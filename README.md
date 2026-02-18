@@ -164,7 +164,7 @@ npm run build
 
 **Universidad de Sevilla**  
 Escuela Tecnica Superior de Ingenieria Informatica  
-Grado en Ingenieria Informatica  
+Grado en Ingenieria Informatica - Ingenieria del Software  
 Curso 2025-2026
 
 ## Licencia
