@@ -31,7 +31,7 @@ services:
     routes:
       - type: rewrite
         source: /api/*
-        destination: https://tfg-backend.onrender.com/api/*
+        destination: https://tfg-backend-jdjl.onrender.com/api/*
       - type: rewrite
         source: /*
         destination: /index.html
