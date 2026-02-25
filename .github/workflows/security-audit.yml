@@ -58,7 +58,7 @@ jobs:
         run: chmod +x ./mvnw
 
       - name: OWASP Dependency Check
-        run: ./mvnw org.owasp:dependency-check-maven:check --batch-mode --no-transfer-progress
+        run: ./mvnw org.owasp:dependency-check-maven:check -DnvdApiKey=${{ secrets.NVD_API_KEY }} --batch-mode --no-transfer-progress
         continue-on-error: true
 
       - name: Subir reporte
