@@ -48,15 +48,15 @@ public class CursoService {
     }
 
     /**
-     * SYSOP-003: Lista cursos de un profesor.
+     * SYSOP-003: Lista cursos de un profesor por su usuarioId.
      */
     @Transactional(readOnly = true)
-    public List<CursoDTO> listarCursosProfesor(Long profesorId) {
-        if (!profesorRepository.existsById(profesorId)) {
-            throw new EntityNotFoundException("Profesor no encontrado con ID: " + profesorId);
+    public List<CursoDTO> listarCursosProfesor(Long usuarioId) {
+        if (!profesorRepository.existsByUsuarioId(usuarioId)) {
+            throw new EntityNotFoundException("Profesor no encontrado para usuario con ID: " + usuarioId);
         }
         
-        return cursoRepository.findByProfesorUsuarioId(profesorId).stream()
+        return cursoRepository.findByProfesorUsuarioId(usuarioId).stream()
                 .map(mapper::toDTO)
                 .collect(Collectors.toList());
     }

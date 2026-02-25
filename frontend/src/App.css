@@ -6,7 +6,8 @@
 
 .main-content {
   flex: 1;
-  background-color: #f5f6fa;
+  background-color: var(--bg-primary);
+  transition: background-color 0.3s ease;
 }
 
 .page {
@@ -25,7 +26,7 @@
 
 .page p {
   margin-bottom: 2rem;
-  color: #888;
+  color: var(--text-secondary);
 }
 
 .btn {
@@ -38,36 +39,32 @@
 }
 
 .btn-primary {
-  background-color: #646cff;
+  background-color: var(--accent-blue);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #535bf2;
+  background-color: var(--accent-blue-hover);
   color: white;
 }
 
 .btn-secondary {
   background-color: transparent;
-  border: 2px solid #646cff;
-  color: #646cff;
+  border: 2px solid var(--accent-blue);
+  color: var(--accent-blue);
 }
 
 .btn-secondary:hover {
-  background-color: #646cff;
+  background-color: var(--accent-blue);
   color: white;
 }
 
 /* Cards */
 .card {
-  background-color: #1a1a1a;
+  background-color: var(--bg-card);
   border-radius: 12px;
   padding: 1.5rem;
   margin: 1rem 0;
-}
-
-@media (prefers-color-scheme: light) {
-  .card {
-    background-color: #f5f5f5;
-  }
+  border: 1px solid var(--border-primary);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }

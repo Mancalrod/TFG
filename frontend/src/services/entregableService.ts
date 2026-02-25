@@ -1,7 +1,7 @@
 import api from './api';
 import { EntregableDTO, CrearEntregableDTO, Visibilidad } from '../types';
 
-const BASE_URL = '/entregables';
+const BASE_URL = '/api/entregables';
 
 export const entregableService = {
   obtener: async (id: number): Promise<EntregableDTO> => {

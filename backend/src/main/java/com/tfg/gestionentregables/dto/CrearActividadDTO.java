@@ -35,7 +35,6 @@ public class CrearActividadDTO {
     
     private Double notaMaxima;
     
-    @NotNull(message = "El curso es obligatorio")
     private Long cursoId;
     
     private List<Long> grupoIds;

@@ -10,13 +10,13 @@
   gap: 2rem;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #ecf0f1;
+  border-bottom: 1px solid var(--border-primary);
 }
 
 .btn-back {
   background: none;
   border: none;
-  color: #3498db;
+  color: var(--accent-blue);
   font-size: 1rem;
   cursor: pointer;
   padding: 0.5rem;
@@ -33,7 +33,7 @@
 .actividad-info h1 {
   margin: 0 0 0.5rem 0;
   font-size: 1.75rem;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .actividad-meta {
@@ -43,7 +43,7 @@
 }
 
 .curso-link {
-  color: #3498db;
+  color: var(--accent-blue);
   font-size: 0.9rem;
 }
 
@@ -55,12 +55,12 @@
   text-transform: uppercase;
 }
 
-.tipo-badge.individual {
+.tipo-badge.evaluable {
   background-color: #e8f4f8;
   color: #3498db;
 }
 
-.tipo-badge.grupal {
+.tipo-badge.no_evaluable {
   background-color: #f3e8ff;
   color: #9b59b6;
 }
@@ -94,16 +94,16 @@
 }
 
 .actividad-details {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-card);
   height: fit-content;
 }
 
 .actividad-details h2 {
   font-size: 1rem;
-  color: #7f8c8d;
+  color: var(--text-secondary);
   text-transform: uppercase;
   margin-bottom: 1rem;
 }
@@ -117,26 +117,26 @@
 .detail-item label {
   display: block;
   font-size: 0.75rem;
-  color: #95a5a6;
+  color: var(--text-tertiary);
   text-transform: uppercase;
   margin-bottom: 0.25rem;
 }
 
 .detail-item p {
   margin: 0;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .entregables-section {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-card);
 }
 
 .entregables-section h2 {
   font-size: 1.25rem;
-  color: #2c3e50;
+  color: var(--text-primary);
   margin-bottom: 1rem;
 }
 
@@ -147,7 +147,7 @@
 }
 
 .entregable-card {
-  border: 1px solid #ecf0f1;
+  border: 1px solid var(--border-primary);
   border-radius: 8px;
   padding: 1rem;
   cursor: pointer;
@@ -155,8 +155,8 @@
 }
 
 .entregable-card:hover {
-  border-color: #3498db;
-  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+  border-color: var(--accent-blue);
+  box-shadow: 0 2px 8px var(--accent-blue-shadow);
 }
 
 .entregable-header {
@@ -169,7 +169,7 @@
 .entregable-header h3 {
   margin: 0;
   font-size: 1rem;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .entregable-header .estado {
@@ -186,11 +186,11 @@
 
 .entregable-header .estado.vencido {
   background-color: #f5f5f5;
-  color: #95a5a6;
+  color: var(--text-tertiary);
 }
 
 .entregable-desc {
-  color: #7f8c8d;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   margin: 0 0 0.75rem 0;
 }
@@ -200,11 +200,11 @@
   flex-wrap: wrap;
   gap: 1rem;
   font-size: 0.8rem;
-  color: #7f8c8d;
+  color: var(--text-secondary);
 }
 
 .entregable-info strong {
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .tag-reenvio {
@@ -218,7 +218,7 @@
 .empty-entregables {
   text-align: center;
   padding: 2rem;
-  color: #7f8c8d;
+  color: var(--text-secondary);
 }
 
 .empty-entregables button {
@@ -237,8 +237,8 @@
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #ecf0f1;
-  border-top-color: #3498db;
+  border: 4px solid var(--border-primary);
+  border-top-color: var(--accent-blue);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -250,12 +250,12 @@
 }
 
 .error-message {
-  color: #e74c3c;
+  color: var(--error-color);
   margin-bottom: 1rem;
 }
 
 .btn-primary {
-  background-color: #3498db;
+  background-color: var(--accent-blue);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -266,13 +266,13 @@
 }
 
 .btn-primary:hover {
-  background-color: #2980b9;
+  background-color: var(--accent-blue-hover);
 }
 
 .btn-secondary {
-  background-color: #ecf0f1;
-  color: #2c3e50;
-  border: 1px solid #bdc3c7;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-secondary);
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
@@ -280,7 +280,7 @@
 }
 
 .btn-secondary:hover {
-  background-color: #bdc3c7;
+  background-color: var(--border-secondary);
 }
 
 @media (max-width: 900px) {
