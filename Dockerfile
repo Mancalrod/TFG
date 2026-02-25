@@ -7,7 +7,7 @@ WORKDIR /app/frontend
 
 # Copiar package.json y lock primero (cache de capas)
 COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci
+RUN npm config set fetch-retries 3 && npm config set fetch-retry-mintimeout 5000 && npm ci
 
 # Copiar código fuente del frontend y compilar
 COPY frontend/ .
