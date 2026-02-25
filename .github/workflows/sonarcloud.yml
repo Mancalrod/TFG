@@ -25,25 +25,15 @@ jobs:
           cache: maven
           cache-dependency-path: backend/pom.xml
 
-      - name: Configurar Node 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Build backend (necesario para análisis Java)
+      - name: Build y análisis SonarCloud (Maven)
         run: |
           chmod +x ./mvnw
-          ./mvnw verify --batch-mode --no-transfer-progress
+          ./mvnw verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -Dsonar.projectKey=Mancalrod_TFG \
+            -Dsonar.organization=mancalrod \
+            -Dsonar.host.url=https://sonarcloud.io \
+            --batch-mode --no-transfer-progress
         working-directory: backend
-
-      - name: Instalar dependencias frontend
-        run: npm ci
-        working-directory: frontend
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
