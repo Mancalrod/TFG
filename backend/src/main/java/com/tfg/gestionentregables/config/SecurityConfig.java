@@ -41,14 +41,22 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Endpoints públicos
+                // Recursos estáticos del frontend (SPA)
+                .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
+                .requestMatchers("/assets/**", "/*.js", "/*.css", "/*.png", "/*.svg", "/*.ico").permitAll()
+                // Endpoints públicos de la API
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/api/health").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 // Endpoints de administración
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                // Todos los demás requieren autenticación
+                // Rutas de la SPA (no API) - se redirigen a index.html
+                .requestMatchers(request -> {
+                    String path = request.getServletPath();
+                    return !path.startsWith("/api/") && !path.startsWith("/h2-console");
+                }).permitAll()
+                // Todos los endpoints API restantes requieren autenticación
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())
@@ -79,7 +87,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of(
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "https://tfg-frontend-zmc3.onrender.com"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
         configuration.setExposedHeaders(List.of("Authorization"));
