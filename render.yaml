@@ -1,14 +1,8 @@
-# ===========================================
-# Render Blueprint - Despliegue automático
-# ===========================================
-# Docs: https://docs.render.com/blueprint-spec
-
 services:
-  # ---- Backend (Spring Boot) ----
+  # ---- Backend (Spring Boot)  ----
   - type: web
     name: tfg-backend
     runtime: docker
-    rootDir: backend
     dockerfilePath: ./Dockerfile
     plan: free
     envVars:
@@ -20,18 +14,3 @@ services:
         sync: false
       - key: DATABASE_PASSWORD
         sync: false
-
-  # ---- Frontend (React SPA) ----
-  - type: web
-    name: tfg-frontend
-    runtime: static
-    rootDir: frontend
-    buildCommand: npm ci && npm run build
-    staticPublishPath: dist
-    routes:
-      - type: rewrite
-        source: /api/*
-        destination: https://tfg-backend-jdjl.onrender.com/api/*
-      - type: rewrite
-        source: /*
-        destination: /index.html

@@ -41,14 +41,22 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Endpoints públicos
+                // Recursos estáticos del frontend (SPA)
+                .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
+                .requestMatchers("/assets/**", "/*.js", "/*.css", "/*.png", "/*.svg", "/*.ico").permitAll()
+                // Endpoints públicos de la API
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/api/health").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 // Endpoints de administración
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                // Todos los demás requieren autenticación
+                // Rutas de la SPA (no API) - se redirigen a index.html
+                .requestMatchers(request -> {
+                    String path = request.getServletPath();
+                    return !path.startsWith("/api/") && !path.startsWith("/h2-console");
+                }).permitAll()
+                // Todos los endpoints API restantes requieren autenticación
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())

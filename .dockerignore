@@ -1,0 +1,34 @@
+# Git
+.git
+.github
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.iml
+
+# Docs
+docs/
+README.md
+*.md
+
+# Config files
+sonar-project.properties
+render.yaml
+
+# Python venv
+.venv
+
+# Node modules (se instalan en el Dockerfile)
+frontend/node_modules
+
+# Backend build artifacts (se generan en el Dockerfile)
+backend/target
+
+# Old Dockerfiles (ya no se usan)
+backend/Dockerfile
+backend/.dockerignore
+frontend/Dockerfile
+frontend/.dockerignore
