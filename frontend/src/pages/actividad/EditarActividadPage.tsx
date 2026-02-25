@@ -147,12 +147,13 @@ const EditarActividadPage: React.FC = () => {
       };
       await actividadService.actualizar(parseInt(id), dataToSend);
       navigate(`/actividades/${id}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error al guardar:', err);
+      const axiosErr = err as { response?: { data?: { message?: string; errors?: Record<string, string> } } };
       const msg =
-        err?.response?.data?.message ||
-        (err?.response?.data?.errors
-          ? Object.values(err.response.data.errors).join(', ')
+        axiosErr?.response?.data?.message ||
+        (axiosErr?.response?.data?.errors
+          ? Object.values(axiosErr.response.data.errors).join(', ')
           : 'Error al guardar los cambios');
       setErrorGuardar(typeof msg === 'string' ? msg : 'Error al guardar los cambios');
     } finally {
@@ -171,10 +172,11 @@ const EditarActividadPage: React.FC = () => {
       } else {
         navigate('/dashboard');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error al eliminar:', err);
+      const axiosErr = err as { response?: { data?: { message?: string } } };
       setErrorGuardar(
-        err?.response?.data?.message || 'Error al eliminar la actividad'
+        axiosErr?.response?.data?.message || 'Error al eliminar la actividad'
       );
       setMostrarConfirmarEliminar(false);
     } finally {

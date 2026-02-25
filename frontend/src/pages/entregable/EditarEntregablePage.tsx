@@ -140,12 +140,13 @@ const EditarEntregablePage: React.FC = () => {
     try {
       await entregableService.actualizar(parseInt(id), formData);
       navigate(`/entregables/${id}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error al guardar:', err);
+      const axiosErr = err as { response?: { data?: { message?: string; errors?: Record<string, string> } } };
       const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.errors
-          ? Object.values(err.response.data.errors).join(', ')
+        axiosErr?.response?.data?.message ||
+          axiosErr?.response?.data?.errors
+          ? Object.values(axiosErr.response?.data?.errors || {}).join(', ')
           : 'Error al guardar los cambios';
       setErrorGuardar(typeof msg === 'string' ? msg : 'Error al guardar los cambios');
     } finally {
@@ -165,10 +166,11 @@ const EditarEntregablePage: React.FC = () => {
       } else {
         navigate(-1);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error al eliminar:', err);
+      const axiosErr = err as { response?: { data?: { message?: string } } };
       setErrorGuardar(
-        err?.response?.data?.message || 'Error al eliminar el entregable'
+        axiosErr?.response?.data?.message || 'Error al eliminar el entregable'
       );
       setMostrarConfirmarEliminar(false);
     } finally {
@@ -384,7 +386,7 @@ const EditarEntregablePage: React.FC = () => {
           <div className="ee-modal" onClick={e => e.stopPropagation()}>
             <h2>¿Eliminar entregable?</h2>
             <p>
-              Se eliminará <strong>"{entregable.titulo}"</strong> y todas sus entregas asociadas. 
+              Se eliminará <strong>"{entregable.titulo}"</strong> y todas sus entregas asociadas.
               Esta acción no se puede deshacer.
             </p>
             {entregable.numeroEntregas > 0 && (
