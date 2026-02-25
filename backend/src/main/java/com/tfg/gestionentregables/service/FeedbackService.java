@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 /**
  * Servicio para gestión de feedback.
@@ -61,7 +61,7 @@ public class FeedbackService {
         
         return feedbackRepository.findByEntregaIdOrderByFechaCreacionDesc(entregaId).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -119,7 +119,7 @@ public class FeedbackService {
         
         return feedbackRepository.findByProfesorIdOrderByFechaCreacionDesc(profesorId).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

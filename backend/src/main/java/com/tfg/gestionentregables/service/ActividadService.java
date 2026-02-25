@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 /**
  * Servicio para gestión de actividades.
@@ -69,7 +69,7 @@ public class ActividadService {
         
         return actividadRepository.findByCursoId(cursoId).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -83,7 +83,7 @@ public class ActividadService {
         
         return actividadRepository.findByGrupoIdAndVisibilidad(grupoId, Visibilidad.VISIBLE).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -163,7 +163,7 @@ public class ActividadService {
         LocalDateTime ahora = LocalDateTime.now();
         return actividadRepository.findByCursoIdAndFechaLimiteAfter(cursoId, ahora).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -175,6 +175,6 @@ public class ActividadService {
         LocalDateTime limite = ahora.plusDays(dias);
         return actividadRepository.findByCursoIdAndFechaLimiteBetween(cursoId, ahora, limite).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

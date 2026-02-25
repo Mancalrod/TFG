@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 /**
  * Servicio para gestión de entregables.
@@ -61,7 +61,7 @@ public class EntregableService {
         
         return entregableRepository.findByActividadId(actividadId).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -85,7 +85,7 @@ public class EntregableService {
         
         return entregableRepository.findByActividadIdAndVisibilidad(actividadId, Visibilidad.VISIBLE).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -143,7 +143,7 @@ public class EntregableService {
         LocalDateTime ahora = LocalDateTime.now();
         return entregableRepository.findByActividadIdAndFechaLimiteAfter(actividadId, ahora).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -155,7 +155,7 @@ public class EntregableService {
         LocalDateTime limite = ahora.plusDays(dias);
         return entregableRepository.findByActividadIdAndFechaLimiteBetween(actividadId, ahora, limite).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -166,6 +166,6 @@ public class EntregableService {
         // Obtener todos los entregables de la actividad
         return entregableRepository.findByActividadId(actividadId).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

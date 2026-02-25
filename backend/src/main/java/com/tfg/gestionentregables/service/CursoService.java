@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 /**
  * Servicio para gestión de cursos.
@@ -58,7 +58,7 @@ public class CursoService {
         
         return cursoRepository.findByProfesorUsuarioId(usuarioId).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -68,7 +68,7 @@ public class CursoService {
     public List<CursoDTO> listarCursosEstudiante(Long estudianteUsuarioId) {
         return cursoRepository.findByEstudianteUsuarioId(estudianteUsuarioId).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -98,7 +98,7 @@ public class CursoService {
     public List<CursoDTO> listarTodosCursos() {
         return cursoRepository.findAll().stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -186,6 +186,6 @@ public class CursoService {
         
         return grupoRepository.findByCursoId(cursoId).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

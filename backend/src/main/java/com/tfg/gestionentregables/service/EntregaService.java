@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
+
 
 /**
  * Servicio para gestión de entregas.
@@ -111,7 +111,7 @@ public class EntregaService {
         
         return entregaRepository.findByEntregableIdAndEsVersionActiva(entregableId, true).stream()
                 .map(mapper::toResumenDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -123,7 +123,7 @@ public class EntregaService {
                 .stream()
                 .sorted((a, b) -> Integer.compare(b.getVersion(), a.getVersion()))
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -168,7 +168,7 @@ public class EntregaService {
         return entregaRepository.findByEstudianteId(estudianteId).stream()
                 .sorted((a, b) -> b.getFechaEntrega().compareTo(a.getFechaEntrega()))
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -178,7 +178,7 @@ public class EntregaService {
     public List<EntregaResumenDTO> listarEntregasPendientesCalificar(Long profesorId) {
         return entregaRepository.findByEstadoAndEsVersionActiva(EstadoEntrega.ENTREGADO, true).stream()
                 .map(mapper::toResumenDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

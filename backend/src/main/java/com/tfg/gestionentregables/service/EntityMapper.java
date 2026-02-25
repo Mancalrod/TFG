@@ -5,7 +5,7 @@ import com.tfg.gestionentregables.entity.*;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.stream.Collectors;
+
 
 /**
  * Mapper para convertir entidades a DTOs y viceversa.
@@ -31,7 +31,7 @@ public class EntityMapper {
                 .titulo(curso.getTitulo())
                 .descripcion(curso.getDescripcion())
                 .codigo(curso.getCodigo())
-                .grupos(curso.getGrupos().stream().map(this::toSimpleDTO).collect(Collectors.toList()))
+                .grupos(curso.getGrupos().stream().map(this::toSimpleDTO).toList())
                 .numeroActividades(curso.getActividades().size())
                 .numeroProfesores(curso.getProfesores().size())
                 .numeroEstudiantes(curso.getGrupos().stream()
@@ -74,7 +74,7 @@ public class EntityMapper {
                 .notaMaxima(actividad.getNotaMaxima())
                 .cursoId(actividad.getCurso().getId())
                 .cursoTitulo(actividad.getCurso().getTitulo())
-                .grupoIds(actividad.getGrupos().stream().map(Grupo::getId).collect(Collectors.toList()))
+                .grupoIds(actividad.getGrupos().stream().map(Grupo::getId).toList())
                 .numeroEntregables(actividad.getEntregables().size())
                 .enPlazo(actividad.estaEnPlazo())
                 .build();
@@ -85,7 +85,7 @@ public class EntityMapper {
         if (dto != null && actividad.getEntregables() != null) {
             dto.setEntregables(actividad.getEntregables().stream()
                     .map(this::toDTO)
-                    .collect(Collectors.toList()));
+                    .toList());
         }
         return dto;
     }
@@ -127,10 +127,10 @@ public class EntityMapper {
                 .estudianteNombre(entrega.getEstudiante().getUsuario().getNombre())
                 .fueATiempo(entrega.fueATiempo())
                 .archivos(entrega.getArchivos() != null ? 
-                        entrega.getArchivos().stream().map(this::toDTO).collect(Collectors.toList()) : 
+                        entrega.getArchivos().stream().map(this::toDTO).toList() : 
                         Collections.emptyList())
                 .feedbacks(entrega.getFeedbacks() != null ?
-                        entrega.getFeedbacks().stream().map(this::toDTO).collect(Collectors.toList()) :
+                        entrega.getFeedbacks().stream().map(this::toDTO).toList() :
                         Collections.emptyList())
                 .build();
     }

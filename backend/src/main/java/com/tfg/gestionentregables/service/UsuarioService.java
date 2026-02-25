@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 /**
  * Servicio para gestión de usuarios.
@@ -55,7 +55,7 @@ public class UsuarioService {
     public List<UsuarioDTO> listarUsuarios() {
         return usuarioRepository.findAll().stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

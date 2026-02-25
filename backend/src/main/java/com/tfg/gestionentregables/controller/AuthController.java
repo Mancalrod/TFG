@@ -18,7 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("/api/auth")
@@ -58,7 +58,7 @@ public class AuthController {
                     .correoElectronico(usuario.getCorreoElectronico())
                     .roles(userDetails.getAuthorities().stream()
                             .map(GrantedAuthority::getAuthority)
-                            .collect(Collectors.toList()))
+                            .toList())
                     .build();
 
             return ResponseEntity.ok(response);
@@ -96,7 +96,7 @@ public class AuthController {
                 .correoElectronico(usuario.getCorreoElectronico())
                 .roles(userDetails.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toList()))
+                        .toList())
                 .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -124,7 +124,7 @@ public class AuthController {
                         .correoElectronico(usuario.getCorreoElectronico())
                         .roles(userDetails.getAuthorities().stream()
                                 .map(GrantedAuthority::getAuthority)
-                                .collect(Collectors.toList()))
+                                .toList())
                         .build();
 
                 return ResponseEntity.ok(response);
@@ -153,7 +153,7 @@ public class AuthController {
                 .correoElectronico(usuario.getCorreoElectronico())
                 .roles(userDetails.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toList()))
+                        .toList())
                 .build();
 
         return ResponseEntity.ok(response);
