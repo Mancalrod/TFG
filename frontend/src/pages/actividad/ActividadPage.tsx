@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ActividadDTO, EntregableDTO } from '../types';
-import { actividadService, entregableService } from '../services';
-import { useAuth } from '../context/AuthContext';
+import { ActividadDTO, EntregableDTO } from '../../types';
+import { actividadService, entregableService } from '../../services';
+import { useAuth } from '../../context/AuthContext';
 import './ActividadPage.css';
 
 const ActividadPage: React.FC = () => {

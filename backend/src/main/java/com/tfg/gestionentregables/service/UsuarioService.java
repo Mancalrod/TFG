@@ -5,6 +5,7 @@ import com.tfg.gestionentregables.entity.*;
 import com.tfg.gestionentregables.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ public class UsuarioService {
     private final EstudianteRepository estudianteRepository;
     private final GrupoRepository grupoRepository;
     private final EntityMapper mapper;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * SYSOP-001: Obtiene un usuario por su ID.
@@ -68,6 +70,7 @@ public class UsuarioService {
                 .nombre(dto.getNombre())
                 .telefono(dto.getTelefono())
                 .correoElectronico(dto.getCorreoElectronico())
+                .contrasena(passwordEncoder.encode(dto.getContrasena()))
                 .esAdmin(dto.getEsAdmin() != null ? dto.getEsAdmin() : false)
                 .build();
 
@@ -91,6 +94,9 @@ public class UsuarioService {
         usuario.setNombre(dto.getNombre());
         usuario.setTelefono(dto.getTelefono());
         usuario.setCorreoElectronico(dto.getCorreoElectronico());
+        if (dto.getContrasena() != null && !dto.getContrasena().isBlank()) {
+            usuario.setContrasena(passwordEncoder.encode(dto.getContrasena()));
+        }
         if (dto.getEsAdmin() != null) {
             usuario.setEsAdmin(dto.getEsAdmin());
         }

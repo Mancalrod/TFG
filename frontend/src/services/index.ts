@@ -1,3 +1,4 @@
+export { authService } from './authService';
 export { usuarioService } from './usuarioService';
 export { cursoService } from './cursoService';
 export { actividadService } from './actividadService';

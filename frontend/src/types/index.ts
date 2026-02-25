@@ -35,6 +35,7 @@ export interface CrearUsuarioDTO {
   nombre: string;
   telefono?: string;
   correoElectronico: string;
+  contrasena: string;
   esAdmin?: boolean;
 }
 
@@ -186,6 +187,26 @@ export interface EntregaEstadisticasDTO {
   entregasCalificadas: number;
   entregasPendientes: number;
   promedioCalificacion?: number;
+}
+
+// Auth DTOs
+export interface LoginRequestDTO {
+  correoElectronico: string;
+  contrasena: string;
+}
+
+export interface AuthResponseDTO {
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+  usuarioId: number;
+  nombre: string;
+  correoElectronico: string;
+  roles: string[];
+}
+
+export interface RefreshTokenRequestDTO {
+  refreshToken: string;
 }
 
 // Error response

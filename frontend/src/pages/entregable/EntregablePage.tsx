@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { EntregableDTO, EntregaDTO, EntregaResumenDTO, EntregaEstadisticasDTO } from '../types';
-import { entregableService, entregaService } from '../services';
-import { useAuth } from '../context/AuthContext';
+import { EntregableDTO, EntregaDTO, EntregaResumenDTO, EntregaEstadisticasDTO } from '../../types';
+import { entregableService, entregaService } from '../../services';
+import { useAuth } from '../../context/AuthContext';
 import './EntregablePage.css';
 
 const EntregablePage: React.FC = () => {

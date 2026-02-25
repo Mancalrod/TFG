@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.home-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  /* Fondo oscuro con un degradado radial sutil hacia el centro */
+  background-color: #0f0f11;
+  background-image: radial-gradient(circle at 50% 0%, #1f1f2e 0%, #0f0f11 70%);
+  font-family: 'Inter', sans-serif;
+  color: #ffffff;
+  padding: 20px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero-section {
+  max-width: 800px;
+  width: 100%;
+  /* Pequeña animación de entrada */
+  animation: fadeUp 0.8s ease-out forwards;
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.badge {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  margin-bottom: 8px;
+}
+
+.hero-title {
+  font-size: 4rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0;
+  letter-spacing: -1.5px;
+}
+
+/* Aplicamos un degradado azul moderno a la palabra clave */
+.text-highlight {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: #a1a1aa;
+  max-width: 600px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.action-container {
+  margin-top: 24px;
+}
+
+.btn-hero-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 16px 36px;
+  border-radius: 12px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.3);
+}
+
+.btn-hero-primary:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+/* Animación inicial fluida */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsividad para móviles */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.75rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
+    padding: 0 15px;
+  }
+  
+  .btn-hero-primary {
+    padding: 14px 28px;
+    font-size: 1rem;
+  }
+}

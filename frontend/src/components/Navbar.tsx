@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 const Navbar: React.FC = () => {
-  const { usuario, esProfesor, logout } = useAuth();
+  const { usuario, esProfesor, esAdmin, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -29,7 +29,7 @@ const Navbar: React.FC = () => {
             <div className="navbar-user">
               <span className="user-name">{usuario.nombre}</span>
               <span className="user-role">
-                {esProfesor ? 'Profesor' : 'Estudiante'}
+                {esAdmin ? 'Administrador' : esProfesor ? 'Profesor' : 'Estudiante'}
               </span>
               <button onClick={handleLogout} className="btn-logout">
                 Cerrar Sesión
