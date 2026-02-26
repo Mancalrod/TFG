@@ -21,6 +21,8 @@ import java.util.List;
 @Transactional
 public class FeedbackService {
 
+    private static final String FEEDBACK_NOT_FOUND = "Feedback no encontrado con ID: ";
+
     private final FeedbackRepository feedbackRepository;
     private final EntregaRepository entregaRepository;
     private final UsuarioRepository usuarioRepository;
@@ -69,7 +71,7 @@ public class FeedbackService {
      */
     public FeedbackDTO actualizarFeedback(Long feedbackId, Long profesorId, CrearFeedbackDTO dto) {
         Feedback feedback = feedbackRepository.findById(feedbackId)
-                .orElseThrow(() -> new EntityNotFoundException("Feedback no encontrado con ID: " + feedbackId));
+                .orElseThrow(() -> new EntityNotFoundException(FEEDBACK_NOT_FOUND + feedbackId));
 
         // Verificar que el profesor que modifica es el mismo que creó el feedback
         if (!feedback.getProfesor().getId().equals(profesorId)) {
@@ -89,7 +91,7 @@ public class FeedbackService {
     @Transactional(readOnly = true)
     public FeedbackDTO obtenerFeedback(Long feedbackId) {
         Feedback feedback = feedbackRepository.findById(feedbackId)
-                .orElseThrow(() -> new EntityNotFoundException("Feedback no encontrado con ID: " + feedbackId));
+                .orElseThrow(() -> new EntityNotFoundException(FEEDBACK_NOT_FOUND + feedbackId));
         return mapper.toDTO(feedback);
     }
 

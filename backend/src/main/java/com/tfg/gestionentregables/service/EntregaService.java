@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,6 +29,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional
 public class EntregaService {
+
+    private static final String ENTREGA_NOT_FOUND = "Entrega no encontrada con ID: ";
 
     private final EntregaRepository entregaRepository;
     private final EntregableRepository entregableRepository;
@@ -96,7 +99,7 @@ public class EntregaService {
     @Transactional(readOnly = true)
     public EntregaDTO obtenerEntrega(Long entregaId) {
         Entrega entrega = entregaRepository.findById(entregaId)
-                .orElseThrow(() -> new EntityNotFoundException("Entrega no encontrada con ID: " + entregaId));
+                .orElseThrow(() -> new EntityNotFoundException(ENTREGA_NOT_FOUND + entregaId));
         return mapper.toDTO(entrega);
     }
 
@@ -186,8 +189,9 @@ public class EntregaService {
      */
     @Transactional(readOnly = true)
     public EntregaEstadisticasDTO obtenerEstadisticas(Long entregableId) {
-        Entregable entregable = entregableRepository.findById(entregableId)
-                .orElseThrow(() -> new EntityNotFoundException("Entregable no encontrado con ID: " + entregableId));
+        if (!entregableRepository.existsById(entregableId)) {
+            throw new EntityNotFoundException("Entregable no encontrado con ID: " + entregableId);
+        }
 
         List<Entrega> entregasActivas = entregaRepository.findByEntregableIdAndEsVersionActiva(entregableId, true);
         
@@ -258,7 +262,7 @@ public class EntregaService {
                     .entrega(entrega)
                     .build();
         } catch (IOException e) {
-            throw new RuntimeException("Error al guardar el archivo: " + e.getMessage(), e);
+            throw new UncheckedIOException("Error al guardar el archivo: " + e.getMessage(), e);
         }
     }
 

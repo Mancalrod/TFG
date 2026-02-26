@@ -21,6 +21,8 @@ import java.util.List;
 @Transactional
 public class UsuarioService {
 
+    private static final String USUARIO_NOT_FOUND = "Usuario no encontrado con ID: ";
+
     private final UsuarioRepository usuarioRepository;
     private final ProfesorRepository profesorRepository;
     private final EstudianteRepository estudianteRepository;
@@ -34,7 +36,7 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public UsuarioDTO obtenerUsuarioPorId(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException(USUARIO_NOT_FOUND + id));
         return mapper.toDTO(usuario);
     }
 
@@ -71,7 +73,7 @@ public class UsuarioService {
                 .telefono(dto.getTelefono())
                 .correoElectronico(dto.getCorreoElectronico())
                 .contrasena(passwordEncoder.encode(dto.getContrasena()))
-                .esAdmin(dto.getEsAdmin() != null ? dto.getEsAdmin() : false)
+                .esAdmin(Boolean.TRUE.equals(dto.getEsAdmin()))
                 .build();
 
         usuario = usuarioRepository.save(usuario);
@@ -110,7 +112,7 @@ public class UsuarioService {
      */
     public void eliminarUsuario(Long id) {
         if (!usuarioRepository.existsById(id)) {
-            throw new EntityNotFoundException("Usuario no encontrado con ID: " + id);
+            throw new EntityNotFoundException(USUARIO_NOT_FOUND + id);
         }
         usuarioRepository.deleteById(id);
     }
@@ -120,7 +122,7 @@ public class UsuarioService {
      */
     public void registrarComoProfesor(Long usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + usuarioId));
+                .orElseThrow(() -> new EntityNotFoundException(USUARIO_NOT_FOUND + usuarioId));
 
         if (profesorRepository.existsByUsuarioId(usuarioId)) {
             throw new IllegalStateException("El usuario ya está registrado como profesor");

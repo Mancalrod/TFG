@@ -23,6 +23,8 @@ import java.util.List;
 @Transactional
 public class ActividadService {
 
+    private static final String ACTIVIDAD_NOT_FOUND = "Actividad no encontrada con ID: ";
+
     private final ActividadRepository actividadRepository;
     private final CursoRepository cursoRepository;
     private final GrupoRepository grupoRepository;
@@ -92,7 +94,7 @@ public class ActividadService {
     @Transactional(readOnly = true)
     public ActividadDTO obtenerActividadConEntregables(Long actividadId) {
         Actividad actividad = actividadRepository.findById(actividadId)
-                .orElseThrow(() -> new EntityNotFoundException("Actividad no encontrada con ID: " + actividadId));
+                .orElseThrow(() -> new EntityNotFoundException(ACTIVIDAD_NOT_FOUND + actividadId));
         return mapper.toDTOWithEntregables(actividad);
     }
 
@@ -114,7 +116,7 @@ public class ActividadService {
     @Transactional(readOnly = true)
     public ActividadDTO obtenerActividadPorId(Long id) {
         Actividad actividad = actividadRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Actividad no encontrada con ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException(ACTIVIDAD_NOT_FOUND + id));
         return mapper.toDTO(actividad);
     }
 
@@ -150,7 +152,7 @@ public class ActividadService {
      */
     public void eliminarActividad(Long id) {
         if (!actividadRepository.existsById(id)) {
-            throw new EntityNotFoundException("Actividad no encontrada con ID: " + id);
+            throw new EntityNotFoundException(ACTIVIDAD_NOT_FOUND + id);
         }
         actividadRepository.deleteById(id);
     }

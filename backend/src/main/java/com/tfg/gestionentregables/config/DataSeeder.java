@@ -27,6 +27,10 @@ import java.util.Set;
 @Profile("!prod")
 public class DataSeeder implements CommandLineRunner {
 
+    private static final String SEPARATOR = "========================================";
+    private static final String PROF_PASSWORD = "prof123";
+    private static final String ALUMNO_PASSWORD = "alumno123";
+
     private final UsuarioRepository usuarioRepository;
     private final ProfesorRepository profesorRepository;
     private final EstudianteRepository estudianteRepository;
@@ -47,9 +51,9 @@ public class DataSeeder implements CommandLineRunner {
             return;
         }
 
-        log.info("========================================");
+        log.info(SEPARATOR);
         log.info("Iniciando seeding de datos de desarrollo");
-        log.info("========================================");
+        log.info(SEPARATOR);
 
         // 1. Usuarios
         List<Usuario> usuarios = seedUsuarios();
@@ -58,7 +62,7 @@ public class DataSeeder implements CommandLineRunner {
         List<Curso> cursos = seedCursos();
 
         // 3. Profesores (relación usuario-curso)
-        List<Profesor> profesores = seedProfesores(usuarios, cursos);
+        seedProfesores(usuarios, cursos);
 
         // 4. Grupos
         List<Grupo> grupos = seedGrupos(cursos);
@@ -87,21 +91,21 @@ public class DataSeeder implements CommandLineRunner {
         // 12. Feedbacks
         seedFeedbacks(entregas, usuarios);
 
-        log.info("========================================");
+        log.info(SEPARATOR);
         log.info("Seeding completado exitosamente");
-        log.info("========================================");
+        log.info(SEPARATOR);
         log.info("Credenciales de prueba:");
         log.info("  Admin:      admin@ull.edu.es / admin123");
-        log.info("  Profesor 1: juan.garcia@ull.edu.es / prof123");
-        log.info("  Profesor 2: maria.lopez@ull.edu.es / prof123");
-        log.info("  Profesor 3: carlos.martinez@ull.edu.es / prof123");
-        log.info("  Alumno 1:   ana.fernandez@ull.edu.es / alumno123");
-        log.info("  Alumno 2:   pedro.sanchez@ull.edu.es / alumno123");
-        log.info("  Alumno 3:   laura.diaz@ull.edu.es / alumno123");
-        log.info("  Alumno 4:   miguel.ruiz@ull.edu.es / alumno123");
-        log.info("  Alumno 5:   sofia.moreno@ull.edu.es / alumno123");
-        log.info("  Alumno 6:   daniel.jimenez@ull.edu.es / alumno123");
-        log.info("========================================");
+        log.info("  Profesor 1: juan.garcia@ull.edu.es / {}", PROF_PASSWORD);
+        log.info("  Profesor 2: maria.lopez@ull.edu.es / {}", PROF_PASSWORD);
+        log.info("  Profesor 3: carlos.martinez@ull.edu.es / {}", PROF_PASSWORD);
+        log.info("  Alumno 1:   ana.fernandez@ull.edu.es / {}", ALUMNO_PASSWORD);
+        log.info("  Alumno 2:   pedro.sanchez@ull.edu.es / {}", ALUMNO_PASSWORD);
+        log.info("  Alumno 3:   laura.diaz@ull.edu.es / {}", ALUMNO_PASSWORD);
+        log.info("  Alumno 4:   miguel.ruiz@ull.edu.es / {}", ALUMNO_PASSWORD);
+        log.info("  Alumno 5:   sofia.moreno@ull.edu.es / {}", ALUMNO_PASSWORD);
+        log.info("  Alumno 6:   daniel.jimenez@ull.edu.es / {}", ALUMNO_PASSWORD);
+        log.info(SEPARATOR);
     }
 
     // =============================================
@@ -122,7 +126,7 @@ public class DataSeeder implements CommandLineRunner {
                 .nombre("Juan García Pérez")
                 .telefono("922111111")
                 .correoElectronico("juan.garcia@ull.edu.es")
-                .contrasena(passwordEncoder.encode("prof123"))
+                .contrasena(passwordEncoder.encode(PROF_PASSWORD))
                 .esAdmin(false)
                 .build();
 
@@ -146,7 +150,7 @@ public class DataSeeder implements CommandLineRunner {
                 .nombre("Ana Fernández Torres")
                 .telefono("622111111")
                 .correoElectronico("ana.fernandez@ull.edu.es")
-                .contrasena(passwordEncoder.encode("alumno123"))
+                .contrasena(passwordEncoder.encode(ALUMNO_PASSWORD))
                 .esAdmin(false)
                 .build();
 
