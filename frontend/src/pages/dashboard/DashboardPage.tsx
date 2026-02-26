@@ -6,7 +6,7 @@ import { CursoDTO } from '../../types';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
-  const { usuario } = useAuth();
+  const { usuario, esEstudiante, esAdmin } = useAuth();
   const navigate = useNavigate();
   const [busqueda, setBusqueda] = useState('');
   const [cursos, setCursos] = useState<CursoDTO[]>([]);
@@ -22,7 +22,14 @@ const Dashboard: React.FC = () => {
       setLoading(true);
       setError('');
       try {
-        const data = await cursoService.listarPorProfesor(usuario.id);
+        let data: CursoDTO[];
+        if (esAdmin) {
+          data = await cursoService.listarTodos();
+        } else if (esEstudiante) {
+          data = await cursoService.listarPorEstudiante(usuario.id);
+        } else {
+          data = await cursoService.listarPorProfesor(usuario.id);
+        }
         setCursos(data);
       } catch (err) {
         console.error('Error al cargar cursos:', err);
@@ -32,7 +39,7 @@ const Dashboard: React.FC = () => {
       }
     };
     cargarCursos();
-  }, [usuario]);
+  }, [usuario, esEstudiante, esAdmin]);
 
   // Filtrado por nombre en el buscador
   const cursosFiltrados = useMemo(() => {
