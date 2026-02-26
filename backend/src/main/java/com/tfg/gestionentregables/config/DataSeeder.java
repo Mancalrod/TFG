@@ -5,6 +5,7 @@ import com.tfg.gestionentregables.entity.enums.*;
 import com.tfg.gestionentregables.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,8 +29,15 @@ import java.util.Set;
 public class DataSeeder implements CommandLineRunner {
 
     private static final String SEPARATOR = "========================================";
-    private static final String PROF_PASSWORD = "prof123";
-    private static final String ALUMNO_PASSWORD = "alumno123";
+
+    @Value("${app.seeder.admin-credential}")
+    private String adminCredential;
+
+    @Value("${app.seeder.prof-credential}")
+    private String profCredential;
+
+    @Value("${app.seeder.alumno-credential}")
+    private String alumnoCredential;
 
     private final UsuarioRepository usuarioRepository;
     private final ProfesorRepository profesorRepository;
@@ -95,16 +103,16 @@ public class DataSeeder implements CommandLineRunner {
         log.info("Seeding completado exitosamente");
         log.info(SEPARATOR);
         log.info("Credenciales de prueba:");
-        log.info("  Admin:      admin@ull.edu.es / admin123");
-        log.info("  Profesor 1: juan.garcia@ull.edu.es / {}", PROF_PASSWORD);
-        log.info("  Profesor 2: maria.lopez@ull.edu.es / {}", PROF_PASSWORD);
-        log.info("  Profesor 3: carlos.martinez@ull.edu.es / {}", PROF_PASSWORD);
-        log.info("  Alumno 1:   ana.fernandez@ull.edu.es / {}", ALUMNO_PASSWORD);
-        log.info("  Alumno 2:   pedro.sanchez@ull.edu.es / {}", ALUMNO_PASSWORD);
-        log.info("  Alumno 3:   laura.diaz@ull.edu.es / {}", ALUMNO_PASSWORD);
-        log.info("  Alumno 4:   miguel.ruiz@ull.edu.es / {}", ALUMNO_PASSWORD);
-        log.info("  Alumno 5:   sofia.moreno@ull.edu.es / {}", ALUMNO_PASSWORD);
-        log.info("  Alumno 6:   daniel.jimenez@ull.edu.es / {}", ALUMNO_PASSWORD);
+        log.info("  Admin:      admin@ull.edu.es / {}", adminCredential);
+        log.info("  Profesor 1: juan.garcia@ull.edu.es / {}", profCredential);
+        log.info("  Profesor 2: maria.lopez@ull.edu.es / {}", profCredential);
+        log.info("  Profesor 3: carlos.martinez@ull.edu.es / {}", profCredential);
+        log.info("  Alumno 1:   ana.fernandez@ull.edu.es / {}", alumnoCredential);
+        log.info("  Alumno 2:   pedro.sanchez@ull.edu.es / {}", alumnoCredential);
+        log.info("  Alumno 3:   laura.diaz@ull.edu.es / {}", alumnoCredential);
+        log.info("  Alumno 4:   miguel.ruiz@ull.edu.es / {}", alumnoCredential);
+        log.info("  Alumno 5:   sofia.moreno@ull.edu.es / {}", alumnoCredential);
+        log.info("  Alumno 6:   daniel.jimenez@ull.edu.es / {}", alumnoCredential);
         log.info(SEPARATOR);
     }
 
@@ -118,7 +126,7 @@ public class DataSeeder implements CommandLineRunner {
                 .nombre("Administrador del Sistema")
                 .telefono("922000000")
                 .correoElectronico("admin@ull.edu.es")
-                .contrasena(passwordEncoder.encode("admin123"))
+                .contrasena(passwordEncoder.encode(adminCredential))
                 .esAdmin(true)
                 .build();
 
@@ -126,7 +134,7 @@ public class DataSeeder implements CommandLineRunner {
                 .nombre("Juan García Pérez")
                 .telefono("922111111")
                 .correoElectronico("juan.garcia@ull.edu.es")
-                .contrasena(passwordEncoder.encode(PROF_PASSWORD))
+                .contrasena(passwordEncoder.encode(profCredential))
                 .esAdmin(false)
                 .build();
 
@@ -134,7 +142,7 @@ public class DataSeeder implements CommandLineRunner {
                 .nombre("María López Hernández")
                 .telefono("922222222")
                 .correoElectronico("maria.lopez@ull.edu.es")
-                .contrasena(passwordEncoder.encode("prof123"))
+                .contrasena(passwordEncoder.encode(profCredential))
                 .esAdmin(false)
                 .build();
 
@@ -150,7 +158,7 @@ public class DataSeeder implements CommandLineRunner {
                 .nombre("Ana Fernández Torres")
                 .telefono("622111111")
                 .correoElectronico("ana.fernandez@ull.edu.es")
-                .contrasena(passwordEncoder.encode(ALUMNO_PASSWORD))
+                .contrasena(passwordEncoder.encode(alumnoCredential))
                 .esAdmin(false)
                 .build();
 
@@ -158,7 +166,7 @@ public class DataSeeder implements CommandLineRunner {
                 .nombre("Pedro Sánchez Ramos")
                 .telefono("622222222")
                 .correoElectronico("pedro.sanchez@ull.edu.es")
-                .contrasena(passwordEncoder.encode("alumno123"))
+                .contrasena(passwordEncoder.encode(alumnoCredential))
                 .esAdmin(false)
                 .build();
 
