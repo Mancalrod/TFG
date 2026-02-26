@@ -432,7 +432,7 @@ class EntregaServiceTest {
         @Test
         @DisplayName("Obtiene estadísticas correctamente")
         void obtener_ok() {
-            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(entregableRepository.existsById(1L)).thenReturn(true);
             when(entregaRepository.findByEntregableIdAndEsVersionActiva(1L, true))
                     .thenReturn(List.of(entrega));
 
@@ -445,7 +445,7 @@ class EntregaServiceTest {
         @Test
         @DisplayName("Lanza excepción si entregable no existe")
         void obtener_noExiste() {
-            when(entregableRepository.findById(99L)).thenReturn(Optional.empty());
+            when(entregableRepository.existsById(99L)).thenReturn(false);
 
             assertThatThrownBy(() -> entregaService.obtenerEstadisticas(99L))
                     .isInstanceOf(EntityNotFoundException.class);
@@ -454,7 +454,7 @@ class EntregaServiceTest {
         @Test
         @DisplayName("Estadísticas con lista vacía")
         void obtener_sinEntregas() {
-            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(entregableRepository.existsById(1L)).thenReturn(true);
             when(entregaRepository.findByEntregableIdAndEsVersionActiva(1L, true))
                     .thenReturn(List.of());
 
@@ -478,7 +478,7 @@ class EntregaServiceTest {
                     .entregable(entregable).estudiante(estudiante)
                     .archivos(new HashSet<>()).feedbacks(new HashSet<>()).build();
 
-            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(entregableRepository.existsById(1L)).thenReturn(true);
             when(entregaRepository.findByEntregableIdAndEsVersionActiva(1L, true))
                     .thenReturn(List.of(entrega, entregaCalificada));
 
@@ -500,7 +500,7 @@ class EntregaServiceTest {
                     .entregable(entregable).estudiante(estudiante)
                     .archivos(new HashSet<>()).feedbacks(new HashSet<>()).build();
 
-            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(entregableRepository.existsById(1L)).thenReturn(true);
             when(entregaRepository.findByEntregableIdAndEsVersionActiva(1L, true))
                     .thenReturn(List.of(entrega, entregaTardia));
 
