@@ -18,13 +18,15 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
+
+    private static final String BEARER_TOKEN_TYPE = "Bearer";
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
@@ -52,13 +54,13 @@ public class AuthController {
             AuthResponseDTO response = AuthResponseDTO.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
-                    .tokenType("Bearer")
+                    .tokenType(BEARER_TOKEN_TYPE)
                     .usuarioId(usuario.getId())
                     .nombre(usuario.getNombre())
                     .correoElectronico(usuario.getCorreoElectronico())
                     .roles(userDetails.getAuthorities().stream()
                             .map(GrantedAuthority::getAuthority)
-                            .collect(Collectors.toList()))
+                            .toList())
                     .build();
 
             return ResponseEntity.ok(response);
@@ -78,7 +80,7 @@ public class AuthController {
                 .telefono(dto.getTelefono())
                 .correoElectronico(dto.getCorreoElectronico())
                 .contrasena(passwordEncoder.encode(dto.getContrasena()))
-                .esAdmin(dto.getEsAdmin() != null ? dto.getEsAdmin() : false)
+                .esAdmin(Boolean.TRUE.equals(dto.getEsAdmin()))
                 .build();
 
         usuario = usuarioRepository.save(usuario);
@@ -96,7 +98,7 @@ public class AuthController {
                 .correoElectronico(usuario.getCorreoElectronico())
                 .roles(userDetails.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toList()))
+                        .toList())
                 .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -124,7 +126,7 @@ public class AuthController {
                         .correoElectronico(usuario.getCorreoElectronico())
                         .roles(userDetails.getAuthorities().stream()
                                 .map(GrantedAuthority::getAuthority)
-                                .collect(Collectors.toList()))
+                                .toList())
                         .build();
 
                 return ResponseEntity.ok(response);
@@ -153,7 +155,7 @@ public class AuthController {
                 .correoElectronico(usuario.getCorreoElectronico())
                 .roles(userDetails.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toList()))
+                        .toList())
                 .build();
 
         return ResponseEntity.ok(response);

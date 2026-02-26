@@ -6,7 +6,7 @@ import {
   EntregaEstadisticasDTO 
 } from '../types';
 
-const BASE_URL = '/entregas';
+const BASE_URL = '/api/entregas';
 
 export const entregaService = {
   obtener: async (id: number): Promise<EntregaDTO> => {

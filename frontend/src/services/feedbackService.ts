@@ -1,7 +1,7 @@
 import api from './api';
 import { FeedbackDTO, CrearFeedbackDTO } from '../types';
 
-const BASE_URL = '/feedback';
+const BASE_URL = '/api/feedback';
 
 export const feedbackService = {
   obtener: async (id: number): Promise<FeedbackDTO> => {

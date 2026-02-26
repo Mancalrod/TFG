@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.2</version>
+		<version>4.0.3</version>
 		<relativePath/>
 	</parent>
 	
@@ -96,18 +96,18 @@
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
-			<version>0.12.6</version>
+			<version>0.13.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-impl</artifactId>
-			<version>0.12.6</version>
+			<version>0.13.0</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-jackson</artifactId>
-			<version>0.12.6</version>
+			<version>0.13.0</version>
 			<scope>runtime</scope>
 		</dependency>
 
@@ -150,7 +150,94 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<!-- JaCoCo - Cobertura de código -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
+
+	<!-- ============================================= -->
+	<!-- PERFIL: Compilar frontend e incluirlo en JAR  -->
+	<!-- Activar con: mvn package -Pfrontend           -->
+	<!-- ============================================= -->
+	<profiles>
+		<profile>
+			<id>frontend</id>
+			<build>
+				<plugins>
+					<!-- 1) Instalar Node + npm y compilar frontend -->
+					<plugin>
+						<groupId>com.github.eirslett</groupId>
+						<artifactId>frontend-maven-plugin</artifactId>
+						<version>1.15.1</version>
+						<configuration>
+							<workingDirectory>${project.basedir}/../frontend</workingDirectory>
+							<nodeVersion>v20.18.0</nodeVersion>
+							<installDirectory>${project.build.directory}/node</installDirectory>
+						</configuration>
+						<executions>
+							<execution>
+								<id>install-node-and-npm</id>
+								<goals><goal>install-node-and-npm</goal></goals>
+							</execution>
+							<execution>
+								<id>npm-install</id>
+								<goals><goal>npm</goal></goals>
+								<configuration>
+									<arguments>ci</arguments>
+								</configuration>
+							</execution>
+							<execution>
+								<id>npm-build</id>
+								<goals><goal>npm</goal></goals>
+								<configuration>
+									<arguments>run build</arguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<!-- 2) Copiar frontend/dist/ → classes/static/ -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-frontend-dist</id>
+								<phase>generate-resources</phase>
+								<goals><goal>copy-resources</goal></goals>
+								<configuration>
+									<outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${project.basedir}/../frontend/dist</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>

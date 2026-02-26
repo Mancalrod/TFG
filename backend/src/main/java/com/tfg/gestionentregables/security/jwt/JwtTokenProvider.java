@@ -13,7 +13,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+
 
 @Component
 public class JwtTokenProvider {
@@ -34,7 +34,7 @@ public class JwtTokenProvider {
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         extraClaims.put("roles", userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList()));
+                .toList());
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 

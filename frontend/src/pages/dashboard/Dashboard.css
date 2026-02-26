@@ -1,117 +1,35 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-.dashboard-layout {
-  min-height: 100vh;
+.dashboard-container {
   width: 100%;
-  background-color: #0d0d0f;
+  min-height: calc(100vh - 70px);
+  background-color: var(--bg-primary);
   font-family: 'Inter', sans-serif;
-  color: #ffffff;
+  color: var(--text-primary);
   display: flex;
   flex-direction: column;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* --- NAVBAR --- */
-.top-navbar {
-  width: 100%;
-  background-color: #161618;
-  border-bottom: 1px solid #27272a;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 48px;
-  box-sizing: border-box;
-}
-
-.nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.nav-icon {
-  color: #3b82f6;
-  width: 24px;
-  height: 24px;
-}
-
-.nav-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #ffffff;
-}
-
-.nav-links {
-  display: flex;
-  gap: 32px;
-}
-
-.nav-link {
-  color: #a1a1aa;
-  text-decoration: none;
-  font-size: 0.95rem;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-.nav-link:hover, .nav-link.active {
-  color: #ffffff;
-}
-
-.nav-profile {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.profile-text {
-  display: flex;
-  flex-direction: column;
-  text-align: right;
-}
-
-.profile-name {
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.profile-role {
-  font-size: 0.8rem;
-  color: #9ca3af;
-}
-
-.profile-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background-color: #3b82f6;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-}
-
-/* --- CONTENIDO PRINCIPAL --- */
 .dashboard-content {
   flex: 1;
   width: 100%;
-  max-width: 1200px; /* Ancho máximo para centrar el contenido */
+  max-width: 1200px;
   margin: 0 auto;
   padding: 40px 48px;
   box-sizing: border-box;
 }
 
-/* --- BUSCADOR --- */
 .search-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 48px; /* Separación amplia con las tarjetas */
+  margin-bottom: 48px;
 }
 
 .search-wrapper {
   position: relative;
   width: 100%;
-  max-width: 500px; /* Ancho de la barra de búsqueda */
+  max-width: 500px;
 }
 
 .search-icon {
@@ -121,16 +39,16 @@
   transform: translateY(-50%);
   width: 18px;
   height: 18px;
-  color: #71717a;
+  color: var(--text-tertiary);
 }
 
 .search-input {
   width: 100%;
-  padding: 14px 16px 14px 44px; /* Espacio extra a la izquierda para el icono */
+  padding: 14px 16px 14px 44px;
   border-radius: 8px;
-  border: 1px solid #3f3f46;
-  background-color: #18181b;
-  color: #ffffff;
+  border: 1px solid var(--border-secondary);
+  background-color: var(--bg-input);
+  color: var(--text-primary);
   font-size: 1rem;
   outline: none;
   transition: all 0.2s ease;
@@ -138,92 +56,127 @@
 }
 
 .search-input::placeholder {
-  color: #71717a;
+  color: var(--text-tertiary);
 }
 
 .search-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-border);
 }
 
-/* --- TARJETAS DE ASIGNATURAS --- */
+.dashboard-status {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.dashboard-error p {
+  color: var(--error-color);
+  background-color: var(--error-bg);
+  padding: 12px 24px;
+  border-radius: 8px;
+  display: inline-block;
+  border: 1px solid var(--error-border);
+}
+
 .courses-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 Columnas como en tu mock up */
+  grid-template-columns: repeat(2, 1fr);
   gap: 32px;
 }
 
 .course-card {
   display: flex;
-  align-items: center;
-  background-color: #18181b;
-  border: 1px solid #27272a;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
   border-radius: 12px;
   padding: 16px;
-  gap: 24px; /* Separación entre imagen y texto */
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  gap: 24px;
+  transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.3s ease;
   cursor: pointer;
 }
 
 .course-card:hover {
   transform: translateY(-4px);
-  border-color: #52525b;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  border-color: var(--border-tertiary);
+  box-shadow: var(--shadow-card-hover);
 }
 
-/* El rectángulo de la izquierda */
 .course-image-placeholder {
-  width: 220px;
-  height: 140px;
-  background-color: #27272a;
-  border: 1px dashed #52525b;
+  width: 200px;
+  height: 160px;
+  background-color: var(--bg-tertiary);
+  border: 1px dashed var(--border-tertiary);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  color: #a1a1aa;
-  font-size: 0.9rem;
-  line-height: 1.4;
-  flex-shrink: 0; /* Evita que la imagen se encoja */
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .course-info {
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 .course-title {
   font-size: 1.4rem;
   font-weight: 600;
-  color: #ffffff;
-  margin: 0;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
 }
 
-/* Responsivo para portátiles pequeños y tablets */
+.course-description {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.course-stats {
+  display: flex;
+  gap: 16px;
+  margin-top: auto;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.stat svg {
+  color: var(--text-muted);
+}
+
 @media (max-width: 900px) {
   .courses-grid {
-    grid-template-columns: 1fr; /* Pasa a 1 columna en pantallas pequeñas */
+    grid-template-columns: 1fr;
   }
 }
 
-/* Responsivo para móviles */
 @media (max-width: 768px) {
-  .top-navbar { 
-    padding: 16px 20px; 
-    flex-wrap: wrap; /* Permite que los elementos bajen si no caben */
-  }
-  .nav-links {
-    display: none; /* Ocultamos los links en móvil para no saturar */
-  }
   .dashboard-content { 
     padding: 24px 20px; 
   }
   .course-card {
-    flex-direction: column; /* Apila la imagen y el título en móvil */
-    align-items: flex-start;
+    flex-direction: column; 
   }
   .course-image-placeholder {
     width: 100%;
+    height: 140px;
   }
 }

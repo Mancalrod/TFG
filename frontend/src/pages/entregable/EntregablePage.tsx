@@ -113,6 +113,15 @@ const EntregablePage: React.FC = () => {
           </div>
         </div>
 
+        {esProfesor && (
+          <button 
+            className="btn-secondary"
+            onClick={() => navigate(`/entregables/${id}/editar`)}
+          >
+            Editar
+          </button>
+        )}
+
         {!esProfesor && entregable.enPlazo && (
           <button 
             className="btn-primary"

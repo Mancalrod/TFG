@@ -1,42 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { cursoService } from '../../services';
+import { CursoDTO } from '../../types';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
+  const { usuario } = useAuth();
+  const navigate = useNavigate();
   const [busqueda, setBusqueda] = useState('');
+  const [cursos, setCursos] = useState<CursoDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const cargarCursos = async () => {
+      if (!usuario) {
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      setError('');
+      try {
+        const data = await cursoService.listarPorProfesor(usuario.id);
+        setCursos(data);
+      } catch (err) {
+        console.error('Error al cargar cursos:', err);
+        setError('No se pudieron cargar los cursos.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    cargarCursos();
+  }, [usuario]);
+
+  // Filtrado por nombre en el buscador
+  const cursosFiltrados = useMemo(() => {
+    if (!busqueda.trim()) return cursos;
+    const termino = busqueda.toLowerCase();
+    return cursos.filter(
+      (c) =>
+        c.titulo.toLowerCase().includes(termino) ||
+        c.codigo.toLowerCase().includes(termino)
+    );
+  }, [cursos, busqueda]);
 
   return (
-    <div className="dashboard-layout">
-      {/* --- BARRA SUPERIOR --- */}
-      <header className="top-navbar">
-        <div className="nav-brand">
-          <div className="nav-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-            </svg>
-          </div>
-          <span className="nav-title">Sistema de Gestión de Entregables</span>
-        </div>
-        
-        {/* Enlaces centrales de navegación */}
-        <nav className="nav-links">
-          <a href="#dashboard" className="nav-link">Dashboard</a>
-          <a href="#cursos" className="nav-link active">Cursos</a>
-          <a href="#evaluaciones" className="nav-link">Evaluaciones</a>
-        </nav>
-
-        <div className="nav-profile">
-          <div className="profile-text">
-            <span className="profile-name">Juan García Pérez</span>
-            <span className="profile-role">Profesor</span>
-          </div>
-          <div className="profile-avatar">JG</div>
-        </div>
-      </header>
-
-      {/* --- CONTENIDO PRINCIPAL --- */}
+    <div className="dashboard-container">
       <main className="dashboard-content">
-        
+
         {/* Buscador central */}
         <div className="search-container">
           <div className="search-wrapper">
@@ -44,40 +56,90 @@ const Dashboard: React.FC = () => {
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <input 
-              type="text" 
-              placeholder="Buscar asignatura..." 
+            <input
+              type="text"
+              placeholder="Buscar asignatura por nombre o código..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               className="search-input"
             />
           </div>
         </div>
-        
-        {/* Cuadrícula de Asignaturas (2 columnas) */}
-        <div className="courses-grid">
-          
-          {/* Tarjeta 1 */}
-          <div className="course-card">
-            <div className="course-image-placeholder">
-              <span>Imagen de la<br/>asignatura</span>
-            </div>
-            <div className="course-info">
-              <h2 className="course-title">Sistema operativo</h2>
-            </div>
-          </div>
 
-          {/* Tarjeta 2 */}
-          <div className="course-card">
-            <div className="course-image-placeholder">
-              <span>Imagen de la<br/>asignatura</span>
-            </div>
-            <div className="course-info">
-              <h2 className="course-title">Redes de computadores</h2>
-            </div>
+        {/* Estados de carga y error */}
+        {loading && (
+          <div className="dashboard-status">
+            <p>Cargando asignaturas...</p>
           </div>
+        )}
 
-        </div>
+        {error && (
+          <div className="dashboard-status dashboard-error">
+            <p>{error}</p>
+          </div>
+        )}
+
+        {/* Cuadrícula de Asignaturas */}
+        {!loading && !error && (
+          <>
+            {cursosFiltrados.length === 0 ? (
+              <div className="dashboard-status">
+                <p>
+                  {busqueda
+                    ? `No se encontraron asignaturas para "${busqueda}"`
+                    : 'No tienes asignaturas asignadas.'}
+                </p>
+              </div>
+            ) : (
+              <div className="courses-grid">
+                {cursosFiltrados.map((curso) => (
+                  <div
+                    key={curso.id}
+                    className="course-card"
+                    onClick={() => navigate(`/cursos/${curso.id}`)}
+                  >
+                    <div className="course-image-placeholder">
+                      <span>{curso.codigo}</span>
+                    </div>
+                    <div className="course-info">
+                      <h2 className="course-title">{curso.titulo}</h2>
+                      {curso.descripcion && (
+                        <p className="course-description">{curso.descripcion}</p>
+                      )}
+                      <div className="course-stats">
+                        <span className="stat">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                          </svg>
+                          {curso.numeroEstudiantes} estudiantes
+                        </span>
+                        <span className="stat">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                          </svg>
+                          {curso.numeroActividades} actividades
+                        </span>
+                        <span className="stat">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                          </svg>
+                          {curso.grupos.length} grupos
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </main>
     </div>
   );

@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 /**
  * Servicio para gestión de actividades.
@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class ActividadService {
+
+    private static final String ACTIVIDAD_NOT_FOUND = "Actividad no encontrada con ID: ";
 
     private final ActividadRepository actividadRepository;
     private final CursoRepository cursoRepository;
@@ -69,7 +71,7 @@ public class ActividadService {
         
         return actividadRepository.findByCursoId(cursoId).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -83,7 +85,7 @@ public class ActividadService {
         
         return actividadRepository.findByGrupoIdAndVisibilidad(grupoId, Visibilidad.VISIBLE).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -92,7 +94,7 @@ public class ActividadService {
     @Transactional(readOnly = true)
     public ActividadDTO obtenerActividadConEntregables(Long actividadId) {
         Actividad actividad = actividadRepository.findById(actividadId)
-                .orElseThrow(() -> new EntityNotFoundException("Actividad no encontrada con ID: " + actividadId));
+                .orElseThrow(() -> new EntityNotFoundException(ACTIVIDAD_NOT_FOUND + actividadId));
         return mapper.toDTOWithEntregables(actividad);
     }
 
@@ -114,7 +116,7 @@ public class ActividadService {
     @Transactional(readOnly = true)
     public ActividadDTO obtenerActividadPorId(Long id) {
         Actividad actividad = actividadRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Actividad no encontrada con ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException(ACTIVIDAD_NOT_FOUND + id));
         return mapper.toDTO(actividad);
     }
 
@@ -150,7 +152,7 @@ public class ActividadService {
      */
     public void eliminarActividad(Long id) {
         if (!actividadRepository.existsById(id)) {
-            throw new EntityNotFoundException("Actividad no encontrada con ID: " + id);
+            throw new EntityNotFoundException(ACTIVIDAD_NOT_FOUND + id);
         }
         actividadRepository.deleteById(id);
     }
@@ -163,7 +165,7 @@ public class ActividadService {
         LocalDateTime ahora = LocalDateTime.now();
         return actividadRepository.findByCursoIdAndFechaLimiteAfter(cursoId, ahora).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -175,6 +177,6 @@ public class ActividadService {
         LocalDateTime limite = ahora.plusDays(dias);
         return actividadRepository.findByCursoIdAndFechaLimiteBetween(cursoId, ahora, limite).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap');
+
+.not-found-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 70px); 
+  background-color: var(--bg-primary);
+  font-family: 'Inter', sans-serif;
+  color: var(--text-primary);
+  padding: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.not-found-content {
+  text-align: center;
+  max-width: 500px;
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* El texto 404 gigante y llamativo */
+.error-code {
+  font-size: 8rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1;
+  /* Degradado moderno para el número */
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  /* Sombra sutil para darle profundidad */
+  filter: drop-shadow(0 10px 20px rgba(59, 130, 246, 0.2));
+}
+
+.error-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 16px 0;
+  color: var(--text-primary);
+}
+
+.error-message {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 40px;
+}
+
+/* Botón de retorno mejorado */
+.btn-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: var(--accent-blue);
+  color: #ffffff;
+  text-decoration: none;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px 0 var(--accent-blue-shadow);
+}
+
+.btn-home svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s ease;
+}
+
+.btn-home:hover {
+  background-color: var(--accent-blue-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--accent-blue-shadow);
+}
+
+/* Pequeño efecto en el icono de la flecha al pasar el ratón */
+.btn-home:hover svg {
+  transform: translateX(-4px);
+}
+
+/* Animación de entrada suave */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsividad para móviles */
+@media (max-width: 600px) {
+  .error-code {
+    font-size: 6rem;
+  }
+  .error-title {
+    font-size: 1.5rem;
+  }
+  .error-message {
+    font-size: 1rem;
+  }
+}

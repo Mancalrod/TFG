@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 /**
  * Servicio para gestión de feedback.
@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class FeedbackService {
+
+    private static final String FEEDBACK_NOT_FOUND = "Feedback no encontrado con ID: ";
 
     private final FeedbackRepository feedbackRepository;
     private final EntregaRepository entregaRepository;
@@ -61,7 +63,7 @@ public class FeedbackService {
         
         return feedbackRepository.findByEntregaIdOrderByFechaCreacionDesc(entregaId).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -69,7 +71,7 @@ public class FeedbackService {
      */
     public FeedbackDTO actualizarFeedback(Long feedbackId, Long profesorId, CrearFeedbackDTO dto) {
         Feedback feedback = feedbackRepository.findById(feedbackId)
-                .orElseThrow(() -> new EntityNotFoundException("Feedback no encontrado con ID: " + feedbackId));
+                .orElseThrow(() -> new EntityNotFoundException(FEEDBACK_NOT_FOUND + feedbackId));
 
         // Verificar que el profesor que modifica es el mismo que creó el feedback
         if (!feedback.getProfesor().getId().equals(profesorId)) {
@@ -89,7 +91,7 @@ public class FeedbackService {
     @Transactional(readOnly = true)
     public FeedbackDTO obtenerFeedback(Long feedbackId) {
         Feedback feedback = feedbackRepository.findById(feedbackId)
-                .orElseThrow(() -> new EntityNotFoundException("Feedback no encontrado con ID: " + feedbackId));
+                .orElseThrow(() -> new EntityNotFoundException(FEEDBACK_NOT_FOUND + feedbackId));
         return mapper.toDTO(feedback);
     }
 
@@ -119,7 +121,7 @@ public class FeedbackService {
         
         return feedbackRepository.findByProfesorIdOrderByFechaCreacionDesc(profesorId).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

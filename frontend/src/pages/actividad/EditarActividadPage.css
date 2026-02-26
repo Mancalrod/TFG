@@ -1,0 +1,287 @@
+.editar-actividad-page {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.ea-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.ea-header-info h1 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+.ea-subtitle {
+  color: var(--accent-blue);
+  font-size: 0.9rem;
+}
+
+/* ── Formulario ── */
+.ea-form {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ea-error-banner {
+  background-color: #fde8e8;
+  color: #e74c3c;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.ea-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ea-field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ea-field input[type="text"],
+.ea-field input[type="number"],
+.ea-field input[type="datetime-local"],
+.ea-field textarea,
+.ea-field select {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ea-field input:focus,
+.ea-field textarea:focus,
+.ea-field select:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.12);
+}
+
+.ea-field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* ── Filas de 2 columnas ── */
+.ea-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* ── Grupo toggle ── */
+.ea-grupo-toggle {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-primary);
+  margin-top: 0.25rem;
+}
+
+.ea-grupo-toggle-btn {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: none;
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.ea-grupo-toggle-btn.active {
+  background-color: var(--accent-blue);
+  color: white;
+}
+
+.ea-grupo-toggle-btn:not(.active):hover {
+  background-color: var(--bg-tertiary);
+}
+
+/* ── Grupo checkboxes ── */
+.ea-grupo-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-primary);
+}
+
+.ea-grupo-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.35rem 0;
+}
+
+.ea-grupo-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent-blue);
+  cursor: pointer;
+}
+
+.ea-grupo-checkbox-label {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.ea-grupo-checkbox-count {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-left: auto;
+}
+
+/* ── Acciones del formulario ── */
+.ea-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-primary);
+}
+
+.ea-actions-left {
+  display: flex;
+}
+
+.ea-actions-right {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.ea-btn-eliminar {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.5rem 0;
+  transition: color 0.2s;
+}
+
+.ea-btn-eliminar:hover {
+  color: #c0392b;
+  text-decoration: underline;
+}
+
+.ea-btn-eliminar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Modal de confirmación ── */
+.ea-modal {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 460px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.ea-modal h2 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+.ea-modal p {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.ea-modal-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.ea-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.ea-btn-confirmar-eliminar {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.ea-btn-confirmar-eliminar:hover {
+  background-color: #c0392b;
+}
+
+.ea-btn-confirmar-eliminar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .editar-actividad-page {
+    padding: 1rem;
+  }
+
+  .ea-form {
+    padding: 1.25rem;
+  }
+
+  .ea-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ea-actions {
+    flex-direction: column-reverse;
+    gap: 1rem;
+  }
+
+  .ea-actions-left,
+  .ea-actions-right {
+    width: 100%;
+    justify-content: center;
+  }
+}

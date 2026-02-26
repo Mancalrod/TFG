@@ -1,19 +1,23 @@
 // Enums
 export enum TipoActividad {
-  INDIVIDUAL = 'INDIVIDUAL',
-  GRUPAL = 'GRUPAL'
+  EVALUABLE = 'EVALUABLE',
+  NO_EVALUABLE = 'NO_EVALUABLE'
 }
 
 export enum Visibilidad {
   VISIBLE = 'VISIBLE',
-  OCULTA = 'OCULTA'
+  OCULTO = 'OCULTO'
 }
 
 export enum TipoMaterial {
   PDF = 'PDF',
-  IMAGEN = 'IMAGEN',
+  DOCX = 'DOCX',
   ZIP = 'ZIP',
-  DOCUMENTO = 'DOCUMENTO',
+  RAR = 'RAR',
+  TXT = 'TXT',
+  IMAGEN = 'IMAGEN',
+  VIDEO = 'VIDEO',
+  ENLACE = 'ENLACE',
   OTRO = 'OTRO'
 }
 

@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 /**
  * Servicio para gestión de entregables.
@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class EntregableService {
+
+    private static final String ENTREGABLE_NOT_FOUND = "Entregable no encontrado con ID: ";
 
     private final EntregableRepository entregableRepository;
     private final ActividadRepository actividadRepository;
@@ -42,7 +44,7 @@ public class EntregableService {
                 .tipoArchivoEsperado(dto.getTipoArchivoEsperado())
                 .tamanoMaximoBytes(dto.getTamanoMaximoBytes())
                 .visibilidad(dto.getVisibilidad() != null ? dto.getVisibilidad() : Visibilidad.OCULTO)
-                .permiteReenvio(dto.getPermiteReenvio() != null ? dto.getPermiteReenvio() : true)
+                .permiteReenvio(dto.getPermiteReenvio() == null || dto.getPermiteReenvio())
                 .actividad(actividad)
                 .build();
 
@@ -56,12 +58,12 @@ public class EntregableService {
     @Transactional(readOnly = true)
     public List<EntregableDTO> listarEntregablesActividad(Long actividadId) {
         if (!actividadRepository.existsById(actividadId)) {
-            throw new EntityNotFoundException("Actividad no encontrada con ID: " + actividadId);
+            throw new EntityNotFoundException(ENTREGABLE_NOT_FOUND + actividadId);
         }
         
         return entregableRepository.findByActividadId(actividadId).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -70,7 +72,7 @@ public class EntregableService {
     @Transactional(readOnly = true)
     public EntregableDTO obtenerEntregable(Long entregableId) {
         Entregable entregable = entregableRepository.findById(entregableId)
-                .orElseThrow(() -> new EntityNotFoundException("Entregable no encontrado con ID: " + entregableId));
+                .orElseThrow(() -> new EntityNotFoundException(ENTREGABLE_NOT_FOUND + entregableId));
         return mapper.toDTO(entregable);
     }
 
@@ -80,12 +82,12 @@ public class EntregableService {
     @Transactional(readOnly = true)
     public List<EntregableDTO> listarEntregablesVisibles(Long actividadId) {
         if (!actividadRepository.existsById(actividadId)) {
-            throw new EntityNotFoundException("Actividad no encontrada con ID: " + actividadId);
+            throw new EntityNotFoundException(ENTREGABLE_NOT_FOUND + actividadId);
         }
         
         return entregableRepository.findByActividadIdAndVisibilidad(actividadId, Visibilidad.VISIBLE).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -93,7 +95,7 @@ public class EntregableService {
      */
     public EntregableDTO actualizarEntregable(Long id, CrearEntregableDTO dto) {
         Entregable entregable = entregableRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Entregable no encontrado con ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException(ENTREGABLE_NOT_FOUND + id));
 
         entregable.setTitulo(dto.getTitulo());
         entregable.setDescripcion(dto.getDescripcion());
@@ -118,7 +120,7 @@ public class EntregableService {
      */
     public EntregableDTO cambiarVisibilidad(Long entregableId, Visibilidad visibilidad) {
         Entregable entregable = entregableRepository.findById(entregableId)
-                .orElseThrow(() -> new EntityNotFoundException("Entregable no encontrado con ID: " + entregableId));
+                .orElseThrow(() -> new EntityNotFoundException(ENTREGABLE_NOT_FOUND + entregableId));
         
         entregable.setVisibilidad(visibilidad);
         entregable = entregableRepository.save(entregable);
@@ -130,7 +132,7 @@ public class EntregableService {
      */
     public void eliminarEntregable(Long id) {
         if (!entregableRepository.existsById(id)) {
-            throw new EntityNotFoundException("Entregable no encontrado con ID: " + id);
+            throw new EntityNotFoundException(ENTREGABLE_NOT_FOUND + id);
         }
         entregableRepository.deleteById(id);
     }
@@ -143,7 +145,7 @@ public class EntregableService {
         LocalDateTime ahora = LocalDateTime.now();
         return entregableRepository.findByActividadIdAndFechaLimiteAfter(actividadId, ahora).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -155,7 +157,7 @@ public class EntregableService {
         LocalDateTime limite = ahora.plusDays(dias);
         return entregableRepository.findByActividadIdAndFechaLimiteBetween(actividadId, ahora, limite).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -166,6 +168,6 @@ public class EntregableService {
         // Obtener todos los entregables de la actividad
         return entregableRepository.findByActividadId(actividadId).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

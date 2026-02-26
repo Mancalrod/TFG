@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 /**
  * Servicio para gestión de cursos.
@@ -19,6 +19,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class CursoService {
+
+    private static final String PROFESOR_NOT_FOUND = "Profesor no encontrado con ID: ";
+    private static final String CURSO_NOT_FOUND = "Curso no encontrado con ID: ";
 
     private final CursoRepository cursoRepository;
     private final ProfesorRepository profesorRepository;
@@ -30,7 +33,7 @@ public class CursoService {
      */
     public CursoDTO crearCurso(CrearCursoDTO dto, Long profesorId) {
         Profesor profesor = profesorRepository.findById(profesorId)
-                .orElseThrow(() -> new EntityNotFoundException("Profesor no encontrado con ID: " + profesorId));
+                .orElseThrow(() -> new EntityNotFoundException(PROFESOR_NOT_FOUND + profesorId));
 
         if (cursoRepository.existsByCodigo(dto.getCodigo())) {
             throw new IllegalArgumentException("Ya existe un curso con ese código");
@@ -48,17 +51,17 @@ public class CursoService {
     }
 
     /**
-     * SYSOP-003: Lista cursos de un profesor.
+     * SYSOP-003: Lista cursos de un profesor por su usuarioId.
      */
     @Transactional(readOnly = true)
-    public List<CursoDTO> listarCursosProfesor(Long profesorId) {
-        if (!profesorRepository.existsById(profesorId)) {
-            throw new EntityNotFoundException("Profesor no encontrado con ID: " + profesorId);
+    public List<CursoDTO> listarCursosProfesor(Long usuarioId) {
+        if (!profesorRepository.existsByUsuarioId(usuarioId)) {
+            throw new EntityNotFoundException("Profesor no encontrado para usuario con ID: " + usuarioId);
         }
         
-        return cursoRepository.findByProfesorUsuarioId(profesorId).stream()
+        return cursoRepository.findByProfesorUsuarioId(usuarioId).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -68,7 +71,7 @@ public class CursoService {
     public List<CursoDTO> listarCursosEstudiante(Long estudianteUsuarioId) {
         return cursoRepository.findByEstudianteUsuarioId(estudianteUsuarioId).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -77,7 +80,7 @@ public class CursoService {
     @Transactional(readOnly = true)
     public CursoDTO obtenerCursoPorId(Long id) {
         Curso curso = cursoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Curso no encontrado con ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException(CURSO_NOT_FOUND + id));
         return mapper.toDTO(curso);
     }
 
@@ -98,7 +101,7 @@ public class CursoService {
     public List<CursoDTO> listarTodosCursos() {
         return cursoRepository.findAll().stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -106,7 +109,7 @@ public class CursoService {
      */
     public CursoDTO actualizarCurso(Long id, CrearCursoDTO dto) {
         Curso curso = cursoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Curso no encontrado con ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException(CURSO_NOT_FOUND + id));
 
         // Verificar si el nuevo código ya existe en otro curso
         if (!curso.getCodigo().equals(dto.getCodigo()) && cursoRepository.existsByCodigo(dto.getCodigo())) {
@@ -126,7 +129,7 @@ public class CursoService {
      */
     public void eliminarCurso(Long id) {
         if (!cursoRepository.existsById(id)) {
-            throw new EntityNotFoundException("Curso no encontrado con ID: " + id);
+            throw new EntityNotFoundException(CURSO_NOT_FOUND + id);
         }
         cursoRepository.deleteById(id);
     }
@@ -136,9 +139,9 @@ public class CursoService {
      */
     public CursoDTO agregarProfesor(Long cursoId, Long profesorId) {
         Curso curso = cursoRepository.findById(cursoId)
-                .orElseThrow(() -> new EntityNotFoundException("Curso no encontrado con ID: " + cursoId));
+                .orElseThrow(() -> new EntityNotFoundException(CURSO_NOT_FOUND + cursoId));
         Profesor profesor = profesorRepository.findById(profesorId)
-                .orElseThrow(() -> new EntityNotFoundException("Profesor no encontrado con ID: " + profesorId));
+                .orElseThrow(() -> new EntityNotFoundException(PROFESOR_NOT_FOUND + profesorId));
 
         curso.addProfesor(profesor);
         curso = cursoRepository.save(curso);
@@ -150,9 +153,9 @@ public class CursoService {
      */
     public CursoDTO quitarProfesor(Long cursoId, Long profesorId) {
         Curso curso = cursoRepository.findById(cursoId)
-                .orElseThrow(() -> new EntityNotFoundException("Curso no encontrado con ID: " + cursoId));
+                .orElseThrow(() -> new EntityNotFoundException(CURSO_NOT_FOUND + cursoId));
         Profesor profesor = profesorRepository.findById(profesorId)
-                .orElseThrow(() -> new EntityNotFoundException("Profesor no encontrado con ID: " + profesorId));
+                .orElseThrow(() -> new EntityNotFoundException(PROFESOR_NOT_FOUND + profesorId));
 
         curso.removeProfesor(profesor);
         curso = cursoRepository.save(curso);
@@ -164,7 +167,7 @@ public class CursoService {
      */
     public GrupoDTO crearGrupo(Long cursoId, String titulo) {
         Curso curso = cursoRepository.findById(cursoId)
-                .orElseThrow(() -> new EntityNotFoundException("Curso no encontrado con ID: " + cursoId));
+                .orElseThrow(() -> new EntityNotFoundException(CURSO_NOT_FOUND + cursoId));
 
         Grupo grupo = Grupo.builder()
                 .titulo(titulo)
@@ -181,11 +184,11 @@ public class CursoService {
     @Transactional(readOnly = true)
     public List<GrupoDTO> listarGrupos(Long cursoId) {
         if (!cursoRepository.existsById(cursoId)) {
-            throw new EntityNotFoundException("Curso no encontrado con ID: " + cursoId);
+            throw new EntityNotFoundException(CURSO_NOT_FOUND + cursoId);
         }
         
         return grupoRepository.findByCursoId(cursoId).stream()
                 .map(mapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

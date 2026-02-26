@@ -1,7 +1,7 @@
 import api from './api';
 import { ActividadDTO, CrearActividadDTO, Visibilidad } from '../types';
 
-const BASE_URL = '/actividades';
+const BASE_URL = '/api/actividades';
 
 export const actividadService = {
   obtener: async (id: number): Promise<ActividadDTO> => {

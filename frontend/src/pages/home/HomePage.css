@@ -5,14 +5,14 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  /* Fondo oscuro con un degradado radial sutil hacia el centro */
-  background-color: #0f0f11;
-  background-image: radial-gradient(circle at 50% 0%, #1f1f2e 0%, #0f0f11 70%);
+  background-color: var(--bg-primary);
+  background-image: var(--gradient-bg);
   font-family: 'Inter', sans-serif;
-  color: #ffffff;
+  color: var(--text-primary);
   padding: 20px;
   text-align: center;
   overflow: hidden;
+  transition: background-color 0.3s ease;
 }
 
 .hero-section {
@@ -30,15 +30,15 @@
 }
 
 .badge {
-  background-color: rgba(59, 130, 246, 0.1);
-  color: #60a5fa;
+  background-color: var(--accent-blue-bg);
+  color: var(--accent-blue-light);
   padding: 6px 16px;
   border-radius: 999px;
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid var(--accent-blue-border);
   margin-bottom: 8px;
 }
 
@@ -60,7 +60,7 @@
 
 .hero-subtitle {
   font-size: 1.25rem;
-  color: #a1a1aa;
+  color: var(--text-secondary);
   max-width: 600px;
   line-height: 1.6;
   margin: 0;
@@ -75,7 +75,7 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  background-color: #3b82f6;
+  background-color: var(--accent-blue);
   color: white;
   border: none;
   padding: 16px 36px;
@@ -84,13 +84,13 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 14px 0 var(--accent-blue-shadow);
 }
 
 .btn-hero-primary:hover {
-  background-color: #2563eb;
+  background-color: var(--accent-blue-hover);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 6px 20px var(--accent-blue-shadow);
 }
 
 /* Animación inicial fluida */

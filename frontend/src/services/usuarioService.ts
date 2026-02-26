@@ -1,7 +1,7 @@
 import api from './api';
 import { UsuarioDTO, CrearUsuarioDTO } from '../types';
 
-const BASE_URL = '/usuarios';
+const BASE_URL = '/api/usuarios';
 
 export const usuarioService = {
   listar: async (): Promise<UsuarioDTO[]> => {

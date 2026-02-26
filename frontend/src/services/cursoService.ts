@@ -1,7 +1,7 @@
 import api from './api';
 import { CursoDTO, CrearCursoDTO, GrupoDTO } from '../types';
 
-const BASE_URL = '/cursos';
+const BASE_URL = '/api/cursos';
 
 export const cursoService = {
   listarTodos: async (): Promise<CursoDTO[]> => {
