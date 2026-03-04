@@ -191,4 +191,25 @@ public class CursoService {
                 .map(mapper::toDTO)
                 .toList();
     }
+
+    /**
+     * Actualiza el título de un grupo.
+     */
+    public GrupoDTO actualizarGrupo(Long grupoId, String titulo) {
+        Grupo grupo = grupoRepository.findById(grupoId)
+                .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con ID: " + grupoId));
+        grupo.setTitulo(titulo);
+        grupo = grupoRepository.save(grupo);
+        return mapper.toDTO(grupo);
+    }
+
+    /**
+     * Elimina un grupo.
+     */
+    public void eliminarGrupo(Long grupoId) {
+        if (!grupoRepository.existsById(grupoId)) {
+            throw new EntityNotFoundException("Grupo no encontrado con ID: " + grupoId);
+        }
+        grupoRepository.deleteById(grupoId);
+    }
 }

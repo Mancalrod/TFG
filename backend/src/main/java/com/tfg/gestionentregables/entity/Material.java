@@ -38,6 +38,18 @@ public class Material {
     @Column(name = "tamano_bytes")
     private Long tamanoBytes;
 
+    // OneDrive: ID del item en el drive del alumno (para descargas vía Graph API)
+    @Column(name = "onedrive_item_id")
+    private String oneDriveItemId;
+
+    // OneDrive: URL web para visualizar/compartir el archivo
+    @Column(name = "onedrive_web_url", length = 1024)
+    private String oneDriveWebUrl;
+
+    // OneDrive: ID del usuario propietario del drive (para buscar su token OAuth2)
+    @Column(name = "onedrive_owner_user_id")
+    private Long oneDriveOwnerUserId;
+
     // Relación: Un material puede pertenecer a una actividad (material de apoyo)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "actividad_id")

@@ -27,8 +27,11 @@ class EntregaServiceTest {
     @Mock private EntregaRepository entregaRepository;
     @Mock private EntregableRepository entregableRepository;
     @Mock private EstudianteRepository estudianteRepository;
+    @Mock private ProfesorRepository profesorRepository;
     @Mock private MaterialRepository materialRepository;
     @Mock private EntityMapper mapper;
+    @Mock private OneDriveService oneDriveService;
+    @Mock private MicrosoftOAuthService microsoftOAuthService;
 
     @InjectMocks
     private EntregaService entregaService;

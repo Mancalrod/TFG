@@ -132,6 +132,8 @@ export interface MaterialDTO {
   tipoMaterial: TipoMaterial;
   ruta: string;
   tamanoBytes: number;
+  oneDriveWebUrl?: string;
+  oneDriveItemId?: string;
 }
 
 export interface FeedbackDTO {

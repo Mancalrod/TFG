@@ -12,7 +12,6 @@ const EntregablePage: React.FC = () => {
   const [misEntregas, setMisEntregas] = useState<EntregaDTO[]>([]);
   const [estadisticas, setEstadisticas] = useState<EntregaEstadisticasDTO | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showUploadModal, setShowUploadModal] = useState(false);
   const { esProfesor, usuario } = useAuth();
   const navigate = useNavigate();
 
@@ -48,8 +47,7 @@ const EntregablePage: React.FC = () => {
   };
 
   const handleCloseModal = () => {
-    setShowUploadModal(false);
-    // Recargar datos después de cerrar el modal
+    // Recargar datos
     if (id) {
       cargarEntregable(parseInt(id));
     }
@@ -125,7 +123,7 @@ const EntregablePage: React.FC = () => {
         {!esProfesor && entregable.enPlazo && (
           <button 
             className="btn-primary"
-            onClick={() => setShowUploadModal(true)}
+            onClick={() => navigate(`/entregables/${id}/entregar`)}
           >
             Realizar Entrega
           </button>
@@ -272,18 +270,6 @@ const EntregablePage: React.FC = () => {
           </div>
         )}
 
-        {/* Modal de entrega */}
-        {showUploadModal && (
-          <div className="modal-overlay" onClick={handleCloseModal}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-              <h2>Realizar Entrega</h2>
-              <p>Aquí iría el formulario de subida de archivos.</p>
-              <button className="btn-secondary" onClick={handleCloseModal}>
-                Cerrar
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -190,4 +190,46 @@ public class UsuarioService {
                 .orElseThrow(() -> new EntityNotFoundException("No es estudiante"));
         return estudiante.getId();
     }
+
+    /**
+     * Elimina el rol de profesor de un usuario.
+     */
+    public void eliminarRolProfesor(Long usuarioId) {
+        List<Profesor> profesores = profesorRepository.findByUsuarioId(usuarioId);
+        if (profesores.isEmpty()) {
+            throw new EntityNotFoundException("El usuario no es profesor");
+        }
+        profesorRepository.deleteAll(profesores);
+    }
+
+    /**
+     * Elimina el rol de estudiante de un usuario.
+     */
+    public void eliminarRolEstudiante(Long usuarioId) {
+        List<Estudiante> estudiantes = estudianteRepository.findByUsuarioId(usuarioId);
+        if (estudiantes.isEmpty()) {
+            throw new EntityNotFoundException("El usuario no es estudiante");
+        }
+        estudianteRepository.deleteAll(estudiantes);
+    }
+
+    /**
+     * Lista los estudiantes de un grupo con información de usuario.
+     */
+    @Transactional(readOnly = true)
+    public List<UsuarioDTO> listarEstudiantesDeGrupo(Long grupoId) {
+        return estudianteRepository.findByGrupoId(grupoId).stream()
+                .map(e -> mapper.toDTO(e.getUsuario()))
+                .toList();
+    }
+
+    /**
+     * Elimina a un estudiante de un grupo específico.
+     */
+    public void eliminarEstudianteDeGrupo(Long usuarioId, Long grupoId) {
+        Estudiante estudiante = estudianteRepository.findByUsuarioIdAndGrupoId(usuarioId, grupoId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "El usuario " + usuarioId + " no es estudiante del grupo " + grupoId));
+        estudianteRepository.delete(estudiante);
+    }
 }

@@ -63,5 +63,16 @@ export const cursoService = {
   listarGrupos: async (cursoId: number): Promise<GrupoDTO[]> => {
     const response = await api.get<GrupoDTO[]>(`${BASE_URL}/${cursoId}/grupos`);
     return response.data;
+  },
+
+  actualizarGrupo: async (grupoId: number, titulo: string): Promise<GrupoDTO> => {
+    const response = await api.put<GrupoDTO>(`${BASE_URL}/grupos/${grupoId}`, null, {
+      params: { titulo }
+    });
+    return response.data;
+  },
+
+  eliminarGrupo: async (grupoId: number): Promise<void> => {
+    await api.delete(`${BASE_URL}/grupos/${grupoId}`);
   }
 };

@@ -48,6 +48,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/api/health").permitAll()
+                .requestMatchers("/api/oauth/microsoft/callback").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 // Endpoints de administración
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")

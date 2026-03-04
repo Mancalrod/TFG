@@ -5,6 +5,7 @@ import com.tfg.gestionentregables.entity.Material;
 import com.tfg.gestionentregables.service.EntregaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -83,11 +85,28 @@ public class EntregaController {
 
     /**
      * SYSOP-018: Descargar archivo de una entrega.
+     * Soporta descarga desde OneDrive y desde sistema de archivos local.
      */
     @GetMapping("/archivo/{materialId}")
     public ResponseEntity<Resource> descargarArchivo(@PathVariable Long materialId) {
         Material material = entregaService.obtenerArchivo(materialId);
-        
+
+        // Si el material está en OneDrive, descargar desde OneDrive
+        if (material.getOneDriveItemId() != null && material.getOneDriveOwnerUserId() != null) {
+            try {
+                InputStream stream = entregaService.descargarContenidoArchivo(materialId);
+                InputStreamResource resource = new InputStreamResource(stream);
+                return ResponseEntity.ok()
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .header(HttpHeaders.CONTENT_DISPOSITION,
+                                "attachment; filename=\"" + material.getNombre() + "\"")
+                        .body(resource);
+            } catch (Exception e) {
+                return ResponseEntity.internalServerError().build();
+            }
+        }
+
+        // Fallback: descargar desde sistema de archivos local
         try {
             Path filePath = Paths.get(material.getRuta());
             Resource resource = new UrlResource(filePath.toUri());

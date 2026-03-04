@@ -1,17 +1,50 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { cursoService } from '../../services';
+import { cursoService, oneDriveService } from '../../services';
 import { CursoDTO } from '../../types';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
   const { usuario, esEstudiante, esAdmin } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [busqueda, setBusqueda] = useState('');
   const [cursos, setCursos] = useState<CursoDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // ── OneDrive ──
+  const [oneDriveConnected, setOneDriveConnected] = useState(false);
+  const [oneDriveEmail, setOneDriveEmail] = useState('');
+  const [oneDriveLoading, setOneDriveLoading] = useState(false);
+  const [oneDriveMsg, setOneDriveMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Comprobar parámetros de callback de OneDrive
+  useEffect(() => {
+    const onedriveResult = searchParams.get('onedrive');
+    if (onedriveResult === 'success') {
+      setOneDriveMsg({ type: 'success', text: 'OneDrive conectado correctamente.' });
+      searchParams.delete('onedrive');
+      setSearchParams(searchParams, { replace: true });
+    } else if (onedriveResult === 'error') {
+      const reason = searchParams.get('reason') || 'desconocido';
+      setOneDriveMsg({ type: 'error', text: `Error al conectar OneDrive: ${reason}` });
+      searchParams.delete('onedrive');
+      searchParams.delete('reason');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, []);
+
+  // Cargar estado de OneDrive
+  useEffect(() => {
+    if (usuario) {
+      oneDriveService.getStatus(usuario.id).then((status) => {
+        setOneDriveConnected(status.connected);
+        setOneDriveEmail(status.microsoftEmail || '');
+      }).catch(() => { /* ignorar si OneDrive no está habilitado */ });
+    }
+  }, [usuario, oneDriveMsg]);
 
   useEffect(() => {
     const cargarCursos = async () => {
@@ -52,6 +85,37 @@ const Dashboard: React.FC = () => {
     );
   }, [cursos, busqueda]);
 
+  // ── OneDrive handlers ──
+  const handleConnectOneDrive = async () => {
+    if (!usuario) return;
+    setOneDriveLoading(true);
+    try {
+      const authUrl = await oneDriveService.getAuthorizationUrl(usuario.id);
+      // Redirigir el navegador a la URL de Microsoft
+      window.location.href = authUrl;
+    } catch (err) {
+      console.error('Error al obtener URL de autorización:', err);
+      setOneDriveMsg({ type: 'error', text: 'No se pudo iniciar la conexión con OneDrive.' });
+      setOneDriveLoading(false);
+    }
+  };
+
+  const handleDisconnectOneDrive = async () => {
+    if (!usuario) return;
+    setOneDriveLoading(true);
+    try {
+      await oneDriveService.disconnect(usuario.id);
+      setOneDriveConnected(false);
+      setOneDriveEmail('');
+      setOneDriveMsg({ type: 'success', text: 'OneDrive desconectado correctamente.' });
+    } catch (err) {
+      console.error('Error al desconectar OneDrive:', err);
+      setOneDriveMsg({ type: 'error', text: 'No se pudo desconectar OneDrive.' });
+    } finally {
+      setOneDriveLoading(false);
+    }
+  };
+
   return (
     <div className="dashboard-container">
       <main className="dashboard-content">
@@ -70,6 +134,56 @@ const Dashboard: React.FC = () => {
               onChange={(e) => setBusqueda(e.target.value)}
               className="search-input"
             />
+          </div>
+        </div>
+
+        {/* Mensaje de OneDrive */}
+        {oneDriveMsg && (
+          <div className={`onedrive-alert ${oneDriveMsg.type === 'success' ? 'onedrive-alert-success' : 'onedrive-alert-error'}`}>
+            <span>{oneDriveMsg.text}</span>
+            <button className="onedrive-alert-close" onClick={() => setOneDriveMsg(null)}>×</button>
+          </div>
+        )}
+
+        {/* Tarjeta de conexión OneDrive */}
+        <div className="onedrive-card">
+          <div className="onedrive-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="28" height="28">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" />
+              <path d="M2 17l10 5 10-5" />
+              <path d="M2 12l10 5 10-5" />
+            </svg>
+          </div>
+          <div className="onedrive-card-info">
+            <h3>Microsoft OneDrive</h3>
+            {oneDriveConnected ? (
+              <p className="onedrive-status connected">
+                Conectado como <strong>{oneDriveEmail}</strong>
+              </p>
+            ) : (
+              <p className="onedrive-status disconnected">
+                Conecta tu cuenta de Microsoft para subir tus entregas a OneDrive.
+              </p>
+            )}
+          </div>
+          <div className="onedrive-card-action">
+            {oneDriveConnected ? (
+              <button
+                className="onedrive-btn onedrive-btn-disconnect"
+                onClick={handleDisconnectOneDrive}
+                disabled={oneDriveLoading}
+              >
+                {oneDriveLoading ? 'Desconectando...' : 'Desconectar'}
+              </button>
+            ) : (
+              <button
+                className="onedrive-btn onedrive-btn-connect"
+                onClick={handleConnectOneDrive}
+                disabled={oneDriveLoading}
+              >
+                {oneDriveLoading ? 'Conectando...' : 'Conectar OneDrive'}
+              </button>
+            )}
           </div>
         </div>
 

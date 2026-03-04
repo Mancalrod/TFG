@@ -49,5 +49,27 @@ export const usuarioService = {
   esEstudiante: async (id: number): Promise<boolean> => {
     const response = await api.get<boolean>(`${BASE_URL}/${id}/es-estudiante`);
     return response.data;
+  },
+
+  eliminarRolProfesor: async (id: number): Promise<void> => {
+    await api.delete(`${BASE_URL}/${id}/profesor`);
+  },
+
+  eliminarRolEstudiante: async (id: number): Promise<void> => {
+    await api.delete(`${BASE_URL}/${id}/estudiante`);
+  },
+
+  eliminarEstudianteDeGrupo: async (usuarioId: number, grupoId: number): Promise<void> => {
+    await api.delete(`${BASE_URL}/${usuarioId}/estudiante/${grupoId}`);
+  },
+
+  listarEstudiantesDeGrupo: async (grupoId: number): Promise<UsuarioDTO[]> => {
+    const response = await api.get<UsuarioDTO[]>(`${BASE_URL}/grupo/${grupoId}`);
+    return response.data;
+  },
+
+  obtenerProfesorId: async (usuarioId: number): Promise<number> => {
+    const response = await api.get<number>(`${BASE_URL}/${usuarioId}/profesor-id`);
+    return response.data;
   }
 };
