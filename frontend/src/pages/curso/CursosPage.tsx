@@ -13,10 +13,6 @@ const CursosPage: React.FC = () => {
   const { usuario, esProfesor } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    cargarCursos();
-  }, [cargarCursos]);
-
   const cargarCursos = useCallback(async () => {
     if (!usuario) return;
     
@@ -42,6 +38,10 @@ const CursosPage: React.FC = () => {
       setLoading(false);
     }
   }, [usuario]);
+
+  useEffect(() => {
+    cargarCursos();
+  }, [cargarCursos]);
 
   const handleVerActividad = (actividadId: number) => {
     navigate(`/actividades/${actividadId}`);
