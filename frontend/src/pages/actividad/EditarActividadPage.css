@@ -37,12 +37,12 @@
 }
 
 .ea-error-banner {
-  background-color: #fde8e8;
-  color: #e74c3c;
+  background-color: var(--error-bg);
+  color: var(--error-color);
   padding: 0.75rem 1rem;
   border-radius: 8px;
   font-size: 0.9rem;
-  border: 1px solid rgba(231, 76, 60, 0.2);
+  border: 1px solid var(--error-border);
 }
 
 .ea-field {
@@ -185,7 +185,7 @@
 .ea-btn-eliminar {
   background: none;
   border: none;
-  color: #e74c3c;
+  color: var(--error-color);
   cursor: pointer;
   font-size: 0.9rem;
   padding: 0.5rem 0;
@@ -226,8 +226,8 @@
 }
 
 .ea-modal-warning {
-  background-color: #fff3cd;
-  color: #856404;
+  background-color: var(--warning-bg);
+  color: var(--warning-color);
   padding: 0.6rem 0.75rem;
   border-radius: 6px;
   font-size: 0.85rem;
@@ -241,7 +241,7 @@
 }
 
 .ea-btn-confirmar-eliminar {
-  background-color: #e74c3c;
+  background-color: var(--error-color);
   color: white;
   border: none;
   padding: 0.6rem 1.25rem;

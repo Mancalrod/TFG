@@ -18,7 +18,10 @@ import ActividadPage from './pages/actividad/ActividadPage'
 import EditarActividadPage from './pages/actividad/EditarActividadPage'
 import EntregablePage from './pages/entregable/EntregablePage'
 import EditarEntregablePage from './pages/entregable/EditarEntregablePage'
+import CrearEntregablePage from './pages/entregable/CrearEntregablePage'
+import RealizarEntregaPage from './pages/entrega/RealizarEntregaPage'
 import ActividadesPorCursoPage from './pages/actividades-por-curso/ActividadesPorCursoPage'
+import AdminPage from './pages/admin/AdminPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 // Componente para proteger rutas que requieren autenticación
@@ -59,8 +62,11 @@ function App() {
             <Route path="/actividades-por-curso" element={<ProtectedRoute><ActividadesPorCursoPage /></ProtectedRoute>} />
             <Route path="/actividades/:id" element={<ProtectedRoute><ActividadPage /></ProtectedRoute>} />
             <Route path="/actividades/:id/editar" element={<ProtectedRoute><EditarActividadPage /></ProtectedRoute>} />
+            <Route path="/actividades/:actividadId/entregables/nuevo" element={<ProtectedRoute><CrearEntregablePage /></ProtectedRoute>} />
             <Route path="/entregables/:id" element={<ProtectedRoute><EntregablePage /></ProtectedRoute>} />
+            <Route path="/entregables/:id/entregar" element={<ProtectedRoute><RealizarEntregaPage /></ProtectedRoute>} />
             <Route path="/entregables/:id/editar" element={<ProtectedRoute><EditarEntregablePage /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
             
             {/* 404 */}
             <Route path="*" element={<NotFoundPage />} />

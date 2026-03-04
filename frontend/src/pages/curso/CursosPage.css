@@ -159,13 +159,13 @@
 }
 
 .actividad-estado.en-plazo {
-  background-color: #d5f4e6;
-  color: #27ae60;
+  background-color: var(--badge-success-bg);
+  color: var(--badge-success-color);
 }
 
 .actividad-estado.vencido {
-  background-color: #fde8e8;
-  color: #e74c3c;
+  background-color: var(--badge-error-bg);
+  color: var(--badge-error-color);
 }
 
 .no-actividades {

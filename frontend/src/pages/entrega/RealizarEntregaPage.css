@@ -1,0 +1,558 @@
+.realizar-entrega-page {
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.re-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.re-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.re-header-info h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+.re-subtitle {
+  color: var(--accent-blue);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.re-actividad {
+  color: var(--text-tertiary);
+  font-size: 0.85rem;
+}
+
+/* ── Barra de info del entregable ── */
+.re-info-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: var(--bg-card);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-card);
+  align-items: center;
+}
+
+.re-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.re-info-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.re-info-value {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.re-info-tag {
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.re-info-tag.reenvio {
+  background-color: var(--badge-success-bg);
+  color: var(--badge-success-color);
+}
+
+/* ── Borrador banner ── */
+.re-borrador-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--info-bg);
+  color: var(--info-color);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  border: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+.re-borrador-descartar {
+  background: none;
+  border: none;
+  color: var(--error-color);
+  cursor: pointer;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.re-borrador-descartar:hover {
+  color: #c0392b;
+}
+
+/* ── Success banner ── */
+.re-success-banner {
+  background-color: var(--success-bg);
+  color: var(--success-color);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+  border: 1px solid rgba(39, 174, 96, 0.2);
+}
+
+/* ── Formulario ── */
+.re-form {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.re-error-banner {
+  background-color: var(--error-bg);
+  color: var(--error-color);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  border: 1px solid var(--error-border);
+  white-space: pre-line;
+}
+
+.re-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.re-field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.re-field input[type="text"] {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.re-field input[type="text"]:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.12);
+}
+
+/* ── Dropzone ── */
+.re-dropzone {
+  border: 2px dashed var(--border-primary);
+  border-radius: 12px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+  position: relative;
+}
+
+.re-dropzone:hover {
+  border-color: var(--accent-blue);
+  background-color: rgba(52, 152, 219, 0.03);
+}
+
+.re-dropzone.drag-over {
+  border-color: var(--accent-blue);
+  background-color: rgba(52, 152, 219, 0.08);
+}
+
+.re-dropzone.has-files {
+  padding: 1.5rem 1rem;
+}
+
+.re-file-input {
+  display: none;
+}
+
+.re-dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.re-dropzone-icon {
+  font-size: 2.5rem;
+}
+
+.re-dropzone-text {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.re-dropzone-link {
+  color: var(--accent-blue);
+  font-weight: 500;
+  text-decoration: underline;
+}
+
+.re-dropzone-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+}
+
+/* ── Lista de archivos ── */
+.re-files-list {
+  border: 1px solid var(--border-primary);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.re-files-header {
+  padding: 0.75rem 1rem;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.re-files-header h3 {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.re-files {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.re-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-primary);
+  transition: background-color 0.15s;
+}
+
+.re-file-item:last-child {
+  border-bottom: none;
+}
+
+.re-file-item:hover {
+  background-color: var(--bg-secondary);
+}
+
+.re-file-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.re-file-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.re-file-details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.re-file-name {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.re-file-size {
+  color: var(--text-tertiary);
+  font-size: 0.8rem;
+}
+
+.re-file-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.re-btn-preview,
+.re-btn-download,
+.re-btn-remove {
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: background-color 0.15s, border-color 0.15s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.re-btn-preview:hover {
+  background-color: rgba(52, 152, 219, 0.1);
+  border-color: rgba(52, 152, 219, 0.2);
+}
+
+.re-btn-download:hover {
+  background-color: rgba(39, 174, 96, 0.1);
+  border-color: rgba(39, 174, 96, 0.2);
+}
+
+.re-btn-remove:hover {
+  background-color: rgba(231, 76, 60, 0.1);
+  border-color: rgba(231, 76, 60, 0.2);
+}
+
+.re-btn-remove:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Acciones ── */
+.re-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-primary);
+  gap: 1rem;
+}
+
+.re-autosave-hint {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+}
+
+.re-actions-right {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* ── Preview overlay ── */
+.re-preview-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.re-preview-modal {
+  width: 90%;
+  max-width: 1000px;
+  max-height: 90vh;
+  background: var(--bg-card);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.re-preview-container {
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+}
+
+.re-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-primary);
+  background-color: var(--bg-secondary);
+}
+
+.re-preview-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.re-preview-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.15s;
+}
+
+.re-preview-close:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.re-preview-iframe {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background-color: white;
+}
+
+.re-preview-image-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  padding: 1rem;
+  background-color: var(--bg-secondary);
+}
+
+.re-preview-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+/* DOC preview */
+.re-preview-doc {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 3rem;
+}
+
+.re-preview-doc-icon {
+  font-size: 4rem;
+}
+
+.re-preview-doc-name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.re-preview-doc-info {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  text-align: center;
+  max-width: 400px;
+}
+
+.re-preview-download-btn {
+  display: inline-block;
+  text-decoration: none;
+  margin-top: 0.5rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .realizar-entrega-page {
+    padding: 1rem;
+  }
+
+  .re-header {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .re-info-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .re-form {
+    padding: 1.25rem;
+  }
+
+  .re-dropzone {
+    padding: 1.5rem 1rem;
+  }
+
+  .re-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .re-autosave-hint {
+    text-align: center;
+  }
+
+  .re-actions-right {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .re-file-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .re-file-actions {
+    align-self: flex-end;
+  }
+
+  .re-preview-overlay {
+    padding: 0.5rem;
+  }
+
+  .re-preview-modal {
+    width: 100%;
+    max-height: 95vh;
+  }
+}

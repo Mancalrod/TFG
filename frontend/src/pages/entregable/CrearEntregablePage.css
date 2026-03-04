@@ -1,11 +1,11 @@
-.editar-entregable-page {
+.crear-entregable-page {
   padding: 2rem;
   max-width: 800px;
   margin: 0 auto;
 }
 
 /* ── Header ── */
-.ee-header {
+.ce-header {
   display: flex;
   align-items: flex-start;
   gap: 1.5rem;
@@ -14,19 +14,19 @@
   border-bottom: 1px solid var(--border-primary);
 }
 
-.ee-header-info h1 {
+.ce-header-info h1 {
   margin: 0 0 0.25rem 0;
   font-size: 1.5rem;
   color: var(--text-primary);
 }
 
-.ee-subtitle {
+.ce-subtitle {
   color: var(--accent-blue);
   font-size: 0.9rem;
 }
 
 /* ── Formulario ── */
-.ee-form {
+.ce-form {
   background: var(--bg-card);
   border-radius: 12px;
   padding: 2rem;
@@ -36,7 +36,7 @@
   gap: 1.25rem;
 }
 
-.ee-error-banner {
+.ce-error-banner {
   background-color: var(--error-bg);
   color: var(--error-color);
   padding: 0.75rem 1rem;
@@ -45,13 +45,13 @@
   border: 1px solid var(--error-border);
 }
 
-.ee-field {
+.ce-field {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
 }
 
-.ee-field label {
+.ce-field label {
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-secondary);
@@ -59,11 +59,11 @@
   letter-spacing: 0.03em;
 }
 
-.ee-field input[type="text"],
-.ee-field input[type="number"],
-.ee-field input[type="datetime-local"],
-.ee-field textarea,
-.ee-field select {
+.ce-field input[type="text"],
+.ce-field input[type="number"],
+.ce-field input[type="datetime-local"],
+.ce-field textarea,
+.ce-field select {
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--border-primary);
   border-radius: 8px;
@@ -74,32 +74,32 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.ee-field input:focus,
-.ee-field textarea:focus,
-.ee-field select:focus {
+.ce-field input:focus,
+.ce-field textarea:focus,
+.ce-field select:focus {
   outline: none;
   border-color: var(--accent-blue);
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.12);
 }
 
-.ee-field textarea {
+.ce-field textarea {
   resize: vertical;
   min-height: 80px;
 }
 
 /* ── Filas de 2 columnas ── */
-.ee-row {
+.ce-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
 /* ── Checkbox ── */
-.ee-checkbox-field {
+.ce-checkbox-field {
   margin-top: 0.5rem;
 }
 
-.ee-checkbox-label {
+.ce-checkbox-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -110,137 +110,54 @@
   font-weight: 500 !important;
 }
 
-.ee-checkbox-label input[type="checkbox"] {
+.ce-checkbox-label input[type="checkbox"] {
   width: 18px;
   height: 18px;
   accent-color: var(--accent-blue);
   cursor: pointer;
 }
 
-.ee-help-text {
+.ce-help-text {
   margin: 0.25rem 0 0 0;
   font-size: 0.8rem;
   color: var(--text-tertiary);
 }
 
 /* ── Acciones del formulario ── */
-.ee-actions {
+.ce-actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-top: 1rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--border-primary);
 }
 
-.ee-actions-left {
-  display: flex;
-}
-
-.ee-actions-right {
+.ce-actions-right {
   display: flex;
   gap: 0.75rem;
-}
-
-.ee-btn-eliminar {
-  background: none;
-  border: none;
-  color: var(--error-color);
-  cursor: pointer;
-  font-size: 0.9rem;
-  padding: 0.5rem 0;
-  transition: color 0.2s;
-}
-
-.ee-btn-eliminar:hover {
-  color: #c0392b;
-  text-decoration: underline;
-}
-
-.ee-btn-eliminar:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ── Modal de confirmación ── */
-.ee-modal {
-  background: var(--bg-card);
-  border-radius: 12px;
-  padding: 2rem;
-  max-width: 460px;
-  width: 90%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-.ee-modal h2 {
-  margin: 0 0 0.75rem 0;
-  font-size: 1.2rem;
-  color: var(--text-primary);
-}
-
-.ee-modal p {
-  margin: 0 0 0.75rem 0;
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-.ee-modal-warning {
-  background-color: var(--warning-bg);
-  color: var(--warning-color);
-  padding: 0.6rem 0.75rem;
-  border-radius: 6px;
-  font-size: 0.85rem;
-}
-
-.ee-modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1.25rem;
-}
-
-.ee-btn-confirmar-eliminar {
-  background-color: var(--error-color);
-  color: white;
-  border: none;
-  padding: 0.6rem 1.25rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.ee-btn-confirmar-eliminar:hover {
-  background-color: #c0392b;
-}
-
-.ee-btn-confirmar-eliminar:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 /* ── Responsive ── */
 @media (max-width: 600px) {
-  .editar-entregable-page {
+  .crear-entregable-page {
     padding: 1rem;
   }
 
-  .ee-form {
+  .ce-form {
     padding: 1.25rem;
   }
 
-  .ee-row {
+  .ce-row {
     grid-template-columns: 1fr;
   }
 
-  .ee-actions {
+  .ce-actions {
     flex-direction: column-reverse;
     gap: 1rem;
   }
 
-  .ee-actions-left,
-  .ee-actions-right {
+  .ce-actions-right {
     width: 100%;
     justify-content: center;
   }

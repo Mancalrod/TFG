@@ -5,6 +5,7 @@ import com.tfg.gestionentregables.entity.Material;
 import com.tfg.gestionentregables.service.EntregaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;

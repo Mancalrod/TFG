@@ -78,4 +78,34 @@ public class UsuarioController {
     public ResponseEntity<Boolean> esEstudiante(@PathVariable Long id) {
         return ResponseEntity.ok(usuarioService.esEstudiante(id));
     }
+
+    @DeleteMapping("/{id}/profesor")
+    public ResponseEntity<Void> eliminarRolProfesor(@PathVariable Long id) {
+        usuarioService.eliminarRolProfesor(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}/estudiante")
+    public ResponseEntity<Void> eliminarRolEstudiante(@PathVariable Long id) {
+        usuarioService.eliminarRolEstudiante(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}/estudiante/{grupoId}")
+    public ResponseEntity<Void> eliminarEstudianteDeGrupo(
+            @PathVariable Long id,
+            @PathVariable Long grupoId) {
+        usuarioService.eliminarEstudianteDeGrupo(id, grupoId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/grupo/{grupoId}")
+    public ResponseEntity<List<UsuarioDTO>> listarEstudiantesDeGrupo(@PathVariable Long grupoId) {
+        return ResponseEntity.ok(usuarioService.listarEstudiantesDeGrupo(grupoId));
+    }
+
+    @GetMapping("/{id}/profesor-id")
+    public ResponseEntity<Long> obtenerProfesorId(@PathVariable Long id) {
+        return ResponseEntity.ok(usuarioService.obtenerProfesorId(id));
+    }
 }

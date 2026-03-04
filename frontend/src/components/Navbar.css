@@ -95,7 +95,7 @@
 }
 
 .btn-logout {
-  background-color: #ef4444;
+  background-color: var(--error-color);
   color: white;
   border: none;
   padding: 8px 16px;
@@ -107,7 +107,7 @@
 }
 
 .btn-logout:hover {
-  background-color: #dc2626;
+  background-color: color-mix(in srgb, var(--error-color) 80%, black);
 }
 
 /* Theme toggle button */

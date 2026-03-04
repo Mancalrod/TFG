@@ -103,4 +103,17 @@ public class CursoController {
     public ResponseEntity<List<GrupoDTO>> listarGrupos(@PathVariable Long cursoId) {
         return ResponseEntity.ok(cursoService.listarGrupos(cursoId));
     }
+
+    @PutMapping("/grupos/{grupoId}")
+    public ResponseEntity<GrupoDTO> actualizarGrupo(
+            @PathVariable Long grupoId,
+            @RequestParam String titulo) {
+        return ResponseEntity.ok(cursoService.actualizarGrupo(grupoId, titulo));
+    }
+
+    @DeleteMapping("/grupos/{grupoId}")
+    public ResponseEntity<Void> eliminarGrupo(@PathVariable Long grupoId) {
+        cursoService.eliminarGrupo(grupoId);
+        return ResponseEntity.noContent().build();
+    }
 }

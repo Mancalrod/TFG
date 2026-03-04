@@ -45,6 +45,14 @@ const Navbar: React.FC = () => {
                 Evaluaciones
               </NavLink>
             )}
+            {esAdmin && (
+              <NavLink 
+                to="/admin" 
+                className={({ isActive }) => isActive ? "navbar-item active" : "navbar-item"}
+              >
+                Administración
+              </NavLink>
+            )}
           </>
         )}
       </div>

@@ -55,18 +55,18 @@
 }
 
 .estado-badge.en-plazo {
-  background-color: #d5f4e6;
-  color: #27ae60;
+  background-color: var(--badge-success-bg);
+  color: var(--badge-success-color);
 }
 
 .estado-badge.vencido {
-  background-color: #fde8e8;
-  color: #e74c3c;
+  background-color: var(--badge-error-bg);
+  color: var(--badge-error-color);
 }
 
 .reenvio-badge {
-  background-color: #fff3cd;
-  color: #856404;
+  background-color: var(--badge-warning-bg);
+  color: var(--warning-color);
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
   font-size: 0.75rem;
@@ -130,11 +130,11 @@
 }
 
 .text-danger {
-  color: #e74c3c !important;
+  color: var(--error-color) !important;
 }
 
 .text-success {
-  color: #27ae60 !important;
+  color: var(--success-color) !important;
 }
 
 .stats-grid {
@@ -151,19 +151,19 @@
 }
 
 .stat-card.success {
-  background-color: #d5f4e6;
+  background-color: var(--badge-success-bg);
 }
 
 .stat-card.warning {
-  background-color: #fff3cd;
+  background-color: var(--badge-warning-bg);
 }
 
 .stat-card.info {
-  background-color: #cce5ff;
+  background-color: var(--badge-info-bg);
 }
 
 .stat-card.primary {
-  background-color: #e8f4f8;
+  background-color: var(--info-bg);
 }
 
 .stat-value {
@@ -223,13 +223,13 @@
 }
 
 .badge.entregado {
-  background-color: #fff3cd;
-  color: #856404;
+  background-color: var(--badge-warning-bg);
+  color: var(--warning-color);
 }
 
 .badge.calificado {
-  background-color: #d5f4e6;
-  color: #27ae60;
+  background-color: var(--badge-success-bg);
+  color: var(--badge-success-color);
 }
 
 .btn-sm {
