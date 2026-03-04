@@ -1,6 +1,6 @@
 #FileLock
-#Wed Mar 04 14:03:02 CET 2026
-hostName=DESKTOP-1FPJVAD
-id=19cb8f1d56592c5443611ad441a489674d09f9f7b6c
+#Wed Mar 04 14:19:37 CET 2026
+hostName=DESKTOP-TH8QGKG
+id=19cb900ef03e302b6dbcbfa84577cde3ea18b4a591d
 method=file
-server=192.168.1.180\:49903
+server=192.168.56.1\:51596
