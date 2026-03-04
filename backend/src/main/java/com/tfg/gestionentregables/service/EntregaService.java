@@ -98,6 +98,8 @@ public class EntregaService {
             }
         }
 
+        // Refrescar la entrega desde la BD para incluir los materiales guardados
+        entrega = entregaRepository.findById(entrega.getId()).orElseThrow();
         return mapper.toDTO(entrega);
     }
 
