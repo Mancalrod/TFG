@@ -14,8 +14,8 @@
 | **Total Sprints** | 4 sprints (+ Sprint 0) |
 | **Inicio Sprint 0** | Septiembre 2025 |
 | **Fin Sprint 0** | 22 Febrero 2026 |
-| **Inicio Sprints 1-4** | 24 Febrero 2026 |
-| **Fecha Fin Estimada** | 19 Abril 2026 |
+| **Inicio Sprints 1-4** | 17 Febrero 2026 |
+| **Fecha Fin Estimada** | 13 Abril 2026 |
 
 ---
 
@@ -31,7 +31,6 @@ El MVP del sistema debe cubrir obligatoriamente:
 ### Fuera del alcance MVP (trabajo futuro)
 - OAuth2 (Google / ULL institucional)
 - Autenticacion 2FA (TOTP/SMS)
-- Integracion HDVirtual / OneDrive
 - Notificaciones de feedback
 - Calendario de fechas limite
 - Monitorizacion avanzada
@@ -57,10 +56,10 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
 | Sprint | Fechas | Horas | Objetivo Principal | Estado |
 |--------|--------|-------|---------------------|--------|
 | Sprint 0 | Sep 2025 - 22 Feb 2026 | 120h | Documentacion: ERS y DAS | COMPLETADO |
-| Sprint 1 | 24 Feb - 8 Mar 2026 | 120h | Infraestructura + Auth + Cursos + Actividades + CI/CD + Deploy | COMPLETADO |
-| Sprint 2 | 9 Mar - 22 Mar 2026 | 120h | Gestion Entregables + Entregas (frontend) | EN CURSO |
-| Sprint 3 | 23 Mar - 5 Abr 2026 | 120h | Panel Evaluacion + Feedback + UX Profesor | PENDIENTE |
-| Sprint 4 | 6 Abr - 19 Abr 2026 | 120h | Memoria TFG + Polish + Presentacion | PENDIENTE |
+| Sprint 1 | 17 Feb - 2 Mar 2026 | 120h | Infraestructura + Auth + Cursos + Actividades + CI/CD + Deploy | COMPLETADO |
+| Sprint 2 | 3 Mar - 16 Mar 2026 | 120h | Gestion Entregables + Entregas + Integracion OneDrive | EN CURSO |
+| Sprint 3 | 17 Mar - 30 Mar 2026 | 120h | Panel Evaluacion + Feedback + UX Profesor | PENDIENTE |
+| Sprint 4 | 31 Mar - 13 Abr 2026 | 120h | Memoria TFG + Polish + Presentacion | PENDIENTE |
 
 **Total horas:** 120h (Sprint 0) + 480h (Sprints 1-4) = **600 horas**
 
@@ -102,7 +101,7 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
 
 ## Sprint 1: Infraestructura + Auth + Cursos + Actividades + CI/CD + Deploy - COMPLETADO
 **Estado:** COMPLETADO
-**Fechas:** 24 Febrero - 8 Marzo 2026
+**Fechas:** 17 Febrero - 2 Marzo 2026
 **Horas:** 120h (60h/persona)
 
 ### Objetivos
@@ -196,9 +195,9 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
 
 ---
 
-## Sprint 2: Gestion Entregables + Entregas (Frontend) - EN CURSO
+## Sprint 2: Gestion Entregables + Entregas + Integracion OneDrive - EN CURSO
 **Estado:** EN CURSO
-**Fechas:** 9 Marzo - 22 Marzo 2026
+**Fechas:** 3 Marzo - 16 Marzo 2026
 **Horas Planificadas:** 120h (60h/persona)
 
 ### Objetivos
@@ -208,11 +207,13 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
 - Implementar vista de entregas del profesor (lista por entregable)
 - Descarga individual de archivos
 - Reenvio de entregas si esta permitido
+- **Integracion con Microsoft OneDrive** (OAuth2, subida/descarga de archivos en la nube)
 - Testing de funcionalidades de este sprint
 
 ### Epicas/PBIs Incluidos
 - EP-06 completa: Frontend Gestion Entregables (PBI-031 a PBI-035 frontend)
 - EP-07: Gestion de Entregas frontend (PBI-036 a PBI-042)
+- EP-08 nueva: Integracion OneDrive (entidad OneDriveToken, OneDriveService, OneDriveController, config OAuth2)
 - EP-11 parcial: Paginas entregable completa y entregas (PBI-068)
 - EP-13 parcial: Testing funcionalidades Sprint 2
 
@@ -229,7 +230,10 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
 | Frontend: Descarga archivos individual | 3h | 3h | 6h |
 | Frontend: Reenvio entregas (si permitido) | 3h | 3h | 6h |
 | Mejoras UX y navegacion (breadcrumbs, toasts) | 3h | 3h | 6h |
-| Ajustes backend (si necesario) | 2h | 2h | 4h |
+| Backend: OneDriveToken + OneDriveTokenRepository + OneDriveConfig | 1h | 1h | 2h |
+| Backend: OneDriveService (OAuth2, token exchange, upload, download) | 2h | 2h | 4h |
+| Backend: OneDriveController (auth-url, callback, status, disconnect) | 1h | 1h | 2h |
+| Frontend: oneDriveService.ts + integracion subida a OneDrive | 1h | 1h | 2h |
 | Testing: Tests entregables (ampliar service + controller) | 4h | 4h | 8h |
 | Testing: Tests entregas (ampliar service + controller) | 5h | 5h | 10h |
 | Testing: Tests integracion flujo completo | 4h | 4h | 8h |
@@ -245,6 +249,9 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
 - [ ] Estudiante puede reenviar entregas si esta permitido y en plazo
 - [ ] Profesor puede ver lista de entregas por entregable
 - [ ] Se pueden descargar archivos de entregas
+- [ ] Usuario puede conectar su cuenta de Microsoft OneDrive (OAuth2)
+- [ ] Archivos de entregas se suben a OneDrive si el usuario tiene la cuenta conectada
+- [ ] Respuesta de entrega incluye `almacenadoEnOneDrive`, `onedriveFileId` y `onedriveWebUrl`
 - [ ] Tests unitarios y de integracion pasando
 - [ ] Aplicacion desplegada y funcional en Render
 
@@ -252,7 +259,7 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
 
 ## Sprint 3: Panel Evaluacion + Feedback + UX Profesor - PENDIENTE
 **Estado:** PENDIENTE
-**Fechas:** 23 Marzo - 5 Abril 2026
+**Fechas:** 17 Marzo - 30 Marzo 2026
 **Horas Planificadas:** 120h (60h/persona)
 
 ### Objetivos
@@ -310,7 +317,7 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
 
 ## Sprint 4: Memoria TFG + Polish + Presentacion - PENDIENTE
 **Estado:** PENDIENTE
-**Fechas:** 6 Abril - 19 Abril 2026
+**Fechas:** 31 Marzo - 13 Abril 2026
 **Horas Planificadas:** 120h (60h/persona)
 
 ### Objetivos
@@ -368,11 +375,12 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
     9 10 11 12 13 14 15       9 10 11 12 13 14 15      13 14 15 16 17 18 19
    16 17 18 19 20 21 22      16 17 18 19 20 21 22      20 21 22 23 24 25 26
    [Sprint 0 fin: 22]        23 24 25 26 27 28 29      27 28 29 30
-   [Sprint 1: 24-8 Mar]      30 31
-                             [Sprint 2: 9-22]
-                             [Sprint 3: 23-5 Abr]
-                                                       [Sprint 4: 6-19]
-                                                       [ENTREGA TFG: 19 Abr]
+   [Sprint 1: 17-28 Feb]     30 31
+   [Sprint 1: hasta 2 Mar]
+                             [Sprint 2: 3-16 Mar]
+                             [Sprint 3: 17-30 Mar]
+                                                       [Sprint 4: 31 Mar-13 Abr]
+                                                       [ENTREGA TFG: 13 Abr]
 ```
 
 ---
@@ -417,7 +425,8 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
 | Feb 2026 | 1.0 | Creacion inicial |
 | 18 Feb 2026 | 2.0 | Reestructuracion: 20h/persona/semana, 6 sprints de 80h |
 | 3 Mar 2026 | 3.0 | Reestructuracion mayor: 30h/persona/semana, 4 sprints de 120h. Sprint 1 completado con toda la infraestructura, auth, cursos, actividades, CI/CD, deploy y testing. MVP priorizado. OAuth/2FA/Cloud storage movidos a trabajo futuro. Testing distribuido por sprint. |
+| Mar 2026 | 4.0 | Fechas ajustadas: Sprint 1 → 17 Feb-2 Mar, Sprint 2 → 3-16 Mar, Sprint 3 → 17-30 Mar, Sprint 4 → 31 Mar-13 Abr. Integracion OneDrive anadida a Sprint 2 (implementada y funcional). |
 
 ---
 
-*Ultima actualizacion: 3 Marzo 2026*
+*Ultima actualizacion: 16 Marzo 2026*
