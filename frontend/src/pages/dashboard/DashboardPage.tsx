@@ -39,8 +39,8 @@ const Dashboard: React.FC = () => {
   // Cargar estado de OneDrive
   useEffect(() => {
     if (usuario) {
-      oneDriveService.getStatus(usuario.id).then((status) => {
-        setOneDriveConnected(status.connected);
+      oneDriveService.getConnectionStatus(usuario.id).then((status) => {
+        setOneDriveConnected(status.conectado);
         setOneDriveEmail(status.microsoftEmail || '');
       }).catch(() => { /* ignorar si OneDrive no está habilitado */ });
     }
@@ -90,12 +90,16 @@ const Dashboard: React.FC = () => {
     if (!usuario) return;
     setOneDriveLoading(true);
     try {
-      const authUrl = await oneDriveService.getAuthorizationUrl(usuario.id);
-      // Redirigir el navegador a la URL de Microsoft
-      window.location.href = authUrl;
+      const success = await oneDriveService.connectOneDrive(usuario.id);
+      if (success) {
+        setOneDriveMsg({ type: 'success', text: 'OneDrive conectado correctamente.' });
+      } else {
+        setOneDriveMsg({ type: 'error', text: 'No se completó la conexión con OneDrive.' });
+      }
     } catch (err) {
-      console.error('Error al obtener URL de autorización:', err);
+      console.error('Error al conectar OneDrive:', err);
       setOneDriveMsg({ type: 'error', text: 'No se pudo iniciar la conexión con OneDrive.' });
+    } finally {
       setOneDriveLoading(false);
     }
   };
@@ -104,7 +108,7 @@ const Dashboard: React.FC = () => {
     if (!usuario) return;
     setOneDriveLoading(true);
     try {
-      await oneDriveService.disconnect(usuario.id);
+      await oneDriveService.disconnectOneDrive(usuario.id);
       setOneDriveConnected(false);
       setOneDriveEmail('');
       setOneDriveMsg({ type: 'success', text: 'OneDrive desconectado correctamente.' });

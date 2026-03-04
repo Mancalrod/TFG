@@ -201,14 +201,14 @@
 }
 
 .onedrive-alert-success {
-  background-color: rgba(16, 185, 129, 0.12);
-  color: #059669;
+  background-color: var(--success-bg);
+  color: var(--success-color);
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .onedrive-alert-error {
-  background-color: rgba(239, 68, 68, 0.12);
-  color: #dc2626;
+  background-color: var(--error-bg);
+  color: var(--error-color);
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
@@ -267,7 +267,7 @@
 }
 
 .onedrive-status.connected {
-  color: #059669;
+  color: var(--success-color);
 }
 
 .onedrive-status.disconnected {
@@ -314,6 +314,6 @@
 
 .onedrive-btn-disconnect:hover:not(:disabled) {
   background-color: rgba(239, 68, 68, 0.08);
-  color: #dc2626;
+  color: var(--error-color);
   border-color: rgba(239, 68, 68, 0.3);
 }

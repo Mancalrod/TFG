@@ -56,13 +56,13 @@
 }
 
 .tipo-badge.evaluable {
-  background-color: #e8f4f8;
-  color: #3498db;
+  background-color: var(--badge-info-bg);
+  color: var(--badge-info-color);
 }
 
 .tipo-badge.no_evaluable {
-  background-color: #f3e8ff;
-  color: #9b59b6;
+  background-color: var(--badge-purple-bg);
+  color: var(--badge-purple-color);
 }
 
 .estado-badge {
@@ -73,13 +73,13 @@
 }
 
 .estado-badge.en-plazo {
-  background-color: #d5f4e6;
-  color: #27ae60;
+  background-color: var(--badge-success-bg);
+  color: var(--badge-success-color);
 }
 
 .estado-badge.vencido {
-  background-color: #fde8e8;
-  color: #e74c3c;
+  background-color: var(--badge-error-bg);
+  color: var(--badge-error-color);
 }
 
 .actividad-actions {
@@ -180,12 +180,12 @@
 }
 
 .entregable-header .estado.activo {
-  background-color: #d5f4e6;
-  color: #27ae60;
+  background-color: var(--badge-success-bg);
+  color: var(--badge-success-color);
 }
 
 .entregable-header .estado.vencido {
-  background-color: #f5f5f5;
+  background-color: var(--bg-tertiary);
   color: var(--text-tertiary);
 }
 
@@ -208,8 +208,8 @@
 }
 
 .tag-reenvio {
-  background-color: #fff3cd;
-  color: #856404;
+  background-color: var(--badge-warning-bg);
+  color: var(--warning-color);
   padding: 0.125rem 0.5rem;
   border-radius: 4px;
   font-size: 0.7rem;

@@ -149,8 +149,8 @@
   justify-content: center;
   gap: 10px;
   width: 100%;
-  background-color: #ffffff;
-  color: #18181b;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
   border: 1px solid var(--border-secondary);
   padding: 12px;
   border-radius: 8px;
@@ -161,5 +161,5 @@
 }
 
 .btn-google:hover {
-  background-color: #f0f0f0;
+  background-color: var(--bg-tertiary);
 }

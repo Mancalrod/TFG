@@ -78,8 +78,8 @@
 }
 
 .re-info-tag.reenvio {
-  background-color: #d5f4e6;
-  color: #27ae60;
+  background-color: var(--badge-success-bg);
+  color: var(--badge-success-color);
 }
 
 /* ── Borrador banner ── */
@@ -87,8 +87,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #e8f4f8;
-  color: #2980b9;
+  background-color: var(--info-bg);
+  color: var(--info-color);
   padding: 0.75rem 1rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
@@ -99,7 +99,7 @@
 .re-borrador-descartar {
   background: none;
   border: none;
-  color: #e74c3c;
+  color: var(--error-color);
   cursor: pointer;
   font-size: 0.85rem;
   text-decoration: underline;
@@ -112,8 +112,8 @@
 
 /* ── Success banner ── */
 .re-success-banner {
-  background-color: #d5f4e6;
-  color: #27ae60;
+  background-color: var(--success-bg);
+  color: var(--success-color);
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
@@ -135,12 +135,12 @@
 }
 
 .re-error-banner {
-  background-color: #fde8e8;
-  color: #e74c3c;
+  background-color: var(--error-bg);
+  color: var(--error-color);
   padding: 0.75rem 1rem;
   border-radius: 8px;
   font-size: 0.9rem;
-  border: 1px solid rgba(231, 76, 60, 0.2);
+  border: 1px solid var(--error-border);
   white-space: pre-line;
 }
 

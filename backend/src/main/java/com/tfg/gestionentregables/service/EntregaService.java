@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +26,6 @@ import java.util.UUID;
 /**
  * Servicio para gestión de entregas.
  * Implementa operaciones SYSOP-013 a SYSOP-018.
- * Soporta almacenamiento local y OneDrive (OAuth2 delegado).
  */
 @Service
 @RequiredArgsConstructor
@@ -40,7 +38,6 @@ public class EntregaService {
     private final EntregaRepository entregaRepository;
     private final EntregableRepository entregableRepository;
     private final EstudianteRepository estudianteRepository;
-    private final ProfesorRepository profesorRepository;
     private final MaterialRepository materialRepository;
     private final EntityMapper mapper;
     private final OneDriveService oneDriveService;
@@ -80,11 +77,10 @@ public class EntregaService {
 
         // Crear nueva entrega
         LocalDateTime ahora = LocalDateTime.now();
-        int nuevaVersion = ultimaVersion + 1;
         
         Entrega entrega = Entrega.builder()
                 .nombre(nombre)
-                .version(nuevaVersion)
+                .version(ultimaVersion + 1)
                 .fechaEntrega(ahora)
                 .estado(EstadoEntrega.ENTREGADO)
                 .esVersionActiva(true)
@@ -96,13 +92,6 @@ public class EntregaService {
 
         // Procesar archivos adjuntos
         if (archivos != null && !archivos.isEmpty()) {
-            // Intentar obtener token OAuth2 del estudiante para OneDrive
-            Long estudianteUsuarioId = estudiante.getUsuario().getId();
-            Optional<String> studentToken = Optional.empty();
-            if (oneDriveService.isEnabled()) {
-                studentToken = microsoftOAuthService.getValidAccessToken(estudianteUsuarioId);
-            }
-
             for (MultipartFile archivo : archivos) {
                 Material material = guardarArchivoConOneDrive(archivo, entrega, entregable, estudiante);
                 materialRepository.save(material);
@@ -170,42 +159,12 @@ public class EntregaService {
     }
 
     /**
-     * SYSOP-018: Obtiene un archivo (material).
+     * SYSOP-018: Descarga archivo de una entrega.
      */
     @Transactional(readOnly = true)
     public Material obtenerArchivo(Long materialId) {
         return materialRepository.findById(materialId)
                 .orElseThrow(() -> new EntityNotFoundException("Archivo no encontrado con ID: " + materialId));
-    }
-
-    /**
-     * Descarga el contenido de un archivo.
-     * Si el material tiene OneDrive info, obtiene un token válido del propietario
-     * y descarga desde OneDrive. Si no, descarga desde el sistema de archivos local.
-     */
-    @Transactional(readOnly = true)
-    public InputStream descargarContenidoArchivo(Long materialId) {
-        Material material = obtenerArchivo(materialId);
-
-        if (material.getOneDriveItemId() != null && material.getOneDriveOwnerUserId() != null) {
-            // Obtener token OAuth2 del propietario para descargar
-            Optional<String> token = microsoftOAuthService.getValidAccessToken(material.getOneDriveOwnerUserId());
-            if (token.isPresent()) {
-                return oneDriveService.downloadFile(token.get(), material.getOneDriveItemId());
-            } else {
-                throw new IllegalStateException(
-                        "El propietario del archivo no tiene OneDrive conectado. " +
-                        "Debe reconectar su cuenta de Microsoft.");
-            }
-        } else {
-            // Descargar desde sistema de archivos local
-            try {
-                Path filePath = Paths.get(material.getRuta());
-                return Files.newInputStream(filePath);
-            } catch (IOException e) {
-                throw new UncheckedIOException("Error al leer el archivo local: " + e.getMessage(), e);
-            }
-        }
     }
 
     /**

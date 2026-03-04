@@ -113,7 +113,7 @@ public class EntregaController {
                                         "attachment; filename=\"" + material.getNombre() + "\"")
                                 .body(resource.getContentAsByteArray());
                     }
-                } catch (MalformedURLException | IOException ex) {
+                } catch (IOException ex) {
                     // ignorar
                 }
             }

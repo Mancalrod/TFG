@@ -29,7 +29,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #ca8a04;
+  color: var(--warning-color);
   font-size: 0.9rem;
 }
 
@@ -48,7 +48,7 @@
   border-radius: 6px;
   border: 1px solid rgba(234, 179, 8, 0.3);
   background: transparent;
-  color: #ca8a04;
+  color: var(--warning-color);
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
@@ -64,7 +64,7 @@
   padding: 6px 14px;
   border-radius: 6px;
   border: none;
-  background-color: #ca8a04;
+  background-color: var(--warning-color);
   color: white;
   font-size: 0.8rem;
   font-weight: 600;
@@ -95,9 +95,9 @@
 }
 
 .cd-btn-preview:hover {
-  border-color: #ca8a04;
-  color: #ca8a04;
-  background-color: rgba(234, 179, 8, 0.06);
+  border-color: var(--warning-color);
+  color: var(--warning-color);
+  background-color: var(--warning-bg);
 }
 
 /* Grupo selector list */
@@ -421,38 +421,38 @@
 }
 
 .cd-tipo.evaluable {
-  background-color: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background-color: var(--accent-blue-bg);
+  color: var(--accent-blue);
 }
 
 .cd-tipo.no_evaluable {
-  background-color: rgba(168, 85, 247, 0.1);
-  color: #a855f7;
+  background-color: var(--badge-purple-bg);
+  color: var(--badge-purple-color);
 }
 
 .cd-visibilidad.visible {
-  background-color: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
+  background-color: var(--badge-success-bg);
+  color: var(--badge-success-color);
 }
 
 .cd-visibilidad.oculto {
-  background-color: rgba(234, 179, 8, 0.1);
-  color: #eab308;
+  background-color: var(--badge-warning-bg);
+  color: var(--warning-color);
 }
 
 .cd-plazo.en-plazo {
-  background-color: rgba(34, 197, 94, 0.08);
-  color: #16a34a;
+  background-color: var(--badge-success-bg);
+  color: var(--success-color);
 }
 
 .cd-plazo.vencida {
-  background-color: rgba(239, 68, 68, 0.08);
-  color: #ef4444;
+  background-color: var(--badge-error-bg);
+  color: var(--error-color);
 }
 
 .cd-plazo.no-iniciada {
   background-color: rgba(107, 114, 128, 0.08);
-  color: #6b7280;
+  color: var(--text-tertiary);
 }
 
 .cd-actividad-titulo {
@@ -528,7 +528,7 @@
 }
 
 .cd-btn-eliminar-link:hover {
-  color: #ef4444;
+  color: var(--error-color);
 }
 
 /* === Delete confirm modal extras === */
@@ -641,7 +641,7 @@
   padding: 10px 24px;
   border-radius: 8px;
   border: none;
-  background-color: #ef4444;
+  background-color: var(--error-color);
   color: white;
   font-size: 0.875rem;
   font-weight: 600;
