@@ -154,7 +154,7 @@ public class OneDriveController {
                     } else {
                         // Si no es popup, redirigir al frontend
                         setTimeout(() => {
-                            window.location.href = '/';
+                            window.location.href = 'http://localhost:3000';
                         }, 3000);
                     }
                 </script>
