@@ -7,15 +7,48 @@
 | **Proyecto** | Sistema de Gestion de Entregables (TFG) |
 | **Horas Totales** | 600 horas |
 | **Equipo** | 2 personas |
-| **Horas por Persona/Semana** | 20 horas |
-| **Horas por Semana (total)** | 40 horas |
+| **Horas por Persona/Semana** | 30 horas |
+| **Horas por Semana (total)** | 60 horas |
 | **Duracion Sprint** | 2 semanas |
-| **Horas por Sprint** | 80 horas (40h/persona) |
-| **Total Sprints** | 6 sprints (+ Sprint 0) |
+| **Horas por Sprint** | 120 horas (60h/persona) |
+| **Total Sprints** | 4 sprints (+ Sprint 0) |
 | **Inicio Sprint 0** | Septiembre 2025 |
 | **Fin Sprint 0** | 22 Febrero 2026 |
-| **Inicio Sprints 1-6** | 24 Febrero 2026 |
-| **Fecha Fin Estimada** | 18 Mayo 2026 |
+| **Inicio Sprints 1-4** | 24 Febrero 2026 |
+| **Fecha Fin Estimada** | 19 Abril 2026 |
+
+---
+
+## Definicion del MVP
+
+El MVP del sistema debe cubrir obligatoriamente:
+
+1. **Gestion de cursos y tareas** - CRUD completo de cursos, grupos y actividades.
+2. **Subida y gestion de entregables por parte del alumno** - El alumno puede subir entregas, ver historial y estado.
+3. **Panel de evaluacion y notas** - El profesor puede calificar entregas y dar feedback.
+4. **Vista de profesor "Usable"** - Gestion agil de correcciones, descarga de archivos, busqueda/filtros, exportacion de calificaciones. Mejora sustancial respecto a Blackboard/ensenanza virtual.
+
+### Fuera del alcance MVP (trabajo futuro)
+- OAuth2 (Google / ULL institucional)
+- Autenticacion 2FA (TOTP/SMS)
+- Integracion HDVirtual / OneDrive
+- Notificaciones de feedback
+- Calendario de fechas limite
+- Monitorizacion avanzada
+- Foto de perfil de usuario
+
+---
+
+## Estrategia de Testing
+
+El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
+
+| Sprint | Testing incluido |
+|--------|-----------------|
+| Sprint 1 | Tests unitarios backend (controllers, services, security) - 18 clases |
+| Sprint 2 | Tests entregables + entregas (ampliar cobertura backend) |
+| Sprint 3 | Tests feedback + calificacion + integracion |
+| Sprint 4 | Tests E2E frontend + documentacion de pruebas + pruebas finales |
 
 ---
 
@@ -23,21 +56,19 @@
 
 | Sprint | Fechas | Horas | Objetivo Principal | Estado |
 |--------|--------|-------|---------------------|--------|
-| Sprint 0 | Sep 2025 - 22 Feb 2026 | ~120h | Documentacion: ERS y DAS | COMPLETADO |
-| Sprint 1 | 24 Feb - 9 Mar 2026 | 80h | Backend base + Autenticacion basica | PENDIENTE |
-| Sprint 2 | 10 Mar - 23 Mar 2026 | 80h | Gestion usuarios, cursos + Frontend base | PENDIENTE |
-| Sprint 3 | 24 Mar - 6 Abr 2026 | 80h | Actividades, entregables, entregas | PENDIENTE |
-| Sprint 4 | 7 Abr - 20 Abr 2026 | 80h | Almacenamiento cloud + Feedback | PENDIENTE |
-| Sprint 5 | 21 Abr - 4 May 2026 | 80h | OAuth, 2FA + Testing | PENDIENTE |
-| Sprint 6 | 5 May - 18 May 2026 | 80h | Despliegue + Memoria TFG | PENDIENTE |
+| Sprint 0 | Sep 2025 - 22 Feb 2026 | 120h | Documentacion: ERS y DAS | COMPLETADO |
+| Sprint 1 | 24 Feb - 8 Mar 2026 | 120h | Infraestructura + Auth + Cursos + Actividades + CI/CD + Deploy | COMPLETADO |
+| Sprint 2 | 9 Mar - 22 Mar 2026 | 120h | Gestion Entregables + Entregas (frontend) | EN CURSO |
+| Sprint 3 | 23 Mar - 5 Abr 2026 | 120h | Panel Evaluacion + Feedback + UX Profesor | PENDIENTE |
+| Sprint 4 | 6 Abr - 19 Abr 2026 | 120h | Memoria TFG + Polish + Presentacion | PENDIENTE |
 
-**Total horas:** 120h (Sprint 0) + 480h (Sprints 1-6) = **600 horas**
+**Total horas:** 120h (Sprint 0) + 480h (Sprints 1-4) = **600 horas**
 
 ---
 
 ## Sprint 0: Documentacion y Analisis - COMPLETADO
-**Estado:** COMPLETADO  
-**Fechas:** Septiembre 2025 - 22 Febrero 2026  
+**Estado:** COMPLETADO
+**Fechas:** Septiembre 2025 - 22 Febrero 2026
 **Horas:** ~120h
 
 ### Objetivos
@@ -69,198 +100,260 @@
 
 ---
 
-## Sprint 1: Backend Base + Autenticacion - PENDIENTE
-**Estado:** PENDIENTE  
-**Fechas:** 24 Febrero - 9 Marzo 2026  
-**Horas Planificadas:** 80h (40h/persona)
+## Sprint 1: Infraestructura + Auth + Cursos + Actividades + CI/CD + Deploy - COMPLETADO
+**Estado:** COMPLETADO
+**Fechas:** 24 Febrero - 8 Marzo 2026
+**Horas:** 120h (60h/persona)
 
 ### Objetivos
-- Configurar proyecto backend Spring Boot
-- Implementar entidades JPA y repositorios
-- Configurar base de datos
-- Implementar autenticacion basica JWT
-- Iniciar estructura frontend
+- Configurar proyecto backend Spring Boot completo
+- Implementar todas las entidades JPA, repositorios, servicios y controladores
+- Configurar autenticacion JWT completa (access + refresh tokens)
+- Desarrollar frontend: Login, Dashboard, Cursos, Actividades (CRUD completo)
+- Visualizacion de entregables (solo lectura)
+- Configurar CI/CD con GitHub Actions (7 workflows)
+- Desplegar aplicacion en Render + Neon PostgreSQL
+- Dockerizar la aplicacion (multi-stage builds)
+- Implementar modo oscuro/claro
+- Testing de funcionalidades implementadas (18 clases de test)
+
+### Epicas/PBIs Completados
+- EP-02: Arquitectura y Configuracion (PBI-007 a PBI-011) - COMPLETA
+- EP-03: Gestion de Usuarios (PBI-012 a PBI-016) - COMPLETA
+- EP-04: Gestion de Cursos (PBI-018 a PBI-023) - COMPLETA
+- EP-05: Gestion de Actividades (PBI-024 a PBI-030) - COMPLETA
+- EP-06 parcial: Backend entregables completo (PBI-031 a PBI-035 backend)
+- EP-07 parcial: Backend entregas completo (PBI-036 a PBI-042 backend)
+- EP-09 parcial: Backend feedback completo (PBI-050 a PBI-053 backend)
+- EP-10: Frontend UI Base (PBI-055 a PBI-062) - COMPLETA
+- EP-11 parcial: Login, Dashboard, Cursos, Actividades, Vista entregables (PBI-063 a PBI-067)
+- EP-12 parcial: JWT completo (PBI-073 a PBI-076, PBI-081)
+- EP-13 parcial: 18 clases de test (controllers, services, security)
+- EP-14: Despliegue y DevOps (PBI-087 a PBI-091) - COMPLETA
+
+### Funcionalidades Backend Implementadas
+- **10 entidades JPA** con relaciones completas (Usuario, Profesor, Estudiante, Curso, Grupo, Actividad, Entregable, Entrega, Feedback, Material)
+- **4 enums** (EstadoEntrega, TipoActividad, TipoMaterial, Visibilidad)
+- **10 repositorios** Spring Data con queries JPQL personalizadas
+- **7 servicios** (UsuarioService, CursoService, ActividadService, EntregableService, EntregaService, FeedbackService, EntityMapper)
+- **8 controladores REST** con ~60 endpoints
+- **19 DTOs** con patron mapper (EntityMapper)
+- Autenticacion JWT (access tokens 24h + refresh tokens 7 dias)
+- Roles: ROLE_ADMIN, ROLE_PROFESOR, ROLE_ESTUDIANTE, ROLE_USER
+- Spring Security con proteccion de rutas por rol
+- GlobalExceptionHandler (404, 400, 409, 500)
+- DataSeeder con datos de desarrollo (10 usuarios, cursos, actividades, entregables, entregas, feedback)
+- Upload de archivos multipart hasta 50MB
+- SpaController para React Router
+
+### Funcionalidades Frontend Implementadas
+- **Login** con JWT y AuthContext
+- **Dashboard** con cursos filtrados por rol y busqueda
+- **CRUD completo de actividades** (vista profesor y estudiante)
+- **Vista de cursos** y detalle de curso
+- **Vista de entregables** (solo lectura)
+- **Navbar** con navegacion por rol
+- **Modo oscuro/claro** con persistencia en localStorage
+- **Rutas protegidas** con redireccion a login
+- **Interceptor Axios** con refresh automatico de tokens
+- **Tipos TypeScript** para todos los DTOs (22 interfaces + 4 enums)
+- **8 modulos de servicios API** (auth, usuario, curso, actividad, entregable, entrega, feedback, api base)
+
+### DevOps Implementado
+- **Docker**: 3 Dockerfiles multi-stage (root, backend, frontend) + docker-compose.yml
+- **CI**: backend-ci.yml, frontend-ci.yml, full-stack-ci.yml
+- **CD**: cd.yml (build + push a GHCR)
+- **Calidad**: sonarcloud.yml (analisis SonarCloud)
+- **Seguridad**: security-audit.yml (npm audit + OWASP Dependency Check)
+- **Disponibilidad**: keep-alive.yml (ping cada 14 min a Render)
+- **Despliegue**: render.yaml (Render Blueprint con PostgreSQL Neon)
+
+### Testing Implementado (18 clases)
+- 8 tests de controladores (Actividad, Auth, Curso, Entregable, Entrega, Feedback, Health, Usuario)
+- 7 tests de servicios (Actividad, Curso, EntityMapper, Entregable, Entrega, Feedback, Usuario)
+- 3 tests de seguridad (CustomUserDetailsService, JwtAuthenticationFilter, JwtTokenProvider)
+- 1 test de configuracion (SpaController)
+- 1 test de aplicacion (GestionEntregablesApplicationTests)
+
+### Desglose de Horas
+| Tarea | Manuel Maria Calderon Rodriguez | Jose Manuel Marquez Gutierrez | Total |
+|-------|-----------|-----------|-------|
+| Config Spring Boot + React + BD | 4h | 4h | 8h |
+| Entidades JPA (10) y repositorios (10) | 6h | 6h | 12h |
+| DTOs (19) y EntityMapper | 3h | 3h | 6h |
+| Servicios (Usuario, Curso, Actividad) | 6h | 6h | 12h |
+| Servicios (Entregable, Entrega, Feedback) | 5h | 5h | 10h |
+| Controladores REST (8, ~60 endpoints) | 5h | 5h | 10h |
+| Autenticacion JWT + Spring Security | 5h | 5h | 10h |
+| Frontend: Login + AuthContext | 3h | 3h | 6h |
+| Frontend: Dashboard + Cursos | 4h | 4h | 8h |
+| Frontend: Actividades CRUD completo | 5h | 5h | 10h |
+| Frontend: Vista entregables + Navbar + Theme | 3h | 3h | 6h |
+| Docker + CI/CD (7 workflows) + Deploy Render | 4h | 4h | 8h |
+| DataSeeder + Config (perfiles, SPA, CORS) | 2h | 2h | 4h |
+| Testing (18 clases de test) | 5h | 5h | 10h |
+| **Total** | **60h** | **60h** | **120h** |
+
+---
+
+## Sprint 2: Gestion Entregables + Entregas (Frontend) - EN CURSO
+**Estado:** EN CURSO
+**Fechas:** 9 Marzo - 22 Marzo 2026
+**Horas Planificadas:** 120h (60h/persona)
+
+### Objetivos
+- Completar frontend CRUD de entregables (crear, editar, eliminar, visibilidad)
+- Implementar formulario de entrega para estudiantes (subida de archivos)
+- Implementar vista de entregas del estudiante (historial, versiones, estado)
+- Implementar vista de entregas del profesor (lista por entregable)
+- Descarga individual de archivos
+- Reenvio de entregas si esta permitido
+- Testing de funcionalidades de este sprint
 
 ### Epicas/PBIs Incluidos
-- EP-02: Arquitectura y Configuracion (PBI-007 a PBI-011)
-- EP-03 parcial: Gestion de Usuarios (PBI-012 a PBI-014)
-- EP-12 parcial: Autenticacion JWT (PBI-073, PBI-074, PBI-076)
-- EP-10 parcial: Estructura frontend basica
+- EP-06 completa: Frontend Gestion Entregables (PBI-031 a PBI-035 frontend)
+- EP-07: Gestion de Entregas frontend (PBI-036 a PBI-042)
+- EP-11 parcial: Paginas entregable completa y entregas (PBI-068)
+- EP-13 parcial: Testing funcionalidades Sprint 2
 
 ### Desglose de Horas (Estimado)
 | Tarea | Manuel Maria Calderon Rodriguez | Jose Manuel Marquez Gutierrez | Total |
 |-------|-----------|-----------|-------|
-| Configuracion Spring Boot + React | 4h | 4h | 8h |
-| Entidades JPA (5 cada uno) | 8h | 8h | 16h |
-| Repositorios Spring Data | 4h | 4h | 8h |
-| DTOs y EntityMapper | 5h | 5h | 10h |
-| Configuracion BD H2/MySQL | 3h | 3h | 6h |
-| Autenticacion JWT basica | 8h | 8h | 16h |
-| Estructura React + routing | 4h | 4h | 8h |
-| Servicios Usuario | 4h | 4h | 8h |
-| **Total** | **40h** | **40h** | **80h** |
+| Frontend: Crear entregable (formulario profesor) | 5h | 5h | 10h |
+| Frontend: Editar entregable (completar pagina) | 4h | 4h | 8h |
+| Frontend: Eliminar + toggle visibilidad entregable | 3h | 3h | 6h |
+| Frontend: Formulario entrega estudiante (drag & drop) | 6h | 6h | 12h |
+| Frontend: Subida archivos multipart + progreso | 5h | 5h | 10h |
+| Frontend: Vista entregas estudiante (historial versiones) | 5h | 5h | 10h |
+| Frontend: Vista entregas profesor (por entregable) | 5h | 5h | 10h |
+| Frontend: Descarga archivos individual | 3h | 3h | 6h |
+| Frontend: Reenvio entregas (si permitido) | 3h | 3h | 6h |
+| Mejoras UX y navegacion (breadcrumbs, toasts) | 3h | 3h | 6h |
+| Ajustes backend (si necesario) | 2h | 2h | 4h |
+| Testing: Tests entregables (ampliar service + controller) | 4h | 4h | 8h |
+| Testing: Tests entregas (ampliar service + controller) | 5h | 5h | 10h |
+| Testing: Tests integracion flujo completo | 4h | 4h | 8h |
+| Buffer imprevistos | 3h | 3h | 6h |
+| **Total** | **60h** | **60h** | **120h** |
+
+### Criterios de Aceptacion
+- [ ] Profesor puede crear entregables dentro de una actividad
+- [ ] Profesor puede editar y eliminar entregables
+- [ ] Profesor puede cambiar visibilidad de entregables (VISIBLE/OCULTO)
+- [ ] Estudiante puede realizar entregas subiendo archivos
+- [ ] Estudiante puede ver historial de versiones de sus entregas
+- [ ] Estudiante puede reenviar entregas si esta permitido y en plazo
+- [ ] Profesor puede ver lista de entregas por entregable
+- [ ] Se pueden descargar archivos de entregas
+- [ ] Tests unitarios y de integracion pasando
+- [ ] Aplicacion desplegada y funcional en Render
 
 ---
 
-## Sprint 2: Usuarios, Cursos + Frontend Base - PENDIENTE
-**Estado:** PENDIENTE  
-**Fechas:** 10 Marzo - 23 Marzo 2026  
-**Horas Planificadas:** 80h (40h/persona)
+## Sprint 3: Panel Evaluacion + Feedback + UX Profesor - PENDIENTE
+**Estado:** PENDIENTE
+**Fechas:** 23 Marzo - 5 Abril 2026
+**Horas Planificadas:** 120h (60h/persona)
 
 ### Objetivos
-- Completar servicios y controladores de usuarios
-- Implementar gestion completa de cursos y grupos
-- Desarrollar componentes UI base
-- Implementar dashboard por rol
+- Implementar panel de calificacion para profesores
+- Implementar sistema completo de feedback (CRUD)
+- Implementar vista de calificaciones y feedback para estudiantes
+- Descarga masiva de entregas para profesores
+- Busqueda y filtros en listados
+- Exportacion de calificaciones a CSV/Excel
+- Mejorar UX del flujo de trabajo docente
+- Testing de funcionalidades de este sprint
+- Iniciar estructura de la memoria TFG
 
 ### Epicas/PBIs Incluidos
-- EP-03 completa: Gestion de Usuarios (PBI-015 a PBI-017)
-- EP-04: Gestion de Cursos (PBI-018 a PBI-023)
-- EP-10: Frontend UI Base (PBI-055 a PBI-062)
-- EP-11 parcial: Pagina login y cursos
+- EP-09: Feedback y Evaluacion completa (PBI-050 a PBI-053 frontend)
+- EP-07 parcial: Estadisticas entregas (PBI-043)
+- EP-11 parcial: Pagina evaluacion (PBI-069), exportar CSV (PBI-071), busqueda/filtros (PBI-072)
+- EP-13 parcial: Testing Sprint 3
+- EP-15 parcial: Inicio memoria TFG
 
 ### Desglose de Horas (Estimado)
 | Tarea | Manuel Maria Calderon Rodriguez | Jose Manuel Marquez Gutierrez | Total |
 |-------|-----------|-----------|-------|
-| Servicios y controladores usuarios | 4h | 4h | 8h |
-| Servicios cursos y grupos | 6h | 6h | 12h |
-| Controladores cursos | 4h | 4h | 8h |
-| Layout principal (Navbar, Sidebar) | 6h | - | 6h |
-| Componentes reutilizables | - | 8h | 8h |
-| Pagina Login | 4h | 4h | 8h |
-| Dashboard por rol | 6h | 6h | 12h |
-| Pagina Cursos | 5h | 5h | 10h |
-| Estilos responsive | 5h | 3h | 8h |
-| **Total** | **40h** | **40h** | **80h** |
+| Frontend: Panel calificacion profesor | 6h | 6h | 12h |
+| Frontend: Formulario feedback (crear/editar/eliminar) | 5h | 5h | 10h |
+| Frontend: Vista feedback estudiante | 4h | 4h | 8h |
+| Frontend: Vista calificaciones estudiante | 4h | 4h | 8h |
+| Frontend: Descarga masiva entregas (ZIP) | 4h | 4h | 8h |
+| Backend: Endpoint descarga masiva (ZIP) | 3h | 3h | 6h |
+| Frontend: Busqueda y filtros en listados | 4h | 4h | 8h |
+| Frontend: Exportar calificaciones CSV/Excel | 3h | 3h | 6h |
+| Frontend: Estadisticas entregas (profesor) | 3h | 3h | 6h |
+| Mejoras UX profesor (flujo agil correcciones) | 3h | 3h | 6h |
+| Testing: Tests feedback (service + controller) | 3h | 3h | 6h |
+| Testing: Tests calificacion + integracion | 4h | 4h | 8h |
+| Memoria: Estructura + Introduccion + Objetivos | 5h | 5h | 10h |
+| Memoria: Metodologia | 4h | 4h | 8h |
+| Buffer imprevistos | 5h | 5h | 10h |
+| **Total** | **60h** | **60h** | **120h** |
+
+### Criterios de Aceptacion
+- [ ] Profesor puede calificar entregas con nota numerica
+- [ ] Profesor puede escribir, editar y eliminar feedback
+- [ ] Estudiante puede ver sus calificaciones por entregable
+- [ ] Estudiante puede leer feedback de los profesores
+- [ ] Profesor puede descargar todas las entregas de un entregable (ZIP)
+- [ ] Listados tienen busqueda y filtros funcionales
+- [ ] Profesor puede exportar calificaciones a CSV
+- [ ] Profesor puede ver estadisticas de entregas por entregable
+- [ ] Flujo de correccion del profesor es fluido y eficiente
+- [ ] Tests pasando para nuevas funcionalidades
+- [ ] Estructura de la memoria TFG iniciada (introduccion, objetivos, metodologia)
 
 ---
 
-## Sprint 3: Actividades, Entregables, Entregas - PENDIENTE
-**Estado:** PENDIENTE  
-**Fechas:** 24 Marzo - 6 Abril 2026  
-**Horas Planificadas:** 80h (40h/persona)
+## Sprint 4: Memoria TFG + Polish + Presentacion - PENDIENTE
+**Estado:** PENDIENTE
+**Fechas:** 6 Abril - 19 Abril 2026
+**Horas Planificadas:** 120h (60h/persona)
 
 ### Objetivos
-- Implementar gestion de actividades
-- Implementar gestion de entregables
-- Implementar gestion de entregas
-- Desarrollar frontend de actividades y entregas
+- Completar la memoria del TFG
+- Elaborar manuales de usuario y tecnico
+- Polish final de UX/UI
+- Testing E2E y pruebas finales
+- Correccion de bugs
+- Preparar y ensayar la presentacion de defensa
 
 ### Epicas/PBIs Incluidos
-- EP-05: Gestion de Actividades (PBI-024 a PBI-030)
-- EP-06: Gestion de Entregables (PBI-031 a PBI-035)
-- EP-07: Gestion de Entregas (PBI-036 a PBI-043)
-- EP-11 parcial: Paginas actividades, entregables, entregas
-
-### Desglose de Horas (Estimado)
-| Tarea | Manuel Maria Calderon Rodriguez | Jose Manuel Marquez Gutierrez | Total |
-|-------|-----------|-----------|-------|
-| Servicios actividades | 5h | 5h | 10h |
-| Controladores actividades | 3h | 3h | 6h |
-| Servicios entregables | 4h | 4h | 8h |
-| Controladores entregables | 2h | 2h | 4h |
-| Servicios entregas | 6h | 6h | 12h |
-| Controladores entregas | 3h | 3h | 6h |
-| Frontend: Pagina actividades | 5h | 5h | 10h |
-| Frontend: Pagina entregable | 5h | 5h | 10h |
-| Frontend: Formulario entrega | 4h | 4h | 8h |
-| Pruebas integracion | 3h | 3h | 6h |
-| **Total** | **40h** | **40h** | **80h** |
-
----
-
-## Sprint 4: Almacenamiento Cloud + Feedback - PENDIENTE
-**Estado:** PENDIENTE  
-**Fechas:** 7 Abril - 20 Abril 2026  
-**Horas Planificadas:** 80h (40h/persona)
-
-### Objetivos
-- Integrar HDVirtual ULL para almacenamiento
-- Integrar OneDrive como alternativa
-- Implementar sistema de feedback y calificaciones
-- Optimizar subida/descarga de archivos
-
-### Epicas/PBIs Incluidos
-- EP-08: Almacenamiento Cloud (PBI-044 a PBI-049)
-- EP-09: Feedback y Evaluacion (PBI-050 a PBI-054)
-- EP-11 parcial: Pagina evaluacion entregas
-
-### Desglose de Horas (Estimado)
-| Tarea | Manuel Maria Calderon Rodriguez | Jose Manuel Marquez Gutierrez | Total |
-|-------|-----------|-----------|-------|
-| Integracion API HDVirtual | 8h | 8h | 16h |
-| Integracion API OneDrive | 6h | 6h | 12h |
-| Servicio almacenamiento unificado | 4h | 4h | 8h |
-| Gestion cuotas y sincronizacion | 4h | 4h | 8h |
-| Servicios feedback | 4h | 4h | 8h |
-| Controladores feedback | 2h | 2h | 4h |
-| Frontend: Subida archivos cloud | 4h | 4h | 8h |
-| Frontend: Pagina evaluacion | 4h | 4h | 8h |
-| Pruebas almacenamiento | 4h | 4h | 8h |
-| **Total** | **40h** | **40h** | **80h** |
-
----
-
-## Sprint 5: OAuth, 2FA + Testing - PENDIENTE
-**Estado:** PENDIENTE  
-**Fechas:** 21 Abril - 4 Mayo 2026  
-**Horas Planificadas:** 80h (40h/persona)
-
-### Objetivos
-- Implementar OAuth2 con Google
-- Implementar OAuth2 con cuenta ULL institucional
-- Implementar autenticacion de doble factor (2FA)
-- Testing completo del sistema
-
-### Epicas/PBIs Incluidos
-- EP-12 completa: OAuth y 2FA (PBI-077 a PBI-081)
-- EP-13: Testing (PBI-082 a PBI-086)
-
-### Desglose de Horas (Estimado)
-| Tarea | Manuel Maria Calderon Rodriguez | Jose Manuel Marquez Gutierrez | Total |
-|-------|-----------|-----------|-------|
-| OAuth2 Google | 6h | 6h | 12h |
-| OAuth2 ULL institucional | 6h | 6h | 12h |
-| Implementacion 2FA (TOTP) | 5h | 5h | 10h |
-| UI configuracion 2FA | 3h | 3h | 6h |
-| Tests unitarios backend | 8h | 8h | 16h |
-| Tests integracion API | 5h | 5h | 10h |
-| Tests E2E frontend | 4h | 4h | 8h |
-| Documentacion pruebas | 3h | 3h | 6h |
-| **Total** | **40h** | **40h** | **80h** |
-
----
-
-## Sprint 6: Despliegue + Memoria TFG - PENDIENTE
-**Estado:** PENDIENTE  
-**Fechas:** 5 Mayo - 18 Mayo 2026  
-**Horas Planificadas:** 80h (40h/persona)
-
-### Objetivos
-- Dockerizar aplicacion
-- Configurar CI/CD
-- Desplegar en produccion
-- Completar memoria TFG
-- Preparar presentacion defensa
-
-### Epicas/PBIs Incluidos
-- EP-14: Despliegue y DevOps (PBI-087 a PBI-091)
 - EP-15: Documentacion Final y Memoria (PBI-092 a PBI-099)
+- EP-13 parcial: Tests E2E frontend (PBI-084), documentar pruebas (PBI-085)
+- Polish y correccion de bugs
 
 ### Desglose de Horas (Estimado)
 | Tarea | Manuel Maria Calderon Rodriguez | Jose Manuel Marquez Gutierrez | Total |
 |-------|-----------|-----------|-------|
-| Dockerfiles y docker-compose | 4h | 4h | 8h |
-| CI/CD GitHub Actions | 4h | 4h | 8h |
-| Despliegue produccion | 4h | 4h | 8h |
-| SSL y dominio | 2h | 2h | 4h |
-| Manual de usuario | 4h | 4h | 8h |
-| Manual tecnico | 4h | 4h | 8h |
-| Memoria: Intro, objetivos, metodologia | 6h | 6h | 12h |
-| Memoria: Desarrollo y resultados | 6h | 6h | 12h |
-| Memoria: Conclusiones y formato | 4h | 4h | 8h |
-| Presentacion defensa | 2h | 2h | 4h |
-| **Total** | **40h** | **40h** | **80h** |
+| Memoria: Desarrollo y resultados | 8h | 8h | 16h |
+| Memoria: Conclusiones y trabajo futuro | 5h | 5h | 10h |
+| Memoria: Revision y formato segun normativa | 5h | 5h | 10h |
+| Manual de usuario | 5h | 5h | 10h |
+| Manual tecnico / guia de instalacion | 5h | 5h | 10h |
+| Testing: E2E frontend | 5h | 5h | 10h |
+| Testing: Pruebas integracion finales | 4h | 4h | 8h |
+| Testing: Documentar casos de prueba | 3h | 3h | 6h |
+| Polish UX/UI + responsive | 5h | 5h | 10h |
+| Correccion bugs | 4h | 4h | 8h |
+| Preparar presentacion defensa | 5h | 5h | 10h |
+| Ensayo presentacion | 3h | 3h | 6h |
+| Buffer imprevistos | 3h | 3h | 6h |
+| **Total** | **60h** | **60h** | **120h** |
+
+### Criterios de Aceptacion
+- [ ] Memoria TFG completa segun normativa
+- [ ] Manual de usuario completo
+- [ ] Manual tecnico / guia de instalacion completo
+- [ ] Tests E2E del frontend pasando
+- [ ] Documentacion de casos de prueba
+- [ ] UX pulida y responsive
+- [ ] Bugs criticos corregidos
+- [ ] Presentacion preparada y ensayada
+- [ ] Aplicacion desplegada y estable en produccion
 
 ---
 
@@ -268,38 +361,40 @@
 
 ```
 2026
-         FEBRERO                    MARZO                     ABRIL                      MAYO
-    L  M  X  J  V  S  D       L  M  X  J  V  S  D       L  M  X  J  V  S  D       L  M  X  J  V  S  D
-                         1                         1          1  2  3  4  5                   1  2  3
-    2  3  4  5  6  7  8       2  3  4  5  6  7  8       6  7  8  9 10 11 12       4  5  6  7  8  9 10
-    9 10 11 12 13 14 15       9 10 11 12 13 14 15      13 14 15 16 17 18 19      11 12 13 14 15 16 17
-   16 17 18 19 20 21 22      16 17 18 19 20 21 22      20 21 22 23 24 25 26      18 19 20 21 22 23 24
-   [Sprint 0 fin: 22]        23 24 25 26 27 28 29      27 28 29 30               25 26 27 28 29 30 31
-   [Sprint 1: 24-9 Mar]      30 31
-                             [Sprint 2: 10-23]
-                             [Sprint 3: 24-6 Abr]
-                                                       [Sprint 4: 7-20]
-                                                       [Sprint 5: 21-4 May]
-                                                                                 [Sprint 6: 5-18]
-                                                                                 [ENTREGA TFG: 18]
+         FEBRERO                    MARZO                     ABRIL
+    L  M  X  J  V  S  D       L  M  X  J  V  S  D       L  M  X  J  V  S  D
+                         1                         1          1  2  3  4  5
+    2  3  4  5  6  7  8       2  3  4  5  6  7  8       6  7  8  9 10 11 12
+    9 10 11 12 13 14 15       9 10 11 12 13 14 15      13 14 15 16 17 18 19
+   16 17 18 19 20 21 22      16 17 18 19 20 21 22      20 21 22 23 24 25 26
+   [Sprint 0 fin: 22]        23 24 25 26 27 28 29      27 28 29 30
+   [Sprint 1: 24-8 Mar]      30 31
+                             [Sprint 2: 9-22]
+                             [Sprint 3: 23-5 Abr]
+                                                       [Sprint 4: 6-19]
+                                                       [ENTREGA TFG: 19 Abr]
 ```
 
 ---
 
 ## Metricas de Seguimiento
 
-### Velocidad Planificada
-- **Sprint 0:** 55 SP (completado)
-- **Sprints 1-6:** ~100 SP/sprint estimado
-- **Total:** 616 SP
+### Velocidad por Sprint
+| Metrica | Sprint 0 | Sprint 1 | Sprint 2 | Sprint 3 | Sprint 4 |
+|---------|----------|----------|----------|----------|----------|
+| Horas Planificadas | 120h | 120h | 120h | 120h | 120h |
+| Horas Completadas | 120h | 120h | - | - | - |
+| % Completado | 100% | 100% | - | - | - |
+| PBIs Completados | 6 | ~40 | - | - | - |
 
-### Indicadores de Progreso
-| Metrica | Sprint 0 | Sprint 1 | Sprint 2 | Sprint 3 | Sprint 4 | Sprint 5 | Sprint 6 |
-|---------|----------|----------|----------|----------|----------|----------|----------|
-| SP Planificados | 55 | 100 | 95 | 105 | 100 | 100 | 116 |
-| SP Completados | 55 | - | - | - | - | - | - |
-| % Completado | 100% | - | - | - | - | - | - |
-| Horas Usadas | 120h | - | - | - | - | - | - |
+### Progreso Acumulado
+| Sprint | Horas Acumuladas | % del Total (600h) |
+|--------|-----------------|---------------------|
+| Sprint 0 | 120h | 20% |
+| Sprint 1 | 240h | 40% |
+| Sprint 2 | 360h | 60% |
+| Sprint 3 | 480h | 80% |
+| Sprint 4 | 600h | 100% |
 
 ---
 
@@ -307,10 +402,11 @@
 
 | Riesgo | Probabilidad | Impacto | Mitigacion |
 |--------|--------------|---------|------------|
-| Complejidad OAuth ULL | Media | Alto | Contactar con soporte IT ULL temprano |
-| Integracion HDVirtual | Media | Alto | Tener OneDrive como backup |
-| Tiempo memoria TFG | Alta | Medio | Documentar durante desarrollo |
-| Disponibilidad 20h/persona | Media | Alto | Buffer de tiempo en Sprint 6 |
+| Complejidad UX panel evaluacion profesor | Media | Alto | Prototipar flujo antes de implementar |
+| Tiempo memoria TFG | Alta | Alto | Iniciar en Sprint 3, documentar durante desarrollo |
+| Bugs en integracion frontend-backend entregas | Media | Medio | Tests de integracion por sprint |
+| Disponibilidad 30h/persona/semana | Media | Alto | Buffer en cada sprint |
+| Complejidad descarga masiva archivos | Baja | Medio | Implementar con ZIP en backend |
 
 ---
 
@@ -319,8 +415,9 @@
 | Fecha | Version | Cambios |
 |-------|---------|---------|
 | Feb 2026 | 1.0 | Creacion inicial |
-| 18 Feb 2026 | 2.0 | Reestructuracion: 20h/persona/semana, 6 sprints de 80h, anadidos OAuth/2FA/HDVirtual |
+| 18 Feb 2026 | 2.0 | Reestructuracion: 20h/persona/semana, 6 sprints de 80h |
+| 3 Mar 2026 | 3.0 | Reestructuracion mayor: 30h/persona/semana, 4 sprints de 120h. Sprint 1 completado con toda la infraestructura, auth, cursos, actividades, CI/CD, deploy y testing. MVP priorizado. OAuth/2FA/Cloud storage movidos a trabajo futuro. Testing distribuido por sprint. |
 
 ---
 
-*Ultima actualizacion: 18 Febrero 2026*
+*Ultima actualizacion: 3 Marzo 2026*

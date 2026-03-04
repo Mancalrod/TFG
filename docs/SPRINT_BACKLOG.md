@@ -1,17 +1,17 @@
-# Sprint Backlog - Sprint 1
+# Sprint Backlog - Sprint 2
 
 ## Informacion del Sprint
 
 | Campo | Valor |
 |-------|-------|
-| **Sprint** | 1 |
-| **Objetivo** | Backend base + Autenticacion JWT |
-| **Fecha Inicio** | 24 Febrero 2026 |
-| **Fecha Fin** | 9 Marzo 2026 |
+| **Sprint** | 2 |
+| **Objetivo** | Gestion Entregables + Entregas (Frontend) |
+| **Fecha Inicio** | 9 Marzo 2026 |
+| **Fecha Fin** | 22 Marzo 2026 |
 | **Duracion** | 2 semanas |
-| **Horas Planificadas** | 80 horas (40h/persona) |
+| **Horas Planificadas** | 120 horas (60h/persona) |
 | **Horas Completadas** | 0 horas |
-| **Estado** | PENDIENTE |
+| **Estado** | EN CURSO |
 
 ---
 
@@ -19,148 +19,149 @@
 
 | Miembro | Rol | Horas Disponibles | Horas Asignadas |
 |---------|-----|-------------------|-----------------|
-| Manuel Maria Calderon Rodriguez | Desarrollador Full-Stack | 40h | 40h |
-| Jose Manuel Marquez Gutierrez | Desarrollador Full-Stack | 40h | 40h |
+| Manuel Maria Calderon Rodriguez | Desarrollador Full-Stack | 60h | 60h |
+| Jose Manuel Marquez Gutierrez | Desarrollador Full-Stack | 60h | 60h |
 
 ---
 
 ## Objetivo del Sprint
 
-> Establecer las bases del proyecto backend con Spring Boot, implementar las entidades JPA y repositorios necesarios, configurar la autenticacion JWT basica, e iniciar la estructura del frontend React. Al finalizar el sprint, el sistema debe permitir login/logout basico.
+> Completar la funcionalidad frontend de gestion de entregables y entregas. Al finalizar, el profesor podra crear/editar/eliminar entregables, y el estudiante podra realizar entregas con subida de archivos, ver su historial de versiones y reenviar entregas. El profesor podra ver la lista de entregas por entregable y descargar archivos. Todas las funcionalidades tendran tests asociados.
+
+---
+
+## Contexto: Que existe ya (Sprint 1)
+
+**Backend** (100% funcional para entregables y entregas):
+- `EntregableService`: crear, listar, obtener, actualizar, cambiar visibilidad, eliminar, filtrar por plazo
+- `EntregableController`: 10 endpoints REST
+- `EntregaService`: realizar (con upload multipart y versionado), obtener, listar, calificar, descargar, estadisticas
+- `EntregaController`: 10 endpoints REST
+- Tests existentes: `EntregableServiceTest`, `EntregableControllerTest`, `EntregaServiceTest`, `EntregaControllerTest`
+
+**Frontend** (parcialmente implementado):
+- `EntregablePage.tsx` - Vista de detalle de entregable (solo lectura)
+- `EditarEntregablePage.tsx` - Pagina de edicion (estructura existe pero logica incompleta)
+- `entregableService.ts` - 10 metodos API (crear, listar, obtener, actualizar, cambiarVisibilidad, eliminar, etc.)
+- `entregaService.ts` - 10 metodos API (realizar, listarParaEvaluar, listarHistorial, calificar, descargar, etc.)
+
+**Pendiente en este sprint**: Completar toda la logica frontend de interaccion.
 
 ---
 
 ## Product Backlog Items (PBIs) del Sprint
 
-### PBI-007: Configuracion Spring Boot
-**Prioridad:** Alta | **Estimacion:** 5h | **Estado:** PENDIENTE
+### PBI-031/032: Crear Entregable (Frontend Profesor)
+**Prioridad:** Must Have | **Estimacion:** 10h | **Estado:** PENDIENTE
 
 | ID | Tarea | Responsable | Estimacion | Estado | Horas Reales |
 |----|-------|-------------|------------|--------|--------------|
-| T-1.1 | Crear proyecto Maven con dependencias | Manuel Maria Calderon Rodriguez | 1.5h | PENDIENTE | - |
-| T-1.2 | Configurar application.properties | Manuel Maria Calderon Rodriguez | 1h | PENDIENTE | - |
-| T-1.3 | Configurar perfiles dev/prod | Manuel Maria Calderon Rodriguez | 1h | PENDIENTE | - |
-| T-1.4 | Crear estructura de paquetes | Manuel Maria Calderon Rodriguez | 1.5h | PENDIENTE | - |
+| T-2.01 | Crear pagina/modal CrearEntregablePage con formulario completo | Manuel Maria | 3h | PENDIENTE | - |
+| T-2.02 | Implementar campos: titulo, descripcion, fechas inicio/limite, nota maxima | Manuel Maria | 2h | PENDIENTE | - |
+| T-2.03 | Implementar seleccion tipo archivo esperado y tamano maximo | Jose Manuel | 2h | PENDIENTE | - |
+| T-2.04 | Conectar formulario con entregableService.crear() | Jose Manuel | 1.5h | PENDIENTE | - |
+| T-2.05 | Validaciones frontend (campos requeridos, fechas coherentes) y mensajes de error | Manuel Maria | 1.5h | PENDIENTE | - |
 
 ---
 
-### PBI-008: Configuracion React + TypeScript
-**Prioridad:** Alta | **Estimacion:** 5h | **Estado:** PENDIENTE
+### PBI-034/035: Editar y Configurar Entregable (Frontend)
+**Prioridad:** Must Have | **Estimacion:** 8h | **Estado:** PENDIENTE
 
 | ID | Tarea | Responsable | Estimacion | Estado | Horas Reales |
 |----|-------|-------------|------------|--------|--------------|
-| T-2.1 | Crear proyecto Vite + React + TS | Jose Manuel Marquez Gutierrez | 1.5h | PENDIENTE | - |
-| T-2.2 | Configurar ESLint y Prettier | Jose Manuel Marquez Gutierrez | 1h | PENDIENTE | - |
-| T-2.3 | Configurar routing React Router | Jose Manuel Marquez Gutierrez | 1.5h | PENDIENTE | - |
-| T-2.4 | Configurar axios y servicios base | Jose Manuel Marquez Gutierrez | 1h | PENDIENTE | - |
+| T-2.06 | Completar EditarEntregablePage: cargar datos existentes del entregable | Jose Manuel | 3h | PENDIENTE | - |
+| T-2.07 | Implementar actualizacion con entregableService.actualizar() | Jose Manuel | 2h | PENDIENTE | - |
+| T-2.08 | Toggle permiteReenvio y configuracion avanzada | Manuel Maria | 1.5h | PENDIENTE | - |
+| T-2.09 | Feedback visual de cambios guardados exitosamente | Manuel Maria | 1.5h | PENDIENTE | - |
 
 ---
 
-### PBI-009: Configuracion Base de Datos
-**Prioridad:** Alta | **Estimacion:** 5h | **Estado:** PENDIENTE
+### PBI-033: Eliminar y Visibilidad Entregable (Frontend)
+**Prioridad:** Must Have | **Estimacion:** 6h | **Estado:** PENDIENTE
 
 | ID | Tarea | Responsable | Estimacion | Estado | Horas Reales |
 |----|-------|-------------|------------|--------|--------------|
-| T-3.1 | Configurar H2 para desarrollo | Manuel Maria Calderon Rodriguez | 1.5h | PENDIENTE | - |
-| T-3.2 | Configurar MySQL para produccion | Manuel Maria Calderon Rodriguez | 1.5h | PENDIENTE | - |
-| T-3.3 | Crear scripts de inicializacion | Jose Manuel Marquez Gutierrez | 2h | PENDIENTE | - |
+| T-2.10 | Boton eliminar entregable con dialogo de confirmacion | Jose Manuel | 2h | PENDIENTE | - |
+| T-2.11 | Toggle visibilidad VISIBLE/OCULTO con icono visual | Manuel Maria | 2h | PENDIENTE | - |
+| T-2.12 | Actualizar lista de entregables tras eliminar/cambiar visibilidad | Jose Manuel | 2h | PENDIENTE | - |
 
 ---
 
-### PBI-010: Entidades JPA
-**Prioridad:** Alta | **Estimacion:** 13h | **Estado:** PENDIENTE
+### PBI-036/037: Formulario Entrega Estudiante (Subida Archivos)
+**Prioridad:** Must Have | **Estimacion:** 22h | **Estado:** PENDIENTE
 
 | ID | Tarea | Responsable | Estimacion | Estado | Horas Reales |
 |----|-------|-------------|------------|--------|--------------|
-| T-4.1 | Crear entidad Usuario | Manuel Maria Calderon Rodriguez | 1.5h | PENDIENTE | - |
-| T-4.2 | Crear entidades Profesor y Estudiante | Manuel Maria Calderon Rodriguez | 2h | PENDIENTE | - |
-| T-4.3 | Crear entidad Curso | Manuel Maria Calderon Rodriguez | 1.5h | PENDIENTE | - |
-| T-4.4 | Crear entidad Grupo | Jose Manuel Marquez Gutierrez | 1.5h | PENDIENTE | - |
-| T-4.5 | Crear entidad Actividad | Jose Manuel Marquez Gutierrez | 2h | PENDIENTE | - |
-| T-4.6 | Crear entidad Entregable | Jose Manuel Marquez Gutierrez | 1.5h | PENDIENTE | - |
-| T-4.7 | Crear entidades Entrega y Material | Manuel Maria Calderon Rodriguez | 2h | PENDIENTE | - |
-| T-4.8 | Crear entidad Feedback | Jose Manuel Marquez Gutierrez | 1h | PENDIENTE | - |
+| T-2.13 | Crear componente FormularioEntrega con zona drag & drop | Manuel Maria | 4h | PENDIENTE | - |
+| T-2.14 | Implementar subida multipart con entregaService.realizar() | Jose Manuel | 4h | PENDIENTE | - |
+| T-2.15 | Validacion frontend de tipo y tamano de archivo (segun entregable) | Manuel Maria | 2h | PENDIENTE | - |
+| T-2.16 | Barra de progreso durante la subida | Jose Manuel | 2h | PENDIENTE | - |
+| T-2.17 | Pantalla de confirmacion de entrega exitosa con resumen | Manuel Maria | 2h | PENDIENTE | - |
+| T-2.18 | Manejo errores de subida (tamano excedido, tipo invalido, fuera de plazo) | Jose Manuel | 2h | PENDIENTE | - |
+| T-2.19 | Integrar formulario en EntregablePage (condicional: solo si estudiante) | Manuel Maria | 3h | PENDIENTE | - |
+| T-2.20 | Mostrar estado actual de la entrega del estudiante en EntregablePage | Jose Manuel | 3h | PENDIENTE | - |
 
 ---
 
-### PBI-011: Repositorios Spring Data
-**Prioridad:** Alta | **Estimacion:** 7h | **Estado:** PENDIENTE
+### PBI-038/040/041: Vista Entregas Estudiante (Historial y Reenvio)
+**Prioridad:** Must Have | **Estimacion:** 16h | **Estado:** PENDIENTE
 
 | ID | Tarea | Responsable | Estimacion | Estado | Horas Reales |
 |----|-------|-------------|------------|--------|--------------|
-| T-5.1 | Crear UsuarioRepository | Manuel Maria Calderon Rodriguez | 1h | PENDIENTE | - |
-| T-5.2 | Crear ProfesorRepository y EstudianteRepository | Manuel Maria Calderon Rodriguez | 1h | PENDIENTE | - |
-| T-5.3 | Crear CursoRepository y GrupoRepository | Jose Manuel Marquez Gutierrez | 1.5h | PENDIENTE | - |
-| T-5.4 | Crear ActividadRepository | Jose Manuel Marquez Gutierrez | 1h | PENDIENTE | - |
-| T-5.5 | Crear EntregableRepository y EntregaRepository | Manuel Maria Calderon Rodriguez | 1.5h | PENDIENTE | - |
-| T-5.6 | Crear MaterialRepository y FeedbackRepository | Jose Manuel Marquez Gutierrez | 1h | PENDIENTE | - |
+| T-2.21 | Crear componente historial de versiones por entregable | Manuel Maria | 4h | PENDIENTE | - |
+| T-2.22 | Mostrar cada version con: fecha, estado, calificacion (si existe) | Jose Manuel | 3h | PENDIENTE | - |
+| T-2.23 | Indicar claramente version activa vs versiones anteriores | Manuel Maria | 2h | PENDIENTE | - |
+| T-2.24 | Boton reenviar entrega (visible solo si permiteReenvio y en plazo) | Jose Manuel | 3h | PENDIENTE | - |
+| T-2.25 | Vista global "Mis Entregas" del estudiante (todas sus entregas) | Manuel Maria | 4h | PENDIENTE | - |
 
 ---
 
-### PBI-012: Service y Controller Usuarios
-**Prioridad:** Alta | **Estimacion:** 8h | **Estado:** PENDIENTE
+### PBI-039/042: Vista Entregas Profesor + Descarga
+**Prioridad:** Must Have | **Estimacion:** 16h | **Estado:** PENDIENTE
 
 | ID | Tarea | Responsable | Estimacion | Estado | Horas Reales |
 |----|-------|-------------|------------|--------|--------------|
-| T-6.1 | Crear DTOs Usuario | Manuel Maria Calderon Rodriguez | 1.5h | PENDIENTE | - |
-| T-6.2 | Crear UsuarioService | Manuel Maria Calderon Rodriguez | 3h | PENDIENTE | - |
-| T-6.3 | Crear UsuarioController | Manuel Maria Calderon Rodriguez | 2h | PENDIENTE | - |
-| T-6.4 | Crear GlobalExceptionHandler | Jose Manuel Marquez Gutierrez | 1.5h | PENDIENTE | - |
+| T-2.26 | Crear vista lista de entregas por entregable (profesor) | Jose Manuel | 4h | PENDIENTE | - |
+| T-2.27 | Mostrar por cada entrega: estudiante, fecha, estado, calificacion | Manuel Maria | 3h | PENDIENTE | - |
+| T-2.28 | Boton descargar archivo individual de cada entrega | Jose Manuel | 3h | PENDIENTE | - |
+| T-2.29 | Navegacion fluida: actividad -> entregable -> entregas | Manuel Maria | 3h | PENDIENTE | - |
+| T-2.30 | Indicadores visuales por estado (badges: pendiente, entregado, calificado) | Jose Manuel | 3h | PENDIENTE | - |
 
 ---
 
-### PBI-073: Login Seguro
-**Prioridad:** Alta | **Estimacion:** 8h | **Estado:** PENDIENTE
+### Mejoras UX y Navegacion
+**Prioridad:** Should Have | **Estimacion:** 10h | **Estado:** PENDIENTE
 
 | ID | Tarea | Responsable | Estimacion | Estado | Horas Reales |
 |----|-------|-------------|------------|--------|--------------|
-| T-7.1 | Configurar Spring Security | Jose Manuel Marquez Gutierrez | 2h | PENDIENTE | - |
-| T-7.2 | Implementar JwtTokenProvider | Jose Manuel Marquez Gutierrez | 2h | PENDIENTE | - |
-| T-7.3 | Implementar JwtTokenFilter | Jose Manuel Marquez Gutierrez | 2h | PENDIENTE | - |
-| T-7.4 | Crear AuthController (login/register) | Manuel Maria Calderon Rodriguez | 2h | PENDIENTE | - |
+| T-2.31 | Mejorar navegacion entre actividad <-> entregables | Manuel Maria | 3h | PENDIENTE | - |
+| T-2.32 | Breadcrumbs o indicadores de ubicacion | Jose Manuel | 3h | PENDIENTE | - |
+| T-2.33 | Indicadores de carga (loading spinners/skeletons) | Manuel Maria | 2h | PENDIENTE | - |
+| T-2.34 | Mensajes de exito/error globales (toasts/notificaciones) | Jose Manuel | 2h | PENDIENTE | - |
 
 ---
 
-### PBI-074: Cerrar Sesion
-**Prioridad:** Alta | **Estimacion:** 2h | **Estado:** PENDIENTE
+### Testing Sprint 2
+**Prioridad:** Must Have | **Estimacion:** 26h | **Estado:** PENDIENTE
 
 | ID | Tarea | Responsable | Estimacion | Estado | Horas Reales |
 |----|-------|-------------|------------|--------|--------------|
-| T-8.1 | Implementar logout en backend | Manuel Maria Calderon Rodriguez | 1h | PENDIENTE | - |
-| T-8.2 | Implementar logout en frontend | Jose Manuel Marquez Gutierrez | 1h | PENDIENTE | - |
-
----
-
-### PBI-076: JWT Autenticacion
-**Prioridad:** Alta | **Estimacion:** 8h | **Estado:** PENDIENTE
-
-| ID | Tarea | Responsable | Estimacion | Estado | Horas Reales |
-|----|-------|-------------|------------|--------|--------------|
-| T-9.1 | Configurar secreto JWT | Jose Manuel Marquez Gutierrez | 1h | PENDIENTE | - |
-| T-9.2 | Implementar generacion de tokens | Jose Manuel Marquez Gutierrez | 2h | PENDIENTE | - |
-| T-9.3 | Implementar validacion de tokens | Jose Manuel Marquez Gutierrez | 2h | PENDIENTE | - |
-| T-9.4 | Implementar refresh tokens | Manuel Maria Calderon Rodriguez | 3h | PENDIENTE | - |
-
----
-
-### PBI-055/056: Estructura Frontend Base
-**Prioridad:** Media | **Estimacion:** 8h | **Estado:** PENDIENTE
-
-| ID | Tarea | Responsable | Estimacion | Estado | Horas Reales |
-|----|-------|-------------|------------|--------|--------------|
-| T-10.1 | Crear tipos TypeScript base | Manuel Maria Calderon Rodriguez | 2h | PENDIENTE | - |
-| T-10.2 | Crear AuthContext | Jose Manuel Marquez Gutierrez | 2h | PENDIENTE | - |
-| T-10.3 | Crear servicios API base | Manuel Maria Calderon Rodriguez | 2h | PENDIENTE | - |
-| T-10.4 | Crear layout basico | Jose Manuel Marquez Gutierrez | 2h | PENDIENTE | - |
+| T-2.35 | Ampliar tests unitarios EntregableService | Manuel Maria | 4h | PENDIENTE | - |
+| T-2.36 | Ampliar tests unitarios EntregableController | Jose Manuel | 4h | PENDIENTE | - |
+| T-2.37 | Ampliar tests unitarios EntregaService (upload, versionado) | Manuel Maria | 5h | PENDIENTE | - |
+| T-2.38 | Ampliar tests unitarios EntregaController | Jose Manuel | 5h | PENDIENTE | - |
+| T-2.39 | Tests integracion: flujo crear entregable -> entregar -> ver historial | Manuel Maria | 4h | PENDIENTE | - |
+| T-2.40 | Tests integracion: flujo reenvio y versionado de entregas | Jose Manuel | 4h | PENDIENTE | - |
 
 ---
 
 ### Buffer y Contingencia
-**Estimacion:** 3h | **Estado:** RESERVADO
+**Estimacion:** 6h | **Estado:** RESERVADO
 
 | ID | Tarea | Responsable | Estimacion | Estado | Horas Reales |
 |----|-------|-------------|------------|--------|--------------|
-| T-11.1 | Buffer para imprevistos | Ambos | 3h | RESERVADO | - |
+| T-2.41 | Ajustes backend si necesario | Ambos | 4h | RESERVADO | - |
+| T-2.42 | Buffer para imprevistos | Ambos | 2h | RESERVADO | - |
 
 ---
 
@@ -171,82 +172,93 @@
 |--------|--------|-------|
 | COMPLETADO | 0 | 0h |
 | EN PROGRESO | 0 | 0h |
-| PENDIENTE | 36 | 80h |
-| **Total** | **36** | **80h** |
+| PENDIENTE | 40 | 114h |
+| RESERVADO | 2 | 6h |
+| **Total** | **42** | **120h** |
 
 ### Por Persona
 | Persona | Completado | En Progreso | Pendiente | Total |
 |---------|------------|-------------|-----------|-------|
-| Manuel Maria Calderon Rodriguez | 0h | 0h | 40h | 40h |
-| Jose Manuel Marquez Gutierrez | 0h | 0h | 40h | 40h |
+| Manuel Maria Calderon Rodriguez | 0h | 0h | 60h | 60h |
+| Jose Manuel Marquez Gutierrez | 0h | 0h | 60h | 60h |
 
 ---
 
 ## Burndown Chart (Horas Restantes)
 
 ```
-80 |XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-75 |                                                                              (Ideal)
-70 |
-65 |
-60 |
-55 |
-50 |
-45 |
-40 |
-35 |
-30 |
-25 |
-20 |
-15 |
-10 |
- 5 |
- 0 |________________________________________________________________________________
+120|XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+115|                                                                  (Ideal)
+110|
+100|
+ 90|
+ 80|
+ 70|
+ 60|
+ 50|
+ 40|
+ 30|
+ 20|
+ 10|
+  0|________________________________________________________________________
     D1  D2  D3  D4  D5  D6  D7  D8  D9  D10 D11 D12 D13 D14
 ```
 
-**Estado:** No iniciado
+**Estado:** En curso
 
 ---
 
 ## Daily Scrum Notes
 
-### Dia 1-2 (24-25 Feb)
-- [ ] Planificacion inicio
-- [ ] Configuracion entornos
+### Semana 1 (9-13 Mar)
 
-### Dia 3-4 (26-27 Feb)
-- [ ] Entidades JPA
-- [ ] Configuracion BD
+#### Dia 1-2 (9-10 Mar)
+- [ ] Crear entregable: formulario profesor
+- [ ] Editar entregable: completar logica
 
-### Dia 5-6 (28 Feb - 3 Mar)
-- [ ] Repositorios
-- [ ] DTOs basicos
+#### Dia 3-4 (11-12 Mar)
+- [ ] Eliminar + visibilidad entregable
+- [ ] Formulario entrega estudiante (inicio)
 
-### Dia 7-8 (4-5 Mar)
-- [ ] Servicios Usuario
-- [ ] Spring Security
+#### Dia 5 (13 Mar)
+- [ ] Formulario entrega: subida archivos + validaciones
 
-### Dia 9-10 (6-7 Mar)
-- [ ] JWT implementacion
-- [ ] AuthController
+### Semana 2 (16-20 Mar)
 
-### Dia 11-12 (8-9 Mar)
-- [ ] Frontend base
-- [ ] AuthContext
-- [ ] Sprint Review
+#### Dia 6-7 (16-17 Mar)
+- [ ] Vista entregas estudiante (historial versiones)
+- [ ] Vista entregas profesor (lista por entregable)
+
+#### Dia 8-9 (18-19 Mar)
+- [ ] Descarga archivos + reenvio entregas
+- [ ] Mejoras UX (breadcrumbs, toasts, loading)
+
+#### Dia 10 (20 Mar)
+- [ ] Testing: ampliar tests entregables y entregas
+- [ ] Tests integracion flujos completos
+
+#### Dia 11-12 (21-22 Mar)
+- [ ] Completar testing
+- [ ] Correccion de bugs
+- [ ] Sprint Review y Retrospectiva
 
 ---
 
 ## Criterios de Aceptacion del Sprint
 
-- [ ] Backend compilando sin errores
-- [ ] Frontend compilando sin errores
-- [ ] Login funcional con JWT
-- [ ] Logout funcional
-- [ ] Base de datos H2 funcionando
-- [ ] Estructura de carpetas correcta
-- [ ] Documentacion API basica
+- [ ] Profesor puede crear entregables con todos los campos (titulo, descripcion, fechas, nota, tipo archivo, tamano)
+- [ ] Profesor puede editar entregables existentes
+- [ ] Profesor puede eliminar entregables (con confirmacion)
+- [ ] Profesor puede cambiar visibilidad VISIBLE/OCULTO
+- [ ] Profesor puede configurar si permite reenvios
+- [ ] Estudiante puede subir archivos como entrega (respetando tipo y tamano)
+- [ ] Estudiante puede ver historial de versiones de sus entregas
+- [ ] Estudiante puede reenviar entregas si el entregable lo permite
+- [ ] Profesor puede ver lista de entregas por entregable (con estado visual)
+- [ ] Profesor puede descargar archivos de entregas individuales
+- [ ] Navegacion fluida: actividad -> entregable -> entregas
+- [ ] Tests unitarios y de integracion pasando (cobertura ampliada)
+- [ ] Todo desplegado y funcional en Render
 
 ---
 
@@ -277,4 +289,4 @@
 
 ---
 
-*Ultima actualizacion: 18 Febrero 2026*
+*Ultima actualizacion: 3 Marzo 2026*

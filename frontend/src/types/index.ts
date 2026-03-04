@@ -132,8 +132,9 @@ export interface MaterialDTO {
   tipoMaterial: TipoMaterial;
   ruta: string;
   tamanoBytes: number;
-  oneDriveWebUrl?: string;
-  oneDriveItemId?: string;
+  onedriveFileId?: string;
+  onedriveWebUrl?: string;
+  almacenadoEnOneDrive: boolean;
 }
 
 export interface FeedbackDTO {
@@ -224,4 +225,13 @@ export interface ErrorResponse {
 
 export interface ValidationErrorResponse extends ErrorResponse {
   errors: Record<string, string>;
+}
+
+// OneDrive DTOs
+export interface OneDriveConnectionDTO {
+  conectado: boolean;
+  microsoftEmail?: string;
+  fechaConexion?: string;
+  fechaUltimoUso?: string;
+  integrationEnabled: boolean;
 }

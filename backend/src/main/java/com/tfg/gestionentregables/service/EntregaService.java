@@ -20,7 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -44,15 +44,16 @@ public class EntregaService {
     private final MaterialRepository materialRepository;
     private final EntityMapper mapper;
     private final OneDriveService oneDriveService;
-    private final MicrosoftOAuthService microsoftOAuthService;
 
     // Directorio base para almacenar archivos (fallback local)
     private static final String UPLOAD_DIR = "uploads/entregas";
 
     /**
      * SYSOP-013: Realiza una entrega para un entregable.
-     * Si OneDrive está habilitado, sube los archivos al OneDrive del alumno
-     * y al de cada profesor del curso.
+     * Si OneDrive está habilitado:
+     *  - Sube los archivos al OneDrive de cada profesor del curso
+     *  - Si el alumno tiene OneDrive conectado, también sube una copia a su OneDrive
+     * Si no, almacena localmente como fallback.
      */
     public EntregaDTO realizarEntrega(Long entregableId, Long estudianteId, String nombre, List<MultipartFile> archivos) {
         Entregable entregable = entregableRepository.findById(entregableId)
@@ -103,13 +104,7 @@ public class EntregaService {
             }
 
             for (MultipartFile archivo : archivos) {
-                Material material;
-                if (studentToken.isPresent()) {
-                    material = guardarArchivoOneDrive(archivo, entrega, entregable,
-                            estudiante, nuevaVersion, studentToken.get());
-                } else {
-                    material = guardarArchivoLocal(archivo, entrega);
-                }
+                Material material = guardarArchivoConOneDrive(archivo, entrega, entregable, estudiante);
                 materialRepository.save(material);
             }
         }
@@ -287,107 +282,140 @@ public class EntregaService {
         entregaRepository.delete(entrega);
     }
 
-    // ══════════════════════════════════════════════════════════════
-    // ALMACENAMIENTO ONEDRIVE
-    // ══════════════════════════════════════════════════════════════
+    // ========================================
+    // ALMACENAMIENTO DE ARCHIVOS
+    // ========================================
 
     /**
-     * Guarda un archivo en OneDrive del alumno y de los profesores del curso.
-     * Usa tokens OAuth2 delegados de cada usuario.
+     * Guarda un archivo con soporte para OneDrive.
+     * Si OneDrive está habilitado, sube al OneDrive de los profesores del curso.
+     * Si el alumno tiene OneDrive conectado, también sube a su OneDrive.
+     * Si OneDrive no está habilitado, usa almacenamiento local como fallback.
      */
-    private Material guardarArchivoOneDrive(MultipartFile archivo, Entrega entrega,
-                                            Entregable entregable, Estudiante estudiante,
-                                            int version, String studentAccessToken) {
-        try {
-            byte[] contenido = archivo.getBytes();
-            String nombreOriginal = archivo.getOriginalFilename() != null
-                    ? archivo.getOriginalFilename() : "archivo";
+    private Material guardarArchivoConOneDrive(MultipartFile archivo, Entrega entrega,
+                                                Entregable entregable, Estudiante estudiante) {
+        String nombreOriginal = archivo.getOriginalFilename();
+        String extension = nombreOriginal != null && nombreOriginal.contains(".")
+                ? nombreOriginal.substring(nombreOriginal.lastIndexOf("."))
+                : "";
+        String nombreUnico = UUID.randomUUID().toString() + extension;
 
-            // Datos para construir las rutas
-            Actividad actividad = entregable.getActividad();
-            String codigoCurso = actividad.getCurso().getCodigo();
-            String tituloActividad = actividad.getTitulo();
-            String tituloEntregable = entregable.getTitulo();
-            String nombreEstudiante = estudiante.getUsuario().getNombre();
-            Long estudianteUsuarioId = estudiante.getUsuario().getId();
+        // Datos para organizar las carpetas en OneDrive
+        Actividad actividad = entregable.getActividad();
+        Curso curso = actividad.getCurso();
+        String estudianteNombre = estudiante.getUsuario().getNombre();
 
-            // 1. Subir al OneDrive del alumno (con su propio token)
-            String carpetaAlumno = oneDriveService.buildStudentFolderPath(
-                    codigoCurso, tituloActividad, tituloEntregable, version);
+        // Intentar subir a OneDrive si está habilitado
+        if (oneDriveService.isEnabled()) {
+            return guardarEnOneDrive(archivo, entrega, curso, actividad, entregable,
+                    estudiante, nombreOriginal, nombreUnico);
+        }
 
-            OneDriveService.OneDriveFileInfo infoAlumno = oneDriveService.uploadFile(
-                    studentAccessToken, carpetaAlumno, nombreOriginal, contenido, archivo.getSize());
+        // Fallback: almacenamiento local
+        return guardarArchivoLocal(archivo, entrega, nombreOriginal, nombreUnico);
+    }
 
-            log.info("Archivo subido al OneDrive del alumno (usuario {}): {}",
-                    estudianteUsuarioId, infoAlumno.webUrl());
+    /**
+     * Sube el archivo a OneDrive de los profesores del curso y opcionalmente al del alumno.
+     * Almacena la referencia del primer profesor como material principal.
+     */
+    private Material guardarEnOneDrive(MultipartFile archivo, Entrega entrega,
+                                        Curso curso, Actividad actividad,
+                                        Entregable entregable, Estudiante estudiante,
+                                        String nombreOriginal, String nombreArchivo) {
+        String cursoTitulo = curso.getTitulo();
+        String actividadTitulo = actividad.getTitulo();
+        String entregableTitulo = entregable.getTitulo();
+        String estudianteNombre = estudiante.getUsuario().getNombre();
+        Long estudianteUsuarioId = estudiante.getUsuario().getId();
 
-            // 2. Subir al OneDrive de cada profesor del curso que tenga OneDrive conectado
-            Long cursoId = actividad.getCurso().getId();
-            List<Profesor> profesores = profesorRepository.findByCursoId(cursoId);
+        String onedriveFileId = null;
+        String onedriveWebUrl = null;
+        Long onedriveOwnerId = null;
 
-            for (Profesor profesor : profesores) {
+        // 1. Subir al OneDrive de cada profesor del curso
+        for (Profesor profesor : curso.getProfesores()) {
+            Long profesorUsuarioId = profesor.getUsuario().getId();
+
+            if (oneDriveService.estaConectado(profesorUsuarioId)) {
                 try {
-                    Long profesorUsuarioId = profesor.getUsuario().getId();
-                    Optional<String> profToken = microsoftOAuthService.getValidAccessToken(profesorUsuarioId);
+                    Map<String, String> result = oneDriveService.subirArchivo(
+                            profesorUsuarioId, archivo,
+                            cursoTitulo, actividadTitulo, entregableTitulo,
+                            estudianteNombre, nombreArchivo);
 
-                    if (profToken.isPresent()) {
-                        String carpetaProfesor = oneDriveService.buildProfessorFolderPath(
-                                codigoCurso, tituloActividad, tituloEntregable,
-                                nombreEstudiante, version);
-
-                        oneDriveService.uploadFile(
-                                profToken.get(), carpetaProfesor, nombreOriginal,
-                                contenido, archivo.getSize());
-
-                        log.info("Archivo copiado al OneDrive del profesor (usuario {})", profesorUsuarioId);
-                    } else {
-                        log.info("Profesor (usuario {}) no tiene OneDrive conectado, se omite la copia",
-                                profesorUsuarioId);
+                    // Guardar la referencia del primer profesor como principal
+                    if (onedriveFileId == null) {
+                        onedriveFileId = result.get("fileId");
+                        onedriveWebUrl = result.get("webUrl");
+                        onedriveOwnerId = profesorUsuarioId;
                     }
+
+                    log.info("Archivo subido al OneDrive del profesor {} para entrega {}",
+                            profesor.getUsuario().getNombre(), entrega.getId());
                 } catch (Exception e) {
-                    log.warn("No se pudo copiar el archivo al OneDrive del profesor {}: {}",
-                            profesor.getUsuario().getCorreoElectronico(), e.getMessage());
+                    log.warn("Error al subir al OneDrive del profesor {}: {}",
+                            profesor.getUsuario().getNombre(), e.getMessage());
                 }
             }
+        }
 
-            // Crear material con info de OneDrive (referencia principal es la del alumno)
+        // 2. Si el alumno tiene OneDrive conectado, subir también a su OneDrive
+        if (oneDriveService.estaConectado(estudianteUsuarioId)) {
+            try {
+                Map<String, String> alumnoResult = oneDriveService.subirArchivo(
+                        estudianteUsuarioId, archivo,
+                        cursoTitulo, actividadTitulo, entregableTitulo,
+                        "Mis Entregas", nombreArchivo);
+
+                // Si ningún profesor tenía OneDrive, usar la referencia del alumno
+                if (onedriveFileId == null) {
+                    onedriveFileId = alumnoResult.get("fileId");
+                    onedriveWebUrl = alumnoResult.get("webUrl");
+                    onedriveOwnerId = estudianteUsuarioId;
+                }
+
+                log.info("Archivo subido al OneDrive del alumno {} para entrega {}",
+                        estudianteNombre, entrega.getId());
+            } catch (Exception e) {
+                log.warn("Error al subir al OneDrive del alumno {}: {}",
+                        estudianteNombre, e.getMessage());
+            }
+        }
+
+        // Si se pudo subir a OneDrive, crear material con referencia OneDrive
+        if (onedriveFileId != null) {
             return Material.builder()
                     .nombre(nombreOriginal)
                     .tipoMaterial(determinarTipoMaterial(archivo.getContentType()))
-                    .ruta(infoAlumno.webUrl() != null ? infoAlumno.webUrl() : "onedrive://" + infoAlumno.itemId())
+                    .ruta("onedrive://" + onedriveFileId) // Ruta virtual indicando OneDrive
                     .tamanoBytes(archivo.getSize())
-                    .oneDriveItemId(infoAlumno.itemId())
-                    .oneDriveWebUrl(infoAlumno.webUrl())
-                    .oneDriveOwnerUserId(estudianteUsuarioId)
+                    .onedriveFileId(onedriveFileId)
+                    .onedriveWebUrl(onedriveWebUrl)
+                    .onedriveOwnerId(onedriveOwnerId)
                     .entrega(entrega)
                     .build();
-
-        } catch (IOException e) {
-            throw new UncheckedIOException("Error al leer el archivo para OneDrive: " + e.getMessage(), e);
         }
+
+        // Fallback si OneDrive está habilitado pero ningún usuario lo tiene conectado
+        log.info("Ningún usuario tiene OneDrive conectado, usando almacenamiento local para entrega {}",
+                entrega.getId());
+        return guardarArchivoLocal(archivo, entrega, nombreOriginal, 
+                UUID.randomUUID().toString() + (nombreOriginal != null && nombreOriginal.contains(".")
+                        ? nombreOriginal.substring(nombreOriginal.lastIndexOf(".")) : ""));
     }
 
-    // ══════════════════════════════════════════════════════════════
-    // ALMACENAMIENTO LOCAL (FALLBACK)
-    // ══════════════════════════════════════════════════════════════
-
     /**
-     * Guarda un archivo en el sistema de archivos local.
+     * Almacenamiento local de archivos (fallback cuando OneDrive no está disponible).
      */
-    private Material guardarArchivoLocal(MultipartFile archivo, Entrega entrega) {
+    private Material guardarArchivoLocal(MultipartFile archivo, Entrega entrega,
+                                          String nombreOriginal, String nombreArchivo) {
         try {
             // Crear directorio si no existe
             Path uploadPath = Paths.get(UPLOAD_DIR, String.valueOf(entrega.getId()));
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
-
-            // Generar nombre único para el archivo
-            String nombreOriginal = archivo.getOriginalFilename();
-            String extension = nombreOriginal != null && nombreOriginal.contains(".")
-                    ? nombreOriginal.substring(nombreOriginal.lastIndexOf("."))
-                    : "";
-            String nombreArchivo = UUID.randomUUID().toString() + extension;
 
             // Guardar archivo
             Path rutaArchivo = uploadPath.resolve(nombreArchivo);
@@ -403,6 +431,53 @@ public class EntregaService {
                     .build();
         } catch (IOException e) {
             throw new UncheckedIOException("Error al guardar el archivo: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Descarga un archivo, ya sea desde OneDrive o desde almacenamiento local.
+     *
+     * @param materialId ID del material
+     * @return byte[] con el contenido del archivo
+     */
+    @Transactional(readOnly = true)
+    public byte[] descargarContenidoArchivo(Long materialId) {
+        Material material = materialRepository.findById(materialId)
+                .orElseThrow(() -> new EntityNotFoundException("Archivo no encontrado con ID: " + materialId));
+
+        // Si tiene referencia a OneDrive, descargar desde allí
+        if (material.getOnedriveFileId() != null && material.getOnedriveOwnerId() != null) {
+            try {
+                return oneDriveService.descargarArchivo(
+                        material.getOnedriveOwnerId(),
+                        material.getOnedriveFileId());
+            } catch (Exception e) {
+                log.error("Error al descargar desde OneDrive, intentando fallback local: {}", e.getMessage());
+                // Intentar fallback local si la ruta no es virtual
+                if (material.getRuta() != null && !material.getRuta().startsWith("onedrive://")) {
+                    return leerArchivoLocal(material.getRuta());
+                }
+                throw new RuntimeException("No se pudo descargar el archivo de OneDrive", e);
+            }
+        }
+
+        // Descargar desde almacenamiento local
+        if (material.getRuta() != null) {
+            return leerArchivoLocal(material.getRuta());
+        }
+
+        throw new RuntimeException("El archivo no tiene ruta de almacenamiento válida");
+    }
+
+    /**
+     * Lee un archivo del sistema de archivos local.
+     */
+    private byte[] leerArchivoLocal(String ruta) {
+        try {
+            Path filePath = Paths.get(ruta);
+            return Files.readAllBytes(filePath);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Error al leer archivo local: " + e.getMessage(), e);
         }
     }
 

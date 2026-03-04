@@ -14,6 +14,7 @@ public class MaterialDTO {
     private TipoMaterial tipoMaterial;
     private String ruta;
     private Long tamanoBytes;
-    private String oneDriveWebUrl;
-    private String oneDriveItemId;
+    private String onedriveFileId;
+    private String onedriveWebUrl;
+    private boolean almacenadoEnOneDrive;
 }

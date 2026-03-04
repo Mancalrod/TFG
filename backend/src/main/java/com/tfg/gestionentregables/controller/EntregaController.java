@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -85,43 +85,39 @@ public class EntregaController {
 
     /**
      * SYSOP-018: Descargar archivo de una entrega.
-     * Soporta descarga desde OneDrive y desde sistema de archivos local.
+     * Soporta tanto archivos de OneDrive como almacenamiento local.
      */
     @GetMapping("/archivo/{materialId}")
-    public ResponseEntity<Resource> descargarArchivo(@PathVariable Long materialId) {
+    public ResponseEntity<byte[]> descargarArchivo(@PathVariable Long materialId) {
         Material material = entregaService.obtenerArchivo(materialId);
-
-        // Si el material está en OneDrive, descargar desde OneDrive
-        if (material.getOneDriveItemId() != null && material.getOneDriveOwnerUserId() != null) {
-            try {
-                InputStream stream = entregaService.descargarContenidoArchivo(materialId);
-                InputStreamResource resource = new InputStreamResource(stream);
-                return ResponseEntity.ok()
-                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                        .header(HttpHeaders.CONTENT_DISPOSITION,
-                                "attachment; filename=\"" + material.getNombre() + "\"")
-                        .body(resource);
-            } catch (Exception e) {
-                return ResponseEntity.internalServerError().build();
-            }
-        }
-
-        // Fallback: descargar desde sistema de archivos local
+        
         try {
-            Path filePath = Paths.get(material.getRuta());
-            Resource resource = new UrlResource(filePath.toUri());
+            byte[] contenido = entregaService.descargarContenidoArchivo(materialId);
             
-            if (resource.exists() && resource.isReadable()) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                        .header(HttpHeaders.CONTENT_DISPOSITION, 
-                                "attachment; filename=\"" + material.getNombre() + "\"")
-                        .body(resource);
-            } else {
-                return ResponseEntity.notFound().build();
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, 
+                            "attachment; filename=\"" + material.getNombre() + "\"")
+                    .body(contenido);
+        } catch (Exception e) {
+            // Fallback: intentar servir desde ruta local (compatibilidad)
+            if (material.getRuta() != null && !material.getRuta().startsWith("onedrive://")) {
+                try {
+                    Path filePath = Paths.get(material.getRuta());
+                    Resource resource = new UrlResource(filePath.toUri());
+                    
+                    if (resource.exists() && resource.isReadable()) {
+                        return ResponseEntity.ok()
+                                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                                .header(HttpHeaders.CONTENT_DISPOSITION, 
+                                        "attachment; filename=\"" + material.getNombre() + "\"")
+                                .body(resource.getContentAsByteArray());
+                    }
+                } catch (MalformedURLException | IOException ex) {
+                    // ignorar
+                }
             }
-        } catch (MalformedURLException e) {
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.notFound().build();
         }
     }
 

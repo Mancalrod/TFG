@@ -31,24 +31,35 @@ public class Material {
     @Column(name = "tipo_material", nullable = false)
     private TipoMaterial tipoMaterial;
 
-    @NotBlank(message = "La ruta es obligatoria")
-    @Column(nullable = false)
+    /**
+     * Ruta local del archivo. Puede ser null si el archivo está en OneDrive.
+     */
+    @Column(nullable = true)
     private String ruta;
 
     @Column(name = "tamano_bytes")
     private Long tamanoBytes;
 
-    // OneDrive: ID del item en el drive del alumno (para descargas vía Graph API)
-    @Column(name = "onedrive_item_id")
-    private String oneDriveItemId;
+    // === Campos de OneDrive ===
 
-    // OneDrive: URL web para visualizar/compartir el archivo
-    @Column(name = "onedrive_web_url", length = 1024)
-    private String oneDriveWebUrl;
+    /**
+     * ID del archivo en OneDrive (null si se almacena localmente).
+     */
+    @Column(name = "onedrive_file_id")
+    private String onedriveFileId;
 
-    // OneDrive: ID del usuario propietario del drive (para buscar su token OAuth2)
-    @Column(name = "onedrive_owner_user_id")
-    private Long oneDriveOwnerUserId;
+    /**
+     * URL web del archivo en OneDrive.
+     */
+    @Column(name = "onedrive_web_url")
+    private String onedriveWebUrl;
+
+    /**
+     * ID del usuario cuyo OneDrive almacena el archivo.
+     * Necesario para obtener el access token correcto al descargar.
+     */
+    @Column(name = "onedrive_owner_id")
+    private Long onedriveOwnerId;
 
     // Relación: Un material puede pertenecer a una actividad (material de apoyo)
     @ManyToOne(fetch = FetchType.LAZY)
