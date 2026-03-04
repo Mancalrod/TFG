@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CursoDTO, ActividadDTO } from '../../types';
 import { cursoService, actividadService } from '../../services';
@@ -15,9 +15,9 @@ const CursosPage: React.FC = () => {
 
   useEffect(() => {
     cargarCursos();
-  }, [usuario, esProfesor]);
+  }, [cargarCursos]);
 
-  const cargarCursos = async () => {
+  const cargarCursos = useCallback(async () => {
     if (!usuario) return;
     
     setLoading(true);
@@ -41,7 +41,7 @@ const CursosPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [usuario]);
 
   const handleVerActividad = (actividadId: number) => {
     navigate(`/actividades/${actividadId}`);

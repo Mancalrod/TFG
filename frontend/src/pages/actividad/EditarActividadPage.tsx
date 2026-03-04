@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ActividadDTO, CrearActividadDTO, TipoActividad, Visibilidad, GrupoDTO } from '../../types';
 import { actividadService, cursoService } from '../../services';
@@ -32,19 +32,7 @@ const EditarActividadPage: React.FC = () => {
     grupoIds: [],
   });
 
-  useEffect(() => {
-    if (id) {
-      cargarActividad(parseInt(id));
-    }
-  }, [id]);
-
-  useEffect(() => {
-    if (!loading && !esProfesor) {
-      navigate(-1);
-    }
-  }, [loading, esProfesor, navigate]);
-
-  const cargarActividad = async (actividadId: number) => {
+  const cargarActividad = useCallback(async (actividadId: number) => {
     setLoading(true);
     setError(null);
     try {
@@ -78,7 +66,19 @@ const EditarActividadPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (id) {
+      cargarActividad(parseInt(id));
+    }
+  }, [id, cargarActividad]);
+
+  useEffect(() => {
+    if (!loading && !esProfesor) {
+      navigate(-1);
+    }
+  }, [loading, esProfesor, navigate]);
 
   const toDatetimeLocal = (iso: string): string => {
     const date = new Date(iso);

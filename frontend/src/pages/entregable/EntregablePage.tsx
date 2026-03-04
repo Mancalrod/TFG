@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { EntregableDTO, EntregaDTO, EntregaResumenDTO, EntregaEstadisticasDTO } from '../../types';
 import { entregableService, entregaService } from '../../services';
@@ -15,13 +15,7 @@ const EntregablePage: React.FC = () => {
   const { esProfesor, usuario } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (id) {
-      cargarEntregable(parseInt(id));
-    }
-  }, [id, esProfesor]);
-
-  const cargarEntregable = async (entregableId: number) => {
+  const cargarEntregable = useCallback(async (entregableId: number) => {
     setLoading(true);
     try {
       const entregableData = await entregableService.obtener(entregableId);
@@ -44,14 +38,13 @@ const EntregablePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [esProfesor, usuario?.id]);
 
-  const handleCloseModal = () => {
-    // Recargar datos
+  useEffect(() => {
     if (id) {
       cargarEntregable(parseInt(id));
     }
-  };
+  }, [id, cargarEntregable]);
 
   const formatDate = (dateStr: string | undefined) => {
     if (!dateStr) return 'Sin fecha';

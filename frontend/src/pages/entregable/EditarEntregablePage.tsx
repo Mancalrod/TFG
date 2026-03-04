@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { EntregableDTO, CrearEntregableDTO, Visibilidad, TipoMaterial } from '../../types';
 import { entregableService } from '../../services';
@@ -33,19 +33,7 @@ const EditarEntregablePage: React.FC = () => {
   // Para el selector de tamaño en MB
   const [tamanoMB, setTamanoMB] = useState<string>('');
 
-  useEffect(() => {
-    if (id) {
-      cargarEntregable(parseInt(id));
-    }
-  }, [id]);
-
-  useEffect(() => {
-    if (!loading && !esProfesor) {
-      navigate(-1);
-    }
-  }, [loading, esProfesor, navigate]);
-
-  const cargarEntregable = async (entregableId: number) => {
+  const cargarEntregable = useCallback(async (entregableId: number) => {
     setLoading(true);
     setError(null);
     try {
@@ -81,7 +69,19 @@ const EditarEntregablePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (id) {
+      cargarEntregable(parseInt(id));
+    }
+  }, [id, cargarEntregable]);
+
+  useEffect(() => {
+    if (!loading && !esProfesor) {
+      navigate(-1);
+    }
+  }, [loading, esProfesor, navigate]);
 
   const toDatetimeLocal = (iso: string): string => {
     const date = new Date(iso);

@@ -34,6 +34,7 @@ const Dashboard: React.FC = () => {
       searchParams.delete('reason');
       setSearchParams(searchParams, { replace: true });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Cargar estado de OneDrive

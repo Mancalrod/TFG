@@ -93,6 +93,7 @@ class EntregaServiceTest {
             when(estudianteRepository.findById(1L)).thenReturn(Optional.of(estudiante));
             when(entregaRepository.findByEntregableIdAndEstudianteId(1L, 1L)).thenReturn(List.of());
             when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
+            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
             when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
 
             EntregaDTO result = entregaService.realizarEntrega(1L, 1L, "Mi entrega", null);
@@ -113,6 +114,7 @@ class EntregaServiceTest {
             when(entregaRepository.findByEntregableIdAndEstudianteId(1L, 1L))
                     .thenReturn(List.of(entregaAnterior));
             when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
+            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
             when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
 
             EntregaDTO result = entregaService.realizarEntrega(1L, 1L, "Reenvío", null);
