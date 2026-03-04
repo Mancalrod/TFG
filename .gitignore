@@ -165,3 +165,5 @@ application-secret.properties
 
 # Test file (puedes eliminar esta línea después)
 prueba.txt
+
+/backend/src/main/resources/application-local.properties

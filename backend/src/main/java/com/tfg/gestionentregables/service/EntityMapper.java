@@ -159,6 +159,9 @@ public class EntityMapper {
                 .tipoMaterial(material.getTipoMaterial())
                 .ruta(material.getRuta())
                 .tamanoBytes(material.getTamanoBytes())
+                .onedriveFileId(material.getOnedriveFileId())
+                .onedriveWebUrl(material.getOnedriveWebUrl())
+                .almacenadoEnOneDrive(material.getOnedriveFileId() != null)
                 .build();
     }
 
