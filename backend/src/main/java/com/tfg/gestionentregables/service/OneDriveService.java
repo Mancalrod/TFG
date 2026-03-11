@@ -152,7 +152,6 @@ public class OneDriveService {
      * @param token Token a refrescar
      * @return Token actualizado
      */
-    @Transactional
     public OneDriveToken refrescarToken(OneDriveToken token) {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("client_id", config.getClientId());
