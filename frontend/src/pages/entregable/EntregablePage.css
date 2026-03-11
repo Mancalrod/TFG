@@ -288,3 +288,170 @@
 .btn-secondary:hover {
   background-color: var(--border-secondary);
 }
+
+/* ── Estructura ZIP esperada ── */
+.ep-zip-structure {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  border-left: 3px solid var(--accent-blue);
+}
+
+.ep-zip-structure h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.ep-zip-mode {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.ep-zip-mode.estricta {
+  background: rgba(231, 76, 60, 0.12);
+  color: var(--error-color);
+}
+
+.ep-zip-mode.minima {
+  background: rgba(46, 204, 113, 0.12);
+  color: var(--badge-success-color);
+}
+
+.ep-zip-tree {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.82rem;
+}
+
+.ep-zip-nombre {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.ep-zip-nombre-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.ep-zip-nombre-value {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.85rem;
+  color: var(--accent-blue);
+}
+
+.ep-zip-nodo-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.ep-zip-nodo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.25rem;
+  padding: 0.15rem 0;
+}
+
+.ep-zip-nodo-name {
+  color: var(--text-primary);
+}
+
+.ep-zip-nodo-name em {
+  color: var(--accent-blue);
+  font-style: italic;
+}
+
+.ep-zip-nodo-ext {
+  color: var(--text-tertiary);
+  font-size: 0.78rem;
+}
+
+/* ── Entregas panel header ── */
+.entregas-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.entregas-panel-header h2 {
+  margin-bottom: 0 !important;
+}
+
+.btn-descargar-todo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.9rem;
+}
+
+/* ── Mis Entregas (estudiante) ── */
+.mis-entregas-panel {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+.mis-entregas-panel h2 {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.mis-entregas-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mi-entrega-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.mi-entrega-clickable {
+  cursor: pointer;
+  transition: background-color 0.15s, box-shadow 0.15s;
+  justify-content: space-between;
+}
+
+.mi-entrega-clickable:hover {
+  background: var(--bg-tertiary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.mi-entrega-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.mi-entrega-arrow {
+  color: var(--accent-blue);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+}

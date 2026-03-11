@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ActividadDTO, EntregableDTO } from '../../types';
-import { actividadService, entregableService } from '../../services';
+import { actividadService, entregableService, entregaService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
 import './ActividadPage.css';
 
@@ -13,6 +13,24 @@ const ActividadPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { esProfesor } = useAuth();
   const navigate = useNavigate();
+
+  const handleDescargarTodoActividad = async () => {
+    if (!id) return;
+    try {
+      const { blob, filename } = await entregaService.descargarTodoActividad(parseInt(id));
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error al descargar todo:', err);
+      alert('Error al descargar las entregas de la actividad');
+    }
+  };
 
   useEffect(() => {
     if (id) {
@@ -98,6 +116,14 @@ const ActividadPage: React.FC = () => {
             >
               Editar
             </button>
+            {entregables.length > 0 && (
+              <button
+                className="btn-secondary btn-descargar-actividad"
+                onClick={handleDescargarTodoActividad}
+              >
+                ⬇ Descargar Todo
+              </button>
+            )}
             <button 
               className="btn-primary"
               onClick={() => navigate(`/actividades/${id}/entregables/nuevo`)}

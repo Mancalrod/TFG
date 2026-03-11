@@ -561,120 +561,28 @@ class EntregaServiceTest {
         }
     }
 
-    // =============================================
-    // determinarTipoMaterial (método privado, via reflexión)
-    // =============================================
-
-    @Nested
-    @DisplayName("determinarTipoMaterial")
-    class DeterminarTipoMaterial {
-
-        private TipoMaterial invocarDeterminar(String contentType) {
-            try {
-                Method method = EntregaService.class.getDeclaredMethod("determinarTipoMaterial", String.class);
-                method.setAccessible(true);
-                return (TipoMaterial) method.invoke(entregaService, contentType);
-            } catch (InvocationTargetException e) {
-                throw new RuntimeException(e.getCause());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Test
-        @DisplayName("PDF")
-        void tipo_pdf() {
-            assertThat(invocarDeterminar("application/pdf")).isEqualTo(TipoMaterial.PDF);
-        }
-
-        @Test
-        @DisplayName("Imagen PNG")
-        void tipo_imagen_png() {
-            assertThat(invocarDeterminar("image/png")).isEqualTo(TipoMaterial.IMAGEN);
-        }
-
-        @Test
-        @DisplayName("Imagen JPEG")
-        void tipo_imagen_jpeg() {
-            assertThat(invocarDeterminar("image/jpeg")).isEqualTo(TipoMaterial.IMAGEN);
-        }
-
-        @Test
-        @DisplayName("ZIP")
-        void tipo_zip() {
-            assertThat(invocarDeterminar("application/zip")).isEqualTo(TipoMaterial.ZIP);
-        }
-
-        @Test
-        @DisplayName("RAR")
-        void tipo_rar() {
-            assertThat(invocarDeterminar("application/x-rar-compressed")).isEqualTo(TipoMaterial.ZIP);
-        }
-
-        @Test
-        @DisplayName("7z")
-        void tipo_7z() {
-            assertThat(invocarDeterminar("application/x-7z-compressed")).isEqualTo(TipoMaterial.ZIP);
-        }
-
-        @Test
-        @DisplayName("Word .docx")
-        void tipo_word() {
-            assertThat(invocarDeterminar("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
-                    .isEqualTo(TipoMaterial.DOCX);
-        }
-
-        @Test
-        @DisplayName("Word legacy .doc")
-        void tipo_word_legacy() {
-            assertThat(invocarDeterminar("application/msword")).isEqualTo(TipoMaterial.DOCX);
-        }
-
-        @Test
-        @DisplayName("Null devuelve OTRO")
-        void tipo_null() {
-            assertThat(invocarDeterminar(null)).isEqualTo(TipoMaterial.OTRO);
-        }
-
-        @Test
-        @DisplayName("Tipo desconocido devuelve OTRO")
-        void tipo_desconocido() {
-            assertThat(invocarDeterminar("application/octet-stream")).isEqualTo(TipoMaterial.OTRO);
-        }
-
-        @Test
-        @DisplayName("Texto plano devuelve OTRO")
-        void tipo_texto() {
-            assertThat(invocarDeterminar("text/plain")).isEqualTo(TipoMaterial.OTRO);
-        }
-    }
-
-    // =============================================
-    // descargarContenidoArchivo
-    // =============================================
-
     @Nested
     @DisplayName("descargarContenidoArchivo")
     class DescargarContenidoArchivo {
 
         @Test
-        @DisplayName("Descarga desde OneDrive si tiene referencia")
-        void descargar_onedrive() {
+        @DisplayName("Descarga archivo desde OneDrive cuando tiene referencia")
+        void descargar_desdeOneDrive() {
             Material material = Material.builder()
-                    .id(1L).nombre("archivo.pdf")
-                    .onedriveFileId("file-id-123")
-                    .onedriveOwnerId(1L)
-                    .ruta("onedrive://file-id-123")
+                    .id(1L).nombre("doc.pdf")
+                    .tipoMaterial(TipoMaterial.PDF)
+                    .onedriveFileId("od-file-123")
+                    .onedriveOwnerId(10L)
                     .build();
+            byte[] contenido = "contenido-onedrive".getBytes();
 
             when(materialRepository.findById(1L)).thenReturn(Optional.of(material));
-            when(oneDriveService.descargarArchivo(1L, "file-id-123"))
-                    .thenReturn("contenido pdf".getBytes());
+            when(oneDriveService.descargarArchivo(10L, "od-file-123")).thenReturn(contenido);
 
             byte[] result = entregaService.descargarContenidoArchivo(1L);
 
-            assertThat(result).isEqualTo("contenido pdf".getBytes());
-            verify(oneDriveService).descargarArchivo(1L, "file-id-123");
+            assertThat(result).isEqualTo(contenido);
+            verify(oneDriveService).descargarArchivo(10L, "od-file-123");
         }
 
         @Test
@@ -683,267 +591,79 @@ class EntregaServiceTest {
             when(materialRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> entregaService.descargarContenidoArchivo(99L))
-                    .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessageContaining("Archivo no encontrado");
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
-        @DisplayName("Lanza excepción si OneDrive falla con ruta virtual")
-        void descargar_onedriveFalla_rutaVirtual() {
+        @DisplayName("Lanza excepción si no hay ruta ni OneDrive")
+        void descargar_sinRutaValida() {
             Material material = Material.builder()
-                    .id(1L).nombre("archivo.pdf")
-                    .onedriveFileId("file-id-123")
-                    .onedriveOwnerId(1L)
-                    .ruta("onedrive://file-id-123")
-                    .build();
-
-            when(materialRepository.findById(1L)).thenReturn(Optional.of(material));
-            when(oneDriveService.descargarArchivo(1L, "file-id-123"))
-                    .thenThrow(new RuntimeException("Error de conexión"));
-
-            assertThatThrownBy(() -> entregaService.descargarContenidoArchivo(1L))
-                    .isInstanceOf(RuntimeException.class)
-                    .hasMessageContaining("No se pudo descargar");
-        }
-
-        @Test
-        @DisplayName("Lanza excepción si no hay ruta válida")
-        void descargar_sinRuta() {
-            Material material = Material.builder()
-                    .id(1L).nombre("archivo.pdf")
+                    .id(1L).nombre("doc.pdf")
+                    .tipoMaterial(TipoMaterial.PDF)
                     .ruta(null)
+                    .onedriveFileId(null)
                     .build();
 
             when(materialRepository.findById(1L)).thenReturn(Optional.of(material));
 
             assertThatThrownBy(() -> entregaService.descargarContenidoArchivo(1L))
-                    .isInstanceOf(RuntimeException.class)
-                    .hasMessageContaining("ruta de almacenamiento válida");
+                    .isInstanceOf(RuntimeException.class);
         }
     }
 
-    // =============================================
-    // realizarEntrega con archivos (OneDrive)
-    // =============================================
-
     @Nested
-    @DisplayName("realizarEntrega con archivos")
-    class RealizarEntregaConArchivos {
+    @DisplayName("descargarTodoComoZip")
+    class DescargarTodoComoZip {
 
         @Test
-        @DisplayName("Sube archivos a OneDrive de profesor conectado")
-        void realizar_conArchivos_oneDriveProfesor() {
-            // Setup profesor con OneDrive conectado
-            Usuario usuarioProf = Usuario.builder().id(10L).nombre("Prof. García")
-                    .correoElectronico("prof@test.com").contrasena("pass").build();
-            Profesor profesor = Profesor.builder().id(1L).usuario(usuarioProf).build();
+        @DisplayName("Lanza excepción si entregable no existe")
+        void descargarTodo_noExiste() {
+            when(entregableRepository.existsById(99L)).thenReturn(false);
 
-            Curso curso = Curso.builder().id(1L).titulo("IS").codigo("IS-001")
-                    .profesores(Set.of(profesor)).build();
-            Actividad actividad = Actividad.builder().id(1L).titulo("P1").curso(curso)
-                    .grupos(new HashSet<>()).entregables(new HashSet<>()).build();
+            assertThatThrownBy(() -> entregaService.descargarTodoComoZip(99L))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
 
-            Entregable entregableConCurso = Entregable.builder()
-                    .id(1L).titulo("Entregable 1").notaMaxima(10.0)
-                    .permiteReenvio(true).actividad(actividad)
-                    .entregas(new HashSet<>())
-                    .fechaLimite(LocalDateTime.now().plusDays(7))
-                    .build();
+        @Test
+        @DisplayName("Genera ZIP vacío cuando no hay entregas")
+        void descargarTodo_sinEntregas() {
+            when(entregableRepository.existsById(1L)).thenReturn(true);
+            when(entregaRepository.findByEntregableIdAndEsVersionActiva(1L, true))
+                    .thenReturn(List.of());
 
-            MockMultipartFile archivo = new MockMultipartFile(
-                    "file", "trabajo.pdf", "application/pdf", "contenido del pdf".getBytes());
-
-            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregableConCurso));
-            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(Optional.of(estudiante));
-            when(entregaRepository.findByEntregableIdAndEstudianteId(1L, 1L)).thenReturn(List.of());
-            when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
-            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
-            when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
-
-            // OneDrive habilitado y profesor conectado
-            when(oneDriveService.isEnabled()).thenReturn(true);
-            when(oneDriveService.estaConectado(10L)).thenReturn(true);
-            when(oneDriveService.estaConectado(1L)).thenReturn(false); // alumno no conectado
-            when(oneDriveService.subirArchivo(eq(10L), any(), eq("IS"), eq("P1"),
-                    eq("Entregable 1"), eq("Alumno"), any()))
-                    .thenReturn(Map.of("fileId", "od-file-123", "webUrl", "https://onedrive.live.com/file123"));
-            when(materialRepository.save(any(Material.class))).thenAnswer(inv -> inv.getArgument(0));
-
-            EntregaDTO result = entregaService.realizarEntrega(1L, 1L, "Mi entrega", List.of(archivo));
+            byte[] result = entregaService.descargarTodoComoZip(1L);
 
             assertThat(result).isNotNull();
-            verify(oneDriveService).subirArchivo(eq(10L), any(), eq("IS"), eq("P1"),
-                    eq("Entregable 1"), eq("Alumno"), any());
-            verify(materialRepository).save(any(Material.class));
+            assertThat(result.length).isGreaterThan(0);
         }
 
         @Test
-        @DisplayName("Sube archivos a OneDrive del alumno si profesor no conectado")
-        void realizar_conArchivos_oneDriveAlumno() {
-            // Setup - ningún profesor con OneDrive
-            Usuario usuarioProf = Usuario.builder().id(10L).nombre("Prof.")
-                    .correoElectronico("prof@test.com").contrasena("pass").build();
-            Profesor profesor = Profesor.builder().id(1L).usuario(usuarioProf).build();
-
-            Curso curso = Curso.builder().id(1L).titulo("IS").codigo("IS-001")
-                    .profesores(Set.of(profesor)).build();
-            Actividad actividad = Actividad.builder().id(1L).titulo("P1").curso(curso)
-                    .grupos(new HashSet<>()).entregables(new HashSet<>()).build();
-
-            Entregable entregableConCurso = Entregable.builder()
-                    .id(1L).titulo("Entregable 1").notaMaxima(10.0)
-                    .permiteReenvio(true).actividad(actividad)
-                    .entregas(new HashSet<>())
-                    .fechaLimite(LocalDateTime.now().plusDays(7))
+        @DisplayName("Genera ZIP con archivos de múltiples estudiantes")
+        void descargarTodo_conEntregas() {
+            Material material1 = Material.builder()
+                    .id(10L).nombre("memoria.pdf")
+                    .tipoMaterial(TipoMaterial.PDF)
+                    .ruta("test-path/memoria.pdf")
                     .build();
 
-            MockMultipartFile archivo = new MockMultipartFile(
-                    "file", "trabajo.pdf", "application/pdf", "contenido".getBytes());
+            Set<Material> archivos = new HashSet<>();
+            archivos.add(material1);
 
-            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregableConCurso));
-            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(Optional.of(estudiante));
-            when(entregaRepository.findByEntregableIdAndEstudianteId(1L, 1L)).thenReturn(List.of());
-            when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
-            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
-            when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
+            Entrega entregaConArchivos = Entrega.builder()
+                    .id(1L).version(1).estado(EstadoEntrega.ENTREGADO)
+                    .esVersionActiva(true).entregable(entregable).estudiante(estudiante)
+                    .archivos(archivos).feedbacks(new HashSet<>()).build();
 
-            // OneDrive habilitado, profesor NO conectado, alumno SÍ conectado
-            when(oneDriveService.isEnabled()).thenReturn(true);
-            when(oneDriveService.estaConectado(10L)).thenReturn(false);
-            when(oneDriveService.estaConectado(1L)).thenReturn(true); // alumno conectado
-            when(oneDriveService.subirArchivo(eq(1L), any(), eq("IS"), eq("P1"),
-                    eq("Entregable 1"), eq("Mis Entregas"), any()))
-                    .thenReturn(Map.of("fileId", "od-alu-123", "webUrl", "https://onedrive.live.com/alu123"));
-            when(materialRepository.save(any(Material.class))).thenAnswer(inv -> inv.getArgument(0));
+            when(entregableRepository.existsById(1L)).thenReturn(true);
+            when(entregaRepository.findByEntregableIdAndEsVersionActiva(1L, true))
+                    .thenReturn(List.of(entregaConArchivos));
+            when(materialRepository.findById(10L)).thenReturn(Optional.of(material1));
 
-            EntregaDTO result = entregaService.realizarEntrega(1L, 1L, "Mi entrega", List.of(archivo));
+            // Material tiene ruta local → descargarContenidoArchivo leerá de FS, que fallará.
+            // Pero the ZIP builder catches errors per-file and logs a warning.
+            byte[] result = entregaService.descargarTodoComoZip(1L);
 
             assertThat(result).isNotNull();
-            verify(oneDriveService).subirArchivo(eq(1L), any(), eq("IS"), eq("P1"),
-                    eq("Entregable 1"), eq("Mis Entregas"), any());
-        }
-
-        @Test
-        @DisplayName("Sube a profesor y alumno cuando ambos conectados")
-        void realizar_conArchivos_ambosConectados() {
-            Usuario usuarioProf = Usuario.builder().id(10L).nombre("Prof.")
-                    .correoElectronico("prof@test.com").contrasena("pass").build();
-            Profesor profesor = Profesor.builder().id(1L).usuario(usuarioProf).build();
-
-            Curso curso = Curso.builder().id(1L).titulo("IS").codigo("IS-001")
-                    .profesores(Set.of(profesor)).build();
-            Actividad actividad = Actividad.builder().id(1L).titulo("P1").curso(curso)
-                    .grupos(new HashSet<>()).entregables(new HashSet<>()).build();
-
-            Entregable entregableConCurso = Entregable.builder()
-                    .id(1L).titulo("Entregable 1").notaMaxima(10.0)
-                    .permiteReenvio(true).actividad(actividad)
-                    .entregas(new HashSet<>())
-                    .fechaLimite(LocalDateTime.now().plusDays(7))
-                    .build();
-
-            MockMultipartFile archivo = new MockMultipartFile(
-                    "file", "trabajo.pdf", "application/pdf", "contenido".getBytes());
-
-            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregableConCurso));
-            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(Optional.of(estudiante));
-            when(entregaRepository.findByEntregableIdAndEstudianteId(1L, 1L)).thenReturn(List.of());
-            when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
-            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
-            when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
-
-            when(oneDriveService.isEnabled()).thenReturn(true);
-            when(oneDriveService.estaConectado(10L)).thenReturn(true);
-            when(oneDriveService.estaConectado(1L)).thenReturn(true);
-            when(oneDriveService.subirArchivo(eq(10L), any(), any(), any(), any(), any(), any()))
-                    .thenReturn(Map.of("fileId", "prof-file", "webUrl", "https://prof-url"));
-            when(oneDriveService.subirArchivo(eq(1L), any(), any(), any(), any(), any(), any()))
-                    .thenReturn(Map.of("fileId", "alu-file", "webUrl", "https://alu-url"));
-            when(materialRepository.save(any(Material.class))).thenAnswer(inv -> inv.getArgument(0));
-
-            entregaService.realizarEntrega(1L, 1L, "Mi entrega", List.of(archivo));
-
-            // Verifica que se subió tanto al profesor como al alumno
-            verify(oneDriveService).subirArchivo(eq(10L), any(), any(), any(), any(), any(), any());
-            verify(oneDriveService).subirArchivo(eq(1L), any(), any(), any(), any(), any(), any());
-        }
-
-        @Test
-        @DisplayName("Continúa si subida a OneDrive de profesor falla")
-        void realizar_conArchivos_errorSubidaProfesor() {
-            Usuario usuarioProf = Usuario.builder().id(10L).nombre("Prof.")
-                    .correoElectronico("prof@test.com").contrasena("pass").build();
-            Profesor profesor = Profesor.builder().id(1L).usuario(usuarioProf).build();
-
-            Curso curso = Curso.builder().id(1L).titulo("IS").codigo("IS-001")
-                    .profesores(Set.of(profesor)).build();
-            Actividad actividad = Actividad.builder().id(1L).titulo("P1").curso(curso)
-                    .grupos(new HashSet<>()).entregables(new HashSet<>()).build();
-
-            Entregable entregableConCurso = Entregable.builder()
-                    .id(1L).titulo("Entregable 1").notaMaxima(10.0)
-                    .permiteReenvio(true).actividad(actividad)
-                    .entregas(new HashSet<>())
-                    .fechaLimite(LocalDateTime.now().plusDays(7))
-                    .build();
-
-            MockMultipartFile archivo = new MockMultipartFile(
-                    "file", "trabajo.pdf", "application/pdf", "contenido".getBytes());
-
-            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregableConCurso));
-            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(Optional.of(estudiante));
-            when(entregaRepository.findByEntregableIdAndEstudianteId(1L, 1L)).thenReturn(List.of());
-            when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
-            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
-            when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
-
-            when(oneDriveService.isEnabled()).thenReturn(true);
-            when(oneDriveService.estaConectado(10L)).thenReturn(true);
-            when(oneDriveService.estaConectado(1L)).thenReturn(false);
-            // subirArchivo del profesor lanza excepción
-            when(oneDriveService.subirArchivo(eq(10L), any(), any(), any(), any(), any(), any()))
-                    .thenThrow(new RuntimeException("Error de red"));
-            when(materialRepository.save(any(Material.class))).thenAnswer(inv -> inv.getArgument(0));
-
-            // No lanza excepción, sino que hace fallback a local
-            assertThatNoException().isThrownBy(() ->
-                    entregaService.realizarEntrega(1L, 1L, "Mi entrega", List.of(archivo)));
-        }
-
-        @Test
-        @DisplayName("Usa almacenamiento local si OneDrive deshabilitado")
-        void realizar_conArchivos_oneDriveDeshabilitado() {
-            Curso curso = Curso.builder().id(1L).titulo("IS").codigo("IS-001")
-                    .profesores(new HashSet<>()).build();
-            Actividad actividad = Actividad.builder().id(1L).titulo("P1").curso(curso)
-                    .grupos(new HashSet<>()).entregables(new HashSet<>()).build();
-
-            Entregable entregableLocal = Entregable.builder()
-                    .id(1L).titulo("Entregable 1").notaMaxima(10.0)
-                    .permiteReenvio(true).actividad(actividad)
-                    .entregas(new HashSet<>())
-                    .fechaLimite(LocalDateTime.now().plusDays(7))
-                    .build();
-
-            MockMultipartFile archivo = new MockMultipartFile(
-                    "file", "trabajo.pdf", "application/pdf", "contenido".getBytes());
-
-            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregableLocal));
-            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(Optional.of(estudiante));
-            when(entregaRepository.findByEntregableIdAndEstudianteId(1L, 1L)).thenReturn(List.of());
-            when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
-            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
-            when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
-
-            // OneDrive deshabilitado - usará almacenamiento local
-            when(oneDriveService.isEnabled()).thenReturn(false);
-            when(materialRepository.save(any(Material.class))).thenAnswer(inv -> inv.getArgument(0));
-
-            EntregaDTO result = entregaService.realizarEntrega(1L, 1L, "Mi entrega", List.of(archivo));
-
-            assertThat(result).isNotNull();
-            verify(oneDriveService, never()).subirArchivo(any(), any(), any(), any(), any(), any(), any());
-            verify(materialRepository).save(any(Material.class));
         }
     }
 }

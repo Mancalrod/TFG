@@ -22,6 +22,9 @@ public class EntregableDTO {
     private Long tamanoMaximoBytes;
     private Visibilidad visibilidad;
     private Boolean permiteReenvio;
+    private String estructuraZip;
+    private Boolean validacionZipEstricta;
+    private String nombreZipEsperado;
     private Long actividadId;
     private String actividadTitulo;
     private Long numeroEntregas;

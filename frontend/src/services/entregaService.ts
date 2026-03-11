@@ -66,6 +66,38 @@ export const entregaService = {
     return response.data;
   },
 
+  previsualizarArchivo: async (materialId: number): Promise<Blob> => {
+    const response = await api.get(`${BASE_URL}/archivo/${materialId}/preview`, {
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  descargarTodo: async (entregableId: number): Promise<{ blob: Blob; filename: string }> => {
+    const response = await api.get(`${BASE_URL}/entregable/${entregableId}/descargar-todo`, {
+      responseType: 'blob'
+    });
+    const disposition = response.headers['content-disposition'] || '';
+    const match = disposition.match(/filename="?([^"]+)"?/);
+    const filename = match ? match[1] : `entregas_${entregableId}.zip`;
+    return { blob: response.data, filename };
+  },
+
+  descargarTodoActividad: async (actividadId: number): Promise<{ blob: Blob; filename: string }> => {
+    const response = await api.get(`${BASE_URL}/actividad/${actividadId}/descargar-todo`, {
+      responseType: 'blob'
+    });
+    const disposition = response.headers['content-disposition'] || '';
+    const match = disposition.match(/filename="?([^"]+)"?/);
+    const filename = match ? match[1] : `actividad_${actividadId}.zip`;
+    return { blob: response.data, filename };
+  },
+
+  listarContenidoZip: async (materialId: number): Promise<{ nombre: string; tamano: number; esCarpeta: boolean }[]> => {
+    const response = await api.get(`${BASE_URL}/archivo/${materialId}/zip-contenido`);
+    return response.data;
+  },
+
   listarPorEstudiante: async (estudianteId: number): Promise<EntregaDTO[]> => {
     const response = await api.get<EntregaDTO[]>(`${BASE_URL}/estudiante/${estudianteId}`);
     return response.data;

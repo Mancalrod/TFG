@@ -29,4 +29,6 @@ public class ActividadDTO {
     private Integer numeroEntregables;
     private Integer numeroEntregas;
     private Boolean enPlazo;
+    private Boolean subirAOneDrive;
+    private Long oneDriveUsuarioId;
 }

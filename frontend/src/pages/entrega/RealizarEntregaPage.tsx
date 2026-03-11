@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { EntregableDTO } from '../../types';
+import { EntregableDTO, NodoEstructuraZip } from '../../types';
 import { entregableService, entregaService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
 import './RealizarEntregaPage.css';
@@ -504,6 +504,36 @@ const RealizarEntregaPage: React.FC = () => {
         )}
       </div>
 
+      {/* Estructura esperada del ZIP */}
+      {(entregable.estructuraZip || entregable.nombreZipEsperado) && (() => {
+        let nodos: NodoEstructuraZip[] = [];
+        if (entregable.estructuraZip) {
+          try { nodos = JSON.parse(entregable.estructuraZip); } catch { nodos = []; }
+        }
+        if (nodos.length === 0 && !entregable.nombreZipEsperado) return null;
+        return (
+          <div className="re-zip-structure">
+            <div className="re-zip-structure-header">
+              <span>📦 Estructura esperada del ZIP</span>
+              <span className={`re-zip-mode-badge ${entregable.validacionZipEstricta ? 'estricta' : 'minima'}`}>
+                {entregable.validacionZipEstricta ? 'Estructura exacta' : 'Mínimo requerido'}
+              </span>
+            </div>
+            {entregable.nombreZipEsperado && entregable.nombreZipEsperado !== '*' && (
+              <div className="re-zip-nombre">
+                <span className="re-zip-nombre-label">Nombre esperado:</span>
+                <code className="re-zip-nombre-value">{entregable.nombreZipEsperado}.zip</code>
+              </div>
+            )}
+            {nodos.length > 0 && (
+              <div className="re-zip-tree">
+                <EstructuraZipReadonly nodos={nodos} nivel={0} />
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Aviso de borrador recuperado */}
       {borradorCargado && (
         <div className="re-borrador-banner">
@@ -667,5 +697,36 @@ const RealizarEntregaPage: React.FC = () => {
     </div>
   );
 };
+
+// ── Componente read-only para mostrar la estructura esperada al estudiante ──
+const EstructuraZipReadonly: React.FC<{ nodos: NodoEstructuraZip[]; nivel: number }> = ({ nodos, nivel }) => (
+  <div className="re-zip-nodo-list">
+    {nodos.map(nodo => {
+      const esCarpeta = nodo.tipo === 'CARPETA';
+      const esWild = nodo.nombre === '*';
+      const extensiones = nodo.extensiones || [];
+      let extDisplay = '';
+      if (!esCarpeta) {
+        if (extensiones.length === 0) extDisplay = '.*';
+        else if (extensiones.length === 1) extDisplay = `.${extensiones[0]}`;
+        else extDisplay = `.{${extensiones.join(', ')}}`;
+      }
+
+      return (
+        <div key={nodo.id} className="re-zip-nodo" style={{ paddingLeft: nivel * 18 }}>
+          <span className="re-zip-nodo-icon">{esCarpeta ? '📁' : '📄'}</span>
+          <span className="re-zip-nodo-name">
+            {esWild ? <em>*</em> : nodo.nombre}
+            {!esCarpeta && <span className="re-zip-nodo-ext">{extDisplay}</span>}
+            {esCarpeta && '/'}
+          </span>
+          {esCarpeta && nodo.hijos && nodo.hijos.length > 0 && (
+            <EstructuraZipReadonly nodos={nodo.hijos} nivel={nivel + 1} />
+          )}
+        </div>
+      );
+    })}
+  </div>
+);
 
 export default RealizarEntregaPage;

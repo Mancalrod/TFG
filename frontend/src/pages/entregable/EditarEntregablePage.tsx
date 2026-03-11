@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { EntregableDTO, CrearEntregableDTO, Visibilidad, TipoMaterial } from '../../types';
+import { EntregableDTO, CrearEntregableDTO, Visibilidad, TipoMaterial, NodoEstructuraZip } from '../../types';
 import { entregableService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
+import EstructuraZipBuilder from '../../components/EstructuraZipBuilder';
 import './EditarEntregablePage.css';
 
 const EditarEntregablePage: React.FC = () => {
@@ -30,8 +31,10 @@ const EditarEntregablePage: React.FC = () => {
     permiteReenvio: true,
   });
 
-  // Para el selector de tamaño en MB
   const [tamanoMB, setTamanoMB] = useState<string>('');
+  const [estructuraZipNodos, setEstructuraZipNodos] = useState<NodoEstructuraZip[]>([]);
+  const [validacionZipEstricta, setValidacionZipEstricta] = useState(false);
+  const [nombreZipEsperado, setNombreZipEsperado] = useState('');
 
   const cargarEntregable = useCallback(async (entregableId: number) => {
     setLoading(true);
@@ -63,6 +66,17 @@ const EditarEntregablePage: React.FC = () => {
       if (data.tamanoMaximoBytes) {
         setTamanoMB((data.tamanoMaximoBytes / (1024 * 1024)).toFixed(1));
       }
+
+      // Cargar estructura ZIP si existe
+      if (data.estructuraZip) {
+        try {
+          setEstructuraZipNodos(JSON.parse(data.estructuraZip));
+        } catch {
+          setEstructuraZipNodos([]);
+        }
+      }
+      setValidacionZipEstricta(data.validacionZipEstricta ?? false);
+      setNombreZipEsperado(data.nombreZipEsperado ?? '');
     } catch (err) {
       console.error('Error al cargar entregable:', err);
       setError('No se pudo cargar el entregable');
@@ -138,7 +152,20 @@ const EditarEntregablePage: React.FC = () => {
     setErrorGuardar(null);
 
     try {
-      await entregableService.actualizar(parseInt(id), formData);
+      const datosEnvio: CrearEntregableDTO = { ...formData };
+
+      // Si el tipo esperado es ZIP y hay estructura definida, incluirla
+      if (formData.tipoArchivoEsperado === TipoMaterial.ZIP && estructuraZipNodos.length > 0) {
+        datosEnvio.estructuraZip = JSON.stringify(estructuraZipNodos);
+        datosEnvio.validacionZipEstricta = validacionZipEstricta;
+        datosEnvio.nombreZipEsperado = nombreZipEsperado.trim() || undefined;
+      } else {
+        datosEnvio.estructuraZip = undefined;
+        datosEnvio.validacionZipEstricta = undefined;
+        datosEnvio.nombreZipEsperado = undefined;
+      }
+
+      await entregableService.actualizar(parseInt(id), datosEnvio);
       navigate(`/entregables/${id}`);
     } catch (err: unknown) {
       console.error('Error al guardar:', err);
@@ -331,6 +358,20 @@ const EditarEntregablePage: React.FC = () => {
             />
           </div>
         </div>
+
+        {/* Estructura del ZIP (solo cuando tipo = ZIP) */}
+        {formData.tipoArchivoEsperado === TipoMaterial.ZIP && (
+          <div className="ee-field">
+            <EstructuraZipBuilder
+              nodos={estructuraZipNodos}
+              onChange={setEstructuraZipNodos}
+              estricta={validacionZipEstricta}
+              onEstrictaChange={setValidacionZipEstricta}
+              nombreZipEsperado={nombreZipEsperado}
+              onNombreZipChange={setNombreZipEsperado}
+            />
+          </div>
+        )}
 
         {/* Permite reenvío */}
         <div className="ee-field ee-checkbox-field">

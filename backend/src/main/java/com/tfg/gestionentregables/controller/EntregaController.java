@@ -5,7 +5,6 @@ import com.tfg.gestionentregables.entity.Material;
 import com.tfg.gestionentregables.service.EntregaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controlador REST para gestión de entregas.
@@ -31,6 +31,8 @@ import java.util.List;
 public class EntregaController {
 
     private final EntregaService entregaService;
+    private final com.tfg.gestionentregables.service.EntregableService entregableService;
+    private final com.tfg.gestionentregables.service.ActividadService actividadService;
 
     /**
      * SYSOP-014: Obtener detalle de una entrega.
@@ -120,10 +122,82 @@ public class EntregaController {
         }
     }
 
-    @GetMapping("/estudiante/{usuarioId}")
+    /**
+     * Previsualizar archivo de una entrega (inline, sin forzar descarga).
+     */
+    @GetMapping("/archivo/{materialId}/preview")
+    public ResponseEntity<byte[]> previsualizarArchivo(@PathVariable Long materialId) {
+        Material material = entregaService.obtenerArchivo(materialId);
+
+        try {
+            byte[] contenido = entregaService.descargarContenidoArchivo(materialId);
+            MediaType mediaType = resolverMediaType(material.getNombre());
+
+            return ResponseEntity.ok()
+                    .contentType(mediaType)
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\"" + material.getNombre() + "\"")
+                    .body(contenido);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Descarga todos los archivos de las entregas activas de un entregable como ZIP.
+     */
+    @GetMapping("/entregable/{entregableId}/descargar-todo")
+    public ResponseEntity<byte[]> descargarTodo(@PathVariable Long entregableId) {
+        try {
+            var entregable = entregableService.obtenerEntregable(entregableId);
+            byte[] zipBytes = entregaService.descargarTodoComoZip(entregableId);
+            String filename = sanitizarNombreArchivo(entregable.getTitulo()) + ".zip";
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType("application/zip"))
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + filename + "\"")
+                    .body(zipBytes);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Descarga todas las entregas de todos los entregables de una actividad como ZIP.
+     */
+    @GetMapping("/actividad/{actividadId}/descargar-todo")
+    public ResponseEntity<byte[]> descargarTodoActividad(@PathVariable Long actividadId) {
+        try {
+            var actividad = actividadService.obtenerActividadPorId(actividadId);
+            byte[] zipBytes = entregaService.descargarTodoActividadComoZip(actividadId);
+            String filename = sanitizarNombreArchivo(actividad.getTitulo()) + ".zip";
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType("application/zip"))
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + filename + "\"")
+                    .body(zipBytes);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Lista el contenido interno de un archivo ZIP para previsualización.
+     */
+    @GetMapping("/archivo/{materialId}/zip-contenido")
+    public ResponseEntity<List<Map<String, Object>>> listarContenidoZip(@PathVariable Long materialId) {
+        try {
+            List<Map<String, Object>> contenido = entregaService.listarContenidoZip(materialId);
+            return ResponseEntity.ok(contenido);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/estudiante/{estudianteId}")
     public ResponseEntity<List<EntregaDTO>> listarTodasEntregasEstudiante(
-            @PathVariable Long usuarioId) {
-        return ResponseEntity.ok(entregaService.listarTodasEntregasEstudiante(usuarioId));
+            @PathVariable Long estudianteId) {
+        return ResponseEntity.ok(entregaService.listarTodasEntregasEstudiante(estudianteId));
     }
 
     @GetMapping("/profesor/{profesorId}/pendientes")
@@ -142,5 +216,25 @@ public class EntregaController {
     public ResponseEntity<Void> eliminarEntrega(@PathVariable Long id) {
         entregaService.eliminarEntrega(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private String sanitizarNombreArchivo(String nombre) {
+        if (nombre == null) return "entregas";
+        return nombre.replaceAll("[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ._-]", "_").trim();
+    }
+
+    private MediaType resolverMediaType(String nombre) {
+        if (nombre == null) return MediaType.APPLICATION_OCTET_STREAM;
+        String lower = nombre.toLowerCase();
+        if (lower.endsWith(".pdf")) return MediaType.APPLICATION_PDF;
+        if (lower.endsWith(".png")) return MediaType.IMAGE_PNG;
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return MediaType.IMAGE_JPEG;
+        if (lower.endsWith(".gif")) return MediaType.IMAGE_GIF;
+        if (lower.endsWith(".txt")) return MediaType.TEXT_PLAIN;
+        if (lower.endsWith(".html") || lower.endsWith(".htm")) return MediaType.TEXT_HTML;
+        if (lower.endsWith(".json")) return MediaType.APPLICATION_JSON;
+        if (lower.endsWith(".xml")) return MediaType.APPLICATION_XML;
+        if (lower.endsWith(".svg")) return MediaType.parseMediaType("image/svg+xml");
+        return MediaType.APPLICATION_OCTET_STREAM;
     }
 }

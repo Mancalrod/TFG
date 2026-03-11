@@ -3,7 +3,9 @@ package com.tfg.gestionentregables.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.tfg.gestionentregables.dto.*;
+import com.tfg.gestionentregables.entity.Material;
 import com.tfg.gestionentregables.entity.enums.EstadoEntrega;
+import com.tfg.gestionentregables.entity.enums.TipoMaterial;
 import com.tfg.gestionentregables.security.jwt.JwtTokenProvider;
 import com.tfg.gestionentregables.service.EntregaService;
 import jakarta.persistence.EntityNotFoundException;
@@ -233,6 +235,135 @@ class EntregaControllerTest {
 
             mockMvc.perform(delete("/api/entregas/1"))
                     .andExpect(status().isConflict());
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /api/entregas/archivo/{materialId}/preview")
+    class PrevisualizarArchivo {
+
+        @Test
+        @DisplayName("200 - Previsualiza PDF con content-type correcto")
+        void preview_pdf() throws Exception {
+            Material material = Material.builder()
+                    .id(1L).nombre("informe.pdf").tipoMaterial(TipoMaterial.PDF).build();
+            byte[] contenido = "contenido-pdf".getBytes();
+
+            when(entregaService.obtenerArchivo(1L)).thenReturn(material);
+            when(entregaService.descargarContenidoArchivo(1L)).thenReturn(contenido);
+
+            mockMvc.perform(get("/api/entregas/archivo/1/preview"))
+                    .andExpect(status().isOk())
+                    .andExpect(header().string("Content-Disposition", "inline; filename=\"informe.pdf\""))
+                    .andExpect(content().contentType(MediaType.APPLICATION_PDF))
+                    .andExpect(content().bytes(contenido));
+        }
+
+        @Test
+        @DisplayName("200 - Previsualiza imagen PNG")
+        void preview_png() throws Exception {
+            Material material = Material.builder()
+                    .id(2L).nombre("diagrama.png").tipoMaterial(TipoMaterial.IMAGEN).build();
+            byte[] contenido = "contenido-png".getBytes();
+
+            when(entregaService.obtenerArchivo(2L)).thenReturn(material);
+            when(entregaService.descargarContenidoArchivo(2L)).thenReturn(contenido);
+
+            mockMvc.perform(get("/api/entregas/archivo/2/preview"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.IMAGE_PNG));
+        }
+
+        @Test
+        @DisplayName("200 - Previsualiza archivo TXT")
+        void preview_txt() throws Exception {
+            Material material = Material.builder()
+                    .id(3L).nombre("readme.txt").tipoMaterial(TipoMaterial.TXT).build();
+            byte[] contenido = "Hola mundo".getBytes();
+
+            when(entregaService.obtenerArchivo(3L)).thenReturn(material);
+            when(entregaService.descargarContenidoArchivo(3L)).thenReturn(contenido);
+
+            mockMvc.perform(get("/api/entregas/archivo/3/preview"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.TEXT_PLAIN));
+        }
+
+        @Test
+        @DisplayName("200 - Archivo sin extensión conocida usa octet-stream")
+        void preview_desconocido() throws Exception {
+            Material material = Material.builder()
+                    .id(4L).nombre("archivo.xyz").tipoMaterial(TipoMaterial.OTRO).build();
+            byte[] contenido = "datos".getBytes();
+
+            when(entregaService.obtenerArchivo(4L)).thenReturn(material);
+            when(entregaService.descargarContenidoArchivo(4L)).thenReturn(contenido);
+
+            mockMvc.perform(get("/api/entregas/archivo/4/preview"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM));
+        }
+
+        @Test
+        @DisplayName("404 - Material no encontrado")
+        void preview_notFound() throws Exception {
+            when(entregaService.obtenerArchivo(99L))
+                    .thenThrow(new EntityNotFoundException("No encontrado"));
+
+            mockMvc.perform(get("/api/entregas/archivo/99/preview"))
+                    .andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("404 - Error al descargar contenido")
+        void preview_errorDescarga() throws Exception {
+            Material material = Material.builder()
+                    .id(1L).nombre("archivo.pdf").tipoMaterial(TipoMaterial.PDF).build();
+
+            when(entregaService.obtenerArchivo(1L)).thenReturn(material);
+            when(entregaService.descargarContenidoArchivo(1L))
+                    .thenThrow(new RuntimeException("Error de descarga"));
+
+            mockMvc.perform(get("/api/entregas/archivo/1/preview"))
+                    .andExpect(status().isNotFound());
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /api/entregas/entregable/{entregableId}/descargar-todo")
+    class DescargarTodo {
+
+        @Test
+        @DisplayName("200 - Descarga ZIP con todas las entregas")
+        void descargarTodo_ok() throws Exception {
+            byte[] zipBytes = "fake-zip-content".getBytes();
+            when(entregaService.descargarTodoComoZip(1L)).thenReturn(zipBytes);
+
+            mockMvc.perform(get("/api/entregas/entregable/1/descargar-todo"))
+                    .andExpect(status().isOk())
+                    .andExpect(header().string("Content-Disposition", "attachment; filename=\"entregas.zip\""))
+                    .andExpect(content().contentType("application/zip"))
+                    .andExpect(content().bytes(zipBytes));
+        }
+
+        @Test
+        @DisplayName("404 - Entregable no encontrado")
+        void descargarTodo_notFound() throws Exception {
+            when(entregaService.descargarTodoComoZip(99L))
+                    .thenThrow(new EntityNotFoundException("No encontrado"));
+
+            mockMvc.perform(get("/api/entregas/entregable/99/descargar-todo"))
+                    .andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("404 - Error al generar ZIP")
+        void descargarTodo_error() throws Exception {
+            when(entregaService.descargarTodoComoZip(1L))
+                    .thenThrow(new RuntimeException("Error interno"));
+
+            mockMvc.perform(get("/api/entregas/entregable/1/descargar-todo"))
+                    .andExpect(status().isNotFound());
         }
     }
 }

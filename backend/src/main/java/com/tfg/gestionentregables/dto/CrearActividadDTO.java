@@ -38,4 +38,8 @@ public class CrearActividadDTO {
     private Long cursoId;
     
     private List<Long> grupoIds;
+
+    private Boolean subirAOneDrive;
+
+    private Long oneDriveUsuarioId;
 }

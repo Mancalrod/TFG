@@ -2,13 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ActividadDTO, CrearActividadDTO, TipoActividad, Visibilidad, GrupoDTO } from '../../types';
 import { actividadService, cursoService } from '../../services';
+import { oneDriveService } from '../../services/oneDriveService';
 import { useAuth } from '../../context/AuthContext';
 import './EditarActividadPage.css';
 
 const EditarActividadPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { esProfesor } = useAuth();
+  const { esProfesor, usuario } = useAuth();
 
   const [actividad, setActividad] = useState<ActividadDTO | null>(null);
   const [grupos, setGrupos] = useState<GrupoDTO[]>([]);
@@ -20,6 +21,11 @@ const EditarActividadPage: React.FC = () => {
   const [mostrarConfirmarEliminar, setMostrarConfirmarEliminar] = useState(false);
 
   const [todosLosGrupos, setTodosLosGrupos] = useState(true);
+
+  // OneDrive
+  const [oneDriveEnabled, setOneDriveEnabled] = useState(false);
+  const [oneDriveConectado, setOneDriveConectado] = useState(false);
+  const [conectandoOneDrive, setConectandoOneDrive] = useState(false);
 
   const [formData, setFormData] = useState<CrearActividadDTO>({
     titulo: '',
@@ -59,14 +65,28 @@ const EditarActividadPage: React.FC = () => {
         visibilidad: data.visibilidad,
         notaMaxima: data.notaMaxima ?? undefined,
         grupoIds: data.grupoIds || [],
+        subirAOneDrive: data.subirAOneDrive || false,
+        oneDriveUsuarioId: data.oneDriveUsuarioId,
       });
+
+      // Comprobar estado de OneDrive
+      try {
+        const enabled = await oneDriveService.isEnabled();
+        setOneDriveEnabled(enabled);
+        if (enabled && usuario) {
+          const status = await oneDriveService.getConnectionStatus(usuario.id);
+          setOneDriveConectado(status.conectado);
+        }
+      } catch {
+        setOneDriveEnabled(false);
+      }
     } catch (err) {
       console.error('Error al cargar actividad:', err);
       setError('No se pudo cargar la actividad');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [usuario]);
 
   useEffect(() => {
     if (id) {
@@ -144,6 +164,8 @@ const EditarActividadPage: React.FC = () => {
       const dataToSend: CrearActividadDTO = {
         ...formData,
         grupoIds: todosLosGrupos ? [] : formData.grupoIds,
+        subirAOneDrive: formData.subirAOneDrive || false,
+        oneDriveUsuarioId: formData.subirAOneDrive ? (formData.oneDriveUsuarioId || usuario?.id) : undefined,
       };
       await actividadService.actualizar(parseInt(id), dataToSend);
       navigate(`/actividades/${id}`);
@@ -358,6 +380,44 @@ const EditarActividadPage: React.FC = () => {
                     </span>
                   </label>
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* OneDrive */}
+        {oneDriveEnabled && (
+          <div className="ea-field">
+            <label>Subir entregas a OneDrive</label>
+            {oneDriveConectado ? (
+              <label className="ea-onedrive-toggle">
+                <input
+                  type="checkbox"
+                  checked={formData.subirAOneDrive || false}
+                  onChange={e => setFormData(prev => ({ ...prev, subirAOneDrive: e.target.checked }))}
+                />
+                <span>Las entregas de los alumnos se subirán automáticamente a tu OneDrive</span>
+              </label>
+            ) : (
+              <div className="ea-onedrive-connect">
+                <p className="ea-onedrive-msg">Conecta tu OneDrive para poder recibir las entregas directamente en tu nube.</p>
+                <button
+                  type="button"
+                  className="ea-btn-onedrive"
+                  disabled={conectandoOneDrive}
+                  onClick={async () => {
+                    if (!usuario) return;
+                    setConectandoOneDrive(true);
+                    try {
+                      const ok = await oneDriveService.connectOneDrive(usuario.id);
+                      if (ok) setOneDriveConectado(true);
+                    } finally {
+                      setConectandoOneDrive(false);
+                    }
+                  }}
+                >
+                  {conectandoOneDrive ? 'Conectando...' : 'Conectar OneDrive'}
+                </button>
               </div>
             )}
           </div>
