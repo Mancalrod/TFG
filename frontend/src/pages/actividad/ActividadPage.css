@@ -87,6 +87,10 @@
   gap: 0.5rem;
 }
 
+.btn-descargar-actividad {
+  white-space: nowrap;
+}
+
 .actividad-content {
   display: grid;
   grid-template-columns: 1fr 2fr;

@@ -73,11 +73,24 @@ export const entregaService = {
     return response.data;
   },
 
-  descargarTodo: async (entregableId: number): Promise<Blob> => {
+  descargarTodo: async (entregableId: number): Promise<{ blob: Blob; filename: string }> => {
     const response = await api.get(`${BASE_URL}/entregable/${entregableId}/descargar-todo`, {
       responseType: 'blob'
     });
-    return response.data;
+    const disposition = response.headers['content-disposition'] || '';
+    const match = disposition.match(/filename="?([^"]+)"?/);
+    const filename = match ? match[1] : `entregas_${entregableId}.zip`;
+    return { blob: response.data, filename };
+  },
+
+  descargarTodoActividad: async (actividadId: number): Promise<{ blob: Blob; filename: string }> => {
+    const response = await api.get(`${BASE_URL}/actividad/${actividadId}/descargar-todo`, {
+      responseType: 'blob'
+    });
+    const disposition = response.headers['content-disposition'] || '';
+    const match = disposition.match(/filename="?([^"]+)"?/);
+    const filename = match ? match[1] : `actividad_${actividadId}.zip`;
+    return { blob: response.data, filename };
   },
 
   listarContenidoZip: async (materialId: number): Promise<{ nombre: string; tamano: number; esCarpeta: boolean }[]> => {

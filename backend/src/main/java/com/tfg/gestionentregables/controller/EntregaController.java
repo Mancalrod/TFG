@@ -31,6 +31,8 @@ import java.util.Map;
 public class EntregaController {
 
     private final EntregaService entregaService;
+    private final com.tfg.gestionentregables.service.EntregableService entregableService;
+    private final com.tfg.gestionentregables.service.ActividadService actividadService;
 
     /**
      * SYSOP-014: Obtener detalle de una entrega.
@@ -147,11 +149,32 @@ public class EntregaController {
     @GetMapping("/entregable/{entregableId}/descargar-todo")
     public ResponseEntity<byte[]> descargarTodo(@PathVariable Long entregableId) {
         try {
+            var entregable = entregableService.obtenerEntregable(entregableId);
             byte[] zipBytes = entregaService.descargarTodoComoZip(entregableId);
+            String filename = sanitizarNombreArchivo(entregable.getTitulo()) + ".zip";
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType("application/zip"))
                     .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=\"entregas.zip\"")
+                            "attachment; filename=\"" + filename + "\"")
+                    .body(zipBytes);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Descarga todas las entregas de todos los entregables de una actividad como ZIP.
+     */
+    @GetMapping("/actividad/{actividadId}/descargar-todo")
+    public ResponseEntity<byte[]> descargarTodoActividad(@PathVariable Long actividadId) {
+        try {
+            var actividad = actividadService.obtenerActividadPorId(actividadId);
+            byte[] zipBytes = entregaService.descargarTodoActividadComoZip(actividadId);
+            String filename = sanitizarNombreArchivo(actividad.getTitulo()) + ".zip";
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType("application/zip"))
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + filename + "\"")
                     .body(zipBytes);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
@@ -193,6 +216,11 @@ public class EntregaController {
     public ResponseEntity<Void> eliminarEntrega(@PathVariable Long id) {
         entregaService.eliminarEntrega(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private String sanitizarNombreArchivo(String nombre) {
+        if (nombre == null) return "entregas";
+        return nombre.replaceAll("[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ._-]", "_").trim();
     }
 
     private MediaType resolverMediaType(String nombre) {

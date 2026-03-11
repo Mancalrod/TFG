@@ -513,6 +513,52 @@ public class EntregaService {
     }
 
     /**
+     * Descarga todas las entregas activas de todos los entregables de una actividad como ZIP.
+     * Organiza los archivos en carpetas por entregable y luego por estudiante.
+     */
+    @Transactional(readOnly = true)
+    public byte[] descargarTodoActividadComoZip(Long actividadId) {
+        List<Entregable> entregables = entregableRepository.findByActividadId(actividadId);
+        if (entregables.isEmpty()) {
+            throw new EntityNotFoundException("No se encontraron entregables para la actividad con ID: " + actividadId);
+        }
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             ZipOutputStream zos = new ZipOutputStream(baos)) {
+
+            for (Entregable entregable : entregables) {
+                String carpetaEntregable = entregable.getTitulo()
+                        .replaceAll("[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ._-]", "_");
+
+                List<Entrega> entregasActivas = entregaRepository
+                        .findByEntregableIdAndEsVersionActiva(entregable.getId(), true);
+
+                for (Entrega entrega : entregasActivas) {
+                    String carpetaEstudiante = entrega.getEstudiante().getUsuario().getNombre()
+                            .replaceAll("[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ._-]", "_");
+
+                    for (Material material : entrega.getArchivos()) {
+                        String entryName = carpetaEntregable + "/" + carpetaEstudiante + "/" + material.getNombre();
+                        try {
+                            byte[] contenido = descargarContenidoArchivo(material.getId());
+                            zos.putNextEntry(new ZipEntry(entryName));
+                            zos.write(contenido);
+                            zos.closeEntry();
+                        } catch (Exception e) {
+                            log.warn("No se pudo incluir archivo {} en el ZIP: {}", entryName, e.getMessage());
+                        }
+                    }
+                }
+            }
+
+            zos.finish();
+            return baos.toByteArray();
+        } catch (IOException e) {
+            throw new UncheckedIOException("Error al crear el ZIP de entregas de la actividad", e);
+        }
+    }
+
+    /**
      * Lee un archivo del sistema de archivos local.
      */
     private byte[] leerArchivoLocal(String ruta) {

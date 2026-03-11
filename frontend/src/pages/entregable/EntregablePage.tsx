@@ -7,11 +7,11 @@ import './EntregablePage.css';
 
 const descargarTodo = async (entregableId: number) => {
   try {
-    const blob = await entregaService.descargarTodo(entregableId);
+    const { blob, filename } = await entregaService.descargarTodo(entregableId);
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `entregas_${entregableId}.zip`;
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     a.remove();
