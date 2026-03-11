@@ -76,6 +76,45 @@ class MicrosoftOAuthServiceTest {
             assertThat(url).contains("prompt=consent");
             assertThat(url).startsWith("https://login.microsoftonline.com/common/oauth2/v2.0/authorize");
         }
+
+        @Test
+        @DisplayName("State contiene usuarioId seguido de UUID")
+        void state_contiene_userId() {
+            when(properties.getTenantId()).thenReturn("common");
+            when(properties.getClientId()).thenReturn("cid");
+            when(properties.getRedirectUri()).thenReturn("http://localhost/cb");
+
+            String url = oAuthService.buildAuthorizationUrl(42L);
+
+            // state= se codifica como "42:<uuid>"
+            assertThat(url).contains("state=");
+            // Extraer el valor de state del URL
+            String stateParam = url.substring(url.indexOf("state=") + 6);
+            if (stateParam.contains("&")) {
+                stateParam = stateParam.substring(0, stateParam.indexOf("&"));
+            }
+            assertThat(java.net.URLDecoder.decode(stateParam, java.nio.charset.StandardCharsets.UTF_8))
+                    .startsWith("42:");
+        }
+
+        @Test
+        @DisplayName("URL codifica redirect_uri y scopes")
+        void codifica_parametros() {
+            when(properties.getTenantId()).thenReturn("common");
+            when(properties.getClientId()).thenReturn("cid");
+            when(properties.getRedirectUri()).thenReturn("http://localhost:8080/api/callback");
+
+            String url = oAuthService.buildAuthorizationUrl(1L);
+
+            // scope contiene espacios que deben estar codificados
+            assertThat(url).contains("scope=");
+            // La parte de scope no debe contener espacios sin codificar
+            String scopePart = url.substring(url.indexOf("scope=") + 6);
+            if (scopePart.contains("&")) {
+                scopePart = scopePart.substring(0, scopePart.indexOf("&"));
+            }
+            assertThat(scopePart).doesNotContain(" ");
+        }
     }
 
     // =============================================
@@ -117,6 +156,19 @@ class MicrosoftOAuthServiceTest {
             assertThatThrownBy(() -> oAuthService.exchangeCodeForTokens("code", "abc:uuid"))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("State inválido");
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si usuario existe pero la llamada REST falla")
+        void exchange_restFalla() {
+            when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+            when(properties.getClientId()).thenReturn("fake-client");
+            when(properties.getClientSecret()).thenReturn("fake-secret");
+            when(properties.getRedirectUri()).thenReturn("http://localhost/cb");
+            when(properties.getTenantId()).thenReturn("common");
+
+            assertThatThrownBy(() -> oAuthService.exchangeCodeForTokens("fake-code", "1:uuid"))
+                    .isInstanceOf(Exception.class);
         }
     }
 
@@ -268,6 +320,25 @@ class MicrosoftOAuthServiceTest {
 
             assertThat(result).isEmpty();
         }
+
+        @Test
+        @DisplayName("Devuelve empty si el email del token es null")
+        void email_null() {
+            MicrosoftToken tokenSinEmail = MicrosoftToken.builder()
+                    .id(2L).usuario(usuario)
+                    .microsoftEmail(null)
+                    .accessToken("at").refreshToken("rt")
+                    .expiraEn(LocalDateTime.now().plusHours(1))
+                    .fechaConexion(LocalDateTime.now())
+                    .build();
+
+            when(tokenRepository.findByUsuarioId(1L)).thenReturn(Optional.of(tokenSinEmail));
+
+            Optional<String> result = oAuthService.getMicrosoftEmail(1L);
+
+            // map(MicrosoftToken::getMicrosoftEmail) devuelve Optional.ofNullable(null) → empty
+            assertThat(result).isEmpty();
+        }
     }
 
     // =============================================
@@ -286,6 +357,16 @@ class MicrosoftOAuthServiceTest {
             oAuthService.disconnect(1L);
 
             verify(tokenRepository).deleteByUsuarioId(1L);
+        }
+
+        @Test
+        @DisplayName("No falla si usuario no tenía OneDrive conectado")
+        void disconnect_sinConexionPrevia() {
+            doNothing().when(tokenRepository).deleteByUsuarioId(99L);
+
+            assertThatNoException().isThrownBy(() -> oAuthService.disconnect(99L));
+
+            verify(tokenRepository).deleteByUsuarioId(99L);
         }
     }
 
@@ -381,6 +462,36 @@ class MicrosoftOAuthServiceTest {
             String result = invocarEncode("http://localhost:8080/api/callback");
             assertThat(result).doesNotContain(":");
             assertThat(result).doesNotContain("/");
+        }
+    }
+
+    // =============================================
+    // fetchMicrosoftEmail (método privado, via reflexión)
+    // =============================================
+
+    @Nested
+    @DisplayName("fetchMicrosoftEmail")
+    class FetchMicrosoftEmail {
+
+        private String invocarFetchEmail(String accessToken) {
+            try {
+                Method method = MicrosoftOAuthService.class.getDeclaredMethod("fetchMicrosoftEmail", String.class);
+                method.setAccessible(true);
+                return (String) method.invoke(oAuthService, accessToken);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e.getCause());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        @DisplayName("Devuelve 'unknown@microsoft.com' cuando la API de Graph falla")
+        void retornaFallbackCuandoApiFalla() {
+            // restTemplate real lanza excepción al llamar graph API con token inválido
+            String result = invocarFetchEmail("token-invalido");
+
+            assertThat(result).isEqualTo("unknown@microsoft.com");
         }
     }
 }

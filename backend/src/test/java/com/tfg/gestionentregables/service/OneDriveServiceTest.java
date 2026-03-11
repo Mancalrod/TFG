@@ -16,6 +16,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
@@ -111,6 +114,17 @@ class OneDriveServiceTest {
             assertThatThrownBy(() -> oneDriveService.procesarCallback("code", 99L))
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasMessageContaining("Usuario no encontrado");
+        }
+
+        @Test
+        @DisplayName("Lanza RuntimeException si el intercambio de código falla (API externa no disponible)")
+        void callback_intercambioCodigo_falla() {
+            when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+            when(config.getTokenUrl()).thenReturn("https://login.microsoftonline.com/common/oauth2/v2.0/token");
+
+            assertThatThrownBy(() -> oneDriveService.procesarCallback("fake-code", 1L))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Error al conectar con Microsoft");
         }
     }
 
@@ -553,6 +567,70 @@ class OneDriveServiceTest {
                     () -> oneDriveService.desconectar(99L));
 
             verify(tokenRepository).deleteByUsuarioId(99L);
+        }
+    }
+
+    // =============================================
+    // obtenerPerfilMicrosoft (privado, testeado vía reflexión)
+    // =============================================
+
+    @Nested
+    @DisplayName("obtenerPerfilMicrosoft")
+    class ObtenerPerfilMicrosoft {
+
+        private JsonNode invocarObtenerPerfil(String accessToken) {
+            try {
+                Method method = OneDriveService.class.getDeclaredMethod("obtenerPerfilMicrosoft", String.class);
+                method.setAccessible(true);
+                return (JsonNode) method.invoke(oneDriveService, accessToken);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e.getCause());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        @DisplayName("Devuelve ObjectNode vacío cuando la API de Graph falla")
+        void retornaVacioCuandoApiFalla() {
+            when(config.getGraphApiUrl()).thenReturn("https://graph.microsoft.com/v1.0");
+
+            JsonNode result = invocarObtenerPerfil("token-invalido");
+
+            assertThat(result).isNotNull();
+            assertThat(result).isInstanceOf(ObjectNode.class);
+            assertThat(result.isEmpty()).isTrue();
+        }
+    }
+
+    // =============================================
+    // crearCarpetaSiNoExiste (privado, testeado vía reflexión)
+    // =============================================
+
+    @Nested
+    @DisplayName("crearCarpetaSiNoExiste")
+    class CrearCarpetaSiNoExiste {
+
+        private void invocarCrearCarpeta(String accessToken, String nombreCarpeta) {
+            try {
+                Method method = OneDriveService.class.getDeclaredMethod(
+                        "crearCarpetaSiNoExiste", String.class, String.class);
+                method.setAccessible(true);
+                method.invoke(oneDriveService, accessToken, nombreCarpeta);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e.getCause());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        @DisplayName("No lanza excepción cuando la API de Graph falla (traga RestClientException)")
+        void noLanzaExcepcionCuandoFalla() {
+            when(config.getGraphApiUrl()).thenReturn("https://graph.microsoft.com/v1.0");
+
+            assertThatNoException().isThrownBy(
+                    () -> invocarCrearCarpeta("token-invalido", "MiCarpeta"));
         }
     }
 }
