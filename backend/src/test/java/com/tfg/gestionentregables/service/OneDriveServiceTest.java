@@ -141,6 +141,18 @@ class OneDriveServiceTest {
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("no tiene OneDrive conectado");
         }
+
+        @Test
+        @DisplayName("Intenta refrescar token si está expirado y falla sin servidor")
+        void token_expirado_intentaRefrescar() {
+            token.setExpiraEn(LocalDateTime.now().minusHours(1));
+            when(tokenRepository.findByUsuarioId(1L)).thenReturn(Optional.of(token));
+            when(config.getTokenUrl()).thenReturn("https://login.microsoftonline.com/common/oauth2/v2.0/token");
+
+            assertThatThrownBy(() -> oneDriveService.obtenerAccessTokenValido(1L))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Error al refrescar token");
+        }
     }
 
     // =============================================
@@ -195,25 +207,6 @@ class OneDriveServiceTest {
             OneDriveToken result = oneDriveService.obtenerConexion(99L);
 
             assertThat(result).isNull();
-        }
-    }
-
-    // =============================================
-    // desconectar
-    // =============================================
-
-    @Nested
-    @DisplayName("desconectar")
-    class Desconectar {
-
-        @Test
-        @DisplayName("Elimina el token del usuario")
-        void desconectar_ok() {
-            doNothing().when(tokenRepository).deleteByUsuarioId(1L);
-
-            oneDriveService.desconectar(1L);
-
-            verify(tokenRepository).deleteByUsuarioId(1L);
         }
     }
 
@@ -346,6 +339,26 @@ class OneDriveServiceTest {
             assertThat(resultado).doesNotContain("\"");
             assertThat(resultado).doesNotContain("?");
         }
+
+        @Test
+        @DisplayName("Cadena vacía devuelve cadena vacía")
+        void sanitizar_vacio() {
+            assertThat(invocarSanitizar("")).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Solo caracteres especiales devuelve underscores")
+        void sanitizar_soloEspeciales() {
+            String resultado = invocarSanitizar("*:<>?/\\|");
+            assertThat(resultado).matches("^[_]+$");
+        }
+
+        @Test
+        @DisplayName("Barra invertida se reemplaza")
+        void sanitizar_barraInvertida() {
+            String resultado = invocarSanitizar("carpeta\\subcarpeta");
+            assertThat(resultado).doesNotContain("\\");
+        }
     }
 
     // =============================================
@@ -369,6 +382,39 @@ class OneDriveServiceTest {
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("no tiene OneDrive conectado");
         }
+
+        @Test
+        @DisplayName("Falla al subir cuando Graph API no está disponible")
+        void subir_graphApiFalla() {
+            MockMultipartFile archivo = new MockMultipartFile(
+                    "file", "test.pdf", "application/pdf", "contenido".getBytes());
+
+            when(tokenRepository.findByUsuarioId(1L)).thenReturn(Optional.of(token));
+            when(config.getRootFolder()).thenReturn("TFG-Entregables");
+            when(config.getGraphApiUrl()).thenReturn("https://graph.microsoft.com/v1.0");
+
+            assertThatThrownBy(() -> oneDriveService.subirArchivo(
+                    1L, archivo, "Curso", "Actividad", "Entregable", "Alumno", "test.pdf"))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Error al subir archivo");
+        }
+
+        @Test
+        @DisplayName("Sanitiza caracteres especiales en la ruta de carpetas")
+        void subir_sanitizaRuta() {
+            MockMultipartFile archivo = new MockMultipartFile(
+                    "file", "test.pdf", "application/pdf", "contenido".getBytes());
+
+            when(tokenRepository.findByUsuarioId(1L)).thenReturn(Optional.of(token));
+            when(config.getRootFolder()).thenReturn("TFG-Entregables");
+            when(config.getGraphApiUrl()).thenReturn("https://graph.microsoft.com/v1.0");
+
+            // La llamada fallará por HTTP, pero no debería fallar por caracteres especiales
+            assertThatThrownBy(() -> oneDriveService.subirArchivo(
+                    1L, archivo, "Curso: IS <2026>", "Actividad *1*", "Entregable?", "Alumno|Test", "test.pdf"))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Error al subir archivo");
+        }
     }
 
     // =============================================
@@ -387,6 +433,17 @@ class OneDriveServiceTest {
             assertThatThrownBy(() -> oneDriveService.descargarArchivo(99L, "file-id"))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("no tiene OneDrive conectado");
+        }
+
+        @Test
+        @DisplayName("Falla al descargar cuando Graph API no está disponible")
+        void descargar_graphApiFalla() {
+            when(tokenRepository.findByUsuarioId(1L)).thenReturn(Optional.of(token));
+            when(config.getGraphApiUrl()).thenReturn("https://graph.microsoft.com/v1.0");
+
+            assertThatThrownBy(() -> oneDriveService.descargarArchivo(1L, "file-id-123"))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Error al descargar archivo");
         }
     }
 
@@ -407,6 +464,17 @@ class OneDriveServiceTest {
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("no tiene OneDrive conectado");
         }
+
+        @Test
+        @DisplayName("Falla al obtener URL cuando Graph API no está disponible")
+        void urlDescarga_graphApiFalla() {
+            when(tokenRepository.findByUsuarioId(1L)).thenReturn(Optional.of(token));
+            when(config.getGraphApiUrl()).thenReturn("https://graph.microsoft.com/v1.0");
+
+            assertThatThrownBy(() -> oneDriveService.obtenerUrlDescarga(1L, "file-id-123"))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Error al obtener URL de descarga");
+        }
     }
 
     // =============================================
@@ -425,6 +493,66 @@ class OneDriveServiceTest {
             assertThatThrownBy(() -> oneDriveService.eliminarArchivo(99L, "file-id"))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("no tiene OneDrive conectado");
+        }
+
+        @Test
+        @DisplayName("No lanza excepción si Graph API falla al eliminar (swallows error)")
+        void eliminar_graphApiFallaNoLanza() {
+            when(tokenRepository.findByUsuarioId(1L)).thenReturn(Optional.of(token));
+            when(config.getGraphApiUrl()).thenReturn("https://graph.microsoft.com/v1.0");
+
+            // eliminarArchivo captura RestClientException y no la relanza
+            assertThatNoException().isThrownBy(
+                    () -> oneDriveService.eliminarArchivo(1L, "file-id-inexistente"));
+        }
+    }
+
+    // =============================================
+    // refrescarToken
+    // =============================================
+
+    @Nested
+    @DisplayName("refrescarToken")
+    class RefrescarToken {
+
+        @Test
+        @DisplayName("Lanza RuntimeException cuando no puede contactar el servidor de tokens")
+        void refrescar_falla() {
+            when(config.getTokenUrl()).thenReturn("https://login.microsoftonline.com/common/oauth2/v2.0/token");
+
+            assertThatThrownBy(() -> oneDriveService.refrescarToken(token))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Error al refrescar token");
+        }
+    }
+
+    // =============================================
+    // desconectar - tests adicionales
+    // =============================================
+
+    @Nested
+    @DisplayName("desconectar")
+    class Desconectar {
+
+        @Test
+        @DisplayName("Elimina el token del usuario")
+        void desconectar_ok() {
+            doNothing().when(tokenRepository).deleteByUsuarioId(1L);
+
+            oneDriveService.desconectar(1L);
+
+            verify(tokenRepository).deleteByUsuarioId(1L);
+        }
+
+        @Test
+        @DisplayName("No falla si el usuario no tenía OneDrive conectado")
+        void desconectar_sinConexionPrevia() {
+            doNothing().when(tokenRepository).deleteByUsuarioId(99L);
+
+            assertThatNoException().isThrownBy(
+                    () -> oneDriveService.desconectar(99L));
+
+            verify(tokenRepository).deleteByUsuarioId(99L);
         }
     }
 }
