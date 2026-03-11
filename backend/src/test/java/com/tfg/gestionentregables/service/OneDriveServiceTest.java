@@ -14,12 +14,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -73,7 +75,23 @@ class OneDriveServiceTest {
             assertThat(url).contains("client_id=test-client-id");
             assertThat(url).contains("response_type=code");
             assertThat(url).contains("state=1");
+            assertThat(url).contains("response_mode=query");
             assertThat(url).startsWith("https://login.microsoftonline.com");
+        }
+
+        @Test
+        @DisplayName("URL codifica redirect_uri y scopes correctamente")
+        void genera_url_codificada() {
+            when(config.getAuthorizeUrl()).thenReturn("https://login.microsoftonline.com/common/oauth2/v2.0/authorize");
+            when(config.getClientId()).thenReturn("client-id");
+            when(config.getRedirectUri()).thenReturn("http://localhost:8080/api/onedrive/callback");
+            when(config.getScopes()).thenReturn("files.readwrite offline_access");
+
+            String url = oneDriveService.generarUrlAutorizacion(5L);
+
+            assertThat(url).contains("state=5");
+            assertThat(url).contains("redirect_uri=");
+            assertThat(url).contains("scope=");
         }
     }
 
@@ -252,6 +270,161 @@ class OneDriveServiceTest {
             when(config.getClientSecret()).thenReturn("   ");
 
             assertThat(oneDriveService.isEnabled()).isFalse();
+        }
+
+        @Test
+        @DisplayName("Deshabilitado si clientId es null")
+        void enabled_nullClientId() {
+            when(config.isEnabled()).thenReturn(true);
+            when(config.getClientId()).thenReturn(null);
+
+            assertThat(oneDriveService.isEnabled()).isFalse();
+        }
+    }
+
+    // =============================================
+    // sanitizarNombreCarpeta (método privado, testeado via reflexión)
+    // =============================================
+
+    @Nested
+    @DisplayName("sanitizarNombreCarpeta")
+    class SanitizarNombreCarpeta {
+
+        private String invocarSanitizar(String nombre) {
+            try {
+                Method method = OneDriveService.class.getDeclaredMethod("sanitizarNombreCarpeta", String.class);
+                method.setAccessible(true);
+                return (String) method.invoke(oneDriveService, nombre);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e.getCause());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        @DisplayName("Devuelve 'Sin-nombre' para null")
+        void sanitizar_null() {
+            assertThat(invocarSanitizar(null)).isEqualTo("Sin-nombre");
+        }
+
+        @Test
+        @DisplayName("Reemplaza caracteres especiales de OneDrive (:, <, >)")
+        void sanitizar_caracteresEspeciales() {
+            String resultado = invocarSanitizar("Curso: Programación <2026>");
+            assertThat(resultado).doesNotContain(":");
+            assertThat(resultado).doesNotContain("<");
+            assertThat(resultado).doesNotContain(">");
+        }
+
+        @Test
+        @DisplayName("Nombre normal se mantiene igual")
+        void sanitizar_normal() {
+            assertThat(invocarSanitizar("Ingeniería del Software")).isEqualTo("Ingeniería del Software");
+        }
+
+        @Test
+        @DisplayName("Reemplaza asterisco, barra y pipe")
+        void sanitizar_masCaracteres() {
+            String resultado = invocarSanitizar("Archivo*nombre/raro|test");
+            assertThat(resultado).doesNotContain("*");
+            assertThat(resultado).doesNotContain("/");
+            assertThat(resultado).doesNotContain("|");
+        }
+
+        @Test
+        @DisplayName("Elimina espacios extra y trims")
+        void sanitizar_espaciosExtra() {
+            String resultado = invocarSanitizar("  Nombre   con   espacios  ");
+            assertThat(resultado).isEqualTo("Nombre con espacios");
+        }
+
+        @Test
+        @DisplayName("Reemplaza comillas y signo de interrogación")
+        void sanitizar_comillasYPregunta() {
+            String resultado = invocarSanitizar("Archivo \"importante\"? sí");
+            assertThat(resultado).doesNotContain("\"");
+            assertThat(resultado).doesNotContain("?");
+        }
+    }
+
+    // =============================================
+    // subirArchivo
+    // =============================================
+
+    @Nested
+    @DisplayName("subirArchivo")
+    class SubirArchivo {
+
+        @Test
+        @DisplayName("Lanza excepción si usuario no tiene OneDrive conectado")
+        void subir_sinConexion() {
+            MockMultipartFile archivo = new MockMultipartFile(
+                    "file", "test.pdf", "application/pdf", "contenido".getBytes());
+
+            when(tokenRepository.findByUsuarioId(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> oneDriveService.subirArchivo(
+                    99L, archivo, "Curso", "Actividad", "Entregable", "Alumno", "test.pdf"))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("no tiene OneDrive conectado");
+        }
+    }
+
+    // =============================================
+    // descargarArchivo
+    // =============================================
+
+    @Nested
+    @DisplayName("descargarArchivo")
+    class DescargarArchivo {
+
+        @Test
+        @DisplayName("Lanza excepción si usuario no tiene OneDrive conectado")
+        void descargar_sinConexion() {
+            when(tokenRepository.findByUsuarioId(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> oneDriveService.descargarArchivo(99L, "file-id"))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("no tiene OneDrive conectado");
+        }
+    }
+
+    // =============================================
+    // obtenerUrlDescarga
+    // =============================================
+
+    @Nested
+    @DisplayName("obtenerUrlDescarga")
+    class ObtenerUrlDescarga {
+
+        @Test
+        @DisplayName("Lanza excepción si usuario no tiene OneDrive conectado")
+        void urlDescarga_sinConexion() {
+            when(tokenRepository.findByUsuarioId(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> oneDriveService.obtenerUrlDescarga(99L, "file-id"))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("no tiene OneDrive conectado");
+        }
+    }
+
+    // =============================================
+    // eliminarArchivo
+    // =============================================
+
+    @Nested
+    @DisplayName("eliminarArchivo")
+    class EliminarArchivo {
+
+        @Test
+        @DisplayName("Lanza excepción si usuario no tiene OneDrive conectado")
+        void eliminar_sinConexion() {
+            when(tokenRepository.findByUsuarioId(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> oneDriveService.eliminarArchivo(99L, "file-id"))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("no tiene OneDrive conectado");
         }
     }
 }

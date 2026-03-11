@@ -14,17 +14,17 @@ public class SpaController {
 
     private static final String FORWARD_INDEX = "forward:/index.html";
 
-    @RequestMapping("/{path:[^\\.]*}")
+    @RequestMapping("/{path:^(?!api|h2-console)[^\\.]*$}")
     public String redirectRoot(@PathVariable String path) {
         return FORWARD_INDEX;
     }
 
-    @RequestMapping("/{path:[^\\.]*}/{subPath:[^\\.]*}")
+    @RequestMapping("/{path:^(?!api|h2-console)[^\\.]*$}/{subPath:[^\\.]*}")
     public String redirectSubPath(@PathVariable String path, @PathVariable String subPath) {
         return FORWARD_INDEX;
     }
 
-    @RequestMapping("/{path:[^\\.]*}/{subPath:[^\\.]*}/{remaining:[^\\.]*}")
+    @RequestMapping("/{path:^(?!api|h2-console)[^\\.]*$}/{subPath:[^\\.]*}/{remaining:[^\\.]*}")
     public String redirectDeepPath(@PathVariable String path, @PathVariable String subPath,
                                    @PathVariable String remaining) {
         return FORWARD_INDEX;

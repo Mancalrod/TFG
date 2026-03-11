@@ -52,12 +52,14 @@ public class EntregaService {
      *  - Si el alumno tiene OneDrive conectado, también sube una copia a su OneDrive
      * Si no, almacena localmente como fallback.
      */
-    public EntregaDTO realizarEntrega(Long entregableId, Long estudianteId, String nombre, List<MultipartFile> archivos) {
+    public EntregaDTO realizarEntrega(Long entregableId, Long usuarioId, String nombre, List<MultipartFile> archivos) {
         Entregable entregable = entregableRepository.findById(entregableId)
                 .orElseThrow(() -> new EntityNotFoundException("Entregable no encontrado con ID: " + entregableId));
         
-        Estudiante estudiante = estudianteRepository.findById(estudianteId)
-                .orElseThrow(() -> new EntityNotFoundException("Estudiante no encontrado con ID: " + estudianteId));
+        Long cursoId = entregable.getActividad().getCurso().getId();
+        Estudiante estudiante = estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(usuarioId, cursoId)
+                .orElseThrow(() -> new EntityNotFoundException("Estudiante no encontrado para el usuario con ID: " + usuarioId + " en el curso correspondiente"));
+        Long estudianteId = estudiante.getId();
 
         // Obtener entregas anteriores
         List<Entrega> entregasAnteriores = entregaRepository.findByEntregableIdAndEstudianteId(entregableId, estudianteId);
@@ -131,8 +133,13 @@ public class EntregaService {
      * SYSOP-016: Lista entregas de un estudiante en un entregable (historial de versiones).
      */
     @Transactional(readOnly = true)
-    public List<EntregaDTO> listarEntregasEstudiante(Long entregableId, Long estudianteId) {
-        return entregaRepository.findByEntregableIdAndEstudianteId(entregableId, estudianteId)
+    public List<EntregaDTO> listarEntregasEstudiante(Long entregableId, Long usuarioId) {
+        Entregable entregable = entregableRepository.findById(entregableId)
+                .orElseThrow(() -> new EntityNotFoundException("Entregable no encontrado con ID: " + entregableId));
+        Long cursoId = entregable.getActividad().getCurso().getId();
+        Estudiante estudiante = estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(usuarioId, cursoId)
+                .orElseThrow(() -> new EntityNotFoundException("Estudiante no encontrado para el usuario con ID: " + usuarioId + " en el curso correspondiente"));
+        return entregaRepository.findByEntregableIdAndEstudianteId(entregableId, estudiante.getId())
                 .stream()
                 .sorted((a, b) -> Integer.compare(b.getVersion(), a.getVersion()))
                 .map(mapper::toDTO)
@@ -173,12 +180,14 @@ public class EntregaService {
      * Lista todas las entregas de un estudiante.
      */
     @Transactional(readOnly = true)
-    public List<EntregaDTO> listarTodasEntregasEstudiante(Long estudianteId) {
-        if (!estudianteRepository.existsById(estudianteId)) {
-            throw new EntityNotFoundException("Estudiante no encontrado con ID: " + estudianteId);
+    public List<EntregaDTO> listarTodasEntregasEstudiante(Long usuarioId) {
+        List<Estudiante> estudiantes = estudianteRepository.findByUsuarioId(usuarioId);
+        if (estudiantes.isEmpty()) {
+            throw new EntityNotFoundException("Estudiante no encontrado para el usuario con ID: " + usuarioId);
         }
         
-        return entregaRepository.findByEstudianteId(estudianteId).stream()
+        return estudiantes.stream()
+                .flatMap(est -> entregaRepository.findByEstudianteId(est.getId()).stream())
                 .sorted((a, b) -> b.getFechaEntrega().compareTo(a.getFechaEntrega()))
                 .map(mapper::toDTO)
                 .toList();

@@ -1,6 +1,5 @@
 package com.tfg.gestionentregables.controller;
 
-import com.tfg.gestionentregables.dto.OneDriveConnectionDTO;
 import com.tfg.gestionentregables.entity.OneDriveToken;
 import com.tfg.gestionentregables.entity.Usuario;
 import com.tfg.gestionentregables.security.jwt.JwtTokenProvider;

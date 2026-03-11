@@ -43,13 +43,13 @@ public class EntregaController {
     /**
      * SYSOP-013: Realizar una entrega.
      */
-    @PostMapping("/entregable/{entregableId}/estudiante/{estudianteId}")
+    @PostMapping("/entregable/{entregableId}/estudiante/{usuarioId}")
     public ResponseEntity<EntregaDTO> realizarEntrega(
             @PathVariable Long entregableId,
-            @PathVariable Long estudianteId,
+            @PathVariable Long usuarioId,
             @RequestParam String nombre,
             @RequestParam(required = false) List<MultipartFile> archivos) {
-        EntregaDTO entrega = entregaService.realizarEntrega(entregableId, estudianteId, nombre, archivos);
+        EntregaDTO entrega = entregaService.realizarEntrega(entregableId, usuarioId, nombre, archivos);
         return ResponseEntity.status(HttpStatus.CREATED).body(entrega);
     }
 
@@ -65,11 +65,11 @@ public class EntregaController {
     /**
      * SYSOP-016: Listar entregas de un estudiante (historial de versiones).
      */
-    @GetMapping("/entregable/{entregableId}/estudiante/{estudianteId}")
+    @GetMapping("/entregable/{entregableId}/estudiante/{usuarioId}")
     public ResponseEntity<List<EntregaDTO>> listarEntregasEstudiante(
             @PathVariable Long entregableId,
-            @PathVariable Long estudianteId) {
-        return ResponseEntity.ok(entregaService.listarEntregasEstudiante(entregableId, estudianteId));
+            @PathVariable Long usuarioId) {
+        return ResponseEntity.ok(entregaService.listarEntregasEstudiante(entregableId, usuarioId));
     }
 
     /**
@@ -120,10 +120,10 @@ public class EntregaController {
         }
     }
 
-    @GetMapping("/estudiante/{estudianteId}")
+    @GetMapping("/estudiante/{usuarioId}")
     public ResponseEntity<List<EntregaDTO>> listarTodasEntregasEstudiante(
-            @PathVariable Long estudianteId) {
-        return ResponseEntity.ok(entregaService.listarTodasEntregasEstudiante(estudianteId));
+            @PathVariable Long usuarioId) {
+        return ResponseEntity.ok(entregaService.listarTodasEntregasEstudiante(usuarioId));
     }
 
     @GetMapping("/profesor/{profesorId}/pendientes")

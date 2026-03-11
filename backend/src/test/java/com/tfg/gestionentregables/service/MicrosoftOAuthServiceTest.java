@@ -15,7 +15,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -100,6 +103,21 @@ class MicrosoftOAuthServiceTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("State inválido");
         }
+
+        @Test
+        @DisplayName("Lanza excepción si state es null")
+        void exchange_stateNull() {
+            assertThatThrownBy(() -> oAuthService.exchangeCodeForTokens("code", null))
+                    .isInstanceOf(Exception.class);
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si state tiene formato no numérico")
+        void exchange_stateNoNumerico() {
+            assertThatThrownBy(() -> oAuthService.exchangeCodeForTokens("code", "abc:uuid"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("State inválido");
+        }
     }
 
     // =============================================
@@ -116,6 +134,22 @@ class MicrosoftOAuthServiceTest {
             when(tokenRepository.findByUsuarioId(99L)).thenReturn(Optional.empty());
 
             Optional<MicrosoftToken> result = oAuthService.refreshAccessToken(99L);
+
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Devuelve empty si la llamada HTTP falla (restTemplate lanza excepción)")
+        void refresh_httpFalla() {
+            // El restTemplate interno no es mockeable, pero al intentar llamar
+            // a la URL real con datos falsos, lanzará excepción que es capturada
+            when(tokenRepository.findByUsuarioId(1L)).thenReturn(Optional.of(token));
+            when(properties.getClientId()).thenReturn("fake-client-id");
+            when(properties.getClientSecret()).thenReturn("fake-secret");
+            when(properties.getTenantId()).thenReturn("common");
+
+            // La llamada REST a Microsoft fallará → catch → return Optional.empty()
+            Optional<MicrosoftToken> result = oAuthService.refreshAccessToken(1L);
 
             assertThat(result).isEmpty();
         }
@@ -148,6 +182,36 @@ class MicrosoftOAuthServiceTest {
             Optional<String> result = oAuthService.getValidAccessToken(99L);
 
             assertThat(result).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Intenta refrescar si token expirado, devuelve empty y elimina si falla")
+        void token_expirado_refreshFalla() {
+            // Token con expiración en el pasado
+            MicrosoftToken tokenExpirado = MicrosoftToken.builder()
+                    .id(1L)
+                    .usuario(usuario)
+                    .microsoftEmail("test@outlook.com")
+                    .accessToken("expired-token")
+                    .refreshToken("refresh-token-123")
+                    .expiraEn(LocalDateTime.now().minusHours(1)) // ¡Expirado!
+                    .scopes("Files.ReadWrite User.Read offline_access")
+                    .fechaConexion(LocalDateTime.now())
+                    .build();
+
+            // Primera llamada a findByUsuarioId (getValidAccessToken)
+            // Segunda llamada (refreshAccessToken internamente)
+            when(tokenRepository.findByUsuarioId(1L)).thenReturn(Optional.of(tokenExpirado));
+            when(properties.getClientId()).thenReturn("fake-client-id");
+            when(properties.getClientSecret()).thenReturn("fake-secret");
+            when(properties.getTenantId()).thenReturn("common");
+
+            // refreshAccessToken fallará (restTemplate real lanza excepción)
+            // → getValidAccessToken elimina token y devuelve empty
+            Optional<String> result = oAuthService.getValidAccessToken(1L);
+
+            assertThat(result).isEmpty();
+            verify(tokenRepository).delete(tokenExpirado);
         }
     }
 
@@ -222,6 +286,101 @@ class MicrosoftOAuthServiceTest {
             oAuthService.disconnect(1L);
 
             verify(tokenRepository).deleteByUsuarioId(1L);
+        }
+    }
+
+    // =============================================
+    // extractUsuarioIdFromState (método privado, via reflexión)
+    // =============================================
+
+    @Nested
+    @DisplayName("extractUsuarioIdFromState")
+    class ExtractUsuarioIdFromState {
+
+        private Long invocarExtract(String state) {
+            try {
+                Method method = MicrosoftOAuthService.class.getDeclaredMethod("extractUsuarioIdFromState", String.class);
+                method.setAccessible(true);
+                return (Long) method.invoke(oAuthService, state);
+            } catch (InvocationTargetException e) {
+                if (e.getCause() instanceof RuntimeException re) throw re;
+                throw new RuntimeException(e.getCause());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        @DisplayName("Extrae ID correctamente de state válido")
+        void extract_ok() {
+            Long result = invocarExtract("42:some-uuid-value");
+            assertThat(result).isEqualTo(42L);
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si state tiene texto no numérico")
+        void extract_noNumerico() {
+            assertThatThrownBy(() -> invocarExtract("abc:uuid"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("State inválido");
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si state es vacío")
+        void extract_vacio() {
+            assertThatThrownBy(() -> invocarExtract(""))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
+        @DisplayName("Extrae ID cuando state solo tiene ID sin UUID")
+        void extract_sinUuid() {
+            // "5" → parts[0] = "5" → Long.parseLong("5") = 5L
+            Long result = invocarExtract("5");
+            assertThat(result).isEqualTo(5L);
+        }
+    }
+
+    // =============================================
+    // encodeUrl (método privado, via reflexión)
+    // =============================================
+
+    @Nested
+    @DisplayName("encodeUrl")
+    class EncodeUrl {
+
+        private String invocarEncode(String value) {
+            try {
+                Method method = MicrosoftOAuthService.class.getDeclaredMethod("encodeUrl", String.class);
+                method.setAccessible(true);
+                return (String) method.invoke(oAuthService, value);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e.getCause());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        @DisplayName("Codifica espacios como +")
+        void encode_espacios() {
+            String result = invocarEncode("Files.ReadWrite User.Read offline_access");
+            assertThat(result).contains("+").doesNotContain(" ");
+        }
+
+        @Test
+        @DisplayName("URL sin caracteres especiales se mantiene igual")
+        void encode_sinEspeciales() {
+            String result = invocarEncode("test-value");
+            assertThat(result).isEqualTo("test-value");
+        }
+
+        @Test
+        @DisplayName("Codifica caracteres especiales de URL")
+        void encode_especiales() {
+            String result = invocarEncode("http://localhost:8080/api/callback");
+            assertThat(result).doesNotContain(":");
+            assertThat(result).doesNotContain("/");
         }
     }
 }

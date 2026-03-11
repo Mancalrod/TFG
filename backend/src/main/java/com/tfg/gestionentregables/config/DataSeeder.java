@@ -347,41 +347,47 @@ public class DataSeeder implements CommandLineRunner {
                 .grupo(grupos.get(1))     // Grupo B - IS
                 .build();
 
-        // Ana y Sofía en Grupo Único de BDA
+        // Sofía en Grupo A de IS
         Estudiante e5 = Estudiante.builder()
+                .usuario(usuarios.get(8)) // Sofía
+                .grupo(grupos.get(0))     // Grupo A - IS
+                .build();
+
+        // Ana y Sofía en Grupo Único de BDA
+        Estudiante e6 = Estudiante.builder()
                 .usuario(usuarios.get(4)) // Ana
                 .grupo(grupos.get(2))     // Grupo Único - BDA
                 .build();
 
-        Estudiante e6 = Estudiante.builder()
+        Estudiante e7 = Estudiante.builder()
                 .usuario(usuarios.get(8)) // Sofía
                 .grupo(grupos.get(2))     // Grupo Único - BDA
                 .build();
 
         // Daniel en Grupo Laboratorio de BDA
-        Estudiante e7 = Estudiante.builder()
+        Estudiante e8 = Estudiante.builder()
                 .usuario(usuarios.get(9)) // Daniel
                 .grupo(grupos.get(3))     // Grupo Lab - BDA
                 .build();
 
         // Pedro, Laura y Daniel en Grupo Prácticas de DWFS
-        Estudiante e8 = Estudiante.builder()
+        Estudiante e9 = Estudiante.builder()
                 .usuario(usuarios.get(5)) // Pedro
                 .grupo(grupos.get(4))     // Grupo Prácticas - DWFS
                 .build();
 
-        Estudiante e9 = Estudiante.builder()
+        Estudiante e10 = Estudiante.builder()
                 .usuario(usuarios.get(6)) // Laura
                 .grupo(grupos.get(4))     // Grupo Prácticas - DWFS
                 .build();
 
-        Estudiante e10 = Estudiante.builder()
+        Estudiante e11 = Estudiante.builder()
                 .usuario(usuarios.get(9)) // Daniel
                 .grupo(grupos.get(4))     // Grupo Prácticas - DWFS
                 .build();
 
         List<Estudiante> estudiantes = estudianteRepository.saveAll(
-                List.of(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10));
+                List.of(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11));
         log.info("  -> {} asignaciones estudiante-grupo creadas", estudiantes.size());
         return estudiantes;
     }
@@ -861,7 +867,7 @@ public class DataSeeder implements CommandLineRunner {
                 .build();
 
         // --- Entregas para "Modelo de datos MongoDB" (ent6, ya vencido) ---
-        // Ana (e5 en BDA) entregó
+        // Ana (e6 en BDA) entregó
         Entrega entrega8 = Entrega.builder()
                 .nombre("Modelo MongoDB - Ana Fernández")
                 .version(1)
@@ -871,10 +877,10 @@ public class DataSeeder implements CommandLineRunner {
                 .fechaCalificacion(ahora.minusDays(7))
                 .esVersionActiva(true)
                 .entregable(entregables.get(5))
-                .estudiante(estudiantes.get(4)) // Ana en BDA
+                .estudiante(estudiantes.get(5)) // Ana en BDA
                 .build();
 
-        // Sofía (e6 en BDA) entregó
+        // Sofía (e7 en BDA) entregó
         Entrega entrega9 = Entrega.builder()
                 .nombre("MongoDB Data Model - Sofía")
                 .version(1)
@@ -884,10 +890,10 @@ public class DataSeeder implements CommandLineRunner {
                 .fechaCalificacion(ahora.minusDays(6))
                 .esVersionActiva(true)
                 .entregable(entregables.get(5))
-                .estudiante(estudiantes.get(5)) // Sofía en BDA
+                .estudiante(estudiantes.get(6)) // Sofía en BDA
                 .build();
 
-        // Daniel (e7 en BDA) entregó tarde
+        // Daniel (e8 en BDA) entregó tarde
         Entrega entrega10 = Entrega.builder()
                 .nombre("NoSQL Model - Daniel")
                 .version(1)
@@ -895,11 +901,11 @@ public class DataSeeder implements CommandLineRunner {
                 .estado(EstadoEntrega.ENTREGADO)
                 .esVersionActiva(true)
                 .entregable(entregables.get(5))
-                .estudiante(estudiantes.get(6)) // Daniel en BDA
+                .estudiante(estudiantes.get(7)) // Daniel en BDA
                 .build();
 
         // --- Entregas para "Hito 1: Backend API REST" (ent9, en plazo) ---
-        // Pedro (e8 en DWFS) entregó
+        // Pedro (e9 en DWFS) entregó
         Entrega entrega11 = Entrega.builder()
                 .nombre("API REST - Pedro Sánchez")
                 .version(1)
@@ -907,10 +913,10 @@ public class DataSeeder implements CommandLineRunner {
                 .estado(EstadoEntrega.ENTREGADO)
                 .esVersionActiva(true)
                 .entregable(entregables.get(8))
-                .estudiante(estudiantes.get(7)) // Pedro en DWFS
+                .estudiante(estudiantes.get(8)) // Pedro en DWFS
                 .build();
 
-        // Laura (e9 en DWFS) entregó
+        // Laura (e10 en DWFS) entregó
         Entrega entrega12 = Entrega.builder()
                 .nombre("Backend Spring Boot - Laura")
                 .version(1)
@@ -918,7 +924,7 @@ public class DataSeeder implements CommandLineRunner {
                 .estado(EstadoEntrega.ENTREGADO)
                 .esVersionActiva(true)
                 .entregable(entregables.get(8))
-                .estudiante(estudiantes.get(8)) // Laura en DWFS
+                .estudiante(estudiantes.get(9)) // Laura en DWFS
                 .build();
 
         List<Entrega> entregas = entregaRepository.saveAll(List.of(
