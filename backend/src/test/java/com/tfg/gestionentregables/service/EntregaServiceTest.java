@@ -16,10 +16,21 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
+
+import org.junit.jupiter.api.io.TempDir;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -36,6 +47,7 @@ class EntregaServiceTest {
     @Mock private EntityMapper mapper;
     @Mock private OneDriveService oneDriveService;
     @Mock private MicrosoftOAuthService microsoftOAuthService;
+    @Mock private ZipValidationService zipValidationService;
 
     @InjectMocks
     private EntregaService entregaService;
@@ -162,6 +174,102 @@ class EntregaServiceTest {
             assertThatThrownBy(() -> entregaService.realizarEntrega(1L, 99L, "E", null))
                     .isInstanceOf(EntityNotFoundException.class);
         }
+
+        @Test
+        @DisplayName("Falla si archivo ZIP no cumple estructura esperada")
+        void realizar_zipValidacionFalla() {
+            entregable.setEstructuraZip("src/main.java");
+            entregable.setNombreZipEsperado("entrega.zip");
+
+            MockMultipartFile zipFile = new MockMultipartFile(
+                    "file", "entrega.zip", "application/zip", new byte[]{1, 2, 3});
+
+            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(Optional.of(estudiante));
+            when(zipValidationService.validarZip(any(), eq("src/main.java"), eq(false), eq("entrega.zip")))
+                    .thenReturn(new ZipValidationService.ResultadoValidacion(false, List.of("Falta src/main.java")));
+
+            assertThatThrownBy(() -> entregaService.realizarEntrega(1L, 1L, "Mi entrega", List.of(zipFile)))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("no cumple la estructura");
+        }
+
+        @Test
+        @DisplayName("Pasa validación ZIP y almacena localmente")
+        void realizar_zipValidacionOkYAlmacenaLocal(@TempDir Path tempDir) {
+            ReflectionTestUtils.setField(entregaService, "uploadBaseDir", tempDir.toString());
+            entregable.setEstructuraZip("src/main.java");
+            entregable.setNombreZipEsperado("entrega.zip");
+
+            MockMultipartFile zipFile = new MockMultipartFile(
+                    "file", "entrega.zip", "application/zip", "contenido".getBytes());
+
+            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(Optional.of(estudiante));
+            when(entregaRepository.findByEntregableIdAndEstudianteId(1L, 1L)).thenReturn(List.of());
+            when(zipValidationService.validarZip(any(), eq("src/main.java"), eq(false), eq("entrega.zip")))
+                    .thenReturn(new ZipValidationService.ResultadoValidacion(true, List.of()));
+            when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
+            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
+            when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
+
+            EntregaDTO result = entregaService.realizarEntrega(1L, 1L, "Mi entrega", List.of(zipFile));
+
+            assertThat(result).isNotNull();
+            verify(materialRepository).save(any(Material.class));
+        }
+
+        @Test
+        @DisplayName("No valida ZIP si nombre esperado es asterisco")
+        void realizar_zipNombreAsterisco(@TempDir Path tempDir) {
+            ReflectionTestUtils.setField(entregaService, "uploadBaseDir", tempDir.toString());
+            entregable.setNombreZipEsperado("*");
+            entregable.setEstructuraZip(null);
+
+            MockMultipartFile zipFile = new MockMultipartFile(
+                    "file", "cualquier.zip", "application/zip", new byte[]{1, 2, 3});
+
+            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(Optional.of(estudiante));
+            when(entregaRepository.findByEntregableIdAndEstudianteId(1L, 1L)).thenReturn(List.of());
+            when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
+            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
+            when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
+
+            EntregaDTO result = entregaService.realizarEntrega(1L, 1L, "Mi entrega", List.of(zipFile));
+
+            assertThat(result).isNotNull();
+            verifyNoInteractions(zipValidationService);
+        }
+
+        @Test
+        @DisplayName("Elimina archivos OneDrive de versiones anteriores al reenviar")
+        void realizar_reenvioConOneDriveEliminaAnterior() {
+            Material matAnterior = Material.builder()
+                    .id(5L).nombre("old.pdf")
+                    .onedriveFileId("od-old-123")
+                    .onedriveOwnerId(10L)
+                    .build();
+            Entrega entregaAnterior = Entrega.builder()
+                    .id(2L).version(1).esVersionActiva(true)
+                    .entregable(entregable).estudiante(estudiante)
+                    .archivos(Set.of(matAnterior))
+                    .build();
+            entregable.getActividad().setSubirAOneDrive(true);
+
+            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(Optional.of(estudiante));
+            when(entregaRepository.findByEntregableIdAndEstudianteId(1L, 1L))
+                    .thenReturn(new ArrayList<>(List.of(entregaAnterior)));
+            when(oneDriveService.isEnabled()).thenReturn(true);
+            when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
+            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
+            when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
+
+            entregaService.realizarEntrega(1L, 1L, "Reenvío", null);
+
+            verify(oneDriveService).eliminarArchivo(10L, "od-old-123");
+        }
     }
 
     @Nested
@@ -272,6 +380,25 @@ class EntregaServiceTest {
             List<EntregaDTO> result = entregaService.listarEntregasEstudiante(1L, 1L);
 
             assertThat(result).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si entregable no existe")
+        void listar_entregableNoExiste() {
+            when(entregableRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> entregaService.listarEntregasEstudiante(99L, 1L))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si estudiante no existe en el curso")
+        void listar_estudianteNoExiste() {
+            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(99L, 1L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> entregaService.listarEntregasEstudiante(1L, 99L))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
     }
 
@@ -609,6 +736,69 @@ class EntregaServiceTest {
             assertThatThrownBy(() -> entregaService.descargarContenidoArchivo(1L))
                     .isInstanceOf(RuntimeException.class);
         }
+
+        @Test
+        @DisplayName("Descarga desde almacenamiento local cuando no tiene OneDrive")
+        void descargar_desdeLocal(@TempDir Path tempDir) throws Exception {
+            Path archivo = tempDir.resolve("test.pdf");
+            Files.write(archivo, "contenido-local".getBytes());
+
+            Material material = Material.builder()
+                    .id(1L).nombre("test.pdf")
+                    .tipoMaterial(TipoMaterial.PDF)
+                    .ruta(archivo.toString())
+                    .onedriveFileId(null)
+                    .build();
+
+            when(materialRepository.findById(1L)).thenReturn(Optional.of(material));
+
+            byte[] result = entregaService.descargarContenidoArchivo(1L);
+
+            assertThat(result).isEqualTo("contenido-local".getBytes());
+        }
+
+        @Test
+        @DisplayName("OneDrive falla con fallback a ruta local")
+        void descargar_oneDriveFallbackLocal(@TempDir Path tempDir) throws Exception {
+            Path archivo = tempDir.resolve("fallback.pdf");
+            Files.write(archivo, "contenido-fallback".getBytes());
+
+            Material material = Material.builder()
+                    .id(1L).nombre("fallback.pdf")
+                    .tipoMaterial(TipoMaterial.PDF)
+                    .ruta(archivo.toString())
+                    .onedriveFileId("od-123")
+                    .onedriveOwnerId(10L)
+                    .build();
+
+            when(materialRepository.findById(1L)).thenReturn(Optional.of(material));
+            when(oneDriveService.descargarArchivo(10L, "od-123"))
+                    .thenThrow(new RuntimeException("OneDrive no disponible"));
+
+            byte[] result = entregaService.descargarContenidoArchivo(1L);
+
+            assertThat(result).isEqualTo("contenido-fallback".getBytes());
+        }
+
+        @Test
+        @DisplayName("OneDrive falla y ruta virtual lanza excepción")
+        void descargar_oneDriveFallaSinFallback() {
+            Material material = Material.builder()
+                    .id(1L).nombre("doc.pdf")
+                    .tipoMaterial(TipoMaterial.PDF)
+                    .ruta("onedrive://od-123")
+                    .onedriveFileId("od-123")
+                    .onedriveOwnerId(10L)
+                    .build();
+
+            when(materialRepository.findById(1L)).thenReturn(Optional.of(material));
+            when(oneDriveService.descargarArchivo(10L, "od-123"))
+                    .thenThrow(new RuntimeException("OneDrive no disponible"));
+
+            assertThatThrownBy(() -> entregaService.descargarContenidoArchivo(1L))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("No se pudo descargar");
+        }
     }
 
     @Nested
@@ -664,6 +854,200 @@ class EntregaServiceTest {
             byte[] result = entregaService.descargarTodoComoZip(1L);
 
             assertThat(result).isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("descargarTodoActividadComoZip")
+    class DescargarTodoActividadComoZip {
+
+        @Test
+        @DisplayName("Lanza excepción si no hay entregables para la actividad")
+        void descargar_sinEntregables() {
+            when(entregableRepository.findByActividadId(99L)).thenReturn(List.of());
+
+            assertThatThrownBy(() -> entregaService.descargarTodoActividadComoZip(99L))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("No se encontraron entregables");
+        }
+
+        @Test
+        @DisplayName("Genera ZIP vacío cuando no hay entregas activas")
+        void descargar_sinEntregas() {
+            when(entregableRepository.findByActividadId(1L)).thenReturn(List.of(entregable));
+            when(entregaRepository.findByEntregableIdAndEsVersionActiva(1L, true))
+                    .thenReturn(List.of());
+
+            byte[] result = entregaService.descargarTodoActividadComoZip(1L);
+
+            assertThat(result).isNotNull();
+            assertThat(result.length).isGreaterThan(0);
+        }
+
+        @Test
+        @DisplayName("Genera ZIP con estructura entregable/estudiante")
+        void descargar_conEntregas(@TempDir Path tempDir) throws Exception {
+            Path archivo = tempDir.resolve("memoria.pdf");
+            Files.write(archivo, "contenido-pdf".getBytes());
+
+            Material material = Material.builder()
+                    .id(10L).nombre("memoria.pdf")
+                    .tipoMaterial(TipoMaterial.PDF)
+                    .ruta(archivo.toString())
+                    .build();
+
+            Entrega entregaConArchivos = Entrega.builder()
+                    .id(1L).version(1).estado(EstadoEntrega.ENTREGADO)
+                    .esVersionActiva(true).entregable(entregable).estudiante(estudiante)
+                    .archivos(Set.of(material)).feedbacks(new HashSet<>()).build();
+
+            when(entregableRepository.findByActividadId(1L)).thenReturn(List.of(entregable));
+            when(entregaRepository.findByEntregableIdAndEsVersionActiva(1L, true))
+                    .thenReturn(List.of(entregaConArchivos));
+            when(materialRepository.findById(10L)).thenReturn(Optional.of(material));
+
+            byte[] result = entregaService.descargarTodoActividadComoZip(1L);
+
+            assertThat(result).isNotNull();
+            // Verificar que el ZIP contiene la entrada con carpeta del entregable
+            List<String> entryNames = new ArrayList<>();
+            try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(result))) {
+                ZipEntry entry;
+                while ((entry = zis.getNextEntry()) != null) {
+                    entryNames.add(entry.getName());
+                }
+            }
+            assertThat(entryNames).anyMatch(n -> n.contains("Entregable 1") && n.contains("Alumno"));
+        }
+    }
+
+    @Nested
+    @DisplayName("listarContenidoZip")
+    class ListarContenidoZip {
+
+        @Test
+        @DisplayName("Lista entradas de un ZIP")
+        void listar_ok() throws Exception {
+            // Crear un ZIP real en memoria
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try (ZipOutputStream zos = new ZipOutputStream(baos)) {
+                zos.putNextEntry(new ZipEntry("src/"));
+                zos.closeEntry();
+                zos.putNextEntry(new ZipEntry("src/Main.java"));
+                zos.write("public class Main {}".getBytes());
+                zos.closeEntry();
+                zos.putNextEntry(new ZipEntry("README.md"));
+                zos.write("# Readme".getBytes());
+                zos.closeEntry();
+            }
+
+            Material material = Material.builder()
+                    .id(1L).nombre("entrega.zip")
+                    .tipoMaterial(TipoMaterial.ZIP)
+                    .ruta(null)
+                    .onedriveFileId("od-zip-1")
+                    .onedriveOwnerId(10L)
+                    .build();
+
+            when(materialRepository.findById(1L)).thenReturn(Optional.of(material));
+            when(oneDriveService.descargarArchivo(10L, "od-zip-1")).thenReturn(baos.toByteArray());
+
+            List<Map<String, Object>> result = entregaService.listarContenidoZip(1L);
+
+            assertThat(result).hasSize(3);
+            assertThat(result).anyMatch(m -> "src/".equals(m.get("nombre")) && Boolean.TRUE.equals(m.get("esCarpeta")));
+            assertThat(result).anyMatch(m -> "src/Main.java".equals(m.get("nombre")) && Boolean.FALSE.equals(m.get("esCarpeta")));
+            assertThat(result).anyMatch(m -> "README.md".equals(m.get("nombre")));
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si material no existe")
+        void listar_materialNoExiste() {
+            when(materialRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> entregaService.listarContenidoZip(99L))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("Rechaza ZIP con path traversal")
+        void listar_pathTraversal() throws Exception {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try (ZipOutputStream zos = new ZipOutputStream(baos)) {
+                zos.putNextEntry(new ZipEntry("../../../etc/passwd"));
+                zos.write("malicious".getBytes());
+                zos.closeEntry();
+            }
+
+            Material material = Material.builder()
+                    .id(1L).nombre("evil.zip")
+                    .tipoMaterial(TipoMaterial.ZIP)
+                    .ruta(null)
+                    .onedriveFileId("od-evil")
+                    .onedriveOwnerId(10L)
+                    .build();
+
+            when(materialRepository.findById(1L)).thenReturn(Optional.of(material));
+            when(oneDriveService.descargarArchivo(10L, "od-evil")).thenReturn(baos.toByteArray());
+
+            assertThatThrownBy(() -> entregaService.listarContenidoZip(1L))
+                    .isInstanceOf(UncheckedIOException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("determinarTipoMaterial (private)")
+    class DeterminarTipoMaterialTest {
+
+        private TipoMaterial invocarDeterminarTipo(String contentType) {
+            try {
+                Method method = EntregaService.class.getDeclaredMethod("determinarTipoMaterial", String.class);
+                method.setAccessible(true);
+                return (TipoMaterial) method.invoke(entregaService, contentType);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e.getCause());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        @DisplayName("Detecta PDF")
+        void tipo_pdf() {
+            assertThat(invocarDeterminarTipo("application/pdf")).isEqualTo(TipoMaterial.PDF);
+        }
+
+        @Test
+        @DisplayName("Detecta imagen")
+        void tipo_imagen() {
+            assertThat(invocarDeterminarTipo("image/png")).isEqualTo(TipoMaterial.IMAGEN);
+            assertThat(invocarDeterminarTipo("image/jpeg")).isEqualTo(TipoMaterial.IMAGEN);
+        }
+
+        @Test
+        @DisplayName("Detecta ZIP")
+        void tipo_zip() {
+            assertThat(invocarDeterminarTipo("application/zip")).isEqualTo(TipoMaterial.ZIP);
+            assertThat(invocarDeterminarTipo("application/x-rar-compressed")).isEqualTo(TipoMaterial.ZIP);
+            assertThat(invocarDeterminarTipo("application/x-7z-compressed")).isEqualTo(TipoMaterial.ZIP);
+        }
+
+        @Test
+        @DisplayName("Detecta DOCX")
+        void tipo_docx() {
+            assertThat(invocarDeterminarTipo("application/vnd.openxmlformats-officedocument.wordprocessingml.document")).isEqualTo(TipoMaterial.DOCX);
+        }
+
+        @Test
+        @DisplayName("Devuelve OTRO para tipo desconocido")
+        void tipo_otro() {
+            assertThat(invocarDeterminarTipo("text/plain")).isEqualTo(TipoMaterial.OTRO);
+        }
+
+        @Test
+        @DisplayName("Devuelve OTRO para null")
+        void tipo_null() {
+            assertThat(invocarDeterminarTipo(null)).isEqualTo(TipoMaterial.OTRO);
         }
     }
 }
