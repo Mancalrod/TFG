@@ -192,7 +192,6 @@ public class OneDriveService {
      * @param usuarioId ID del usuario
      * @return Access token válido
      */
-    @Transactional
     public String obtenerAccessTokenValido(Long usuarioId) {
         OneDriveToken token = tokenRepository.findByUsuarioId(usuarioId)
                 .orElseThrow(() -> new RuntimeException("El usuario no tiene OneDrive conectado"));
