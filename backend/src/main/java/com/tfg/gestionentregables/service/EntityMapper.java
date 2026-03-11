@@ -77,6 +77,8 @@ public class EntityMapper {
                 .grupoIds(actividad.getGrupos().stream().map(Grupo::getId).toList())
                 .numeroEntregables(actividad.getEntregables().size())
                 .enPlazo(actividad.estaEnPlazo())
+                .subirAOneDrive(actividad.getSubirAOneDrive())
+                .oneDriveUsuarioId(actividad.getOneDriveUsuarioId())
                 .build();
     }
 
@@ -103,6 +105,9 @@ public class EntityMapper {
                 .tamanoMaximoBytes(entregable.getTamanoMaximoBytes())
                 .visibilidad(entregable.getVisibilidad())
                 .permiteReenvio(entregable.getPermiteReenvio())
+                .estructuraZip(entregable.getEstructuraZip())
+                .validacionZipEstricta(entregable.getValidacionZipEstricta())
+                .nombreZipEsperado(entregable.getNombreZipEsperado())
                 .actividadId(entregable.getActividad().getId())
                 .actividadTitulo(entregable.getActividad().getTitulo())
                 .numeroEntregas((long) entregable.getEntregas().size())

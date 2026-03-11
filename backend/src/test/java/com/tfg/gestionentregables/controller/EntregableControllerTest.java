@@ -58,7 +58,7 @@ class EntregableControllerTest {
                 .fechaLimite(LocalDateTime.now().plusDays(7))
                 .tipoArchivoEsperado(TipoMaterial.PDF)
                 .visibilidad(Visibilidad.VISIBLE)
-                .actividadId(1L).build();
+                .build();
     }
 
     @Nested

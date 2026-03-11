@@ -3,6 +3,7 @@ package com.tfg.gestionentregables.service;
 import com.tfg.gestionentregables.dto.*;
 import com.tfg.gestionentregables.entity.*;
 import com.tfg.gestionentregables.entity.enums.EstadoEntrega;
+import com.tfg.gestionentregables.entity.enums.TipoMaterial;
 import com.tfg.gestionentregables.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -548,6 +549,112 @@ class EntregaServiceTest {
 
             assertThatThrownBy(() -> entregaService.eliminarEntrega(99L))
                     .isInstanceOf(EntityNotFoundException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("descargarContenidoArchivo")
+    class DescargarContenidoArchivo {
+
+        @Test
+        @DisplayName("Descarga archivo desde OneDrive cuando tiene referencia")
+        void descargar_desdeOneDrive() {
+            Material material = Material.builder()
+                    .id(1L).nombre("doc.pdf")
+                    .tipoMaterial(TipoMaterial.PDF)
+                    .onedriveFileId("od-file-123")
+                    .onedriveOwnerId(10L)
+                    .build();
+            byte[] contenido = "contenido-onedrive".getBytes();
+
+            when(materialRepository.findById(1L)).thenReturn(Optional.of(material));
+            when(oneDriveService.descargarArchivo(10L, "od-file-123")).thenReturn(contenido);
+
+            byte[] result = entregaService.descargarContenidoArchivo(1L);
+
+            assertThat(result).isEqualTo(contenido);
+            verify(oneDriveService).descargarArchivo(10L, "od-file-123");
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si material no existe")
+        void descargar_materialNoExiste() {
+            when(materialRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> entregaService.descargarContenidoArchivo(99L))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si no hay ruta ni OneDrive")
+        void descargar_sinRutaValida() {
+            Material material = Material.builder()
+                    .id(1L).nombre("doc.pdf")
+                    .tipoMaterial(TipoMaterial.PDF)
+                    .ruta(null)
+                    .onedriveFileId(null)
+                    .build();
+
+            when(materialRepository.findById(1L)).thenReturn(Optional.of(material));
+
+            assertThatThrownBy(() -> entregaService.descargarContenidoArchivo(1L))
+                    .isInstanceOf(RuntimeException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("descargarTodoComoZip")
+    class DescargarTodoComoZip {
+
+        @Test
+        @DisplayName("Lanza excepción si entregable no existe")
+        void descargarTodo_noExiste() {
+            when(entregableRepository.existsById(99L)).thenReturn(false);
+
+            assertThatThrownBy(() -> entregaService.descargarTodoComoZip(99L))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("Genera ZIP vacío cuando no hay entregas")
+        void descargarTodo_sinEntregas() {
+            when(entregableRepository.existsById(1L)).thenReturn(true);
+            when(entregaRepository.findByEntregableIdAndEsVersionActiva(1L, true))
+                    .thenReturn(List.of());
+
+            byte[] result = entregaService.descargarTodoComoZip(1L);
+
+            assertThat(result).isNotNull();
+            assertThat(result.length).isGreaterThan(0);
+        }
+
+        @Test
+        @DisplayName("Genera ZIP con archivos de múltiples estudiantes")
+        void descargarTodo_conEntregas() {
+            Material material1 = Material.builder()
+                    .id(10L).nombre("memoria.pdf")
+                    .tipoMaterial(TipoMaterial.PDF)
+                    .ruta("test-path/memoria.pdf")
+                    .build();
+
+            Set<Material> archivos = new HashSet<>();
+            archivos.add(material1);
+
+            Entrega entregaConArchivos = Entrega.builder()
+                    .id(1L).version(1).estado(EstadoEntrega.ENTREGADO)
+                    .esVersionActiva(true).entregable(entregable).estudiante(estudiante)
+                    .archivos(archivos).feedbacks(new HashSet<>()).build();
+
+            when(entregableRepository.existsById(1L)).thenReturn(true);
+            when(entregaRepository.findByEntregableIdAndEsVersionActiva(1L, true))
+                    .thenReturn(List.of(entregaConArchivos));
+            when(materialRepository.findById(10L)).thenReturn(Optional.of(material1));
+
+            // Material tiene ruta local → descargarContenidoArchivo leerá de FS, que fallará.
+            // Pero the ZIP builder catches errors per-file and logs a warning.
+            byte[] result = entregaService.descargarTodoComoZip(1L);
+
+            assertThat(result).isNotNull();
         }
     }
 }

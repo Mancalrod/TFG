@@ -20,6 +20,7 @@ import EntregablePage from './pages/entregable/EntregablePage'
 import EditarEntregablePage from './pages/entregable/EditarEntregablePage'
 import CrearEntregablePage from './pages/entregable/CrearEntregablePage'
 import RealizarEntregaPage from './pages/entrega/RealizarEntregaPage'
+import EntregaDetallePage from './pages/entrega/EntregaDetallePage'
 import ActividadesPorCursoPage from './pages/actividades-por-curso/ActividadesPorCursoPage'
 import AdminPage from './pages/admin/AdminPage'
 import NotFoundPage from './pages/NotFoundPage'
@@ -65,6 +66,7 @@ function App() {
             <Route path="/actividades/:actividadId/entregables/nuevo" element={<ProtectedRoute><CrearEntregablePage /></ProtectedRoute>} />
             <Route path="/entregables/:id" element={<ProtectedRoute><EntregablePage /></ProtectedRoute>} />
             <Route path="/entregables/:id/entregar" element={<ProtectedRoute><RealizarEntregaPage /></ProtectedRoute>} />
+            <Route path="/entregas/:id" element={<ProtectedRoute><EntregaDetallePage /></ProtectedRoute>} />
             <Route path="/entregables/:id/editar" element={<ProtectedRoute><EditarEntregablePage /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
             

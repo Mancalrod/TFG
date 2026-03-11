@@ -45,6 +45,9 @@ public class EntregableService {
                 .tamanoMaximoBytes(dto.getTamanoMaximoBytes())
                 .visibilidad(dto.getVisibilidad() != null ? dto.getVisibilidad() : Visibilidad.OCULTO)
                 .permiteReenvio(dto.getPermiteReenvio() == null || dto.getPermiteReenvio())
+                .estructuraZip(dto.getEstructuraZip())
+                .validacionZipEstricta(dto.getValidacionZipEstricta() != null ? dto.getValidacionZipEstricta() : false)
+                .nombreZipEsperado(dto.getNombreZipEsperado())
                 .actividad(actividad)
                 .build();
 
@@ -110,6 +113,11 @@ public class EntregableService {
         if (dto.getPermiteReenvio() != null) {
             entregable.setPermiteReenvio(dto.getPermiteReenvio());
         }
+        entregable.setEstructuraZip(dto.getEstructuraZip());
+        if (dto.getValidacionZipEstricta() != null) {
+            entregable.setValidacionZipEstricta(dto.getValidacionZipEstricta());
+        }
+        entregable.setNombreZipEsperado(dto.getNombreZipEsperado());
 
         entregable = entregableRepository.save(entregable);
         return mapper.toDTO(entregable);

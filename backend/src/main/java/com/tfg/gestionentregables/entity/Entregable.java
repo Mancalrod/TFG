@@ -64,6 +64,29 @@ public class Entregable {
     @Builder.Default
     private Boolean permiteReenvio = true;
 
+    /**
+     * Estructura esperada del ZIP como JSON.
+     * Contiene un array de nodos (archivos/carpetas) con nombres y extensiones permitidas.
+     */
+    @Column(name = "estructura_zip", columnDefinition = "TEXT")
+    private String estructuraZip;
+
+    /**
+     * Nombre esperado del archivo ZIP entregado (sin extensión).
+     * Si es nulo, vacío o "*", se acepta cualquier nombre.
+     */
+    @Column(name = "nombre_zip_esperado")
+    private String nombreZipEsperado;
+
+    /**
+     * Modo de validación del ZIP:
+     * true = el ZIP debe contener exactamente los archivos definidos,
+     * false = el ZIP debe contener al menos los archivos definidos (puede tener más).
+     */
+    @Column(name = "validacion_zip_estricta")
+    @Builder.Default
+    private Boolean validacionZipEstricta = false;
+
     // Relación: Un entregable pertenece a una actividad
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "actividad_id", nullable = false)

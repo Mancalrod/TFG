@@ -36,7 +36,10 @@ public class CrearEntregableDTO {
     private Visibilidad visibilidad = Visibilidad.OCULTO;
     
     private Boolean permiteReenvio = true;
-    
-    @NotNull(message = "La actividad es obligatoria")
-    private Long actividadId;
+
+    private String estructuraZip;
+
+    private Boolean validacionZipEstricta = false;
+
+    private String nombreZipEsperado;
 }

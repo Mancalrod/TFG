@@ -47,6 +47,8 @@ public class ActividadService {
                 .fechaLimite(dto.getFechaLimite())
                 .visibilidad(dto.getVisibilidad() != null ? dto.getVisibilidad() : Visibilidad.OCULTO)
                 .notaMaxima(dto.getNotaMaxima())
+                .subirAOneDrive(Boolean.TRUE.equals(dto.getSubirAOneDrive()))
+                .oneDriveUsuarioId(Boolean.TRUE.equals(dto.getSubirAOneDrive()) ? dto.getOneDriveUsuarioId() : null)
                 .curso(curso)
                 .build();
 
@@ -136,6 +138,11 @@ public class ActividadService {
             actividad.setVisibilidad(dto.getVisibilidad());
         }
         actividad.setNotaMaxima(dto.getNotaMaxima());
+
+        // OneDrive
+        actividad.setSubirAOneDrive(Boolean.TRUE.equals(dto.getSubirAOneDrive()));
+        actividad.setOneDriveUsuarioId(
+                Boolean.TRUE.equals(dto.getSubirAOneDrive()) ? dto.getOneDriveUsuarioId() : null);
 
         // Actualizar grupos si se especifican
         if (dto.getGrupoIds() != null) {

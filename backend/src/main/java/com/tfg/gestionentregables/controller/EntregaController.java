@@ -5,7 +5,6 @@ import com.tfg.gestionentregables.entity.Material;
 import com.tfg.gestionentregables.service.EntregaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controlador REST para gestión de entregas.
@@ -120,6 +120,57 @@ public class EntregaController {
         }
     }
 
+    /**
+     * Previsualizar archivo de una entrega (inline, sin forzar descarga).
+     */
+    @GetMapping("/archivo/{materialId}/preview")
+    public ResponseEntity<byte[]> previsualizarArchivo(@PathVariable Long materialId) {
+        Material material = entregaService.obtenerArchivo(materialId);
+
+        try {
+            byte[] contenido = entregaService.descargarContenidoArchivo(materialId);
+            MediaType mediaType = resolverMediaType(material.getNombre());
+
+            return ResponseEntity.ok()
+                    .contentType(mediaType)
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\"" + material.getNombre() + "\"")
+                    .body(contenido);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Descarga todos los archivos de las entregas activas de un entregable como ZIP.
+     */
+    @GetMapping("/entregable/{entregableId}/descargar-todo")
+    public ResponseEntity<byte[]> descargarTodo(@PathVariable Long entregableId) {
+        try {
+            byte[] zipBytes = entregaService.descargarTodoComoZip(entregableId);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType("application/zip"))
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"entregas.zip\"")
+                    .body(zipBytes);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Lista el contenido interno de un archivo ZIP para previsualización.
+     */
+    @GetMapping("/archivo/{materialId}/zip-contenido")
+    public ResponseEntity<List<Map<String, Object>>> listarContenidoZip(@PathVariable Long materialId) {
+        try {
+            List<Map<String, Object>> contenido = entregaService.listarContenidoZip(materialId);
+            return ResponseEntity.ok(contenido);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @GetMapping("/estudiante/{estudianteId}")
     public ResponseEntity<List<EntregaDTO>> listarTodasEntregasEstudiante(
             @PathVariable Long estudianteId) {
@@ -142,5 +193,20 @@ public class EntregaController {
     public ResponseEntity<Void> eliminarEntrega(@PathVariable Long id) {
         entregaService.eliminarEntrega(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private MediaType resolverMediaType(String nombre) {
+        if (nombre == null) return MediaType.APPLICATION_OCTET_STREAM;
+        String lower = nombre.toLowerCase();
+        if (lower.endsWith(".pdf")) return MediaType.APPLICATION_PDF;
+        if (lower.endsWith(".png")) return MediaType.IMAGE_PNG;
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return MediaType.IMAGE_JPEG;
+        if (lower.endsWith(".gif")) return MediaType.IMAGE_GIF;
+        if (lower.endsWith(".txt")) return MediaType.TEXT_PLAIN;
+        if (lower.endsWith(".html") || lower.endsWith(".htm")) return MediaType.TEXT_HTML;
+        if (lower.endsWith(".json")) return MediaType.APPLICATION_JSON;
+        if (lower.endsWith(".xml")) return MediaType.APPLICATION_XML;
+        if (lower.endsWith(".svg")) return MediaType.parseMediaType("image/svg+xml");
+        return MediaType.APPLICATION_OCTET_STREAM;
     }
 }

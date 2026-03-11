@@ -556,3 +556,98 @@
     max-height: 95vh;
   }
 }
+
+/* ── Estructura esperada del ZIP (vista read-only para estudiantes) ── */
+.re-zip-structure {
+  background: var(--bg-card);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-card);
+  border-left: 3px solid var(--accent-blue);
+}
+
+.re-zip-structure-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.re-zip-mode-badge {
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.re-zip-mode-badge.estricta {
+  background: rgba(231, 76, 60, 0.12);
+  color: var(--error-color);
+}
+
+.re-zip-mode-badge.minima {
+  background: rgba(46, 204, 113, 0.12);
+  color: var(--badge-success-color);
+}
+
+.re-zip-tree {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.82rem;
+}
+
+.re-zip-nombre {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.re-zip-nombre-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.re-zip-nombre-value {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.85rem;
+  color: var(--accent-blue);
+}
+
+.re-zip-nodo-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.re-zip-nodo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.25rem;
+  padding: 0.15rem 0;
+}
+
+.re-zip-nodo-icon {
+  font-size: 0.85rem;
+}
+
+.re-zip-nodo-name {
+  color: var(--text-primary);
+}
+
+.re-zip-nodo-name em {
+  color: var(--accent-blue);
+  font-style: italic;
+}
+
+.re-zip-nodo-ext {
+  color: var(--text-tertiary);
+  font-size: 0.78rem;
+}

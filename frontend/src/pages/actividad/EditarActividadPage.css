@@ -285,3 +285,67 @@
     justify-content: center;
   }
 }
+
+/* === OneDrive === */
+.ea-onedrive-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-secondary);
+  background-color: var(--bg-input);
+  transition: border-color 0.2s;
+}
+
+.ea-onedrive-toggle:has(input:checked) {
+  border-color: var(--accent-blue);
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.ea-onedrive-toggle input[type="checkbox"] {
+  margin-top: 2px;
+  accent-color: var(--accent-blue);
+}
+
+.ea-onedrive-toggle span {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.ea-onedrive-connect {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px dashed var(--border-secondary);
+  background-color: var(--bg-tertiary);
+}
+
+.ea-onedrive-msg {
+  font-size: 0.825rem;
+  color: var(--text-tertiary);
+  margin: 0 0 10px;
+}
+
+.ea-btn-onedrive {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background-color: #0078d4;
+  color: white;
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.2s;
+}
+
+.ea-btn-onedrive:hover:not(:disabled) {
+  background-color: #106ebe;
+}
+
+.ea-btn-onedrive:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { CrearEntregableDTO, Visibilidad, TipoMaterial, ActividadDTO } from '../../types';
+import { CrearEntregableDTO, Visibilidad, TipoMaterial, ActividadDTO, NodoEstructuraZip } from '../../types';
 import { entregableService, actividadService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
+import EstructuraZipBuilder from '../../components/EstructuraZipBuilder';
 import './CrearEntregablePage.css';
 
 const CrearEntregablePage: React.FC = () => {
@@ -29,6 +30,9 @@ const CrearEntregablePage: React.FC = () => {
   });
 
   const [tamanoMB, setTamanoMB] = useState<string>('');
+  const [estructuraZipNodos, setEstructuraZipNodos] = useState<NodoEstructuraZip[]>([]);
+  const [validacionZipEstricta, setValidacionZipEstricta] = useState(false);
+  const [nombreZipEsperado, setNombreZipEsperado] = useState('');
 
   useEffect(() => {
     if (actividadId) {
@@ -104,7 +108,20 @@ const CrearEntregablePage: React.FC = () => {
     setErrorGuardar(null);
 
     try {
-      const nuevoEntregable = await entregableService.crear(parseInt(actividadId), formData);
+      const datosEnvio: CrearEntregableDTO = { ...formData };
+      
+      // Si el tipo esperado es ZIP y hay estructura definida, incluirla
+      if (formData.tipoArchivoEsperado === TipoMaterial.ZIP && estructuraZipNodos.length > 0) {
+        datosEnvio.estructuraZip = JSON.stringify(estructuraZipNodos);
+        datosEnvio.validacionZipEstricta = validacionZipEstricta;
+        datosEnvio.nombreZipEsperado = nombreZipEsperado.trim() || undefined;
+      } else {
+        datosEnvio.estructuraZip = undefined;
+        datosEnvio.validacionZipEstricta = undefined;
+        datosEnvio.nombreZipEsperado = undefined;
+      }
+
+      const nuevoEntregable = await entregableService.crear(parseInt(actividadId), datosEnvio);
       navigate(`/entregables/${nuevoEntregable.id}`);
     } catch (err: unknown) {
       console.error('Error al crear:', err);
@@ -273,6 +290,20 @@ const CrearEntregablePage: React.FC = () => {
             />
           </div>
         </div>
+
+        {/* Estructura del ZIP (solo cuando tipo = ZIP) */}
+        {formData.tipoArchivoEsperado === TipoMaterial.ZIP && (
+          <div className="ce-field">
+            <EstructuraZipBuilder
+              nodos={estructuraZipNodos}
+              onChange={setEstructuraZipNodos}
+              estricta={validacionZipEstricta}
+              onEstrictaChange={setValidacionZipEstricta}
+              nombreZipEsperado={nombreZipEsperado}
+              onNombreZipChange={setNombreZipEsperado}
+            />
+          </div>
+        )}
 
         {/* Permite reenvío */}
         <div className="ce-field ce-checkbox-field">

@@ -69,7 +69,7 @@ class EntregableServiceTest {
                 .notaMaxima(10.0).tipoArchivoEsperado(TipoMaterial.PDF)
                 .tamanoMaximoBytes(5000000L)
                 .visibilidad(Visibilidad.VISIBLE)
-                .permiteReenvio(true).actividadId(1L).build();
+                .permiteReenvio(true).build();
     }
 
     @Nested

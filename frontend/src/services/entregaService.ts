@@ -66,6 +66,25 @@ export const entregaService = {
     return response.data;
   },
 
+  previsualizarArchivo: async (materialId: number): Promise<Blob> => {
+    const response = await api.get(`${BASE_URL}/archivo/${materialId}/preview`, {
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  descargarTodo: async (entregableId: number): Promise<Blob> => {
+    const response = await api.get(`${BASE_URL}/entregable/${entregableId}/descargar-todo`, {
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  listarContenidoZip: async (materialId: number): Promise<{ nombre: string; tamano: number; esCarpeta: boolean }[]> => {
+    const response = await api.get(`${BASE_URL}/archivo/${materialId}/zip-contenido`);
+    return response.data;
+  },
+
   listarPorEstudiante: async (estudianteId: number): Promise<EntregaDTO[]> => {
     const response = await api.get<EntregaDTO[]>(`${BASE_URL}/estudiante/${estudianteId}`);
     return response.data;

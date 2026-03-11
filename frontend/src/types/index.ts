@@ -84,6 +84,8 @@ export interface ActividadDTO {
   numeroEntregables: number;
   enPlazo: boolean;
   entregables?: EntregableDTO[];
+  subirAOneDrive?: boolean;
+  oneDriveUsuarioId?: number;
 }
 
 export interface CrearActividadDTO {
@@ -95,6 +97,8 @@ export interface CrearActividadDTO {
   visibilidad?: Visibilidad;
   notaMaxima?: number;
   grupoIds?: number[];
+  subirAOneDrive?: boolean;
+  oneDriveUsuarioId?: number;
 }
 
 export interface EntregableDTO {
@@ -108,6 +112,9 @@ export interface EntregableDTO {
   tamanoMaximoBytes?: number;
   visibilidad: Visibilidad;
   permiteReenvio: boolean;
+  estructuraZip?: string;
+  validacionZipEstricta?: boolean;
+  nombreZipEsperado?: string;
   actividadId: number;
   actividadTitulo: string;
   numeroEntregas: number;
@@ -124,6 +131,18 @@ export interface CrearEntregableDTO {
   tamanoMaximoBytes?: number;
   visibilidad?: Visibilidad;
   permiteReenvio?: boolean;
+  estructuraZip?: string;
+  validacionZipEstricta?: boolean;
+  nombreZipEsperado?: string;
+}
+
+// Estructura de nodo para el editor de estructura ZIP
+export interface NodoEstructuraZip {
+  id: string;
+  nombre: string;       // nombre del archivo/carpeta, "*" = cualquiera
+  tipo: 'ARCHIVO' | 'CARPETA';
+  extensiones?: string[]; // para archivos: extensiones permitidas (vacío = cualquiera)
+  hijos?: NodoEstructuraZip[]; // para carpetas: nodos hijos
 }
 
 export interface MaterialDTO {

@@ -62,6 +62,20 @@ public class Actividad {
     @Column(name = "nota_maxima")
     private Double notaMaxima;
 
+    /**
+     * Si true, las entregas de esta actividad se suben al OneDrive del profesor.
+     */
+    @Column(name = "subir_a_onedrive")
+    @Builder.Default
+    private Boolean subirAOneDrive = false;
+
+    /**
+     * ID del usuario (profesor) cuyo OneDrive se usará para almacenar entregas.
+     * Solo se establece cuando subirAOneDrive = true.
+     */
+    @Column(name = "onedrive_usuario_id")
+    private Long oneDriveUsuarioId;
+
     // Relación: Una actividad pertenece a un curso
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "curso_id", nullable = false)

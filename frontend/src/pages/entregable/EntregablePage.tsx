@@ -1,9 +1,26 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { EntregableDTO, EntregaDTO, EntregaResumenDTO, EntregaEstadisticasDTO } from '../../types';
+import { EntregableDTO, EntregaDTO, EntregaResumenDTO, EntregaEstadisticasDTO, NodoEstructuraZip } from '../../types';
 import { entregableService, entregaService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
 import './EntregablePage.css';
+
+const descargarTodo = async (entregableId: number) => {
+  try {
+    const blob = await entregaService.descargarTodo(entregableId);
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `entregas_${entregableId}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error('Error al descargar todo:', err);
+    alert('Error al descargar las entregas');
+  }
+};
 
 const EntregablePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -63,6 +80,33 @@ const EntregablePage: React.FC = () => {
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
+
+  const renderEstructuraZip = (nodos: NodoEstructuraZip[], nivel: number): React.ReactNode => (
+    <div className="ep-zip-nodo-list">
+      {nodos.map(nodo => {
+        const esCarpeta = nodo.tipo === 'CARPETA';
+        const esWild = nodo.nombre === '*';
+        const extensiones = nodo.extensiones || [];
+        let extDisplay = '';
+        if (!esCarpeta) {
+          if (extensiones.length === 0) extDisplay = '.*';
+          else if (extensiones.length === 1) extDisplay = `.${extensiones[0]}`;
+          else extDisplay = `.{${extensiones.join(', ')}}`;
+        }
+        return (
+          <div key={nodo.id} className="ep-zip-nodo" style={{ paddingLeft: nivel * 18 }}>
+            <span>{esCarpeta ? '📁' : '📄'}</span>
+            <span className="ep-zip-nodo-name">
+              {esWild ? <em>*</em> : nodo.nombre}
+              {!esCarpeta && <span className="ep-zip-nodo-ext">{extDisplay}</span>}
+              {esCarpeta && '/'}
+            </span>
+            {esCarpeta && nodo.hijos && nodo.hijos.length > 0 && renderEstructuraZip(nodo.hijos, nivel + 1)}
+          </div>
+        );
+      })}
+    </div>
+  );
 
   if (loading) {
     return (
@@ -154,6 +198,34 @@ const EntregablePage: React.FC = () => {
               <p>{formatFileSize(entregable.tamanoMaximoBytes)}</p>
             </div>
           </div>
+
+          {/* Estructura ZIP esperada */}
+          {(entregable.estructuraZip || entregable.nombreZipEsperado) && (() => {
+            let nodos: NodoEstructuraZip[] = [];
+            if (entregable.estructuraZip) {
+              try { nodos = JSON.parse(entregable.estructuraZip); } catch { nodos = []; }
+            }
+            if (nodos.length === 0 && !entregable.nombreZipEsperado) return null;
+            return (
+              <div className="ep-zip-structure">
+                <h3>📦 Estructura esperada del ZIP</h3>
+                <span className={`ep-zip-mode ${entregable.validacionZipEstricta ? 'estricta' : 'minima'}`}>
+                  {entregable.validacionZipEstricta ? 'Estructura exacta' : 'Mínimo requerido'}
+                </span>
+                {entregable.nombreZipEsperado && entregable.nombreZipEsperado !== '*' && (
+                  <div className="ep-zip-nombre">
+                    <span className="ep-zip-nombre-label">Nombre esperado:</span>
+                    <code className="ep-zip-nombre-value">{entregable.nombreZipEsperado}.zip</code>
+                  </div>
+                )}
+                {nodos.length > 0 && (
+                  <div className="ep-zip-tree">
+                    {renderEstructuraZip(nodos, 0)}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
 
         {esProfesor && estadisticas && (
@@ -192,7 +264,17 @@ const EntregablePage: React.FC = () => {
 
         {esProfesor && (
           <div className="entregas-panel">
-            <h2>Entregas Recibidas ({entregas.length})</h2>
+            <div className="entregas-panel-header">
+              <h2>Entregas Recibidas ({entregas.length})</h2>
+              {entregas.length > 0 && (
+                <button
+                  className="btn-secondary btn-descargar-todo"
+                  onClick={() => descargarTodo(parseInt(id!))}
+                >
+                  ⬇ Descargar Todo
+                </button>
+              )}
+            </div>
             {entregas.length === 0 ? (
               <p className="no-entregas">No se han recibido entregas aún</p>
             ) : (
@@ -250,13 +332,20 @@ const EntregablePage: React.FC = () => {
             <h2>Mis Entregas ({misEntregas.length})</h2>
             <ul className="mis-entregas-list">
               {misEntregas.map(entrega => (
-                <li key={entrega.id} className="mi-entrega-item">
-                  <span className="version">v{entrega.version}</span>
-                  <span className="fecha">{formatDate(entrega.fechaEntrega)}</span>
-                  <span className={`estado ${entrega.estado.toLowerCase()}`}>{entrega.estado}</span>
-                  {entrega.calificacion !== undefined && (
-                    <span className="calificacion">{entrega.calificacion} pts</span>
-                  )}
+                <li
+                  key={entrega.id}
+                  className="mi-entrega-item mi-entrega-clickable"
+                  onClick={() => navigate(`/entregas/${entrega.id}`)}
+                >
+                  <div className="mi-entrega-info">
+                    <span className="version">v{entrega.version}</span>
+                    <span className="fecha">{formatDate(entrega.fechaEntrega)}</span>
+                    <span className={`estado ${entrega.estado.toLowerCase()}`}>{entrega.estado}</span>
+                    {entrega.calificacion !== undefined && (
+                      <span className="calificacion">{entrega.calificacion} pts</span>
+                    )}
+                  </div>
+                  <span className="mi-entrega-arrow">→</span>
                 </li>
               ))}
             </ul>
