@@ -43,6 +43,25 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
+// Redirige al dashboard si el usuario está autenticado, si no muestra Home
+const HomeOrDashboard: React.FC = () => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', color: 'var(--text-secondary)' }}>
+        Cargando...
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <HomePage />;
+};
+
 function App() {
   return (
     <ThemeProvider>
@@ -52,7 +71,7 @@ function App() {
         <main className="main-content">
           <Routes>
             {/* Rutas públicas */}
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<HomeOrDashboard />} />
             <Route path="/login" element={<LoginPage />} />
             
             {/* Rutas protegidas */}

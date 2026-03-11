@@ -1,4 +1,21 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tfg-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: tfgdb
+      POSTGRES_USER: tfg
+      POSTGRES_PASSWORD: tfg1234
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tfg -d tfgdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   app:
     build:
       context: .
@@ -6,11 +23,20 @@ services:
     container_name: tfg-app
     ports:
       - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=default
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/tfgdb
+      - DATABASE_USER=tfg
+      - DATABASE_PASSWORD=tfg1234
     healthcheck:
       test: [ "CMD", "wget", "--spider", "-q", "http://localhost:8080/api/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+
+volumes:
+  pgdata:
