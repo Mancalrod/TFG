@@ -174,12 +174,12 @@ class OneDriveControllerTest {
         }
 
         @Test
-        @DisplayName("200 - Callback con error de Microsoft")
+        @DisplayName("400 - Callback con error de Microsoft")
         void callback_error() throws Exception {
             mockMvc.perform(get("/api/onedrive/callback")
                             .param("error", "access_denied")
                             .param("error_description", "User denied access"))
-                    .andExpect(status().isOk())
+                    .andExpect(status().isBadRequest())
                     .andExpect(content().string(org.hamcrest.Matchers.containsString("Error")));
         }
 
@@ -200,7 +200,7 @@ class OneDriveControllerTest {
         }
 
         @Test
-        @DisplayName("200 - Error al procesar callback")
+        @DisplayName("500 - Error al procesar callback")
         void callback_processingError() throws Exception {
             when(oneDriveService.procesarCallback("bad-code", 1L))
                     .thenThrow(new RuntimeException("Token exchange failed"));
@@ -208,7 +208,7 @@ class OneDriveControllerTest {
             mockMvc.perform(get("/api/onedrive/callback")
                             .param("code", "bad-code")
                             .param("state", "1"))
-                    .andExpect(status().isOk())
+                    .andExpect(status().isInternalServerError())
                     .andExpect(content().string(org.hamcrest.Matchers.containsString("Error")));
         }
     }

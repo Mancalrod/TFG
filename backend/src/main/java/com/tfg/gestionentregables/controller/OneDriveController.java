@@ -5,6 +5,7 @@ import com.tfg.gestionentregables.entity.OneDriveToken;
 import com.tfg.gestionentregables.service.OneDriveService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -100,7 +101,8 @@ public class OneDriveController {
         if (error != null) {
             log.error("Error en callback de OneDrive: {} - {}", error, errorDescription);
             // Redirigir al frontend con error
-            return ResponseEntity.ok(generarHtmlRedirect(false, "Error: " + errorDescription));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(generarHtmlRedirect(false, "Error: " + errorDescription));
         }
 
         if (code == null || state == null) {
@@ -117,7 +119,8 @@ public class OneDriveController {
             return ResponseEntity.badRequest().body("Estado inválido");
         } catch (Exception e) {
             log.error("Error procesando callback de OneDrive: {}", e.getMessage());
-            return ResponseEntity.ok(generarHtmlRedirect(false, "Error al conectar: " + e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(generarHtmlRedirect(false, "Error al conectar: " + e.getMessage()));
         }
     }
 

@@ -150,7 +150,7 @@ public class MicrosoftOAuthService {
                 token.setRefreshToken((String) body.get("refresh_token"));
             }
             int expiresIn = ((Number) body.get("expires_in")).intValue();
-            token.setExpiraEn(LocalDateTime.now().plusSeconds(expiresIn - 60)); // 60s margen
+            token.setExpiraEn(LocalDateTime.now().plusSeconds((long) expiresIn - 60)); // 60s margen
             token.setUltimoRefresco(LocalDateTime.now());
 
             tokenRepository.save(token);
@@ -237,7 +237,7 @@ public class MicrosoftOAuthService {
 
         token.setAccessToken(accessToken);
         token.setRefreshToken(refreshToken);
-        token.setExpiraEn(LocalDateTime.now().plusSeconds(expiresIn - 60));
+        token.setExpiraEn(LocalDateTime.now().plusSeconds((long) expiresIn - 60));
         token.setScopes(SCOPES);
         token.setMicrosoftEmail(msEmail);
         token.setUltimoRefresco(LocalDateTime.now());
