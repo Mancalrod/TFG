@@ -8,6 +8,7 @@ import com.tfg.gestionentregables.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,8 +51,8 @@ public class EntregaService {
     private final OneDriveService oneDriveService;
     private final ZipValidationService zipValidationService;
 
-    // Directorio base para almacenar archivos (fallback local)
-    private static final String UPLOAD_DIR = "uploads/entregas";
+    @Value("${app.upload.dir:uploads}")
+    private String uploadBaseDir;
 
     /**
      * SYSOP-013: Realiza una entrega para un entregable.
@@ -425,7 +426,7 @@ public class EntregaService {
                                           String nombreOriginal, String nombreArchivo) {
         try {
             // Crear directorio si no existe
-            Path uploadPath = Paths.get(UPLOAD_DIR, String.valueOf(entrega.getId()));
+            Path uploadPath = Paths.get(uploadBaseDir, "entregas", String.valueOf(entrega.getId()));
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
