@@ -40,7 +40,8 @@ public class SecurityConfig {
         http
             .securityMatcher("/h2-console/**")
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-            .csrf(csrf -> csrf.disable())
+            // CSRF desactivado solo para la consola H2 (solo disponible en desarrollo)
+            .csrf(csrf -> csrf.disable()) // NOSONAR: seguro, acotado a /h2-console/** y protegido por @ConditionalOnProperty
             .headers(headers -> headers.frameOptions(frame -> frame.disable()))
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
@@ -52,7 +53,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
+            // CSRF desactivado: API REST stateless con autenticación JWT (sin cookies de sesión)
+            .csrf(csrf -> csrf.disable()) // NOSONAR: seguro, API stateless autenticada por JWT
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth

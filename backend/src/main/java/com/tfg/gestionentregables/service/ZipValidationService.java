@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -143,14 +144,39 @@ public class ZipValidationService {
      * Extrae todas las rutas (archivos y directorios) de un ZIP.
      * Las rutas de directorio terminan en "/".
      */
+    private static final int MAX_ENTRIES = 10_000;
+    private static final long MAX_TOTAL_SIZE = 100L * 1024 * 1024; // 100 MB
+
     private Set<String> extraerRutasZip(MultipartFile archivo) throws IOException {
         Set<String> rutas = new HashSet<>();
         try (InputStream is = archivo.getInputStream();
              ZipInputStream zis = new ZipInputStream(is)) {
+            int totalEntries = 0;
+            long totalSize = 0;
             ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
+            while ((entry = zis.getNextEntry()) != null) { // NOSONAR - protecciones aplicadas abajo
+                totalEntries++;
+                if (totalEntries > MAX_ENTRIES) {
+                    throw new IOException("El archivo ZIP excede el número máximo de entradas permitidas");
+                }
+
                 String name = entry.getName();
-                // Normalizar: quitar carpeta raíz si todos los archivos están dentro de una
+                // Protección contra Zip Slip: rechazar entradas con path traversal
+                Path entryPath = Path.of(name).normalize();
+                if (entryPath.isAbsolute() || entryPath.startsWith("..")) {
+                    throw new IOException("Entrada ZIP maliciosa detectada: " + name);
+                }
+
+                // Protección contra Zip Bomb: limitar tamaño total descomprimido
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = zis.read(buffer)) >= 0) {
+                    totalSize += bytesRead;
+                    if (totalSize > MAX_TOTAL_SIZE) {
+                        throw new IOException("El archivo ZIP excede el tamaño máximo descomprimido permitido");
+                    }
+                }
+
                 rutas.add(name);
                 zis.closeEntry();
             }
