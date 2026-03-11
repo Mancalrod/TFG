@@ -7,6 +7,8 @@ import com.tfg.gestionentregables.entity.Material;
 import com.tfg.gestionentregables.entity.enums.EstadoEntrega;
 import com.tfg.gestionentregables.entity.enums.TipoMaterial;
 import com.tfg.gestionentregables.security.jwt.JwtTokenProvider;
+import com.tfg.gestionentregables.service.ActividadService;
+import com.tfg.gestionentregables.service.EntregableService;
 import com.tfg.gestionentregables.service.EntregaService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +37,8 @@ class EntregaControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @MockitoBean private EntregaService entregaService;
+    @MockitoBean private EntregableService entregableService;
+    @MockitoBean private ActividadService actividadService;
     @MockitoBean private JwtTokenProvider jwtTokenProvider;
     @MockitoBean private UserDetailsService userDetailsService;
 
@@ -337,11 +341,13 @@ class EntregaControllerTest {
         @DisplayName("200 - Descarga ZIP con todas las entregas")
         void descargarTodo_ok() throws Exception {
             byte[] zipBytes = "fake-zip-content".getBytes();
+            EntregableDTO entregableDTO = EntregableDTO.builder().id(1L).titulo("Entregable Test").build();
+            when(entregableService.obtenerEntregable(1L)).thenReturn(entregableDTO);
             when(entregaService.descargarTodoComoZip(1L)).thenReturn(zipBytes);
 
             mockMvc.perform(get("/api/entregas/entregable/1/descargar-todo"))
                     .andExpect(status().isOk())
-                    .andExpect(header().string("Content-Disposition", "attachment; filename=\"entregas.zip\""))
+                    .andExpect(header().string("Content-Disposition", "attachment; filename=\"Entregable Test.zip\""))
                     .andExpect(content().contentType("application/zip"))
                     .andExpect(content().bytes(zipBytes));
         }
@@ -349,7 +355,7 @@ class EntregaControllerTest {
         @Test
         @DisplayName("404 - Entregable no encontrado")
         void descargarTodo_notFound() throws Exception {
-            when(entregaService.descargarTodoComoZip(99L))
+            when(entregableService.obtenerEntregable(99L))
                     .thenThrow(new EntityNotFoundException("No encontrado"));
 
             mockMvc.perform(get("/api/entregas/entregable/99/descargar-todo"))
@@ -359,6 +365,8 @@ class EntregaControllerTest {
         @Test
         @DisplayName("404 - Error al generar ZIP")
         void descargarTodo_error() throws Exception {
+            EntregableDTO entregableDTO = EntregableDTO.builder().id(1L).titulo("Entregable Test").build();
+            when(entregableService.obtenerEntregable(1L)).thenReturn(entregableDTO);
             when(entregaService.descargarTodoComoZip(1L))
                     .thenThrow(new RuntimeException("Error interno"));
 
