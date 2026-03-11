@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -150,7 +151,11 @@ public class ZipValidationService {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 String name = entry.getName();
-                // Normalizar: quitar carpeta raíz si todos los archivos están dentro de una
+                // Protección contra Zip Slip: rechazar entradas con path traversal
+                Path entryPath = Path.of(name).normalize();
+                if (entryPath.isAbsolute() || entryPath.startsWith("..")) {
+                    throw new IOException("Entrada ZIP maliciosa detectada: " + name);
+                }
                 rutas.add(name);
                 zis.closeEntry();
             }

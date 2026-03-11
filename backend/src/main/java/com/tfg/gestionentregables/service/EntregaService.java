@@ -584,15 +584,25 @@ public class EntregaService {
      * Devuelve una lista de mapas con nombre, tamaño y si es directorio.
      */
     @Transactional(readOnly = true)
+    @SuppressWarnings("java:S5042") // Zip entry expansion is safe: max entries capped, path traversal checked
     public List<Map<String, Object>> listarContenidoZip(Long materialId) {
         byte[] contenido = descargarContenidoArchivo(materialId);
         List<Map<String, Object>> entradas = new ArrayList<>();
 
+        final int maxEntries = 10_000;
+
         try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(contenido))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
+                if (entradas.size() >= maxEntries) {
+                    throw new IOException("ZIP con demasiadas entradas (máximo " + maxEntries + ")");
+                }
+                String name = entry.getName();
+                if (name.contains("..")) {
+                    throw new IOException("Entrada ZIP con ruta no permitida: " + name);
+                }
                 Map<String, Object> item = new HashMap<>();
-                item.put("nombre", entry.getName());
+                item.put("nombre", name);
                 item.put("tamano", entry.getSize() >= 0 ? entry.getSize() : 0);
                 item.put("esCarpeta", entry.isDirectory());
                 entradas.add(item);
