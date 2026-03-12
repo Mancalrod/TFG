@@ -166,4 +166,11 @@ application-secret.properties
 # Test file (puedes eliminar esta línea después)
 prueba.txt
 
+# Python virtual environment
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+
 /backend/src/main/resources/application-local.properties
