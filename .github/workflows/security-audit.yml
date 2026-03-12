@@ -8,6 +8,8 @@ on:
   schedule:
     # Ejecutar cada lunes a las 9:00 UTC
     - cron: '0 9 * * 1'
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   audit-frontend:
