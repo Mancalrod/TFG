@@ -94,8 +94,7 @@ public class CloudinaryService {
             throw new IllegalStateException("Cloudinary no está habilitado");
         }
 
-        try {
-            HttpClient client = HttpClient.newHttpClient();
+        try (HttpClient client = HttpClient.newHttpClient()) {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(secureUrl))
                     .GET()
