@@ -577,7 +577,8 @@ class EntregaServiceIntegrationTest {
             ArgumentCaptor<List<Entrega>> listCaptor = ArgumentCaptor.forClass(List.class);
             verify(entregaRepository).saveAll(listCaptor.capture());
             List<Entrega> desactivadas = listCaptor.getValue();
-            assertThat(desactivadas).allMatch(e -> !e.getEsVersionActiva());
+            assertThat(desactivadas).isNotEmpty()
+                    .allMatch(e -> !e.getEsVersionActiva());
         }
     }
 
