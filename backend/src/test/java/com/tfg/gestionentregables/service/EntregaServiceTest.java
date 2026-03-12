@@ -48,6 +48,7 @@ class EntregaServiceTest {
     @Mock private OneDriveService oneDriveService;
     @Mock private MicrosoftOAuthService microsoftOAuthService;
     @Mock private ZipValidationService zipValidationService;
+    @Mock private CloudinaryService cloudinaryService;
 
     @InjectMocks
     private EntregaService entregaService;

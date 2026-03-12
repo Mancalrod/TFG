@@ -61,6 +61,20 @@ public class Material {
     @Column(name = "onedrive_owner_id")
     private Long onedriveOwnerId;
 
+    // === Campos de Cloudinary ===
+
+    /**
+     * Public ID del archivo en Cloudinary (null si no se almacena en Cloudinary).
+     */
+    @Column(name = "cloudinary_public_id")
+    private String cloudinaryPublicId;
+
+    /**
+     * URL segura del archivo en Cloudinary.
+     */
+    @Column(name = "cloudinary_url")
+    private String cloudinaryUrl;
+
     // Relación: Un material puede pertenecer a una actividad (material de apoyo)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "actividad_id")

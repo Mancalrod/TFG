@@ -8,10 +8,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +46,9 @@ public class DataSeeder implements CommandLineRunner {
     @Value("${app.seeder.alumno-credential}")
     private String alumnoCredential;
 
+    @Value("${app.upload.dir:uploads}")
+    private String uploadBaseDir;
+
     private final UsuarioRepository usuarioRepository;
     private final ProfesorRepository profesorRepository;
     private final EstudianteRepository estudianteRepository;
@@ -62,6 +72,9 @@ public class DataSeeder implements CommandLineRunner {
         log.info(SEPARATOR);
         log.info("Iniciando seeding de datos de desarrollo");
         log.info(SEPARATOR);
+
+        // Copiar archivos placeholder desde classpath al directorio de uploads
+        copySeedFiles();
 
         // 1. Usuarios
         List<Usuario> usuarios = seedUsuarios();
@@ -526,7 +539,7 @@ public class DataSeeder implements CommandLineRunner {
         Material mat1 = Material.builder()
                 .nombre("Guía de Análisis de Requisitos.pdf")
                 .tipoMaterial(TipoMaterial.PDF)
-                .ruta("/materiales/actividades/guia-analisis-requisitos.pdf")
+                .ruta(seedFilePath("materiales/actividades/guia-analisis-requisitos.pdf"))
                 .tamanoBytes(2_500_000L)
                 .actividad(actividades.get(0))
                 .build();
@@ -534,7 +547,7 @@ public class DataSeeder implements CommandLineRunner {
         Material mat2 = Material.builder()
                 .nombre("Plantilla ERS.docx")
                 .tipoMaterial(TipoMaterial.DOCX)
-                .ruta("/materiales/actividades/plantilla-ers.docx")
+                .ruta(seedFilePath("materiales/actividades/plantilla-ers.docx"))
                 .tamanoBytes(150_000L)
                 .actividad(actividades.get(0))
                 .build();
@@ -542,7 +555,7 @@ public class DataSeeder implements CommandLineRunner {
         Material mat3 = Material.builder()
                 .nombre("Tutorial UML - Diagramas de Clases.pdf")
                 .tipoMaterial(TipoMaterial.PDF)
-                .ruta("/materiales/actividades/tutorial-uml.pdf")
+                .ruta(seedFilePath("materiales/actividades/tutorial-uml.pdf"))
                 .tamanoBytes(3_200_000L)
                 .actividad(actividades.get(1))
                 .build();
@@ -550,7 +563,7 @@ public class DataSeeder implements CommandLineRunner {
         Material mat4 = Material.builder()
                 .nombre("Slides Metodologías Ágiles.pdf")
                 .tipoMaterial(TipoMaterial.PDF)
-                .ruta("/materiales/actividades/slides-agiles.pdf")
+                .ruta(seedFilePath("materiales/actividades/slides-agiles.pdf"))
                 .tamanoBytes(5_000_000L)
                 .actividad(actividades.get(2))
                 .build();
@@ -558,7 +571,7 @@ public class DataSeeder implements CommandLineRunner {
         Material mat5 = Material.builder()
                 .nombre("Dataset consultas SQL.zip")
                 .tipoMaterial(TipoMaterial.ZIP)
-                .ruta("/materiales/actividades/dataset-sql.zip")
+                .ruta(seedFilePath("materiales/actividades/dataset-sql.zip"))
                 .tamanoBytes(10_000_000L)
                 .actividad(actividades.get(5))
                 .build();
@@ -566,7 +579,7 @@ public class DataSeeder implements CommandLineRunner {
         Material mat6 = Material.builder()
                 .nombre("Enunciado Proyecto Web.pdf")
                 .tipoMaterial(TipoMaterial.PDF)
-                .ruta("/materiales/actividades/enunciado-proyecto-web.pdf")
+                .ruta(seedFilePath("materiales/actividades/enunciado-proyecto-web.pdf"))
                 .tamanoBytes(1_800_000L)
                 .actividad(actividades.get(6))
                 .build();
@@ -735,7 +748,7 @@ public class DataSeeder implements CommandLineRunner {
         Material mat1 = Material.builder()
                 .nombre("Ejemplo ERS - Proyecto de referencia.pdf")
                 .tipoMaterial(TipoMaterial.PDF)
-                .ruta("/materiales/entregables/ejemplo-ers.pdf")
+                .ruta(seedFilePath("materiales/entregables/ejemplo-ers.pdf"))
                 .tamanoBytes(1_200_000L)
                 .entregable(entregables.get(0))
                 .build();
@@ -743,7 +756,7 @@ public class DataSeeder implements CommandLineRunner {
         Material mat2 = Material.builder()
                 .nombre("Rúbrica de evaluación - Diagrama Clases.pdf")
                 .tipoMaterial(TipoMaterial.PDF)
-                .ruta("/materiales/entregables/rubrica-diagramas.pdf")
+                .ruta(seedFilePath("materiales/entregables/rubrica-diagramas.pdf"))
                 .tamanoBytes(300_000L)
                 .entregable(entregables.get(2))
                 .build();
@@ -751,7 +764,7 @@ public class DataSeeder implements CommandLineRunner {
         Material mat3 = Material.builder()
                 .nombre("Guía Swagger/OpenAPI.pdf")
                 .tipoMaterial(TipoMaterial.PDF)
-                .ruta("/materiales/entregables/guia-swagger.pdf")
+                .ruta(seedFilePath("materiales/entregables/guia-swagger.pdf"))
                 .tamanoBytes(800_000L)
                 .entregable(entregables.get(8))
                 .build();
@@ -945,7 +958,7 @@ public class DataSeeder implements CommandLineRunner {
         Material m1 = Material.builder()
                 .nombre("ERS_AnaFernandez_v2.pdf")
                 .tipoMaterial(TipoMaterial.PDF)
-                .ruta("/uploads/entregas/1/ers-ana-v2.pdf")
+                .ruta(seedFilePath("uploads/entregas/ers-ana-v2.pdf"))
                 .tamanoBytes(2_100_000L)
                 .entrega(entregas.get(1)) // entrega1v2
                 .build();
@@ -954,7 +967,7 @@ public class DataSeeder implements CommandLineRunner {
         Material m2 = Material.builder()
                 .nombre("ERS_PedroSanchez.pdf")
                 .tipoMaterial(TipoMaterial.PDF)
-                .ruta("/uploads/entregas/2/ers-pedro.pdf")
+                .ruta(seedFilePath("uploads/entregas/ers-pedro.pdf"))
                 .tamanoBytes(1_800_000L)
                 .entrega(entregas.get(2)) // entrega2
                 .build();
@@ -963,7 +976,7 @@ public class DataSeeder implements CommandLineRunner {
         Material m3 = Material.builder()
                 .nombre("ERS_LauraDiaz.pdf")
                 .tipoMaterial(TipoMaterial.PDF)
-                .ruta("/uploads/entregas/3/ers-laura.pdf")
+                .ruta(seedFilePath("uploads/entregas/ers-laura.pdf"))
                 .tamanoBytes(1_950_000L)
                 .entrega(entregas.get(3)) // entrega3
                 .build();
@@ -972,7 +985,7 @@ public class DataSeeder implements CommandLineRunner {
         Material m4 = Material.builder()
                 .nombre("CasosDeUso_Ana.pdf")
                 .tipoMaterial(TipoMaterial.PDF)
-                .ruta("/uploads/entregas/5/casos-uso-ana.pdf")
+                .ruta(seedFilePath("uploads/entregas/casos-uso-ana.pdf"))
                 .tamanoBytes(750_000L)
                 .entrega(entregas.get(5)) // entrega5
                 .build();
@@ -981,7 +994,7 @@ public class DataSeeder implements CommandLineRunner {
         Material m5 = Material.builder()
                 .nombre("DiagramaClases_Ana.pdf")
                 .tipoMaterial(TipoMaterial.PDF)
-                .ruta("/uploads/entregas/6/diagrama-clases-ana.pdf")
+                .ruta(seedFilePath("uploads/entregas/diagrama-clases-ana.pdf"))
                 .tamanoBytes(900_000L)
                 .entrega(entregas.get(6)) // entrega6
                 .build();
@@ -990,7 +1003,7 @@ public class DataSeeder implements CommandLineRunner {
         Material m6 = Material.builder()
                 .nombre("ModeloMongoDB_Ana.pdf")
                 .tipoMaterial(TipoMaterial.PDF)
-                .ruta("/uploads/entregas/8/modelo-mongo-ana.pdf")
+                .ruta(seedFilePath("uploads/entregas/modelo-mongo-ana.pdf"))
                 .tamanoBytes(1_500_000L)
                 .entrega(entregas.get(8)) // entrega8
                 .build();
@@ -999,7 +1012,7 @@ public class DataSeeder implements CommandLineRunner {
         Material m7 = Material.builder()
                 .nombre("MongoDB_Sofia.pdf")
                 .tipoMaterial(TipoMaterial.PDF)
-                .ruta("/uploads/entregas/9/mongo-sofia.pdf")
+                .ruta(seedFilePath("uploads/entregas/mongo-sofia.pdf"))
                 .tamanoBytes(1_300_000L)
                 .entrega(entregas.get(9)) // entrega9
                 .build();
@@ -1008,7 +1021,7 @@ public class DataSeeder implements CommandLineRunner {
         Material m8 = Material.builder()
                 .nombre("api-rest-pedro.zip")
                 .tipoMaterial(TipoMaterial.ZIP)
-                .ruta("/uploads/entregas/11/api-pedro.zip")
+                .ruta(seedFilePath("uploads/entregas/api-pedro.zip"))
                 .tamanoBytes(15_000_000L)
                 .entrega(entregas.get(11)) // entrega11
                 .build();
@@ -1017,7 +1030,7 @@ public class DataSeeder implements CommandLineRunner {
         Material m9 = Material.builder()
                 .nombre("backend-laura.zip")
                 .tipoMaterial(TipoMaterial.ZIP)
-                .ruta("/uploads/entregas/12/backend-laura.zip")
+                .ruta(seedFilePath("uploads/entregas/backend-laura.zip"))
                 .tamanoBytes(18_000_000L)
                 .entrega(entregas.get(12)) // entrega12
                 .build();
@@ -1126,5 +1139,69 @@ public class DataSeeder implements CommandLineRunner {
         List<Feedback> feedbacks = feedbackRepository.saveAll(
                 List.of(fb1, fb2, fb3, fb4, fb5, fb6, fb7, fb8));
         log.info("  -> {} feedbacks creados", feedbacks.size());
+    }
+
+    // =============================================
+    // UTILIDADES: Archivos seed
+    // =============================================
+
+    /**
+     * Lista de archivos seed que se copiarán desde classpath al directorio de uploads.
+     */
+    private static final String[] SEED_FILE_PATHS = {
+            "materiales/actividades/guia-analisis-requisitos.pdf",
+            "materiales/actividades/plantilla-ers.docx",
+            "materiales/actividades/tutorial-uml.pdf",
+            "materiales/actividades/slides-agiles.pdf",
+            "materiales/actividades/dataset-sql.zip",
+            "materiales/actividades/enunciado-proyecto-web.pdf",
+            "materiales/entregables/ejemplo-ers.pdf",
+            "materiales/entregables/rubrica-diagramas.pdf",
+            "materiales/entregables/guia-swagger.pdf",
+            "uploads/entregas/ers-ana-v2.pdf",
+            "uploads/entregas/ers-pedro.pdf",
+            "uploads/entregas/ers-laura.pdf",
+            "uploads/entregas/casos-uso-ana.pdf",
+            "uploads/entregas/diagrama-clases-ana.pdf",
+            "uploads/entregas/modelo-mongo-ana.pdf",
+            "uploads/entregas/mongo-sofia.pdf",
+            "uploads/entregas/api-pedro.zip",
+            "uploads/entregas/backend-laura.zip"
+    };
+
+    /**
+     * Copia los archivos placeholder desde el classpath (seed-files/) al directorio
+     * de uploads configurado, para que los materiales del seeder apunten a archivos reales.
+     */
+    private void copySeedFiles() {
+        log.info("Copiando archivos seed al directorio de uploads: {}", uploadBaseDir);
+        int copied = 0;
+        for (String relativePath : SEED_FILE_PATHS) {
+            try {
+                ClassPathResource resource = new ClassPathResource("seed-files/" + relativePath);
+                if (!resource.exists()) {
+                    log.warn("  Archivo seed no encontrado en classpath: seed-files/{}", relativePath);
+                    continue;
+                }
+                Path destPath = Paths.get(uploadBaseDir, relativePath);
+                Files.createDirectories(destPath.getParent());
+                if (!Files.exists(destPath)) {
+                    try (InputStream is = resource.getInputStream()) {
+                        Files.copy(is, destPath, StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    copied++;
+                }
+            } catch (IOException e) {
+                log.warn("  Error copiando archivo seed {}: {}", relativePath, e.getMessage());
+            }
+        }
+        log.info("  -> {} archivos seed copiados", copied);
+    }
+
+    /**
+     * Devuelve la ruta absoluta de un archivo seed dentro del directorio de uploads.
+     */
+    private String seedFilePath(String relativePath) {
+        return Paths.get(uploadBaseDir, relativePath).toAbsolutePath().toString();
     }
 }

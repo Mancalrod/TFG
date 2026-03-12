@@ -50,6 +50,7 @@ public class EntregaService {
     private final EntityMapper mapper;
     private final OneDriveService oneDriveService;
     private final ZipValidationService zipValidationService;
+    private final CloudinaryService cloudinaryService;
 
     @Value("${app.upload.dir:uploads}")
     private String uploadBaseDir;
@@ -332,6 +333,11 @@ public class EntregaService {
                     estudiante, nombreOriginal, nombreUnico);
         }
 
+        // Subir a Cloudinary si está habilitado (producción)
+        if (cloudinaryService.isEnabled()) {
+            return guardarEnCloudinary(archivo, entrega, entregable, nombreOriginal);
+        }
+
         // Fallback: almacenamiento local
         return guardarArchivoLocal(archivo, entrega, nombreOriginal, nombreUnico);
     }
@@ -449,6 +455,28 @@ public class EntregaService {
     }
 
     /**
+     * Sube un archivo a Cloudinary (usado en producción en Render).
+     */
+    private Material guardarEnCloudinary(MultipartFile archivo, Entrega entrega,
+                                          Entregable entregable, String nombreOriginal) {
+        String carpeta = entregable.getActividad().getCurso().getCodigo() + "/"
+                + entregable.getActividad().getTitulo() + "/"
+                + entregable.getTitulo();
+
+        Map<String, String> result = cloudinaryService.subirArchivo(archivo, carpeta);
+
+        return Material.builder()
+                .nombre(nombreOriginal)
+                .tipoMaterial(determinarTipoMaterial(archivo.getContentType()))
+                .ruta("cloudinary://" + result.get("publicId"))
+                .tamanoBytes(archivo.getSize())
+                .cloudinaryPublicId(result.get("publicId"))
+                .cloudinaryUrl(result.get("secureUrl"))
+                .entrega(entrega)
+                .build();
+    }
+
+    /**
      * Descarga un archivo, ya sea desde OneDrive o desde almacenamiento local.
      *
      * @param materialId ID del material
@@ -472,6 +500,16 @@ public class EntregaService {
                     return leerArchivoLocal(material.getRuta());
                 }
                 throw new RuntimeException("No se pudo descargar el archivo de OneDrive", e);
+            }
+        }
+
+        // Si tiene referencia a Cloudinary, descargar desde allí
+        if (material.getCloudinaryPublicId() != null && material.getCloudinaryUrl() != null) {
+            try {
+                return cloudinaryService.descargarArchivo(material.getCloudinaryUrl());
+            } catch (Exception e) {
+                log.error("Error al descargar desde Cloudinary: {}", e.getMessage());
+                throw new RuntimeException("No se pudo descargar el archivo de Cloudinary", e);
             }
         }
 
