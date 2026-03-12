@@ -539,4 +539,134 @@
   .ezb-nodo-actions {
     opacity: 1;
   }
+
+  .ezb-import-options {
+    flex-direction: column;
+  }
+}
+
+/* ── Importar desde ZIP ── */
+.ezb-import-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary, #f8f9fa);
+  border: 1px dashed var(--border-color, #dee2e6);
+  border-radius: 8px;
+}
+
+.ezb-import-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.ezb-import-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ezb-import-help {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+}
+
+.ezb-import-options {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ezb-import-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  cursor: pointer;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border-primary, #dee2e6);
+  border-radius: 6px;
+  background: var(--bg-card, #fff);
+  transition: border-color 0.2s;
+  flex: 1;
+  min-width: 160px;
+}
+
+.ezb-import-option:hover {
+  border-color: var(--accent-blue, #0d6efd);
+}
+
+.ezb-import-option input[type="radio"] {
+  margin-top: 3px;
+  accent-color: var(--accent-blue, #0d6efd);
+}
+
+.ezb-import-option-label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ezb-import-option-label strong {
+  font-size: 0.82rem;
+  color: var(--text-primary);
+}
+
+.ezb-import-option-label small {
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+}
+
+.ezb-import-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ezb-import-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ezb-btn-import {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border: 1px solid var(--accent-blue, #0d6efd);
+  border-radius: 6px;
+  background: var(--accent-blue, #0d6efd);
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.15s, box-shadow 0.15s;
+}
+
+.ezb-btn-import:hover {
+  background: #0b5ed7;
+  box-shadow: 0 2px 6px rgba(13, 110, 253, 0.25);
+}
+
+.ezb-import-warning {
+  font-size: 0.78rem;
+  color: var(--warning-color, #e67e22);
+}
+
+.ezb-import-error {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.82rem;
+  color: var(--error-color, #e74c3c);
+  background: rgba(231, 76, 60, 0.08);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+  border-radius: 6px;
 }

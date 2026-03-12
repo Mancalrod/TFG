@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { NodoEstructuraZip } from '../types';
+import { parsearEstructuraZip, ModoImportacion } from '../utils/zipStructureParser';
 import './EstructuraZipBuilder.css';
 
 interface EstructuraZipBuilderProps {
@@ -31,6 +32,35 @@ const EstructuraZipBuilder: React.FC<EstructuraZipBuilderProps> = ({
   nombreZipEsperado,
   onNombreZipChange,
 }) => {
+  const [modoImportacion, setModoImportacion] = useState<ModoImportacion>('nombres_extensiones');
+  const [importando, setImportando] = useState(false);
+  const [errorImportacion, setErrorImportacion] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImportarZip = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const archivo = e.target.files?.[0];
+    if (!archivo) return;
+
+    if (!archivo.name.toLowerCase().endsWith('.zip')) {
+      setErrorImportacion('El archivo debe ser un .zip');
+      return;
+    }
+
+    setImportando(true);
+    setErrorImportacion(null);
+    try {
+      const nodosImportados = await parsearEstructuraZip(archivo, modoImportacion);
+      onChange(nodosImportados);
+    } catch {
+      setErrorImportacion('No se pudo leer el archivo ZIP. Asegúrate de que es un ZIP válido.');
+    } finally {
+      setImportando(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
     <div className="ezb-container">
       <div className="ezb-header">
@@ -39,6 +69,81 @@ const EstructuraZipBuilder: React.FC<EstructuraZipBuilderProps> = ({
           Define la estructura de archivos y carpetas que debe contener el ZIP.
           Usa <strong>*</strong> como nombre para aceptar cualquier nombre.
         </p>
+      </div>
+
+      {/* ── Importar desde ZIP ── */}
+      <div className="ezb-import-section">
+        <div className="ezb-import-header">
+          <span className="ezb-import-title">📥 Importar estructura desde ZIP</span>
+          <small className="ezb-import-help">
+            Sube un ZIP de ejemplo y se extraerá su estructura automáticamente.
+          </small>
+        </div>
+
+        <div className="ezb-import-options">
+          <label className="ezb-import-option">
+            <input
+              type="radio"
+              name="modoImportacion"
+              checked={modoImportacion === 'nombres_extensiones'}
+              onChange={() => setModoImportacion('nombres_extensiones')}
+            />
+            <span className="ezb-import-option-label">
+              <strong>Nombres y extensiones</strong>
+              <small>Mantiene los nombres de archivos y sus extensiones</small>
+            </span>
+          </label>
+          <label className="ezb-import-option">
+            <input
+              type="radio"
+              name="modoImportacion"
+              checked={modoImportacion === 'solo_nombres'}
+              onChange={() => setModoImportacion('solo_nombres')}
+            />
+            <span className="ezb-import-option-label">
+              <strong>Solo nombres</strong>
+              <small>Mantiene los nombres pero ignora las extensiones</small>
+            </span>
+          </label>
+          <label className="ezb-import-option">
+            <input
+              type="radio"
+              name="modoImportacion"
+              checked={modoImportacion === 'solo_estructura'}
+              onChange={() => setModoImportacion('solo_estructura')}
+            />
+            <span className="ezb-import-option-label">
+              <strong>Solo estructura</strong>
+              <small>Usa comodín (*) para nombres, solo conserva extensiones</small>
+            </span>
+          </label>
+        </div>
+
+        <div className="ezb-import-actions">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".zip"
+            onChange={handleImportarZip}
+            className="ezb-import-file-input"
+            id="ezb-import-file"
+            data-testid="ezb-import-file"
+          />
+          <label htmlFor="ezb-import-file" className="ezb-btn-import">
+            {importando ? 'Importando...' : '📂 Seleccionar ZIP'}
+          </label>
+          {nodos.length > 0 && (
+            <small className="ezb-import-warning">
+              ⚠️ Importar reemplazará la estructura actual
+            </small>
+          )}
+        </div>
+
+        {errorImportacion && (
+          <div className="ezb-import-error" role="alert">
+            ❌ {errorImportacion}
+          </div>
+        )}
       </div>
 
       <div className="ezb-nombre-zip">
