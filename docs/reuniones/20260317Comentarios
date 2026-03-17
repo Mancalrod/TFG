@@ -1,0 +1,45 @@
+# Comentarios
+## Sobre el documento de requisitos (ERS)
+
+1. Modelado de Procesos (BPMN):
+He visto que incluís al 'Sistema' como un participante (Pool/Lane) independiente que interactúa con el usuario. En un TFG de ingeniería, el sistema no es un actor, es el soporte del proceso. Debéis eliminar el carril del sistema y sustituir esas interacciones por Tareas de Servicio (Service Tasks) dentro de los carriles de los actores humanos. El sistema es la herramienta, no un interlocutor externo.
+
+2. Inconsistencia en la ERS (RFs vs. Casos de Uso):
+Tenéis 25 Requisitos Funcionales pero solo 4 Casos de Uso. Esto crea un desequilibrio: u os faltan descripciones detalladas o los Casos de Uso actuales son demasiado genéricos. Cada uno de esos 25 requisitos debe estar 'mapeado' en un flujo de uso. Por ejemplo, la 'Gestión de actividades' debería desglosarse en Casos de Uso más atómicos para que sean testeables.
+
+3. Sincronización de DOC:
+Al ritmo que vais programando, el DAS y la ERS se van a quedar obsoletos cada semana. Para no esperar al Sprint 4 para revisarlo todo. Reservad un 10% del tiempo de cada Sprint a actualizar los diagramas y requisitos según lo que vayáis cambiando en el código
+
+## Sobre el uso de IA generática
+
+Deberíamos añadir una sección en la introducción sobre uso de IA generátiva del estilo de:
+"Declaración de Uso de Inteligencia Artificial Generativa
+Según las recomendaciones éticas y académicas actuales, se declara que para el desarrollo de este Trabajo de Fin de Grado se han utilizado herramientas de Inteligencia Artificial Generativa (IA Gen) bajo los siguientes criterios de uso:
+
+1. Herramientas utilizadas:
+
+GitHub Copilot / Cursor: Utilizados como asistentes de codificación para la generación de código boilerplate, sugerencias de autocompletado y creación de estructuras iniciales de tests unitarios.
+
+ChatGPT / Claude / Gemini: Utilizados para la revisión de estilo y gramática de la memoria, traducción de términos técnicos y apoyo en la estructuración de la documentación de requisitos.
+
+2. Alcance y responsabilidad:
+Los autores declaran que el uso de estas herramientas se ha limitado a tareas de apoyo a la productividad. La autoría intelectual, el diseño de la arquitectura del sistema, la validación de los requisitos y la lógica crítica de negocio son responsabilidad exclusiva de los alumnos. >
+Todo contenido generado por IA ha sido revisado, editado y verificado manualmente para asegurar su veracidad técnica y su coherencia con el resto del proyecto. Se garantiza que no se ha realizado un "copiado y pegado" directo de textos críticos o análisis sin supervisión humana previa.
+
+3. Supervisión de resultados:
+Los alumnos asumen la total responsabilidad de los posibles errores que estas herramientas pudieran introducir y han aplicado criterios técnicos propios para la corrección de sugerencias erróneas o alucinaciones de los modelos de lenguaje utilizados.
+"
+## Sobre el DAS
+Propuesta de revisión para el Diagrama de Clases y Secuencia
+
+1. Modelado de Entregables y Materiales
+He visto que los Entregables se han relacionado directamente con el Material, vinculando el tipo de archivo al entregable completo. Considero que esto es un error de concepto:
+
+El Entregable es la entidad 'actividad' (con su fecha de entrega, descripción y rúbrica).
+
+El Material (el archivo físico o recurso) es el que posee el atributo 'Tipo de Archivo'.
+
+2. Sincronización con Almacenamiento Externo (OneDrive)
+
+En el Diagrama de Secuencia, he observado que la creación de la carpeta externa se dispara al crear la actividad automárticamente. 
+Lógica propuesta: Al definir el entregable, elegir la carpeta y testear la conexión con el servicio externo.
