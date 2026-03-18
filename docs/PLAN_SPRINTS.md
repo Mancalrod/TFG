@@ -272,6 +272,7 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
 - Mejorar UX del flujo de trabajo docente
 - Testing de funcionalidades de este sprint
 - Iniciar estructura de la memoria TFG
+- Revisar ERS y DAS del TFG
 
 ### Epicas/PBIs Incluidos
 - EP-09: Feedback y Evaluacion completa (PBI-050 a PBI-053 frontend)
@@ -297,7 +298,8 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
 | Testing: Tests calificacion + integracion | 4h | 4h | 8h |
 | Memoria: Estructura + Introduccion + Objetivos | 5h | 5h | 10h |
 | Memoria: Metodologia | 4h | 4h | 8h |
-| Buffer imprevistos | 5h | 5h | 10h |
+| Buffer imprevistos | 3h | 3h | 6h |
+| Revisar ERS y DAS del TFG| 2h | 2h | 4h
 | **Total** | **60h** | **60h** | **120h** |
 
 ### Criterios de Aceptacion
@@ -425,8 +427,9 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
 | Feb 2026 | 1.0 | Creacion inicial |
 | 18 Feb 2026 | 2.0 | Reestructuracion: 20h/persona/semana, 6 sprints de 80h |
 | 3 Mar 2026 | 3.0 | Reestructuracion mayor: 30h/persona/semana, 4 sprints de 120h. Sprint 1 completado con toda la infraestructura, auth, cursos, actividades, CI/CD, deploy y testing. MVP priorizado. OAuth/2FA/Cloud storage movidos a trabajo futuro. Testing distribuido por sprint. |
-| Mar 2026 | 4.0 | Fechas ajustadas: Sprint 1 → 17 Feb-2 Mar, Sprint 2 → 3-16 Mar, Sprint 3 → 17-30 Mar, Sprint 4 → 31 Mar-13 Abr. Integracion OneDrive anadida a Sprint 2 (implementada y funcional). |
+|16 Mar 2026 | 4.0 | Fechas ajustadas: Sprint 1 → 17 Feb-2 Mar, Sprint 2 → 3-16 Mar, Sprint 3 → 17-30 Mar, Sprint 4 → 31 Mar-13 Abr. Integracion OneDrive anadida a Sprint 2 (implementada y funcional). |
+|18 Mar 2026 | 5.0 | Añadido apartado de revisión de documentación existente en el sprint 3. |
 
 ---
 
-*Ultima actualizacion: 16 Marzo 2026*
+*Ultima actualizacion: 18 Marzo 2026*
