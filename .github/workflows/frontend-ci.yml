@@ -1,4 +1,4 @@
-﻿name: Frontend CI
+name: Frontend CI
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout codigo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Configurar Node 20
         uses: actions/setup-node@v4
