@@ -1,16 +1,13 @@
-﻿name: Full Stack CI
+name: Mutation CI
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 1'
 
 jobs:
-  backend:
-    name: Build & Test Backend
+  backend-mutation:
+    name: Backend mutation (PIT)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -31,11 +28,18 @@ jobs:
       - name: Dar permisos de ejecucion a mvnw
         run: chmod +x ./mvnw
 
-      - name: Compilar y ejecutar tests
-        run: ./mvnw verify --batch-mode --no-transfer-progress
+      - name: Ejecutar mutation testing backend
+        run: ./mvnw -Pmutation test-compile org.pitest:pitest-maven:mutationCoverage --batch-mode --no-transfer-progress
 
-  frontend:
-    name: Lint, Unit, E2E & Build Frontend
+      - name: Subir reporte PIT
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pit-report
+          path: backend/target/pit-reports
+
+  frontend-mutation:
+    name: Frontend mutation (Stryker)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -55,17 +59,13 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
+      - name: Ejecutar mutation testing frontend
+        run: npm run test:mutation
 
-      - name: Unit tests + coverage
-        run: npm run test:coverage
+      - name: Subir reporte Stryker
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stryker-report
+          path: frontend/reports/mutation
 
-      - name: Instalar Playwright (Chromium)
-        run: npx playwright install --with-deps chromium
-
-      - name: E2E mockeadas
-        run: npm run test:e2e
-
-      - name: Build de produccion
-        run: npm run build

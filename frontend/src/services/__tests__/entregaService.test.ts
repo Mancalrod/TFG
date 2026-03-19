@@ -62,4 +62,83 @@ describe('entregaService', () => {
     const [, formData] = mockPost.mock.calls[0];
     expect((formData as FormData).get('comentario')).toBeNull();
   });
+
+  it('obtener y listados usan rutas esperadas', async () => {
+    mockGet.mockResolvedValue({ data: [] });
+
+    await entregaService.obtener(8);
+    await entregaService.listarParaEvaluar(11);
+    await entregaService.listarHistorial(11, 9);
+    await entregaService.listarPorEstudiante(9);
+    await entregaService.listarPendientesCalificar(3);
+
+    expect(mockGet).toHaveBeenNthCalledWith(1, '/api/entregas/8');
+    expect(mockGet).toHaveBeenNthCalledWith(2, '/api/entregas/entregable/11');
+    expect(mockGet).toHaveBeenNthCalledWith(3, '/api/entregas/entregable/11/estudiante/9');
+    expect(mockGet).toHaveBeenNthCalledWith(4, '/api/entregas/estudiante/9');
+    expect(mockGet).toHaveBeenNthCalledWith(5, '/api/entregas/profesor/3/pendientes');
+  });
+
+  it('descarga y previsualizacion solicitan blob', async () => {
+    const blob = new Blob(['x']);
+    mockGet.mockResolvedValue({ data: blob });
+
+    await entregaService.descargarArchivo(20);
+    await entregaService.previsualizarArchivo(20);
+
+    expect(mockGet).toHaveBeenNthCalledWith(1, '/api/entregas/archivo/20', {
+      responseType: 'blob',
+    });
+    expect(mockGet).toHaveBeenNthCalledWith(2, '/api/entregas/archivo/20/preview', {
+      responseType: 'blob',
+    });
+  });
+
+  it('descargarTodo usa filename del header si existe', async () => {
+    const blob = new Blob(['zip']);
+    mockGet.mockResolvedValue({
+      data: blob,
+      headers: {
+        'content-disposition': 'attachment; filename="entregas_final.zip"',
+      },
+    });
+
+    const result = await entregaService.descargarTodo(15);
+
+    expect(mockGet).toHaveBeenCalledWith('/api/entregas/entregable/15/descargar-todo', {
+      responseType: 'blob',
+    });
+    expect(result.filename).toBe('entregas_final.zip');
+  });
+
+  it('descargarTodo y descargarTodoActividad usan fallback de filename', async () => {
+    const blob = new Blob(['zip']);
+    mockGet
+      .mockResolvedValueOnce({ data: blob, headers: {} })
+      .mockResolvedValueOnce({ data: blob, headers: {} });
+
+    const entregaZip = await entregaService.descargarTodo(15);
+    const actividadZip = await entregaService.descargarTodoActividad(6);
+
+    expect(entregaZip.filename).toBe('entregas_15.zip');
+    expect(actividadZip.filename).toBe('actividad_6.zip');
+    expect(mockGet).toHaveBeenNthCalledWith(2, '/api/entregas/actividad/6/descargar-todo', {
+      responseType: 'blob',
+    });
+  });
+
+  it('listarContenidoZip, estadisticas y eliminar usan endpoints correctos', async () => {
+    mockGet
+      .mockResolvedValueOnce({ data: [{ nombre: 'a.txt', tamano: 1, esCarpeta: false }] })
+      .mockResolvedValueOnce({ data: { total: 2 } });
+    mockDelete.mockResolvedValue({});
+
+    await entregaService.listarContenidoZip(30);
+    await entregaService.obtenerEstadisticas(40);
+    await entregaService.eliminar(50);
+
+    expect(mockGet).toHaveBeenNthCalledWith(1, '/api/entregas/archivo/30/zip-contenido');
+    expect(mockGet).toHaveBeenNthCalledWith(2, '/api/entregas/entregable/40/estadisticas');
+    expect(mockDelete).toHaveBeenCalledWith('/api/entregas/50');
+  });
 });

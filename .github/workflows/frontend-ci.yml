@@ -1,4 +1,4 @@
-name: Frontend CI
+﻿name: Frontend CI
 
 on:
   push:
@@ -13,15 +13,15 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  build:
-    name: Lint & Build Frontend
+  quality:
+    name: Lint, Unit, E2E & Build Frontend
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: frontend
 
     steps:
-      - name: Checkout código
+      - name: Checkout codigo
         uses: actions/checkout@v4
 
       - name: Configurar Node 20
@@ -37,5 +37,14 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Build de producción
+      - name: Unit tests + coverage
+        run: npm run test:coverage
+
+      - name: Instalar Playwright (Chromium)
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E mockeadas
+        run: npm run test:e2e
+
+      - name: Build de produccion
         run: npm run build
