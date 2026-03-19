@@ -1,5 +1,5 @@
-﻿import api from './api';
-import { OneDriveConnectionDTO } from '../types';
+import api from './api';
+import { OneDriveConnectionDTO, OneDriveFolder } from '../types';
 
 /**
  * Servicio para la integracion con Microsoft OneDrive.
@@ -19,6 +19,17 @@ export const oneDriveService = {
    */
   async getConnectionStatus(usuarioId: number): Promise<OneDriveConnectionDTO> {
     const response = await api.get<OneDriveConnectionDTO>(`/api/onedrive/status/${usuarioId}`);
+    return response.data;
+  },
+
+  /**
+   * Obtiene la lista de carpetas de OneDrive del usuario.
+   */
+  async listarCarpetas(usuarioId: number, parentId?: string): Promise<OneDriveFolder[]> {
+    const url = parentId 
+      ? `/api/onedrive/folders/${usuarioId}?parentId=${parentId}`
+      : `/api/onedrive/folders/${usuarioId}`;
+    const response = await api.get<OneDriveFolder[]>(url);
     return response.data;
   },
 

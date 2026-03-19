@@ -14,6 +14,7 @@ import java.util.List;
 public class EntregaDTO {
     private Long id;
     private String nombre;
+    private String comentarioAlumno;
     private Integer version;
     private LocalDateTime fechaEntrega;
     private EstadoEntrega estado;

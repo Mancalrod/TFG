@@ -42,4 +42,6 @@ public class CrearEntregableDTO {
     private Boolean validacionZipEstricta = false;
 
     private String nombreZipEsperado;
+
+    private String carpetaOneDrive;
 }

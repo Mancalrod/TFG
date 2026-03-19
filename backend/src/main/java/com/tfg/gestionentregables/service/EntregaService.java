@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -51,29 +52,41 @@ public class EntregaService {
     private final OneDriveService oneDriveService;
     private final ZipValidationService zipValidationService;
     private final CloudinaryService cloudinaryService;
+    private final FeedbackRepository feedbackRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @Value("${app.upload.dir:uploads}")
     private String uploadBaseDir;
 
     /**
      * SYSOP-013: Realiza una entrega para un entregable.
+     * Permite entregas con archivos, con comentario, o ambos.
+     * El nombre se genera automáticamente si no se proporciona.
      * Si la actividad tiene subirAOneDrive activado:
      *  - Sube los archivos al OneDrive del profesor designado
      *  - Si el alumno tiene OneDrive conectado, también sube una copia a su OneDrive
      *  - Si es reenvío, elimina los archivos de OneDrive de la entrega anterior
      * Si no, almacena localmente como fallback.
      */
-    public EntregaDTO realizarEntrega(Long entregableId, Long usuarioId, String nombre, List<MultipartFile> archivos) {
+    public EntregaDTO realizarEntrega(Long entregableId, Long usuarioId, String nombre,
+                                       String comentario, List<MultipartFile> archivos) {
         Entregable entregable = entregableRepository.findById(entregableId)
                 .orElseThrow(() -> new EntityNotFoundException("Entregable no encontrado con ID: " + entregableId));
-        
+
         Long cursoId = entregable.getActividad().getCurso().getId();
         Estudiante estudiante = estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(usuarioId, cursoId)
                 .orElseThrow(() -> new EntityNotFoundException("Estudiante no encontrado para el usuario con ID: " + usuarioId + " en el curso correspondiente"));
         Long estudianteId = estudiante.getId();
 
+        // Validar que al menos haya archivos O comentario
+        boolean tieneArchivos = archivos != null && !archivos.isEmpty();
+        boolean tieneComentario = comentario != null && !comentario.isBlank();
+        if (!tieneArchivos && !tieneComentario) {
+            throw new IllegalArgumentException("Debe adjuntar al menos un archivo o escribir un comentario");
+        }
+
         // Validar estructura ZIP si el entregable lo requiere
-        if (archivos != null && !archivos.isEmpty()) {
+        if (tieneArchivos) {
             boolean tieneEstructura = entregable.getEstructuraZip() != null && !entregable.getEstructuraZip().isBlank();
             boolean tieneNombre = entregable.getNombreZipEsperado() != null && !entregable.getNombreZipEsperado().isBlank()
                     && !"*".equals(entregable.getNombreZipEsperado().trim());
@@ -132,9 +145,16 @@ public class EntregaService {
 
         // Crear nueva entrega
         LocalDateTime ahora = LocalDateTime.now();
-        
+
+        // Generar nombre automático si no se proporciona
+        String nombreFinal = (nombre != null && !nombre.isBlank())
+                ? nombre
+                : "Entrega v" + (ultimaVersion + 1) + " - " +
+                  ahora.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
         Entrega entrega = Entrega.builder()
-                .nombre(nombre)
+                .nombre(nombreFinal)
+                .comentarioAlumno(tieneComentario ? comentario.trim() : null)
                 .version(ultimaVersion + 1)
                 .fechaEntrega(ahora)
                 .estado(EstadoEntrega.ENTREGADO)
@@ -146,7 +166,7 @@ public class EntregaService {
         entrega = entregaRepository.save(entrega);
 
         // Procesar archivos adjuntos
-        if (archivos != null && !archivos.isEmpty()) {
+        if (tieneArchivos) {
             for (MultipartFile archivo : archivos) {
                 Material material = guardarArchivoConOneDrive(archivo, entrega, entregable, estudiante);
                 materialRepository.save(material);
@@ -201,8 +221,9 @@ public class EntregaService {
 
     /**
      * SYSOP-017: Califica una entrega.
+     * Si se incluye un comentario, se crea automáticamente un feedback del profesor.
      */
-    public EntregaDTO calificarEntrega(Long entregaId, CalificacionDTO calificacion) {
+    public EntregaDTO calificarEntrega(Long entregaId, Long profesorId, CalificacionDTO calificacion) {
         Entrega entrega = entregaRepository.findById(entregaId)
                 .orElseThrow(() -> new EntityNotFoundException("Entrega no encontrada con ID: " + entregaId));
 
@@ -217,6 +238,23 @@ public class EntregaService {
         entrega.setFechaCalificacion(LocalDateTime.now());
 
         entrega = entregaRepository.save(entrega);
+
+        // Si hay comentario del profesor, crear feedback automáticamente
+        if (calificacion.getComentario() != null && !calificacion.getComentario().isBlank()) {
+            Usuario profesor = usuarioRepository.findById(profesorId)
+                    .orElseThrow(() -> new EntityNotFoundException("Profesor no encontrado con ID: " + profesorId));
+
+            Feedback feedback = Feedback.builder()
+                    .comentario(calificacion.getComentario().trim())
+                    .fechaCreacion(LocalDateTime.now())
+                    .entrega(entrega)
+                    .profesor(profesor)
+                    .build();
+            feedbackRepository.save(feedback);
+        }
+
+        // Refrescar entrega para incluir el nuevo feedback
+        entrega = entregaRepository.findById(entrega.getId()).orElseThrow();
         return mapper.toDTO(entrega);
     }
 
@@ -363,10 +401,14 @@ public class EntregaService {
         Long profesorUsuarioId = actividad.getOneDriveUsuarioId();
         if (profesorUsuarioId != null && oneDriveService.estaConectado(profesorUsuarioId)) {
             try {
+                String carpetaDestino = actividad.getModoOneDrive() == com.tfg.gestionentregables.entity.ModoOneDrive.ENTREGABLES
+                        ? entregable.getCarpetaOneDrive()
+                        : actividad.getCarpetaOneDrive();
+
                 Map<String, String> result = oneDriveService.subirArchivo(
                         profesorUsuarioId, archivo,
                         cursoTitulo, actividadTitulo, entregableTitulo,
-                        estudianteNombre, nombreArchivo);
+                        estudianteNombre, nombreArchivo, carpetaDestino);
 
                 onedriveFileId = result.get("fileId");
                 onedriveWebUrl = result.get("webUrl");
@@ -386,7 +428,7 @@ public class EntregaService {
                 Map<String, String> alumnoResult = oneDriveService.subirArchivo(
                         estudianteUsuarioId, archivo,
                         cursoTitulo, actividadTitulo, entregableTitulo,
-                        "Mis Entregas", nombreArchivo);
+                        "Mis Entregas", nombreArchivo, null);
 
                 // Si ningún profesor tenía OneDrive, usar la referencia del alumno
                 if (onedriveFileId == null) {

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ActividadDTO, CrearActividadDTO, TipoActividad, Visibilidad, GrupoDTO } from '../../types';
+import { ActividadDTO, CrearActividadDTO, TipoActividad, Visibilidad, GrupoDTO, ModoOneDrive } from '../../types';
 import { actividadService, cursoService } from '../../services';
 import { oneDriveService } from '../../services/oneDriveService';
 import { useAuth } from '../../context/AuthContext';
+import { OneDriveFolderBrowser } from '../../components/OneDriveFolderBrowser';
 import './EditarActividadPage.css';
 
 const EditarActividadPage: React.FC = () => {
@@ -19,6 +20,11 @@ const EditarActividadPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [errorGuardar, setErrorGuardar] = useState<string | null>(null);
   const [mostrarConfirmarEliminar, setMostrarConfirmarEliminar] = useState(false);
+
+  // Variables para detectar cambio de carpeta OneDrive
+  const [carpetaOriginal, setCarpetaOriginal] = useState<string | undefined>(undefined);
+  const [mostrarConfirmarCambioCarpeta, setMostrarConfirmarCambioCarpeta] = useState(false);
+  const [confirmacionDoble, setConfirmacionDoble] = useState(false);
 
   const [todosLosGrupos, setTodosLosGrupos] = useState(true);
 
@@ -56,6 +62,9 @@ const EditarActividadPage: React.FC = () => {
       const tieneGruposEspecificos = data.grupoIds && data.grupoIds.length > 0 && data.grupoIds.length < gruposData.length;
       setTodosLosGrupos(!tieneGruposEspecificos);
 
+      // Guardar carpeta original para detectar cambios
+      setCarpetaOriginal(data.carpetaOneDrive);
+
       setFormData({
         titulo: data.titulo,
         descripcion: data.descripcion || '',
@@ -67,6 +76,8 @@ const EditarActividadPage: React.FC = () => {
         grupoIds: data.grupoIds || [],
         subirAOneDrive: data.subirAOneDrive || false,
         oneDriveUsuarioId: data.oneDriveUsuarioId,
+        carpetaOneDrive: data.carpetaOneDrive,
+        modoOneDrive: data.modoOneDrive || ModoOneDrive.ACTIVIDAD,
       });
 
       // Comprobar estado de OneDrive
@@ -157,6 +168,17 @@ const EditarActividadPage: React.FC = () => {
     e.preventDefault();
     if (!id) return;
 
+    // Detectar si cambió la carpeta OneDrive
+    const cambioCarpeta = formData.subirAOneDrive &&
+                          carpetaOriginal &&
+                          formData.carpetaOneDrive !== carpetaOriginal &&
+                          formData.modoOneDrive === ModoOneDrive.ACTIVIDAD;
+
+    if (cambioCarpeta && !mostrarConfirmarCambioCarpeta) {
+      setMostrarConfirmarCambioCarpeta(true);
+      return;
+    }
+
     setGuardando(true);
     setErrorGuardar(null);
 
@@ -166,6 +188,8 @@ const EditarActividadPage: React.FC = () => {
         grupoIds: todosLosGrupos ? [] : formData.grupoIds,
         subirAOneDrive: formData.subirAOneDrive || false,
         oneDriveUsuarioId: formData.subirAOneDrive ? (formData.oneDriveUsuarioId || usuario?.id) : undefined,
+        carpetaOneDrive: formData.subirAOneDrive ? formData.carpetaOneDrive : undefined,
+        modoOneDrive: formData.subirAOneDrive ? formData.modoOneDrive : undefined,
       };
       await actividadService.actualizar(parseInt(id), dataToSend);
       navigate(`/actividades/${id}`);
@@ -181,6 +205,24 @@ const EditarActividadPage: React.FC = () => {
     } finally {
       setGuardando(false);
     }
+  };
+
+  const confirmarCambioCarpeta = () => {
+    if (confirmacionDoble) {
+      setMostrarConfirmarCambioCarpeta(false);
+      setConfirmacionDoble(false);
+      // Proceder con el guardado
+      handleGuardar(new Event('submit') as any);
+    } else {
+      setConfirmacionDoble(true);
+    }
+  };
+
+  const cancelarCambioCarpeta = () => {
+    setMostrarConfirmarCambioCarpeta(false);
+    setConfirmacionDoble(false);
+    // Restaurar carpeta original
+    setFormData(prev => ({ ...prev, carpetaOneDrive: carpetaOriginal }));
   };
 
   const handleEliminar = async () => {
@@ -390,14 +432,68 @@ const EditarActividadPage: React.FC = () => {
           <div className="ea-field">
             <label>Subir entregas a OneDrive</label>
             {oneDriveConectado ? (
-              <label className="ea-onedrive-toggle">
-                <input
-                  type="checkbox"
-                  checked={formData.subirAOneDrive || false}
-                  onChange={e => setFormData(prev => ({ ...prev, subirAOneDrive: e.target.checked }))}
-                />
-                <span>Las entregas de los alumnos se subirán automáticamente a tu OneDrive</span>
-              </label>
+              <div className="ea-onedrive-options">
+                <label className="ea-onedrive-toggle">
+                  <input
+                    type="checkbox"
+                    checked={formData.subirAOneDrive || false}
+                    onChange={e => {
+                      const checked = e.target.checked;
+                      setFormData(prev => ({
+                        ...prev,
+                        subirAOneDrive: checked,
+                        carpetaOneDrive: checked ? prev.carpetaOneDrive : '',
+                        modoOneDrive: checked ? (prev.modoOneDrive || ModoOneDrive.ACTIVIDAD) : undefined,
+                      }));
+                    }}
+                  />
+                  <span>Las entregas de los estudiantes se subirán automáticamente a tu OneDrive</span>
+                </label>
+
+                {formData.subirAOneDrive && (
+                  <>
+                    <div className="ea-field" style={{ marginTop: '15px' }}>
+                      <label style={{ marginBottom: '8px', display: 'block' }}>Modo de organización</label>
+                      <select
+                        name="modoOneDrive"
+                        value={formData.modoOneDrive || ModoOneDrive.ACTIVIDAD}
+                        onChange={e => setFormData(prev => ({
+                          ...prev,
+                          modoOneDrive: e.target.value as ModoOneDrive,
+                          carpetaOneDrive: e.target.value === ModoOneDrive.ACTIVIDAD ? prev.carpetaOneDrive : ''
+                        }))}
+                        style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                      >
+                        <option value={ModoOneDrive.ACTIVIDAD}>Por actividad (una carpeta para toda la actividad)</option>
+                        <option value={ModoOneDrive.ENTREGABLES}>Por entregables (una carpeta por cada entregable)</option>
+                      </select>
+                      <p style={{fontSize: '0.85rem', color: '#64748b', marginTop: '8px'}}>
+                        {formData.modoOneDrive === ModoOneDrive.ACTIVIDAD
+                          ? "Todas las entregas de todos los entregables se guardarán en una misma carpeta que elijas aquí."
+                          : "Cada entregable tendrá su propia carpeta que elegirás al crear/editar el entregable."}
+                      </p>
+                    </div>
+
+                    {formData.modoOneDrive === ModoOneDrive.ACTIVIDAD && (
+                      <div className="ea-field ea-onedrive-folder-select" style={{ marginTop: '15px' }}>
+                        <label style={{ marginBottom: '8px', display: 'block' }}>Carpeta de destino en OneDrive</label>
+                        {usuario && (
+                          <OneDriveFolderBrowser
+                            usuarioId={usuario.id}
+                            selectedPath={formData.carpetaOneDrive || ''}
+                            onSelectFolder={(path) => handleChange({ target: { name: 'carpetaOneDrive', value: path } } as any)}
+                          />
+                        )}
+                        <p style={{fontSize: '0.85rem', color: '#64748b', marginTop: '10px'}}>
+                          {formData.carpetaOneDrive
+                            ? `Las entregas se guardarán en "${formData.carpetaOneDrive}/[Nombre_Entregable]/[Nombre_Alumno]/"`
+                            : "Las entregas se guardarán en formato Curso/Actividad/Entregable/[Nombre_Alumno]/"}
+                        </p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             ) : (
               <div className="ea-onedrive-connect">
                 <p className="ea-onedrive-msg">Conecta tu OneDrive para poder recibir las entregas directamente en tu nube.</p>
@@ -485,6 +581,67 @@ const EditarActividadPage: React.FC = () => {
                 {eliminando ? 'Eliminando...' : 'Sí, eliminar'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal confirmar cambio de carpeta OneDrive */}
+      {mostrarConfirmarCambioCarpeta && (
+        <div className="modal-overlay" onClick={cancelarCambioCarpeta}>
+          <div className="ea-modal" onClick={e => e.stopPropagation()}>
+            <h2>⚠ Cambio de carpeta de OneDrive</h2>
+            <p>
+              Estás a punto de cambiar la carpeta de destino de <strong>"{carpetaOriginal}"</strong> a <strong>"{formData.carpetaOneDrive}"</strong>.
+            </p>
+            <div className="ea-modal-warning" style={{backgroundColor: '#fef3c7', border: '1px solid #fbbf24', padding: '12px', borderRadius: '6px', marginTop: '12px'}}>
+              <p><strong>Importante:</strong></p>
+              <ul style={{marginLeft: '20px', marginTop: '8px'}}>
+                <li>Los archivos de entregas ya existentes NO se moverán automáticamente</li>
+                <li>Solo las NUEVAS entregas se guardarán en la nueva carpeta</li>
+                <li>Tendrás que mover manualmente los archivos antiguos si lo deseas</li>
+              </ul>
+            </div>
+            {!confirmacionDoble ? (
+              <>
+                <p style={{marginTop: '15px', fontWeight: 500}}>¿Estás seguro de que deseas continuar?</p>
+                <div className="ea-modal-actions" style={{marginTop: '15px'}}>
+                  <button
+                    className="btn-secondary"
+                    onClick={cancelarCambioCarpeta}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className="btn-primary"
+                    onClick={confirmarCambioCarpeta}
+                    style={{backgroundColor: '#f59e0b', borderColor: '#f59e0b'}}
+                  >
+                    Sí, continuar
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p style={{marginTop: '15px', fontWeight: 600, color: '#dc2626'}}>
+                  Segunda confirmación requerida: ¿Realmente deseas cambiar la carpeta sabiendo que no se moverán los archivos existentes?
+                </p>
+                <div className="ea-modal-actions" style={{marginTop: '15px'}}>
+                  <button
+                    className="btn-secondary"
+                    onClick={cancelarCambioCarpeta}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className="btn-primary"
+                    onClick={confirmarCambioCarpeta}
+                    style={{backgroundColor: '#dc2626', borderColor: '#dc2626'}}
+                  >
+                    Sí, confirmo el cambio
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -222,17 +222,25 @@ public class OneDriveService {
     public Map<String, String> subirArchivo(Long usuarioId, MultipartFile archivo,
                                              String cursoTitulo, String actividadTitulo,
                                              String entregableTitulo, String estudianteNombre,
-                                             String nombreArchivo) {
+                                             String nombreArchivo, String carpetaOpcional) {
         String accessToken = obtenerAccessTokenValido(usuarioId);
 
-        // Construir ruta en OneDrive: TFG-Entregables/Curso/Actividad/Entregable/Alumno/archivo.ext
-        String rutaOneDrive = String.format("%s/%s/%s/%s/%s/%s",
-                config.getRootFolder(),
-                sanitizarNombreCarpeta(cursoTitulo),
-                sanitizarNombreCarpeta(actividadTitulo),
-                sanitizarNombreCarpeta(entregableTitulo),
-                sanitizarNombreCarpeta(estudianteNombre),
-                nombreArchivo);
+        String rutaOneDrive;
+        if (carpetaOpcional != null && !carpetaOpcional.isBlank()) {
+            rutaOneDrive = String.format("%s/%s/%s", 
+                    carpetaOpcional, 
+                    sanitizarNombreCarpeta(estudianteNombre), 
+                    nombreArchivo);
+        } else {
+            // Construir ruta predeterminada: TFG-Entregables/Curso/Actividad/Entregable/Alumno/archivo.ext
+            rutaOneDrive = String.format("%s/%s/%s/%s/%s/%s",
+                    config.getRootFolder(),
+                    sanitizarNombreCarpeta(cursoTitulo),
+                    sanitizarNombreCarpeta(actividadTitulo),
+                    sanitizarNombreCarpeta(entregableTitulo),
+                    sanitizarNombreCarpeta(estudianteNombre),
+                    nombreArchivo);
+        }
 
         return subirArchivoAOneDrive(accessToken, rutaOneDrive, archivo);
     }
@@ -445,6 +453,56 @@ public class OneDriveService {
     // ========================================
     // OPERACIONES CON CARPETAS
     // ========================================
+
+    /**
+     * Obtiene la estructura de carpetas de OneDrive del usuario.
+     */
+    public java.util.List<Map<String, String>> listarCarpetas(Long usuarioId, String parentId) {
+        String accessToken = obtenerAccessTokenValido(usuarioId);
+        String url;
+        if (parentId == null || parentId.isBlank() || parentId.equals("root")) {
+            url = config.getGraphApiUrl() + "/me/drive/root/children?$filter=folder ne null&$select=id,name,parentReference";
+        } else {
+            url = config.getGraphApiUrl() + "/me/drive/items/" + parentId + "/children?$filter=folder ne null&$select=id,name,parentReference";
+        }
+
+        try {
+            String response = restClient.get()
+                    .uri(url)
+                    .header("Authorization", "Bearer " + accessToken)
+                    .retrieve()
+                    .body(String.class);
+
+            JsonNode root = objectMapper.readTree(response);
+            JsonNode values = root.get("value");
+            
+            java.util.List<Map<String, String>> carpetas = new java.util.ArrayList<>();
+            if (values != null && values.isArray()) {
+                for (JsonNode node : values) {
+                    Map<String, String> carpeta = new java.util.HashMap<>();
+                    carpeta.put("id", node.has("id") ? node.get("id").asText() : "");
+                    carpeta.put("name", node.has("name") ? node.get("name").asText() : "");
+                    
+                    // Reconstruimos la ruta completa
+                    String fullPath;
+                    String parentPath = (node.has("parentReference") && node.get("parentReference").has("path")) 
+                            ? node.get("parentReference").get("path").asText() : "";
+                            
+                    if (parentPath.contains("root:/")) {
+                        fullPath = parentPath.substring(parentPath.indexOf("root:/") + 6) + "/" + carpeta.get("name");
+                    } else {
+                        fullPath = carpeta.get("name");
+                    }
+                    carpeta.put("path", fullPath);
+                    carpetas.add(carpeta);
+                }
+            }
+            return carpetas;
+        } catch (RestClientException | IOException e) {
+            log.error("Error al listar carpetas de OneDrive: {}", e.getMessage());
+            throw new RuntimeException("Error al listar carpetas: " + e.getMessage(), e);
+        }
+    }
 
     /**
      * Crea una carpeta en OneDrive si no existe.

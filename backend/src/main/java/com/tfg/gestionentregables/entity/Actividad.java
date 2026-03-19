@@ -2,6 +2,7 @@ package com.tfg.gestionentregables.entity;
 
 import com.tfg.gestionentregables.entity.enums.TipoActividad;
 import com.tfg.gestionentregables.entity.enums.Visibilidad;
+import com.tfg.gestionentregables.entity.ModoOneDrive;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -75,6 +76,21 @@ public class Actividad {
      */
     @Column(name = "onedrive_usuario_id")
     private Long oneDriveUsuarioId;
+
+    /**
+     * ID o ruta de la carpeta de OneDrive seleccionada para la actividad.
+     * Si es nulo, se genera automáticamente.
+     */
+    @Column(name = "carpeta_onedrive")
+    private String carpetaOneDrive;
+
+    /**
+     * Define si el destino se gestiona a nivel de Actividad o a nivel de Entregables.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "modo_onedrive")
+    @Builder.Default
+    private ModoOneDrive modoOneDrive = ModoOneDrive.ACTIVIDAD;
 
     // Relación: Una actividad pertenece a un curso
     @ManyToOne(fetch = FetchType.LAZY)

@@ -49,6 +49,8 @@ public class ActividadService {
                 .notaMaxima(dto.getNotaMaxima())
                 .subirAOneDrive(Boolean.TRUE.equals(dto.getSubirAOneDrive()))
                 .oneDriveUsuarioId(Boolean.TRUE.equals(dto.getSubirAOneDrive()) ? dto.getOneDriveUsuarioId() : null)
+                .carpetaOneDrive(Boolean.TRUE.equals(dto.getSubirAOneDrive()) ? dto.getCarpetaOneDrive() : null)
+                .modoOneDrive(dto.getModoOneDrive() != null ? dto.getModoOneDrive() : com.tfg.gestionentregables.entity.ModoOneDrive.ACTIVIDAD)
                 .curso(curso)
                 .build();
 
@@ -143,6 +145,11 @@ public class ActividadService {
         actividad.setSubirAOneDrive(Boolean.TRUE.equals(dto.getSubirAOneDrive()));
         actividad.setOneDriveUsuarioId(
                 Boolean.TRUE.equals(dto.getSubirAOneDrive()) ? dto.getOneDriveUsuarioId() : null);
+        actividad.setCarpetaOneDrive(
+                Boolean.TRUE.equals(dto.getSubirAOneDrive()) ? dto.getCarpetaOneDrive() : null);
+        if (dto.getModoOneDrive() != null) {
+            actividad.setModoOneDrive(dto.getModoOneDrive());
+        }
 
         // Actualizar grupos si se especifican
         if (dto.getGrupoIds() != null) {

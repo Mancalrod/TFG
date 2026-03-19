@@ -2,6 +2,7 @@ package com.tfg.gestionentregables.dto;
 
 import com.tfg.gestionentregables.entity.enums.TipoActividad;
 import com.tfg.gestionentregables.entity.enums.Visibilidad;
+import com.tfg.gestionentregables.entity.ModoOneDrive;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -31,4 +32,6 @@ public class ActividadDTO {
     private Boolean enPlazo;
     private Boolean subirAOneDrive;
     private Long oneDriveUsuarioId;
+    private String carpetaOneDrive;
+    private ModoOneDrive modoOneDrive;
 }

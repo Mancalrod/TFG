@@ -151,6 +151,7 @@ $RECYCLE.BIN/
 *.jks
 application-secret.yml
 application-secret.properties
+docs/credenciales_seeder.csv
 
 # Temporary files
 *.tmp

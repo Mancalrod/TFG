@@ -44,14 +44,17 @@ public class EntregaController {
 
     /**
      * SYSOP-013: Realizar una entrega.
+     * Permite entregar con archivos, comentario, o ambos.
+     * El nombre es generado automáticamente si no se proporciona.
      */
     @PostMapping("/entregable/{entregableId}/estudiante/{usuarioId}")
     public ResponseEntity<EntregaDTO> realizarEntrega(
             @PathVariable Long entregableId,
             @PathVariable Long usuarioId,
-            @RequestParam String nombre,
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) String comentario,
             @RequestParam(required = false) List<MultipartFile> archivos) {
-        EntregaDTO entrega = entregaService.realizarEntrega(entregableId, usuarioId, nombre, archivos);
+        EntregaDTO entrega = entregaService.realizarEntrega(entregableId, usuarioId, nombre, comentario, archivos);
         return ResponseEntity.status(HttpStatus.CREATED).body(entrega);
     }
 
@@ -76,12 +79,14 @@ public class EntregaController {
 
     /**
      * SYSOP-017: Calificar una entrega.
+     * Si se incluye comentario en la calificación, se crea un feedback automáticamente.
      */
     @PostMapping("/{id}/calificar")
     public ResponseEntity<EntregaDTO> calificarEntrega(
             @PathVariable Long id,
+            @RequestParam Long profesorId,
             @Valid @RequestBody CalificacionDTO calificacion) {
-        return ResponseEntity.ok(entregaService.calificarEntrega(id, calificacion));
+        return ResponseEntity.ok(entregaService.calificarEntrega(id, profesorId, calificacion));
     }
 
     /**

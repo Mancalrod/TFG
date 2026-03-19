@@ -4,7 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import { cursoService } from '../../services/cursoService';
 import { actividadService } from '../../services/actividadService';
 import { oneDriveService } from '../../services/oneDriveService';
-import { CursoDTO, ActividadDTO, CrearActividadDTO, TipoActividad, Visibilidad } from '../../types';
+import { CursoDTO, ActividadDTO, CrearActividadDTO, TipoActividad, Visibilidad, ModoOneDrive } from '../../types';
+import { OneDriveFolderBrowser } from '../../components/OneDriveFolderBrowser';
 import './CursoDetallePage.css';
 
 const CursoDetallePage: React.FC = () => {
@@ -25,6 +26,7 @@ const CursoDetallePage: React.FC = () => {
   // Modal confirmar eliminación
   const [actividadAEliminar, setActividadAEliminar] = useState<ActividadDTO | null>(null);
   const [eliminando, setEliminando] = useState(false);
+  const [errorEliminar, setErrorEliminar] = useState<string | null>(null);
 
   // Vista previa de estudiante
   const [modoPreview, setModoPreview] = useState(false);
@@ -65,8 +67,9 @@ const CursoDetallePage: React.FC = () => {
         ]);
         setCurso(cursoData);
         setActividades(actividadesData);
-      } catch {
-        setError('Error al cargar la información del curso.');
+      } catch (err: unknown) {
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        setError(axiosErr?.response?.data?.message || 'Error al cargar la información del curso.');
       } finally {
         setLoading(false);
       }
@@ -111,12 +114,20 @@ const CursoDetallePage: React.FC = () => {
         grupoIds: todosLosGrupos ? [] : formData.grupoIds,
         subirAOneDrive: formData.subirAOneDrive || false,
         oneDriveUsuarioId: formData.subirAOneDrive ? usuario?.id : undefined,
+        carpetaOneDrive: formData.subirAOneDrive ? formData.carpetaOneDrive : undefined,
+        modoOneDrive: formData.subirAOneDrive ? (formData.modoOneDrive || ModoOneDrive.ACTIVIDAD) : undefined,
       });
       setActividades(prev => [nueva, ...prev]);
       setMostrarModal(false);
       resetForm();
-    } catch {
-      setErrorCrear('Error al crear la actividad. Inténtalo de nuevo.');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string; errors?: Record<string, string> } } };
+      const msg =
+        axiosErr?.response?.data?.message ||
+        (axiosErr?.response?.data?.errors
+          ? Object.values(axiosErr.response.data.errors).join(', ')
+          : 'Error al crear la actividad. Inténtalo de nuevo.');
+      setErrorCrear(typeof msg === 'string' ? msg : 'Error al crear la actividad. Inténtalo de nuevo.');
     } finally {
       setCreando(false);
     }
@@ -133,6 +144,7 @@ const CursoDetallePage: React.FC = () => {
       notaMaxima: 10,
       grupoIds: [],
       subirAOneDrive: false,
+      carpetaOneDrive: undefined,
     });
     setTodosLosGrupos(true);
     setErrorCrear(null);
@@ -146,12 +158,14 @@ const CursoDetallePage: React.FC = () => {
   const handleConfirmarEliminar = async () => {
     if (!actividadAEliminar) return;
     setEliminando(true);
+    setErrorEliminar(null);
     try {
       await actividadService.eliminar(actividadAEliminar.id);
       setActividades(prev => prev.filter(a => a.id !== actividadAEliminar.id));
       setActividadAEliminar(null);
-    } catch {
-      alert('Error al eliminar la actividad.');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setErrorEliminar(axiosErr?.response?.data?.message || 'Error al eliminar la actividad.');
     } finally {
       setEliminando(false);
     }
@@ -416,11 +430,11 @@ const CursoDetallePage: React.FC = () => {
 
       {/* Modal confirmar eliminación */}
       {actividadAEliminar && (
-        <div className="cd-modal-overlay" onClick={() => !eliminando && setActividadAEliminar(null)}>
+        <div className="cd-modal-overlay" onClick={() => { if (!eliminando) { setActividadAEliminar(null); setErrorEliminar(null); } }}>
           <div className="cd-modal cd-modal-sm" onClick={e => e.stopPropagation()}>
             <div className="cd-modal-header">
               <h2>Eliminar actividad</h2>
-              <button className="cd-modal-close" onClick={() => !eliminando && setActividadAEliminar(null)}>
+              <button className="cd-modal-close" onClick={() => { if (!eliminando) { setActividadAEliminar(null); setErrorEliminar(null); } }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
@@ -428,6 +442,9 @@ const CursoDetallePage: React.FC = () => {
               </button>
             </div>
             <div className="cd-modal-body">
+              {errorEliminar && (
+                <div className="cd-form-error" style={{marginBottom: '16px'}}>{errorEliminar}</div>
+              )}
               <p>¿Estás seguro de que quieres eliminar la actividad <strong>{actividadAEliminar.titulo}</strong>?</p>
               <p className="cd-modal-warning">Esta acción no se puede deshacer.</p>
             </div>
@@ -435,7 +452,7 @@ const CursoDetallePage: React.FC = () => {
               <button
                 type="button"
                 className="cd-btn-cancelar"
-                onClick={() => setActividadAEliminar(null)}
+                onClick={() => { setActividadAEliminar(null); setErrorEliminar(null); }}
                 disabled={eliminando}
               >
                 Cancelar
@@ -602,14 +619,67 @@ const CursoDetallePage: React.FC = () => {
                 <div className="cd-form-group">
                   <label>Subir entregas a OneDrive</label>
                   {oneDriveConectado ? (
-                    <label className="cd-onedrive-toggle">
-                      <input
-                        type="checkbox"
-                        checked={formData.subirAOneDrive || false}
-                        onChange={e => setFormData(prev => ({ ...prev, subirAOneDrive: e.target.checked }))}
-                      />
-                      <span>Las entregas de los alumnos se subirán automáticamente a tu OneDrive</span>
-                    </label>
+                    <div className="cd-onedrive-options">
+                      <label className="cd-onedrive-toggle">
+                        <input
+                          type="checkbox"
+                          checked={formData.subirAOneDrive || false}
+                          onChange={e => {
+                            const checked = e.target.checked;
+                            setFormData(prev => ({
+                              ...prev,
+                              subirAOneDrive: checked,
+                              carpetaOneDrive: checked ? prev.carpetaOneDrive : '',
+                              modoOneDrive: checked ? (prev.modoOneDrive || ModoOneDrive.ACTIVIDAD) : undefined,
+                            }));
+                          }}
+                        />
+                        <span>Subir entregas de los estudiantes a OneDrive automáticamente</span>
+                      </label>
+
+                      {formData.subirAOneDrive && (
+                        <>
+                          <div className="cd-form-group" style={{ marginTop: '15px' }}>
+                            <label style={{ marginBottom: '8px', display: 'block' }}>Modo de organización</label>
+                            <select
+                              value={formData.modoOneDrive || ModoOneDrive.ACTIVIDAD}
+                              onChange={e => setFormData(prev => ({
+                                ...prev,
+                                modoOneDrive: e.target.value as ModoOneDrive,
+                                carpetaOneDrive: e.target.value === ModoOneDrive.ACTIVIDAD ? prev.carpetaOneDrive : ''
+                              }))}
+                              style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                            >
+                              <option value={ModoOneDrive.ACTIVIDAD}>Por actividad (una carpeta para toda la actividad)</option>
+                              <option value={ModoOneDrive.ENTREGABLES}>Por entregables (una carpeta por cada entregable)</option>
+                            </select>
+                            <p style={{fontSize: '0.85rem', color: '#64748b', marginTop: '8px'}}>
+                              {formData.modoOneDrive === ModoOneDrive.ACTIVIDAD
+                                ? "Todas las entregas de todos los entregables se guardarán en una misma carpeta que elijas aquí."
+                                : "Cada entregable tendrá su propia carpeta que elegirás al crear/editar el entregable."}
+                            </p>
+                          </div>
+
+                          {formData.modoOneDrive === ModoOneDrive.ACTIVIDAD && (
+                            <div className="cd-form-group cd-onedrive-folder-select" style={{ marginTop: '15px' }}>
+                              <label style={{ marginBottom: '8px', display: 'block' }}>Carpeta de destino en OneDrive</label>
+                              {usuario && (
+                                <OneDriveFolderBrowser
+                                  usuarioId={usuario.id}
+                                  selectedPath={formData.carpetaOneDrive || ''}
+                                  onSelectFolder={(path) => handleInputChange('carpetaOneDrive', path)}
+                                />
+                              )}
+                              <p style={{fontSize: '0.85rem', color: '#64748b', marginTop: '10px'}}>
+                                {formData.carpetaOneDrive
+                                  ? `Las entregas se guardarán en "${formData.carpetaOneDrive}/[Nombre_Entregable]/[Nombre_Alumno]/"`
+                                  : "Las entregas se guardarán en formato Curso/Actividad/Entregable/[Nombre_Alumno]/"}
+                              </p>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
                   ) : (
                     <div className="cd-onedrive-connect">
                       <p className="cd-onedrive-msg">Conecta tu OneDrive para poder recibir las entregas directamente en tu nube.</p>

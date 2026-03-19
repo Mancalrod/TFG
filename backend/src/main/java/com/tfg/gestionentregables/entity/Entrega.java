@@ -52,6 +52,13 @@ public class Entrega {
     @Builder.Default
     private Boolean esVersionActiva = true;
 
+    /**
+     * Comentario/observaciones del alumno al realizar la entrega.
+     * Permite entregas de solo texto o agregar notas a entregas con archivos.
+     */
+    @Column(name = "comentario_alumno", columnDefinition = "TEXT")
+    private String comentarioAlumno;
+
     // Relación: Una entrega pertenece a un entregable
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entregable_id", nullable = false)

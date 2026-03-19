@@ -15,15 +15,18 @@ export const entregaService = {
   },
 
   realizar: async (
-    entregableId: number, 
-    estudianteId: number, 
-    nombre: string, 
+    entregableId: number,
+    estudianteId: number,
+    comentario?: string,
     archivos?: File[]
   ): Promise<EntregaDTO> => {
     const formData = new FormData();
-    formData.append('nombre', nombre);
-    
-    if (archivos) {
+
+    if (comentario && comentario.trim()) {
+      formData.append('comentario', comentario.trim());
+    }
+
+    if (archivos && archivos.length > 0) {
       archivos.forEach(archivo => {
         formData.append('archivos', archivo);
       });
@@ -35,8 +38,7 @@ export const entregaService = {
       {
         headers: {
           'Content-Type': 'multipart/form-data'
-        },
-        params: { nombre }
+        }
       }
     );
     return response.data;
@@ -54,8 +56,12 @@ export const entregaService = {
     return response.data;
   },
 
-  calificar: async (id: number, calificacion: CalificacionDTO): Promise<EntregaDTO> => {
-    const response = await api.post<EntregaDTO>(`${BASE_URL}/${id}/calificar`, calificacion);
+  calificar: async (id: number, profesorId: number, calificacion: CalificacionDTO): Promise<EntregaDTO> => {
+    const response = await api.post<EntregaDTO>(
+      `${BASE_URL}/${id}/calificar`,
+      calificacion,
+      { params: { profesorId } }
+    );
     return response.data;
   },
 

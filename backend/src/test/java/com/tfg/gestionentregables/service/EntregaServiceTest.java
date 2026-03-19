@@ -49,6 +49,8 @@ class EntregaServiceTest {
     @Mock private MicrosoftOAuthService microsoftOAuthService;
     @Mock private ZipValidationService zipValidationService;
     @Mock private CloudinaryService cloudinaryService;
+    @Mock private FeedbackRepository feedbackRepository;
+    @Mock private UsuarioRepository usuarioRepository;
 
     @InjectMocks
     private EntregaService entregaService;
@@ -416,7 +418,7 @@ class EntregaServiceTest {
             when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
             when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
 
-            EntregaDTO result = entregaService.calificarEntrega(1L, cal);
+            EntregaDTO result = entregaService.calificarEntrega(1L, 1L, cal);
 
             assertThat(result).isNotNull();
             verify(entregaRepository).save(argThat(e -> e.getEstado() == EstadoEntrega.CALIFICADO));
@@ -429,7 +431,7 @@ class EntregaServiceTest {
 
             when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
 
-            assertThatThrownBy(() -> entregaService.calificarEntrega(1L, cal))
+            assertThatThrownBy(() -> entregaService.calificarEntrega(1L, 1L, cal))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("nota máxima");
         }
@@ -441,7 +443,7 @@ class EntregaServiceTest {
 
             when(entregaRepository.findById(99L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> entregaService.calificarEntrega(99L, cal))
+            assertThatThrownBy(() -> entregaService.calificarEntrega(99L, 1L, cal))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -454,7 +456,7 @@ class EntregaServiceTest {
             when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
             when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
 
-            assertThatNoException().isThrownBy(() -> entregaService.calificarEntrega(1L, cal));
+            assertThatNoException().isThrownBy(() -> entregaService.calificarEntrega(1L, 1L, cal));
         }
 
         @Test
@@ -467,7 +469,7 @@ class EntregaServiceTest {
             when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
             when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
 
-            assertThatNoException().isThrownBy(() -> entregaService.calificarEntrega(1L, cal));
+            assertThatNoException().isThrownBy(() -> entregaService.calificarEntrega(1L, 1L, cal));
         }
 
         @Test
@@ -479,13 +481,105 @@ class EntregaServiceTest {
             when(entregaRepository.save(any(Entrega.class))).thenAnswer(inv -> inv.getArgument(0));
             when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
 
-            entregaService.calificarEntrega(1L, cal);
+            entregaService.calificarEntrega(1L, 1L, cal);
 
             verify(entregaRepository).save(argThat(e ->
                     e.getCalificacion() == 7.0 &&
                     e.getEstado() == EstadoEntrega.CALIFICADO &&
                     e.getFechaCalificacion() != null
             ));
+        }
+
+        @Test
+        @DisplayName("Crea feedback automático si se incluye comentario")
+        void calificar_conComentario_creaFeedback() {
+            CalificacionDTO cal = CalificacionDTO.builder()
+                    .nota(8.0)
+                    .comentario("Buen trabajo, pero faltan detalles")
+                    .build();
+            Usuario profesor = Usuario.builder().id(10L).nombre("Profesor").build();
+
+            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
+            when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
+            when(usuarioRepository.findById(10L)).thenReturn(Optional.of(profesor));
+            when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
+
+            entregaService.calificarEntrega(1L, 10L, cal);
+
+            verify(feedbackRepository).save(argThat(fb ->
+                    fb.getComentario().equals("Buen trabajo, pero faltan detalles") &&
+                    fb.getProfesor().equals(profesor)
+            ));
+        }
+
+        @Test
+        @DisplayName("No crea feedback si comentario está vacío")
+        void calificar_sinComentario_noFeedback() {
+            CalificacionDTO cal = CalificacionDTO.builder().nota(8.0).build();
+
+            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
+            when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
+            when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
+
+            entregaService.calificarEntrega(1L, 1L, cal);
+
+            verify(feedbackRepository, never()).save(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("realizarEntrega con comentario")
+    class RealizarEntregaConComentario {
+
+        @Test
+        @DisplayName("Permite entrega solo con comentario (sin archivos)")
+        void entrega_soloComentario() {
+            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(anyLong(), anyLong()))
+                    .thenReturn(Optional.of(estudiante));
+            when(entregaRepository.findByEntregableIdAndEstudianteId(anyLong(), anyLong()))
+                    .thenReturn(Collections.emptyList());
+            when(entregaRepository.save(any(Entrega.class))).thenAnswer(inv -> {
+                Entrega e = inv.getArgument(0);
+                e.setId(1L);
+                return e;
+            });
+            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
+            when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
+
+            EntregaDTO result = entregaService.realizarEntrega(
+                    1L, 1L, null, "Este es mi comentario de entrega", null);
+
+            assertThat(result).isNotNull();
+            verify(entregaRepository).save(argThat(e ->
+                    e.getComentarioAlumno().equals("Este es mi comentario de entrega")
+            ));
+        }
+
+        @Test
+        @DisplayName("Falla si no hay ni archivos ni comentario")
+        void entrega_vacia_falla() {
+            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(anyLong(), anyLong()))
+                    .thenReturn(Optional.of(estudiante));
+
+            assertThatThrownBy(() ->
+                    entregaService.realizarEntrega(1L, 1L, null, null, null))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("al menos un archivo o escribir un comentario");
+        }
+
+        @Test
+        @DisplayName("Falla si comentario está en blanco y no hay archivos")
+        void entrega_comentarioBlanco_falla() {
+            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(anyLong(), anyLong()))
+                    .thenReturn(Optional.of(estudiante));
+
+            assertThatThrownBy(() ->
+                    entregaService.realizarEntrega(1L, 1L, null, "   ", null))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("al menos un archivo o escribir un comentario");
         }
     }
 

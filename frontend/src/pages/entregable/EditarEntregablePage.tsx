@@ -1,23 +1,29 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { EntregableDTO, CrearEntregableDTO, Visibilidad, TipoMaterial, NodoEstructuraZip } from '../../types';
-import { entregableService } from '../../services';
+import { EntregableDTO, CrearEntregableDTO, Visibilidad, TipoMaterial, NodoEstructuraZip, ActividadDTO, ModoOneDrive } from '../../types';
+import { entregableService, actividadService, oneDriveService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
 import EstructuraZipBuilder from '../../components/EstructuraZipBuilder';
+import { OneDriveFolderBrowser } from '../../components/OneDriveFolderBrowser';
 import './EditarEntregablePage.css';
 
 const EditarEntregablePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { esProfesor } = useAuth();
+  const { esProfesor, usuario } = useAuth();
 
   const [entregable, setEntregable] = useState<EntregableDTO | null>(null);
+  const [actividad, setActividad] = useState<ActividadDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [eliminando, setEliminando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorGuardar, setErrorGuardar] = useState<string | null>(null);
   const [mostrarConfirmarEliminar, setMostrarConfirmarEliminar] = useState(false);
+
+  // OneDrive
+  const [oneDriveEnabled, setOneDriveEnabled] = useState(false);
+  const [oneDriveConectado, setOneDriveConectado] = useState(false);
 
   const [formData, setFormData] = useState<CrearEntregableDTO>({
     titulo: '',
@@ -43,6 +49,22 @@ const EditarEntregablePage: React.FC = () => {
       const data = await entregableService.obtener(entregableId);
       setEntregable(data);
 
+      // Cargar actividad para conocer el modo OneDrive
+      const actividadData = await actividadService.obtener(data.actividadId);
+      setActividad(actividadData);
+
+      // Comprobar estado de OneDrive
+      try {
+        const enabled = await oneDriveService.isEnabled();
+        setOneDriveEnabled(enabled);
+        if (enabled && usuario) {
+          const status = await oneDriveService.getConnectionStatus(usuario.id);
+          setOneDriveConectado(status.conectado);
+        }
+      } catch {
+        setOneDriveEnabled(false);
+      }
+
       // Convertir fechas ISO al formato datetime-local
       const fechaInicioLocal = data.fechaInicio
         ? toDatetimeLocal(data.fechaInicio)
@@ -61,6 +83,7 @@ const EditarEntregablePage: React.FC = () => {
         tamanoMaximoBytes: data.tamanoMaximoBytes ?? undefined,
         visibilidad: data.visibilidad,
         permiteReenvio: data.permiteReenvio,
+        carpetaOneDrive: data.carpetaOneDrive,
       });
 
       if (data.tamanoMaximoBytes) {
@@ -83,7 +106,7 @@ const EditarEntregablePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [usuario]);
 
   useEffect(() => {
     if (id) {
@@ -147,6 +170,14 @@ const EditarEntregablePage: React.FC = () => {
   const handleGuardar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
+
+    // Validar carpeta OneDrive si es obligatoria
+    if (actividad?.modoOneDrive === ModoOneDrive.ENTREGABLES &&
+        actividad.subirAOneDrive &&
+        (!formData.carpetaOneDrive || formData.carpetaOneDrive.trim() === '')) {
+      setErrorGuardar('La carpeta de OneDrive es obligatoria cuando el modo de almacenamiento de la actividad es por entregables');
+      return;
+    }
 
     setGuardando(true);
     setErrorGuardar(null);
@@ -370,6 +401,40 @@ const EditarEntregablePage: React.FC = () => {
               nombreZipEsperado={nombreZipEsperado}
               onNombreZipChange={setNombreZipEsperado}
             />
+          </div>
+        )}
+
+        {/* Carpeta OneDrive (solo si el modo es ENTREGABLES) */}
+        {oneDriveEnabled && actividad?.modoOneDrive === ModoOneDrive.ENTREGABLES && (
+          <div className="ee-field">
+            <label htmlFor="carpetaOneDrive">
+              Carpeta de destino en OneDrive {actividad.subirAOneDrive && '*'}
+            </label>
+            {oneDriveConectado ? (
+              <>
+                {usuario && (
+                  <OneDriveFolderBrowser
+                    usuarioId={usuario.id}
+                    selectedPath={formData.carpetaOneDrive || ''}
+                    onSelectFolder={(path) => handleChange({ target: { name: 'carpetaOneDrive', value: path } } as any)}
+                  />
+                )}
+                <p className="ee-help-text">
+                  {formData.carpetaOneDrive
+                    ? `Las entregas se guardarán en "${formData.carpetaOneDrive}/[Nombre_Alumno]/"`
+                    : "Selecciona una carpeta donde se guardarán las entregas de los estudiantes"}
+                </p>
+                {!formData.carpetaOneDrive && actividad.subirAOneDrive && (
+                  <p className="ee-help-text" style={{color: '#ef4444', marginTop: '5px'}}>
+                    La carpeta es obligatoria cuando el modo de almacenamiento de la actividad es por entregables
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="ee-help-text">
+                Debes conectar tu OneDrive para seleccionar una carpeta de destino.
+              </p>
+            )}
           </div>
         )}
 

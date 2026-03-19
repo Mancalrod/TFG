@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,6 +36,19 @@ public class OneDriveController {
     @GetMapping("/enabled")
     public ResponseEntity<Map<String, Boolean>> isEnabled() {
         return ResponseEntity.ok(Map.of("enabled", oneDriveService.isEnabled()));
+    }
+
+    /**
+     * Obtiene las carpetas de OneDrive de un usuario.
+     */
+    @GetMapping("/folders/{usuarioId}")
+    public ResponseEntity<List<Map<String, String>>> getFolders(
+            @PathVariable Long usuarioId,
+            @RequestParam(required = false) String parentId) {
+        if (!oneDriveService.isEnabled() || !oneDriveService.estaConectado(usuarioId)) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(oneDriveService.listarCarpetas(usuarioId, parentId));
     }
 
     /**

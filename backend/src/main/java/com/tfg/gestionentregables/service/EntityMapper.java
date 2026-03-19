@@ -79,6 +79,8 @@ public class EntityMapper {
                 .enPlazo(actividad.estaEnPlazo())
                 .subirAOneDrive(actividad.getSubirAOneDrive())
                 .oneDriveUsuarioId(actividad.getOneDriveUsuarioId())
+                .carpetaOneDrive(actividad.getCarpetaOneDrive())
+                .modoOneDrive(actividad.getModoOneDrive())
                 .build();
     }
 
@@ -112,6 +114,7 @@ public class EntityMapper {
                 .actividadTitulo(entregable.getActividad().getTitulo())
                 .numeroEntregas((long) entregable.getEntregas().size())
                 .enPlazo(entregable.estaEnPlazo())
+                .carpetaOneDrive(entregable.getCarpetaOneDrive())
                 .build();
     }
 
@@ -120,6 +123,7 @@ public class EntityMapper {
         return EntregaDTO.builder()
                 .id(entrega.getId())
                 .nombre(entrega.getNombre())
+                .comentarioAlumno(entrega.getComentarioAlumno())
                 .version(entrega.getVersion())
                 .fechaEntrega(entrega.getFechaEntrega())
                 .estado(entrega.getEstado())

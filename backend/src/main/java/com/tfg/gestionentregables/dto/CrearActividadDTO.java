@@ -2,6 +2,7 @@ package com.tfg.gestionentregables.dto;
 
 import com.tfg.gestionentregables.entity.enums.TipoActividad;
 import com.tfg.gestionentregables.entity.enums.Visibilidad;
+import com.tfg.gestionentregables.entity.ModoOneDrive;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -42,4 +43,8 @@ public class CrearActividadDTO {
     private Boolean subirAOneDrive;
 
     private Long oneDriveUsuarioId;
+
+    private String carpetaOneDrive;
+
+    private ModoOneDrive modoOneDrive = ModoOneDrive.ACTIVIDAD;
 }

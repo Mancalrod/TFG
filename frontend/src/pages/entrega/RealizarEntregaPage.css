@@ -351,6 +351,47 @@
   cursor: not-allowed;
 }
 
+/* ── Textarea de comentario ── */
+.re-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.re-textarea:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.re-textarea:disabled {
+  background-color: var(--bg-secondary);
+  cursor: not-allowed;
+}
+
+.re-char-count {
+  text-align: right;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+.re-hint {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0.5rem 0 1rem;
+  padding: 0.75rem;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  border-left: 3px solid var(--accent-blue);
+}
+
 /* ── Acciones ── */
 .re-actions {
   display: flex;

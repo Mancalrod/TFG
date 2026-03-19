@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { EntregaDTO, MaterialDTO } from '../../types';
+import { EntregaDTO, MaterialDTO, CalificacionDTO } from '../../types';
 import { entregaService } from '../../services/entregaService';
 import { useAuth } from '../../context/AuthContext';
 import FilePreviewModal from '../../components/FilePreviewModal';
@@ -9,13 +9,21 @@ import './EntregaDetallePage.css';
 const EntregaDetallePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { esProfesor } = useAuth();
+  const { esProfesor, usuario } = useAuth();
 
   const [entrega, setEntrega] = useState<EntregaDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [previewMaterial, setPreviewMaterial] = useState<MaterialDTO | null>(null);
   const [descargando, setDescargando] = useState<number | null>(null);
+  const [errorDescarga, setErrorDescarga] = useState<string | null>(null);
+
+  // Estados para calificación
+  const [mostrarFormCalificar, setMostrarFormCalificar] = useState(false);
+  const [nota, setNota] = useState<string>('');
+  const [comentarioProfesor, setComentarioProfesor] = useState('');
+  const [calificando, setCalificando] = useState(false);
+  const [errorCalificacion, setErrorCalificacion] = useState<string | null>(null);
 
   const cargarEntrega = useCallback(async (entregaId: number) => {
     setLoading(true);
@@ -23,8 +31,9 @@ const EntregaDetallePage: React.FC = () => {
     try {
       const data = await entregaService.obtener(entregaId);
       setEntrega(data);
-    } catch {
-      setError('No se pudo cargar la entrega');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setError(axiosErr?.response?.data?.message || 'No se pudo cargar la entrega');
     } finally {
       setLoading(false);
     }
@@ -36,6 +45,7 @@ const EntregaDetallePage: React.FC = () => {
 
   const handleDescargar = async (material: MaterialDTO) => {
     setDescargando(material.id);
+    setErrorDescarga(null);
     try {
       const blob = await entregaService.descargarArchivo(material.id);
       const url = URL.createObjectURL(blob);
@@ -44,8 +54,9 @@ const EntregaDetallePage: React.FC = () => {
       a.download = material.nombre;
       a.click();
       URL.revokeObjectURL(url);
-    } catch {
-      alert('Error al descargar el archivo');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setErrorDescarga(axiosErr?.response?.data?.message || `Error al descargar "${material.nombre}"`);
     } finally {
       setDescargando(null);
     }
@@ -86,6 +97,44 @@ const EntregaDetallePage: React.FC = () => {
 
   const esPrevisualizeable = (nombre: string) => {
     return /\.(pdf|png|jpe?g|gif|svg|txt|md|json|xml|html?|css|js|ts|java|py|c|cpp|h|log|csv|zip|rar|7z)$/i.test(nombre);
+  };
+
+  // Handler para calificar
+  const handleCalificar = async () => {
+    if (!entrega || !usuario?.id) return;
+
+    if (!nota || isNaN(parseFloat(nota))) {
+      setErrorCalificacion('La nota es obligatoria');
+      return;
+    }
+
+    const notaNum = parseFloat(nota);
+    if (notaNum < 0) {
+      setErrorCalificacion('La nota no puede ser negativa');
+      return;
+    }
+
+    setCalificando(true);
+    setErrorCalificacion(null);
+
+    try {
+      const calificacionDTO: CalificacionDTO = {
+        calificacion: notaNum,
+        comentario: comentarioProfesor.trim() || undefined
+      };
+      await entregaService.calificar(entrega.id, usuario.id, calificacionDTO);
+      // Recargar entrega para ver cambios
+      await cargarEntrega(entrega.id);
+      setMostrarFormCalificar(false);
+      setNota('');
+      setComentarioProfesor('');
+    } catch (err: unknown) {
+      console.error('Error al calificar:', err);
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setErrorCalificacion(axiosErr?.response?.data?.message || 'Error al calificar la entrega');
+    } finally {
+      setCalificando(false);
+    }
   };
 
   if (loading) {
@@ -221,10 +270,18 @@ const EntregaDetallePage: React.FC = () => {
           )}
         </div>
 
+        {/* Comentario del alumno (si existe) */}
+        {entrega.comentarioAlumno && (
+          <div className="edp-comentario-alumno">
+            <h2>Comentario del Alumno</h2>
+            <p className="edp-comentario-texto">{entrega.comentarioAlumno}</p>
+          </div>
+        )}
+
         {/* Feedback panel */}
         {entrega.feedbacks && entrega.feedbacks.length > 0 && (
           <div className="edp-feedback-panel">
-            <h2>Feedback</h2>
+            <h2>Feedback del Profesor</h2>
             <div className="edp-feedback-list">
               {entrega.feedbacks.map(fb => (
                 <div key={fb.id} className="edp-feedback-item">
@@ -239,12 +296,76 @@ const EntregaDetallePage: React.FC = () => {
           </div>
         )}
 
-        {/* Calificar (para profesores) */}
+        {/* Panel de calificación (para profesores) */}
         {esProfesor && entrega.estado === 'ENTREGADO' && (
-          <div className="edp-actions-bottom">
-            <button className="edp-btn-calificar" onClick={() => navigate(`/entregables/${entrega.entregableId}`)}>
-              Ir a calificar
-            </button>
+          <div className="edp-calificar-panel">
+            {!mostrarFormCalificar ? (
+              <button
+                className="edp-btn-calificar"
+                onClick={() => setMostrarFormCalificar(true)}
+              >
+                Calificar esta entrega
+              </button>
+            ) : (
+              <div className="edp-calificar-form">
+                <h3>Calificar Entrega</h3>
+                {errorCalificacion && (
+                  <div className="edp-calificar-error">{errorCalificacion}</div>
+                )}
+                <div className="edp-form-group">
+                  <label htmlFor="nota">Nota *</label>
+                  <input
+                    id="nota"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    value={nota}
+                    onChange={e => setNota(e.target.value)}
+                    disabled={calificando}
+                    placeholder="Ej: 8.5"
+                  />
+                </div>
+                <div className="edp-form-group">
+                  <label htmlFor="comentarioProfesor">Comentario / Feedback (opcional)</label>
+                  <textarea
+                    id="comentarioProfesor"
+                    value={comentarioProfesor}
+                    onChange={e => setComentarioProfesor(e.target.value)}
+                    rows={4}
+                    maxLength={5000}
+                    placeholder="Escribe un comentario para el alumno..."
+                    disabled={calificando}
+                  />
+                  <span className="edp-char-count">{comentarioProfesor.length}/5000</span>
+                </div>
+                <div className="edp-form-actions">
+                  <button
+                    className="btn-secondary"
+                    onClick={() => {
+                      setMostrarFormCalificar(false);
+                      setErrorCalificacion(null);
+                    }}
+                    disabled={calificando}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className="btn-primary"
+                    onClick={handleCalificar}
+                    disabled={calificando || !nota}
+                  >
+                    {calificando ? 'Guardando...' : 'Guardar Calificación'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Ya calificada - mostrar info */}
+        {esProfesor && (entrega.estado === 'CALIFICADO' || entrega.estado === 'PUBLICADO') && (
+          <div className="edp-calificada-info">
+            ✓ Esta entrega ya ha sido calificada con <strong>{entrega.calificacion} pts</strong>
           </div>
         )}
       </div>

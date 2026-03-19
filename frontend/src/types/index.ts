@@ -26,6 +26,11 @@ export enum EstadoEntrega {
   CALIFICADO = 'CALIFICADO'
 }
 
+export enum ModoOneDrive {
+  ACTIVIDAD = 'ACTIVIDAD',
+  ENTREGABLES = 'ENTREGABLES'
+}
+
 // DTOs
 export interface UsuarioDTO {
   id: number;
@@ -86,6 +91,8 @@ export interface ActividadDTO {
   entregables?: EntregableDTO[];
   subirAOneDrive?: boolean;
   oneDriveUsuarioId?: number;
+  carpetaOneDrive?: string;
+  modoOneDrive?: ModoOneDrive;
 }
 
 export interface CrearActividadDTO {
@@ -99,6 +106,8 @@ export interface CrearActividadDTO {
   grupoIds?: number[];
   subirAOneDrive?: boolean;
   oneDriveUsuarioId?: number;
+  carpetaOneDrive?: string;
+  modoOneDrive?: ModoOneDrive;
 }
 
 export interface EntregableDTO {
@@ -119,6 +128,7 @@ export interface EntregableDTO {
   actividadTitulo: string;
   numeroEntregas: number;
   enPlazo: boolean;
+  carpetaOneDrive?: string;
 }
 
 export interface CrearEntregableDTO {
@@ -134,6 +144,7 @@ export interface CrearEntregableDTO {
   estructuraZip?: string;
   validacionZipEstricta?: boolean;
   nombreZipEsperado?: string;
+  carpetaOneDrive?: string;
 }
 
 // Estructura de nodo para el editor de estructura ZIP
@@ -173,6 +184,7 @@ export interface CrearFeedbackDTO {
 export interface EntregaDTO {
   id: number;
   nombre: string;
+  comentarioAlumno?: string;
   version: number;
   fechaEntrega: string;
   estado: EstadoEntrega;
@@ -203,6 +215,7 @@ export interface EntregaResumenDTO {
 
 export interface CalificacionDTO {
   calificacion: number;
+  comentario?: string;
 }
 
 export interface EntregaEstadisticasDTO {
@@ -253,4 +266,10 @@ export interface OneDriveConnectionDTO {
   fechaConexion?: string;
   fechaUltimoUso?: string;
   integrationEnabled: boolean;
+}
+
+export interface OneDriveFolder {
+  id: string;
+  name: string;
+  path: string;
 }

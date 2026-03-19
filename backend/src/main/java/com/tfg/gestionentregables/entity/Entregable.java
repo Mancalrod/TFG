@@ -87,6 +87,12 @@ public class Entregable {
     @Builder.Default
     private Boolean validacionZipEstricta = false;
 
+    /**
+     * ID o ruta de la carpeta de OneDrive seleccionada para este entregable específico.
+     */
+    @Column(name = "carpeta_onedrive")
+    private String carpetaOneDrive;
+
     // Relación: Un entregable pertenece a una actividad
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "actividad_id", nullable = false)

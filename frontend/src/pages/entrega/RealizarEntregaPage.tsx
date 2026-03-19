@@ -19,7 +19,7 @@ interface ArchivoTemporal {
 
 interface BorradorMeta {
   entregableId: number;
-  nombre: string;
+  comentario: string;
   archivos: ArchivoTemporal[];
   ultimaModificacion: string;
 }
@@ -37,7 +37,7 @@ const RealizarEntregaPage: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Formulario
-  const [nombre, setNombre] = useState('');
+  const [comentario, setComentario] = useState('');
   const [archivos, setArchivos] = useState<ArchivoTemporal[]>([]);
   const [archivoPreview, setArchivoPreview] = useState<ArchivoTemporal | null>(null);
 
@@ -71,7 +71,7 @@ const RealizarEntregaPage: React.FC = () => {
       const raw = localStorage.getItem(storageKey);
       if (raw) {
         const borrador: BorradorMeta = JSON.parse(raw);
-        setNombre(borrador.nombre);
+        setComentario(borrador.comentario || '');
         setArchivos(borrador.archivos);
         setBorradorCargado(true);
       }
@@ -85,7 +85,7 @@ const RealizarEntregaPage: React.FC = () => {
     if (!storageKey || !id) return;
     const borrador: BorradorMeta = {
       entregableId: parseInt(id),
-      nombre,
+      comentario,
       archivos,
       ultimaModificacion: new Date().toISOString(),
     };
@@ -95,16 +95,16 @@ const RealizarEntregaPage: React.FC = () => {
       // localStorage lleno, intentar limpiar
       console.warn('No se pudo guardar el borrador en localStorage');
     }
-  }, [storageKey, id, nombre, archivos]);
+  }, [storageKey, id, comentario, archivos]);
 
   useEffect(() => {
-    // Auto-guardar cuando cambie nombre o archivos (debounce sencillo)
+    // Auto-guardar cuando cambie comentario o archivos (debounce sencillo)
     if (!storageKey) return;
     const timer = setTimeout(() => {
       guardarBorrador();
     }, 500);
     return () => clearTimeout(timer);
-  }, [nombre, archivos, guardarBorrador, storageKey]);
+  }, [comentario, archivos, guardarBorrador, storageKey]);
 
   const limpiarBorrador = () => {
     if (storageKey) {
@@ -349,13 +349,12 @@ const RealizarEntregaPage: React.FC = () => {
     e.preventDefault();
     if (!id || !usuario?.id) return;
 
-    if (archivos.length === 0) {
-      setErrorEnvio('Debes adjuntar al menos un archivo');
-      return;
-    }
+    // Validar que al menos haya archivos O comentario
+    const tieneArchivos = archivos.length > 0;
+    const tieneComentario = comentario.trim().length > 0;
 
-    if (!nombre.trim()) {
-      setErrorEnvio('Debes escribir un nombre para la entrega');
+    if (!tieneArchivos && !tieneComentario) {
+      setErrorEnvio('Debes adjuntar al menos un archivo o escribir un comentario');
       return;
     }
 
@@ -364,18 +363,21 @@ const RealizarEntregaPage: React.FC = () => {
 
     try {
       // Convertir dataUrls a File objects para el envío
-      const fileObjects: File[] = await Promise.all(
-        archivos.map(async (archivo) => {
-          const response = await fetch(archivo.dataUrl);
-          const blob = await response.blob();
-          return new File([blob], archivo.nombre, { type: archivo.tipo });
-        })
-      );
+      let fileObjects: File[] | undefined;
+      if (tieneArchivos) {
+        fileObjects = await Promise.all(
+          archivos.map(async (archivo) => {
+            const response = await fetch(archivo.dataUrl);
+            const blob = await response.blob();
+            return new File([blob], archivo.nombre, { type: archivo.tipo });
+          })
+        );
+      }
 
       await entregaService.realizar(
         parseInt(id),
         usuario.id,
-        nombre.trim(),
+        tieneComentario ? comentario.trim() : undefined,
         fileObjects
       );
 
@@ -390,19 +392,42 @@ const RealizarEntregaPage: React.FC = () => {
     } catch (err: unknown) {
       console.error('Error al enviar:', err);
       const axiosErr = err as { response?: { data?: { message?: string; errors?: Record<string, string> } } };
-      const msg =
-        axiosErr?.response?.data?.message ||
-        (axiosErr?.response?.data?.errors
-          ? Object.values(axiosErr.response.data.errors).join(', ')
-          : 'Error al realizar la entrega');
-      setErrorEnvio(typeof msg === 'string' ? msg : 'Error al realizar la entrega');
+
+      let mensajeError = 'Error al realizar la entrega';
+
+      // Intentar extraer mensaje detallado del error
+      if (axiosErr?.response?.data?.message) {
+        mensajeError = axiosErr.response.data.message;
+      } else if (axiosErr?.response?.data?.errors) {
+        const errores = Object.entries(axiosErr.response.data.errors)
+          .map(([campo, mensaje]) => `${campo}: ${mensaje}`)
+          .join('\n');
+        mensajeError = `Errores de validación:\n${errores}`;
+      } else if ((err as Error).message) {
+        mensajeError = `Error: ${(err as Error).message}`;
+      }
+
+      // Agregar contexto adicional si el error es relacionado con ZIP
+      if (entregable?.estructuraZip && mensajeError.toLowerCase().includes('zip')) {
+        mensajeError += '\n\nRevisa que tu archivo ZIP cumpla con la estructura esperada mostrada arriba.';
+      }
+
+      // Agregar contexto si es problema de tamaño
+      if (mensajeError.toLowerCase().includes('tamaño') || mensajeError.toLowerCase().includes('size')) {
+        if (entregable?.tamanoMaximoBytes) {
+          const maxMB = (entregable.tamanoMaximoBytes / (1024 * 1024)).toFixed(1);
+          mensajeError += `\n\nEl tamaño máximo permitido es ${maxMB} MB.`;
+        }
+      }
+
+      setErrorEnvio(mensajeError);
     } finally {
       setEnviando(false);
     }
   };
 
   const handleDescartarBorrador = () => {
-    setNombre('');
+    setComentario('');
     setArchivos([]);
     setArchivoPreview(null);
     limpiarBorrador();
@@ -561,24 +586,9 @@ const RealizarEntregaPage: React.FC = () => {
           </div>
         )}
 
-        {/* Nombre de la entrega */}
-        <div className="re-field">
-          <label htmlFor="nombre">Nombre de la entrega *</label>
-          <input
-            id="nombre"
-            type="text"
-            value={nombre}
-            onChange={e => setNombre(e.target.value)}
-            required
-            maxLength={200}
-            placeholder="Ej: Entrega final - Práctica 2"
-            disabled={enviando}
-          />
-        </div>
-
         {/* Zona de subida de archivos */}
         <div className="re-field">
-          <label>Archivos *</label>
+          <label>Archivos</label>
           <div
             className={`re-dropzone ${dragOver ? 'drag-over' : ''} ${archivos.length > 0 ? 'has-files' : ''}`}
             onDragOver={handleDragOver}
@@ -661,6 +671,26 @@ const RealizarEntregaPage: React.FC = () => {
           </div>
         )}
 
+        {/* Comentario/Observaciones */}
+        <div className="re-field">
+          <label htmlFor="comentario">Comentario / Observaciones (opcional)</label>
+          <textarea
+            id="comentario"
+            value={comentario}
+            onChange={e => setComentario(e.target.value)}
+            maxLength={5000}
+            rows={4}
+            placeholder="Puedes escribir observaciones, aclaraciones o incluso hacer una entrega de solo texto si no necesitas adjuntar archivos..."
+            disabled={enviando}
+            className="re-textarea"
+          />
+          <div className="re-char-count">{comentario.length}/5000 caracteres</div>
+        </div>
+
+        <p className="re-hint">
+          Debes adjuntar al menos un archivo <strong>o</strong> escribir un comentario.
+        </p>
+
         {/* Acciones */}
         <div className="re-actions">
           <span className="re-autosave-hint">
@@ -678,9 +708,9 @@ const RealizarEntregaPage: React.FC = () => {
             <button
               type="submit"
               className="btn-primary"
-              disabled={enviando || archivos.length === 0}
+              disabled={enviando || (archivos.length === 0 && !comentario.trim())}
             >
-              {enviando ? 'Subiendo a OneDrive...' : 'Enviar entrega'}
+              {enviando ? 'Enviando...' : 'Enviar entrega'}
             </button>
           </div>
         </div>

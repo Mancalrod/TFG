@@ -29,4 +29,5 @@ public class EntregableDTO {
     private String actividadTitulo;
     private Long numeroEntregas;
     private Boolean enPlazo;
+    private String carpetaOneDrive;
 }
