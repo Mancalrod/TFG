@@ -340,6 +340,25 @@ class CursoServiceTest {
 
             assertThat(result).isNotNull();
         }
+
+        @Test
+        @DisplayName("Lanza excepción si curso no existe")
+        void quitar_cursoNoExiste() {
+            when(cursoRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> cursoService.quitarProfesor(99L, 1L))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si profesor no existe")
+        void quitar_profesorNoExiste() {
+            when(cursoRepository.findById(1L)).thenReturn(Optional.of(curso));
+            when(profesorRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> cursoService.quitarProfesor(1L, 99L))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
     }
 
     @Nested
@@ -397,6 +416,62 @@ class CursoServiceTest {
 
             assertThatThrownBy(() -> cursoService.listarGrupos(99L))
                     .isInstanceOf(EntityNotFoundException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("actualizarGrupo")
+    class ActualizarGrupo {
+
+        @Test
+        @DisplayName("Actualiza título del grupo")
+        void actualizar_ok() {
+            Grupo grupo = Grupo.builder().id(1L).titulo("Viejo").curso(curso).build();
+            GrupoDTO grupoDTO = GrupoDTO.builder().id(1L).titulo("Nuevo").cursoId(1L).build();
+
+            when(grupoRepository.findById(1L)).thenReturn(Optional.of(grupo));
+            when(grupoRepository.save(any(Grupo.class))).thenReturn(grupo);
+            when(mapper.toDTO(grupo)).thenReturn(grupoDTO);
+
+            GrupoDTO result = cursoService.actualizarGrupo(1L, "Nuevo");
+
+            assertThat(result.getTitulo()).isEqualTo("Nuevo");
+            verify(grupoRepository).save(argThat(g -> "Nuevo".equals(g.getTitulo())));
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si grupo no existe")
+        void actualizar_noExiste() {
+            when(grupoRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> cursoService.actualizarGrupo(99L, "Nuevo"))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Grupo no encontrado");
+        }
+    }
+
+    @Nested
+    @DisplayName("eliminarGrupo")
+    class EliminarGrupo {
+
+        @Test
+        @DisplayName("Elimina grupo existente")
+        void eliminar_ok() {
+            when(grupoRepository.existsById(1L)).thenReturn(true);
+
+            cursoService.eliminarGrupo(1L);
+
+            verify(grupoRepository).deleteById(1L);
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si grupo no existe")
+        void eliminar_noExiste() {
+            when(grupoRepository.existsById(99L)).thenReturn(false);
+
+            assertThatThrownBy(() -> cursoService.eliminarGrupo(99L))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Grupo no encontrado");
         }
     }
 }

@@ -19,6 +19,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -224,13 +225,14 @@ public class OneDriveService {
                                              String entregableTitulo, String estudianteNombre,
                                              String nombreArchivo, String carpetaOpcional) {
         String accessToken = obtenerAccessTokenValido(usuarioId);
+        String nombreArchivoSeguro = sanitizarNombreArchivo(nombreArchivo);
 
         String rutaOneDrive;
         if (carpetaOpcional != null && !carpetaOpcional.isBlank()) {
             rutaOneDrive = String.format("%s/%s/%s", 
                     carpetaOpcional, 
                     sanitizarNombreCarpeta(estudianteNombre), 
-                    nombreArchivo);
+                    nombreArchivoSeguro);
         } else {
             // Construir ruta predeterminada: TFG-Entregables/Curso/Actividad/Entregable/Alumno/archivo.ext
             rutaOneDrive = String.format("%s/%s/%s/%s/%s/%s",
@@ -239,10 +241,21 @@ public class OneDriveService {
                     sanitizarNombreCarpeta(actividadTitulo),
                     sanitizarNombreCarpeta(entregableTitulo),
                     sanitizarNombreCarpeta(estudianteNombre),
-                    nombreArchivo);
+                    nombreArchivoSeguro);
         }
 
         return subirArchivoAOneDrive(accessToken, rutaOneDrive, archivo);
+    }
+
+    /**
+     * Compatibilidad con llamadas antiguas sin carpeta opcional.
+     */
+    public Map<String, String> subirArchivo(Long usuarioId, MultipartFile archivo,
+                                            String cursoTitulo, String actividadTitulo,
+                                            String entregableTitulo, String estudianteNombre,
+                                            String nombreArchivo) {
+        return subirArchivo(usuarioId, archivo, cursoTitulo, actividadTitulo,
+                entregableTitulo, estudianteNombre, nombreArchivo, null);
     }
 
     /**
@@ -271,7 +284,7 @@ public class OneDriveService {
             }
 
             String response = restClient.put()
-                    .uri(url)
+                    .uri(URI.create(url))
                     .header("Authorization", "Bearer " + accessToken)
                     .header("Content-Type", archivo.getContentType() != null ?
                             archivo.getContentType() : "application/octet-stream")
@@ -319,7 +332,7 @@ public class OneDriveService {
                 """;
 
             String sessionResponse = restClient.post()
-                    .uri(createSessionUrl)
+                    .uri(URI.create(createSessionUrl))
                     .header("Authorization", "Bearer " + accessToken)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(sessionBody)
@@ -606,5 +619,31 @@ public class OneDriveService {
         return nombre.replaceAll("[\"*:<>?/\\\\|]", "_")
                 .replaceAll("\\s+", " ")
                 .trim();
+    }
+
+    /**
+     * Sanitiza el nombre del archivo para OneDrive y elimina componentes de ruta.
+     */
+    private String sanitizarNombreArchivo(String nombreArchivo) {
+        if (nombreArchivo == null || nombreArchivo.isBlank()) {
+            return "archivo_sin_nombre";
+        }
+
+        String baseName = nombreArchivo.replace("\\", "/");
+        int slashIndex = baseName.lastIndexOf('/');
+        if (slashIndex >= 0) {
+            baseName = baseName.substring(slashIndex + 1);
+        }
+
+        String limpio = baseName
+                .replaceAll("[\"*:<>?/\\\\|]", "_")
+                .replaceAll("\\s+", " ")
+                .trim();
+
+        while (limpio.endsWith(".") || limpio.endsWith(" ")) {
+            limpio = limpio.substring(0, limpio.length() - 1);
+        }
+
+        return limpio.isBlank() ? "archivo_sin_nombre" : limpio;
     }
 }

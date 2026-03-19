@@ -21,6 +21,11 @@ const ActividadesPorCursoPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState('');
 
+  const getApiErrorMessage = (err: unknown, fallback: string): string => {
+    const axErr = err as { response?: { data?: { message?: string } } };
+    return axErr?.response?.data?.message || fallback;
+  };
+
   // Cargar cursos al montar
   useEffect(() => {
     if (!usuario) return;
@@ -36,8 +41,8 @@ const ActividadesPorCursoPage: React.FC = () => {
           cursos = await cursoService.listarPorEstudiante(usuario.id);
         }
         setCursosData(cursos.map(c => ({ curso: c, actividades: [], loading: false, loaded: false })));
-      } catch {
-        setError('Error al cargar los cursos.');
+      } catch (err: unknown) {
+        setError(getApiErrorMessage(err, 'Error al cargar los cursos.'));
       } finally {
         setLoading(false);
       }
@@ -72,10 +77,11 @@ const ActividadesPorCursoPage: React.FC = () => {
       setCursosData(prev =>
         prev.map(c => c.curso.id === cursoId ? { ...c, actividades, loading: false, loaded: true } : c)
       );
-    } catch {
+    } catch (err: unknown) {
       setCursosData(prev =>
         prev.map(c => c.curso.id === cursoId ? { ...c, loading: false, loaded: true } : c)
       );
+      setError(getApiErrorMessage(err, 'No se pudieron cargar las actividades del curso.'));
     }
   };
 

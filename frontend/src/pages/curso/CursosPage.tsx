@@ -13,6 +13,11 @@ const CursosPage: React.FC = () => {
   const { usuario, esProfesor } = useAuth();
   const navigate = useNavigate();
 
+  const getApiErrorMessage = (err: unknown, fallback: string): string => {
+    const axErr = err as { response?: { data?: { message?: string } } };
+    return axErr?.response?.data?.message || fallback;
+  };
+
   const cargarCursos = useCallback(async () => {
     if (!usuario) return;
     
@@ -31,8 +36,8 @@ const CursosPage: React.FC = () => {
         actividadesMap[curso.id] = actividades;
       }
       setActividadesPorCurso(actividadesMap);
-    } catch (err) {
-      setError('Error al cargar los cursos');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Error al cargar los cursos'));
       console.error(err);
     } finally {
       setLoading(false);

@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -38,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AuthControllerTest {
 
     @Autowired private MockMvc mockMvc;
+        @Autowired private AuthController authController;
     @MockitoBean private AuthenticationManager authenticationManager;
     @MockitoBean private JwtTokenProvider jwtTokenProvider;
     @MockitoBean private UserDetailsService userDetailsService;
@@ -189,11 +191,44 @@ class AuthControllerTest {
                             .content(objectMapper.writeValueAsString(req)))
                     .andExpect(status().isUnauthorized());
         }
+
+        @Test
+        @DisplayName("401 - Excepción durante refresh")
+        void refresh_excepcion() throws Exception {
+            RefreshTokenRequestDTO req = RefreshTokenRequestDTO.builder()
+                    .refreshToken("bad-token").build();
+
+            when(jwtTokenProvider.extractUsername("bad-token"))
+                    .thenThrow(new RuntimeException("Token corrupto"));
+
+            mockMvc.perform(post("/api/auth/refresh")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(req)))
+                    .andExpect(status().isUnauthorized());
+        }
     }
 
     @Nested
     @DisplayName("GET /api/auth/me")
     class GetCurrentUser {
+
+        @Test
+        @DisplayName("200 - Usuario autenticado")
+        void me_ok() throws Exception {
+            Authentication auth = new UsernamePasswordAuthenticationToken(
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities());
+
+            when(usuarioRepository.findByCorreoElectronico("juan@test.com"))
+                    .thenReturn(Optional.of(usuario));
+
+            AuthResponseDTO body = authController.getCurrentUser(auth).getBody();
+
+            assertThat(body).isNotNull();
+            assertThat(body.getUsuarioId()).isEqualTo(1L);
+            assertThat(body.getCorreoElectronico()).isEqualTo("juan@test.com");
+        }
 
         @Test
         @DisplayName("401 - Sin autenticación")

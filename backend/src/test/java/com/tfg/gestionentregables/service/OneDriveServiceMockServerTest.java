@@ -362,6 +362,93 @@ class OneDriveServiceMockServerTest {
     class SubirArchivoCompleto {
 
         @Test
+        @DisplayName("Sube archivo usando carpeta opcional personalizada")
+        void subir_conCarpetaOpcional() throws InterruptedException {
+            MockMultipartFile archivo = new MockMultipartFile(
+                "file", "doc.txt", "text/plain", "contenido".getBytes());
+
+            mockServer.enqueue(new MockResponse()
+                .setBody("""
+                {"id":"file-id-opt","webUrl":"https://onedrive.example.com/file-opt"}
+                """)
+                .addHeader("Content-Type", "application/json"));
+
+            String base = baseUrl();
+            when(tokenRepository.findByUsuarioId(1L)).thenReturn(Optional.of(token));
+            when(config.getGraphApiUrl()).thenReturn(base + "v1.0");
+
+            Map<String, String> result = oneDriveService.subirArchivo(
+                1L, archivo,
+                "Curso", "Actividad", "Entregable", "Alumno Uno",
+                "doc.txt", "Carpeta Personalizada");
+
+            assertThat(result).containsEntry("fileId", "file-id-opt");
+
+            RecordedRequest request = mockServer.takeRequest();
+            assertThat(request.getMethod()).isEqualTo("PUT");
+            assertThat(request.getPath()).contains("Carpeta%20Personalizada");
+            assertThat(request.getPath()).contains("Alumno%20Uno");
+            assertThat(request.getPath()).doesNotContain("%2520");
+            assertThat(request.getPath()).contains("doc.txt");
+        }
+
+        @Test
+        @DisplayName("Sube archivo grande por upload session cuando supera 4MB")
+        void subir_archivoGrande_uploadSession() throws InterruptedException {
+            byte[] contenidoGrande = new byte[6 * 1024 * 1024]; // 6MB
+            MockMultipartFile archivo = new MockMultipartFile(
+                "file", "video.bin", "application/octet-stream", contenidoGrande);
+
+            String uploadUrl = baseUrl() + "upload-session-url";
+
+            // 1) createUploadSession
+            mockServer.enqueue(new MockResponse()
+                .setBody("""
+                {"uploadUrl":"%s"}
+                """.formatted(uploadUrl))
+                .addHeader("Content-Type", "application/json"));
+
+            // 2) primer chunk (respuesta intermedia)
+            mockServer.enqueue(new MockResponse()
+                .setBody("""
+                {"nextExpectedRanges":["5242880-"]}
+                """)
+                .addHeader("Content-Type", "application/json"));
+
+            // 3) segundo chunk (respuesta final)
+            mockServer.enqueue(new MockResponse()
+                .setBody("""
+                {"id":"large-file-id","webUrl":"https://onedrive.example.com/large"}
+                """)
+                .addHeader("Content-Type", "application/json"));
+
+            String base = baseUrl();
+            when(tokenRepository.findByUsuarioId(1L)).thenReturn(Optional.of(token));
+            when(config.getRootFolder()).thenReturn("TFG-Entregables");
+            when(config.getGraphApiUrl()).thenReturn(base + "v1.0");
+
+            Map<String, String> result = oneDriveService.subirArchivo(
+                1L, archivo, "Curso", "Actividad", "Entregable", "Alumno", "video.bin");
+
+            assertThat(result).containsEntry("fileId", "large-file-id");
+            assertThat(result).containsEntry("webUrl", "https://onedrive.example.com/large");
+
+            RecordedRequest createSessionRequest = mockServer.takeRequest();
+            assertThat(createSessionRequest.getMethod()).isEqualTo("POST");
+            assertThat(createSessionRequest.getPath()).contains("createUploadSession");
+
+            RecordedRequest chunk1Request = mockServer.takeRequest();
+            assertThat(chunk1Request.getMethod()).isEqualTo("PUT");
+            assertThat(chunk1Request.getPath()).isEqualTo("/upload-session-url");
+            assertThat(chunk1Request.getHeader("Content-Range")).isEqualTo("bytes 0-5242879/6291456");
+
+            RecordedRequest chunk2Request = mockServer.takeRequest();
+            assertThat(chunk2Request.getMethod()).isEqualTo("PUT");
+            assertThat(chunk2Request.getPath()).isEqualTo("/upload-session-url");
+            assertThat(chunk2Request.getHeader("Content-Range")).isEqualTo("bytes 5242880-6291455/6291456");
+        }
+
+        @Test
         @DisplayName("Sube archivo pequeño (< 4MB) correctamente")
         void subir_archivoPequeno() throws InterruptedException {
             byte[] contenido = "contenido del archivo PDF de prueba".getBytes();
@@ -621,6 +708,86 @@ class OneDriveServiceMockServerTest {
                     .hasMessageContaining("Error al obtener URL de descarga");
         }
     }
+
+        @Nested
+        @DisplayName("listarCarpetas - flujo completo")
+        class ListarCarpetasCompleto {
+
+                @Test
+                @DisplayName("Lista carpetas desde root y construye path completo")
+                void listar_root_ok() throws InterruptedException {
+                        mockServer.enqueue(new MockResponse()
+                                        .setBody("""
+                                                {
+                                                    "value": [
+                                                        {
+                                                            "id": "folder-1",
+                                                            "name": "Entregas",
+                                                            "parentReference": {"path": "/drive/root:"}
+                                                        },
+                                                        {
+                                                            "id": "folder-2",
+                                                            "name": "Pruebas",
+                                                            "parentReference": {"path": "/drive/root:/Curso A"}
+                                                        }
+                                                    ]
+                                                }
+                                                """)
+                                        .addHeader("Content-Type", "application/json"));
+
+                        String base = baseUrl();
+                        when(tokenRepository.findByUsuarioId(1L)).thenReturn(Optional.of(token));
+                        when(config.getGraphApiUrl()).thenReturn(base + "v1.0");
+
+                        var carpetas = oneDriveService.listarCarpetas(1L, null);
+
+                        assertThat(carpetas).hasSize(2);
+                        assertThat(carpetas.get(0)).containsEntry("id", "folder-1");
+                        assertThat(carpetas.get(0)).containsEntry("path", "Entregas");
+                        assertThat(carpetas.get(1)).containsEntry("path", "Curso A/Pruebas");
+
+                        RecordedRequest request = mockServer.takeRequest();
+                        assertThat(request.getMethod()).isEqualTo("GET");
+                        assertThat(request.getPath()).contains("/v1.0/me/drive/root/children");
+                }
+
+                @Test
+                @DisplayName("Lista carpetas hijas desde parentId")
+                void listar_child_ok() throws InterruptedException {
+                        mockServer.enqueue(new MockResponse()
+                                        .setBody("""
+                                                {"value": [{"id":"child-1","name":"Subcarpeta","parentReference":{"path":"/drive/root:/Base"}}]}
+                                                """)
+                                        .addHeader("Content-Type", "application/json"));
+
+                        String base = baseUrl();
+                        when(tokenRepository.findByUsuarioId(1L)).thenReturn(Optional.of(token));
+                        when(config.getGraphApiUrl()).thenReturn(base + "v1.0");
+
+                        var carpetas = oneDriveService.listarCarpetas(1L, "parent-xyz");
+
+                        assertThat(carpetas).hasSize(1);
+                        assertThat(carpetas.get(0)).containsEntry("id", "child-1");
+
+                        RecordedRequest request = mockServer.takeRequest();
+                        assertThat(request.getPath()).contains("/v1.0/me/drive/items/parent-xyz/children");
+                }
+
+                @Test
+                @DisplayName("Lanza excepción cuando Graph API falla")
+                void listar_errorHttp() {
+                        mockServer.enqueue(new MockResponse().setResponseCode(500)
+                                        .setBody("{" + "\"error\":\"server_error\"}"));
+
+                        String base = baseUrl();
+                        when(tokenRepository.findByUsuarioId(1L)).thenReturn(Optional.of(token));
+                        when(config.getGraphApiUrl()).thenReturn(base + "v1.0");
+
+                        assertThatThrownBy(() -> oneDriveService.listarCarpetas(1L, null))
+                                        .isInstanceOf(RuntimeException.class)
+                                        .hasMessageContaining("Error al listar carpetas");
+                }
+        }
 
     // =============================================
     // eliminarArchivo — flujo completo

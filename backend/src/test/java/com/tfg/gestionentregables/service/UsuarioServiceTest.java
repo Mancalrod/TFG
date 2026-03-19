@@ -422,4 +422,126 @@ class UsuarioServiceTest {
                     .isInstanceOf(EntityNotFoundException.class);
         }
     }
+
+    @Nested
+    @DisplayName("eliminarRolProfesor")
+    class EliminarRolProfesor {
+
+        @Test
+        @DisplayName("Elimina todos los roles de profesor del usuario")
+        void eliminar_ok() {
+            Profesor profesor2 = Profesor.builder().id(2L).usuario(usuario).build();
+            when(profesorRepository.findByUsuarioId(1L)).thenReturn(List.of(profesor, profesor2));
+
+            usuarioService.eliminarRolProfesor(1L);
+
+            verify(profesorRepository).deleteAll(argThat(iterable -> {
+                long count = 0;
+                for (Profesor ignored : iterable) {
+                    count++;
+                }
+                return count == 2;
+            }));
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si el usuario no es profesor")
+        void eliminar_noEsProfesor() {
+            when(profesorRepository.findByUsuarioId(99L)).thenReturn(List.of());
+
+            assertThatThrownBy(() -> usuarioService.eliminarRolProfesor(99L))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("no es profesor");
+        }
+    }
+
+    @Nested
+    @DisplayName("eliminarRolEstudiante")
+    class EliminarRolEstudiante {
+
+        @Test
+        @DisplayName("Elimina todos los roles de estudiante del usuario")
+        void eliminar_ok() {
+            Estudiante estudiante2 = Estudiante.builder().id(2L).usuario(usuario).grupo(grupo).build();
+            when(estudianteRepository.findByUsuarioId(1L)).thenReturn(List.of(estudiante, estudiante2));
+
+            usuarioService.eliminarRolEstudiante(1L);
+
+            verify(estudianteRepository).deleteAll(argThat(iterable -> {
+                long count = 0;
+                for (Estudiante ignored : iterable) {
+                    count++;
+                }
+                return count == 2;
+            }));
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si el usuario no es estudiante")
+        void eliminar_noEsEstudiante() {
+            when(estudianteRepository.findByUsuarioId(99L)).thenReturn(List.of());
+
+            assertThatThrownBy(() -> usuarioService.eliminarRolEstudiante(99L))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("no es estudiante");
+        }
+    }
+
+    @Nested
+    @DisplayName("listarEstudiantesDeGrupo")
+    class ListarEstudiantesDeGrupo {
+
+        @Test
+        @DisplayName("Lista usuarios estudiantes del grupo")
+        void listar_ok() {
+            Usuario user2 = Usuario.builder().id(2L).nombre("Ana").correoElectronico("ana@test.com").build();
+            Estudiante est2 = Estudiante.builder().id(2L).usuario(user2).grupo(grupo).build();
+            UsuarioDTO dto2 = UsuarioDTO.builder().id(2L).nombre("Ana").correoElectronico("ana@test.com").build();
+
+            when(estudianteRepository.findByGrupoId(1L)).thenReturn(List.of(estudiante, est2));
+            when(mapper.toDTO(usuario)).thenReturn(usuarioDTO);
+            when(mapper.toDTO(user2)).thenReturn(dto2);
+
+            List<UsuarioDTO> result = usuarioService.listarEstudiantesDeGrupo(1L);
+
+            assertThat(result).hasSize(2);
+            assertThat(result).extracting(UsuarioDTO::getNombre).containsExactly("Juan", "Ana");
+        }
+
+        @Test
+        @DisplayName("Devuelve vacío si no hay estudiantes en el grupo")
+        void listar_vacio() {
+            when(estudianteRepository.findByGrupoId(1L)).thenReturn(List.of());
+
+            List<UsuarioDTO> result = usuarioService.listarEstudiantesDeGrupo(1L);
+
+            assertThat(result).isEmpty();
+            verifyNoInteractions(mapper);
+        }
+    }
+
+    @Nested
+    @DisplayName("eliminarEstudianteDeGrupo")
+    class EliminarEstudianteDeGrupo {
+
+        @Test
+        @DisplayName("Elimina estudiante cuando pertenece al grupo")
+        void eliminar_ok() {
+            when(estudianteRepository.findByUsuarioIdAndGrupoId(1L, 1L)).thenReturn(Optional.of(estudiante));
+
+            usuarioService.eliminarEstudianteDeGrupo(1L, 1L);
+
+            verify(estudianteRepository).delete(estudiante);
+        }
+
+        @Test
+        @DisplayName("Lanza excepción cuando no pertenece al grupo")
+        void eliminar_noPerteneceAlGrupo() {
+            when(estudianteRepository.findByUsuarioIdAndGrupoId(1L, 99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> usuarioService.eliminarEstudianteDeGrupo(1L, 99L))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("no es estudiante del grupo");
+        }
+    }
 }

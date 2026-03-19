@@ -243,5 +243,88 @@ class UsuarioControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").value(true));
         }
+
+        @Test
+        @DisplayName("200 - No es estudiante")
+        void esEstudiante_false() throws Exception {
+            when(usuarioService.esEstudiante(1L)).thenReturn(false);
+
+            mockMvc.perform(get("/api/usuarios/1/es-estudiante"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$").value(false));
+        }
+    }
+
+    @Nested
+    @DisplayName("DELETE /api/usuarios/{id}/profesor")
+    class EliminarRolProfesor {
+
+        @Test
+        @DisplayName("204 - Elimina rol profesor")
+        void eliminar_ok() throws Exception {
+            doNothing().when(usuarioService).eliminarRolProfesor(1L);
+
+            mockMvc.perform(delete("/api/usuarios/1/profesor"))
+                    .andExpect(status().isNoContent());
+        }
+    }
+
+    @Nested
+    @DisplayName("DELETE /api/usuarios/{id}/estudiante")
+    class EliminarRolEstudiante {
+
+        @Test
+        @DisplayName("204 - Elimina rol estudiante")
+        void eliminar_ok() throws Exception {
+            doNothing().when(usuarioService).eliminarRolEstudiante(1L);
+
+            mockMvc.perform(delete("/api/usuarios/1/estudiante"))
+                    .andExpect(status().isNoContent());
+        }
+    }
+
+    @Nested
+    @DisplayName("DELETE /api/usuarios/{id}/estudiante/{grupoId}")
+    class EliminarEstudianteDeGrupo {
+
+        @Test
+        @DisplayName("204 - Elimina estudiante del grupo")
+        void eliminar_ok() throws Exception {
+            doNothing().when(usuarioService).eliminarEstudianteDeGrupo(1L, 10L);
+
+            mockMvc.perform(delete("/api/usuarios/1/estudiante/10"))
+                    .andExpect(status().isNoContent());
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /api/usuarios/grupo/{grupoId}")
+    class ListarEstudiantesDeGrupo {
+
+        @Test
+        @DisplayName("200 - Lista estudiantes del grupo")
+        void listar_ok() throws Exception {
+            when(usuarioService.listarEstudiantesDeGrupo(3L)).thenReturn(List.of(usuarioDTO));
+
+            mockMvc.perform(get("/api/usuarios/grupo/3"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.length()").value(1))
+                    .andExpect(jsonPath("$[0].id").value(1));
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /api/usuarios/{id}/profesor-id")
+    class ObtenerProfesorId {
+
+        @Test
+        @DisplayName("200 - Obtiene id de profesor")
+        void obtener_ok() throws Exception {
+            when(usuarioService.obtenerProfesorId(1L)).thenReturn(42L);
+
+            mockMvc.perform(get("/api/usuarios/1/profesor-id"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string("42"));
+        }
     }
 }

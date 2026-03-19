@@ -80,7 +80,6 @@ public class EntityMapper {
                 .subirAOneDrive(actividad.getSubirAOneDrive())
                 .oneDriveUsuarioId(actividad.getOneDriveUsuarioId())
                 .carpetaOneDrive(actividad.getCarpetaOneDrive())
-                .modoOneDrive(actividad.getModoOneDrive())
                 .build();
     }
 
@@ -114,7 +113,6 @@ public class EntityMapper {
                 .actividadTitulo(entregable.getActividad().getTitulo())
                 .numeroEntregas((long) entregable.getEntregas().size())
                 .enPlazo(entregable.estaEnPlazo())
-                .carpetaOneDrive(entregable.getCarpetaOneDrive())
                 .build();
     }
 
@@ -123,7 +121,7 @@ public class EntityMapper {
         return EntregaDTO.builder()
                 .id(entrega.getId())
                 .nombre(entrega.getNombre())
-                .comentarioAlumno(entrega.getComentarioAlumno())
+                                .comentarioAlumno(entrega.getComentarioAlumno())
                 .version(entrega.getVersion())
                 .fechaEntrega(entrega.getFechaEntrega())
                 .estado(entrega.getEstado())
@@ -148,6 +146,12 @@ public class EntityMapper {
         if (entrega == null) return null;
         return EntregaResumenDTO.builder()
                 .entregaId(entrega.getId())
+                .cursoId(entrega.getEntregable().getActividad().getCurso().getId())
+                .cursoTitulo(entrega.getEntregable().getActividad().getCurso().getTitulo())
+                .actividadId(entrega.getEntregable().getActividad().getId())
+                .actividadTitulo(entrega.getEntregable().getActividad().getTitulo())
+                .entregableId(entrega.getEntregable().getId())
+                .entregableTitulo(entrega.getEntregable().getTitulo())
                 .estudianteId(entrega.getEstudiante().getId())
                 .estudianteNombre(entrega.getEstudiante().getUsuario().getNombre())
                 .estudianteCorreo(entrega.getEstudiante().getUsuario().getCorreoElectronico())
@@ -187,3 +191,4 @@ public class EntityMapper {
                 .build();
     }
 }
+

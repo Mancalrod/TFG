@@ -39,6 +39,10 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
+.m2/
+backend/.m2/
+backend/.mvn-settings.xml
+*.flattened-pom.xml
 
 # Spring Boot
 *.pid

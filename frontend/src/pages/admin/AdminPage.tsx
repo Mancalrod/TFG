@@ -110,11 +110,18 @@ const UsuariosTab: React.FC<TabProps> = ({ showAlert }) => {
   const [cursoSeleccionado, setCursoSeleccionado] = useState<number | ''>('');
   const [grupoSeleccionado, setGrupoSeleccionado] = useState<number | ''>('');
 
+  const getApiErrorMessage = (err: unknown, fallback: string): string => {
+    const axErr = err as { response?: { data?: { message?: string } } };
+    return axErr?.response?.data?.message || fallback;
+  };
+
   const cargar = useCallback(async () => {
     setLoading(true);
     try {
       setUsuarios(await usuarioService.listar());
-    } catch { showAlert('error', 'Error al cargar usuarios'); }
+    } catch (err: unknown) {
+      showAlert('error', getApiErrorMessage(err, 'Error al cargar usuarios'));
+    }
     finally { setLoading(false); }
   }, [showAlert]);
 
@@ -161,7 +168,9 @@ const UsuariosTab: React.FC<TabProps> = ({ showAlert }) => {
       await usuarioService.eliminar(id);
       showAlert('success', 'Usuario eliminado');
       cargar();
-    } catch { showAlert('error', 'Error al eliminar usuario'); }
+    } catch (err: unknown) {
+      showAlert('error', getApiErrorMessage(err, 'Error al eliminar usuario'));
+    }
   };
 
   // ── Roles modal ──
@@ -178,7 +187,9 @@ const UsuariosTab: React.FC<TabProps> = ({ showAlert }) => {
       setEsProf(prof);
       setEsEst(est);
       setCursos(cursosData);
-    } catch { showAlert('error', 'Error al cargar roles'); }
+    } catch (err: unknown) {
+      showAlert('error', getApiErrorMessage(err, 'Error al cargar roles'));
+    }
   };
 
   const handleCursoChange = async (cursoId: number) => {
@@ -186,7 +197,10 @@ const UsuariosTab: React.FC<TabProps> = ({ showAlert }) => {
     setGrupoSeleccionado('');
     try {
       setGrupos(await cursoService.listarGrupos(cursoId));
-    } catch { setGrupos([]); }
+    } catch (err: unknown) {
+      setGrupos([]);
+      showAlert('error', getApiErrorMessage(err, 'Error al cargar grupos del curso'));
+    }
   };
 
   const handleAsignarProfesor = async () => {
@@ -207,7 +221,9 @@ const UsuariosTab: React.FC<TabProps> = ({ showAlert }) => {
       await usuarioService.eliminarRolProfesor(rolesModal.id);
       setEsProf(false);
       showAlert('success', 'Rol de profesor eliminado');
-    } catch { showAlert('error', 'Error al quitar rol'); }
+    } catch (err: unknown) {
+      showAlert('error', getApiErrorMessage(err, 'Error al quitar rol'));
+    }
   };
 
   const handleAsignarEstudiante = async () => {
@@ -228,7 +244,9 @@ const UsuariosTab: React.FC<TabProps> = ({ showAlert }) => {
       await usuarioService.eliminarRolEstudiante(rolesModal.id);
       setEsEst(false);
       showAlert('success', 'Rol de estudiante eliminado');
-    } catch { showAlert('error', 'Error al quitar rol'); }
+    } catch (err: unknown) {
+      showAlert('error', getApiErrorMessage(err, 'Error al quitar rol'));
+    }
   };
 
   return (
@@ -429,10 +447,15 @@ const CursosTab: React.FC<TabProps> = ({ showAlert }) => {
   const [usuarios, setUsuarios] = useState<UsuarioDTO[]>([]);
   const [profSeleccionado, setProfSeleccionado] = useState<number | ''>('');
 
+  const getApiErrorMessage = (err: unknown, fallback: string): string => {
+    const axErr = err as { response?: { data?: { message?: string } } };
+    return axErr?.response?.data?.message || fallback;
+  };
+
   const cargar = useCallback(async () => {
     setLoading(true);
     try { setCursos(await cursoService.listarTodos()); }
-    catch { showAlert('error', 'Error al cargar cursos'); }
+    catch (err: unknown) { showAlert('error', getApiErrorMessage(err, 'Error al cargar cursos')); }
     finally { setLoading(false); }
   }, [showAlert]);
 
@@ -498,7 +521,9 @@ const CursosTab: React.FC<TabProps> = ({ showAlert }) => {
     setProfSeleccionado('');
     try {
       setUsuarios(await usuarioService.listar());
-    } catch { /* ignore */ }
+    } catch {
+      // Best effort: si falla esta carga, el modal igualmente se abre.
+    }
     setCrearConProf(true);
     setModalOpen(true);
   };
@@ -509,14 +534,20 @@ const CursosTab: React.FC<TabProps> = ({ showAlert }) => {
       await cursoService.eliminar(id);
       showAlert('success', 'Curso eliminado');
       cargar();
-    } catch { showAlert('error', 'Error al eliminar curso'); }
+    } catch (err: unknown) {
+      showAlert('error', getApiErrorMessage(err, 'Error al eliminar curso'));
+    }
   };
 
   // Professor assignment modal
   const openProfModal = async (c: CursoDTO) => {
     setProfModal(c);
     setProfSeleccionado('');
-    try { setUsuarios(await usuarioService.listar()); } catch { /* */ }
+    try {
+      setUsuarios(await usuarioService.listar());
+    } catch {
+      // Best effort: si falla esta carga, el usuario puede cerrar y reintentar.
+    }
   };
 
   const handleAgregarProf = async () => {
@@ -531,7 +562,9 @@ const CursosTab: React.FC<TabProps> = ({ showAlert }) => {
       await cursoService.agregarProfesor(profModal.id, profId);
       showAlert('success', 'Profesor asignado al curso');
       cargar();
-    } catch { showAlert('error', 'Error al asignar profesor'); }
+    } catch (err: unknown) {
+      showAlert('error', getApiErrorMessage(err, 'Error al asignar profesor'));
+    }
   };
 
   return (
@@ -689,6 +722,11 @@ const GruposTab: React.FC<TabProps> = ({ showAlert }) => {
   const [todosUsuarios, setTodosUsuarios] = useState<UsuarioDTO[]>([]);
   const [estSeleccionado, setEstSeleccionado] = useState<number | ''>('');
 
+  const getApiErrorMessage = (err: unknown, fallback: string): string => {
+    const axErr = err as { response?: { data?: { message?: string } } };
+    return axErr?.response?.data?.message || fallback;
+  };
+
   useEffect(() => {
     cursoService.listarTodos().then(setCursos).catch(() => {});
   }, []);
@@ -696,7 +734,7 @@ const GruposTab: React.FC<TabProps> = ({ showAlert }) => {
   const cargarGrupos = useCallback(async (cursoId: number) => {
     setLoading(true);
     try { setGrupos(await cursoService.listarGrupos(cursoId)); }
-    catch { showAlert('error', 'Error al cargar grupos'); }
+    catch (err: unknown) { showAlert('error', getApiErrorMessage(err, 'Error al cargar grupos')); }
     finally { setLoading(false); }
   }, [showAlert]);
 
@@ -745,7 +783,9 @@ const GruposTab: React.FC<TabProps> = ({ showAlert }) => {
       await cursoService.eliminarGrupo(gid);
       showAlert('success', 'Grupo eliminado');
       if (cursoSeleccionado !== '') cargarGrupos(cursoSeleccionado as number);
-    } catch { showAlert('error', 'Error al eliminar grupo'); }
+    } catch (err: unknown) {
+      showAlert('error', getApiErrorMessage(err, 'Error al eliminar grupo'));
+    }
   };
 
   // Estudiantes modal
@@ -759,7 +799,9 @@ const GruposTab: React.FC<TabProps> = ({ showAlert }) => {
       ]);
       setEstudiantes(ests);
       setTodosUsuarios(users);
-    } catch { showAlert('error', 'Error al cargar estudiantes'); }
+    } catch (err: unknown) {
+      showAlert('error', getApiErrorMessage(err, 'Error al cargar estudiantes'));
+    }
   };
 
   const handleAgregarEstudiante = async () => {
@@ -784,7 +826,9 @@ const GruposTab: React.FC<TabProps> = ({ showAlert }) => {
       showAlert('success', 'Estudiante eliminado del grupo');
       setEstudiantes(await usuarioService.listarEstudiantesDeGrupo(estModal.id));
       if (cursoSeleccionado !== '') cargarGrupos(cursoSeleccionado as number);
-    } catch { showAlert('error', 'Error al quitar estudiante'); }
+    } catch (err: unknown) {
+      showAlert('error', getApiErrorMessage(err, 'Error al quitar estudiante'));
+    }
   };
 
   return (

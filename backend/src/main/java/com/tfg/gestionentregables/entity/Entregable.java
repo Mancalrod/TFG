@@ -66,7 +66,8 @@ public class Entregable {
 
     /**
      * Estructura esperada del ZIP como JSON.
-     * Contiene un array de nodos (archivos/carpetas) con nombres y extensiones permitidas.
+     * Contiene un array de nodos (archivos/carpetas) con nombres y extensiones
+     * permitidas.
      */
     @Column(name = "estructura_zip", columnDefinition = "TEXT")
     private String estructuraZip;
@@ -81,17 +82,12 @@ public class Entregable {
     /**
      * Modo de validación del ZIP:
      * true = el ZIP debe contener exactamente los archivos definidos,
-     * false = el ZIP debe contener al menos los archivos definidos (puede tener más).
+     * false = el ZIP debe contener al menos los archivos definidos (puede tener
+     * más).
      */
     @Column(name = "validacion_zip_estricta")
     @Builder.Default
     private Boolean validacionZipEstricta = false;
-
-    /**
-     * ID o ruta de la carpeta de OneDrive seleccionada para este entregable específico.
-     */
-    @Column(name = "carpeta_onedrive")
-    private String carpetaOneDrive;
 
     // Relación: Un entregable pertenece a una actividad
     @ManyToOne(fetch = FetchType.LAZY)

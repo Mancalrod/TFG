@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CrearEntregableDTO, Visibilidad, TipoMaterial, ActividadDTO, NodoEstructuraZip, ModoOneDrive } from '../../types';
 import { entregableService, actividadService, oneDriveService } from '../../services';
@@ -6,6 +6,13 @@ import { useAuth } from '../../context/AuthContext';
 import EstructuraZipBuilder from '../../components/EstructuraZipBuilder';
 import { OneDriveFolderBrowser } from '../../components/OneDriveFolderBrowser';
 import './CrearEntregablePage.css';
+
+const labelTipoMaterial = (tipo: TipoMaterial): string => {
+  if (tipo === TipoMaterial.SOLO_TEXTO) {
+    return 'SOLO_TEXTO (sin archivos)';
+  }
+  return tipo;
+};
 
 const CrearEntregablePage: React.FC = () => {
   const { actividadId } = useParams<{ actividadId: string }>();
@@ -107,10 +114,20 @@ const CrearEntregablePage: React.FC = () => {
     }
 
     if (name === 'tipoArchivoEsperado') {
+      const nuevoTipo = value ? (value as unknown as TipoMaterial) : undefined;
       setFormData(prev => ({
         ...prev,
-        tipoArchivoEsperado: value ? (value as unknown as TipoMaterial) : undefined,
+        tipoArchivoEsperado: nuevoTipo,
+        tamanoMaximoBytes: nuevoTipo === TipoMaterial.SOLO_TEXTO ? undefined : prev.tamanoMaximoBytes,
       }));
+      if (nuevoTipo !== TipoMaterial.ZIP) {
+        setEstructuraZipNodos([]);
+        setValidacionZipEstricta(false);
+        setNombreZipEsperado('');
+      }
+      if (nuevoTipo === TipoMaterial.SOLO_TEXTO) {
+        setTamanoMB('');
+      }
       return;
     }
 
@@ -134,6 +151,10 @@ const CrearEntregablePage: React.FC = () => {
 
     try {
       const datosEnvio: CrearEntregableDTO = { ...formData };
+
+      if (formData.tipoArchivoEsperado === TipoMaterial.SOLO_TEXTO) {
+        datosEnvio.tamanoMaximoBytes = undefined;
+      }
 
       // Si el tipo esperado es ZIP y hay estructura definida, incluirla
       if (formData.tipoArchivoEsperado === TipoMaterial.ZIP && estructuraZipNodos.length > 0) {
@@ -296,24 +317,31 @@ const CrearEntregablePage: React.FC = () => {
               <option value="">Cualquiera</option>
               {Object.values(TipoMaterial).map(tipo => (
                 <option key={tipo} value={tipo}>
-                  {tipo}
+                  {labelTipoMaterial(tipo)}
                 </option>
               ))}
             </select>
+            {formData.tipoArchivoEsperado === TipoMaterial.SOLO_TEXTO && (
+              <p className="ce-help-text">
+                El alumno solo podrá enviar texto en el comentario, sin archivos adjuntos.
+              </p>
+            )}
           </div>
-          <div className="ce-field">
-            <label htmlFor="tamanoMB">Tamaño máximo (MB)</label>
-            <input
-              id="tamanoMB"
-              name="tamanoMB"
-              type="number"
-              step="0.1"
-              min="0"
-              value={tamanoMB}
-              onChange={handleChange}
-              placeholder="Ej: 10"
-            />
-          </div>
+          {formData.tipoArchivoEsperado !== TipoMaterial.SOLO_TEXTO && (
+            <div className="ce-field">
+              <label htmlFor="tamanoMB">Tamaño máximo (MB)</label>
+              <input
+                id="tamanoMB"
+                name="tamanoMB"
+                type="number"
+                step="0.1"
+                min="0"
+                value={tamanoMB}
+                onChange={handleChange}
+                placeholder="Ej: 10"
+              />
+            </div>
+          )}
         </div>
 
         {/* Estructura del ZIP (solo cuando tipo = ZIP) */}

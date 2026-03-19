@@ -119,7 +119,7 @@ const EntregaDetallePage: React.FC = () => {
 
     try {
       const calificacionDTO: CalificacionDTO = {
-        calificacion: notaNum,
+        nota: notaNum,
         comentario: comentarioProfesor.trim() || undefined
       };
       await entregaService.calificar(entrega.id, usuario.id, calificacionDTO);
@@ -218,6 +218,10 @@ const EntregaDetallePage: React.FC = () => {
               </button>
             )}
           </div>
+
+          {errorDescarga && (
+            <p className="edp-error-message">{errorDescarga}</p>
+          )}
 
           {entrega.archivos.length === 0 ? (
             <p className="edp-no-files">No hay archivos adjuntos</p>

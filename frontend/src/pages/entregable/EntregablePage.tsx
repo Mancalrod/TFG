@@ -81,6 +81,13 @@ const EntregablePage: React.FC = () => {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  const formatTipoEsperado = (tipoArchivoEsperado?: string) => {
+    if (!tipoArchivoEsperado) return 'Cualquiera';
+    if (tipoArchivoEsperado === 'SOLO_TEXTO') return 'SOLO TEXTO (sin archivos)';
+    if (tipoArchivoEsperado === 'ENLACE') return 'ENLACE (en comentario, sin archivos)';
+    return tipoArchivoEsperado;
+  };
+
   const renderEstructuraZip = (nodos: NodoEstructuraZip[], nivel: number): React.ReactNode => (
     <div className="ep-zip-nodo-list">
       {nodos.map(nodo => {
@@ -191,7 +198,7 @@ const EntregablePage: React.FC = () => {
             </div>
             <div className="info-item">
               <label>Tipo archivo esperado</label>
-              <p>{entregable.tipoArchivoEsperado || 'Cualquiera'}</p>
+              <p>{formatTipoEsperado(entregable.tipoArchivoEsperado)}</p>
             </div>
             <div className="info-item">
               <label>Tamaño máximo</label>

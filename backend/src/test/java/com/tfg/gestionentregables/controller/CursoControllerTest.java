@@ -245,4 +245,33 @@ class CursoControllerTest {
                     .andExpect(jsonPath("$.length()").value(1));
         }
     }
+
+    @Nested
+    @DisplayName("PUT /api/cursos/grupos/{grupoId}")
+    class ActualizarGrupo {
+
+        @Test
+        @DisplayName("200 - Actualiza grupo")
+        void actualizar_ok() throws Exception {
+            when(cursoService.actualizarGrupo(1L, "Grupo B")).thenReturn(grupoDTO);
+
+            mockMvc.perform(put("/api/cursos/grupos/1").param("titulo", "Grupo B"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(1));
+        }
+    }
+
+    @Nested
+    @DisplayName("DELETE /api/cursos/grupos/{grupoId}")
+    class EliminarGrupo {
+
+        @Test
+        @DisplayName("204 - Elimina grupo")
+        void eliminar_ok() throws Exception {
+            doNothing().when(cursoService).eliminarGrupo(1L);
+
+            mockMvc.perform(delete("/api/cursos/grupos/1"))
+                    .andExpect(status().isNoContent());
+        }
+    }
 }

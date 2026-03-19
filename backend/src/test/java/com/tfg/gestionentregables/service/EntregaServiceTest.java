@@ -197,6 +197,40 @@ class EntregaServiceTest {
                     .hasMessageContaining("no cumple la estructura");
         }
 
+            @Test
+            @DisplayName("Falla si se adjuntan varios archivos cuando el entregable exige ZIP estructurado")
+            void realizar_zipEstructurado_variosArchivosFalla() {
+                entregable.setEstructuraZip("src/main.java");
+
+                MockMultipartFile zipUno = new MockMultipartFile(
+                    "file", "entrega1.zip", "application/zip", new byte[]{1, 2, 3});
+                MockMultipartFile zipDos = new MockMultipartFile(
+                    "file", "entrega2.zip", "application/zip", new byte[]{4, 5, 6});
+
+                when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+                when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(Optional.of(estudiante));
+
+                assertThatThrownBy(() -> entregaService.realizarEntrega(1L, 1L, "Mi entrega", List.of(zipUno, zipDos)))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("único archivo ZIP");
+            }
+
+            @Test
+            @DisplayName("Falla si el entregable exige ZIP estructurado y el archivo no es .zip")
+            void realizar_zipEstructurado_archivoNoZipFalla() {
+                entregable.setEstructuraZip("src/main.java");
+
+                MockMultipartFile txt = new MockMultipartFile(
+                    "file", "entrega.txt", "text/plain", "contenido".getBytes());
+
+                when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+                when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(Optional.of(estudiante));
+
+                assertThatThrownBy(() -> entregaService.realizarEntrega(1L, 1L, "Mi entrega", List.of(txt)))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("extensión .zip");
+            }
+
         @Test
         @DisplayName("Pasa validación ZIP y almacena localmente")
         void realizar_zipValidacionOkYAlmacenaLocal(@TempDir Path tempDir) {
@@ -272,6 +306,50 @@ class EntregaServiceTest {
             entregaService.realizarEntrega(1L, 1L, "Reenvío", null);
 
             verify(oneDriveService).eliminarArchivo(10L, "od-old-123");
+        }
+
+        @Test
+        @DisplayName("Sube a OneDrive manteniendo el nombre original del archivo")
+        void realizar_onedriveMantieneNombreOriginal() {
+            entregable.getActividad().setSubirAOneDrive(true);
+            entregable.getActividad().setOneDriveUsuarioId(10L);
+            entregable.getActividad().setCarpetaOneDrive("Entregas");
+
+            MockMultipartFile archivo = new MockMultipartFile(
+                    "file", "mi documento final.pdf", "application/pdf", "contenido".getBytes());
+
+            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(Optional.of(estudiante));
+            when(entregaRepository.findByEntregableIdAndEstudianteId(1L, 1L)).thenReturn(List.of());
+            when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
+            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
+            when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
+
+            when(oneDriveService.isEnabled()).thenReturn(true);
+            when(oneDriveService.estaConectado(10L)).thenReturn(true);
+            when(oneDriveService.estaConectado(1L)).thenReturn(false);
+            when(oneDriveService.subirArchivo(
+                    eq(10L),
+                    any(),
+                    anyString(),
+                    anyString(),
+                    anyString(),
+                    anyString(),
+                    eq("mi documento final.pdf"),
+                    eq("Entregas")))
+                    .thenReturn(Map.of("fileId", "od-file", "webUrl", "https://onedrive.example.com/file"));
+
+            entregaService.realizarEntrega(1L, 1L, "Entrega", List.of(archivo));
+
+            verify(oneDriveService).subirArchivo(
+                    eq(10L),
+                    any(),
+                    anyString(),
+                    anyString(),
+                    anyString(),
+                    anyString(),
+                    eq("mi documento final.pdf"),
+                    eq("Entregas"));
         }
     }
 
@@ -525,6 +603,30 @@ class EntregaServiceTest {
 
             verify(feedbackRepository, never()).save(any());
         }
+
+        @Test
+        @DisplayName("Lanza excepción si la nota es null")
+        void calificar_notaNull() {
+            CalificacionDTO cal = CalificacionDTO.builder().nota(null).build();
+
+            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
+
+            assertThatThrownBy(() -> entregaService.calificarEntrega(1L, 1L, cal))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("nota es obligatoria");
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si la nota es negativa")
+        void calificar_notaNegativa() {
+            CalificacionDTO cal = CalificacionDTO.builder().nota(-1.0).build();
+
+            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
+
+            assertThatThrownBy(() -> entregaService.calificarEntrega(1L, 1L, cal))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("no puede ser negativa");
+        }
     }
 
     @Nested
@@ -554,6 +656,107 @@ class EntregaServiceTest {
             verify(entregaRepository).save(argThat(e ->
                     e.getComentarioAlumno().equals("Este es mi comentario de entrega")
             ));
+        }
+
+        @Test
+        @DisplayName("Permite entrega solo con comentario cuando tipo esperado es OTRO")
+        void entrega_soloComentario_tipoOtro() {
+            entregable.setTipoArchivoEsperado(TipoMaterial.OTRO);
+
+            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(anyLong(), anyLong()))
+                    .thenReturn(Optional.of(estudiante));
+            when(entregaRepository.findByEntregableIdAndEstudianteId(anyLong(), anyLong()))
+                    .thenReturn(Collections.emptyList());
+            when(entregaRepository.save(any(Entrega.class))).thenAnswer(inv -> {
+                Entrega e = inv.getArgument(0);
+                e.setId(1L);
+                return e;
+            });
+            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
+            when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
+
+            EntregaDTO result = entregaService.realizarEntrega(
+                    1L, 1L, null, "Comentario sin archivo", null);
+
+            assertThat(result).isNotNull();
+            verify(entregaRepository).save(argThat(e ->
+                    "Comentario sin archivo".equals(e.getComentarioAlumno())
+            ));
+        }
+
+        @Test
+        @DisplayName("Permite entrega solo con comentario cuando tipo esperado es ENLACE")
+        void entrega_soloComentario_tipoEnlace() {
+            entregable.setTipoArchivoEsperado(TipoMaterial.ENLACE);
+
+            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(anyLong(), anyLong()))
+                    .thenReturn(Optional.of(estudiante));
+            when(entregaRepository.findByEntregableIdAndEstudianteId(anyLong(), anyLong()))
+                    .thenReturn(Collections.emptyList());
+            when(entregaRepository.save(any(Entrega.class))).thenAnswer(inv -> {
+                Entrega e = inv.getArgument(0);
+                e.setId(1L);
+                return e;
+            });
+            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
+            when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
+
+            EntregaDTO result = entregaService.realizarEntrega(
+                    1L, 1L, null, "https://example.com/mi-entrega", null);
+
+            assertThat(result).isNotNull();
+            verify(entregaRepository).save(argThat(e ->
+                    "https://example.com/mi-entrega".equals(e.getComentarioAlumno())
+            ));
+        }
+
+        @Test
+        @DisplayName("Falla entrega solo con comentario cuando tipo esperado requiere archivo")
+        void entrega_soloComentario_tipoPdf_falla() {
+            entregable.setTipoArchivoEsperado(TipoMaterial.PDF);
+
+            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(anyLong(), anyLong()))
+                    .thenReturn(Optional.of(estudiante));
+
+            assertThatThrownBy(() ->
+                    entregaService.realizarEntrega(1L, 1L, null, "Solo comentario", null))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("debes adjuntar al menos un archivo");
+        }
+
+        @Test
+        @DisplayName("Falla si tipo esperado es SOLO_TEXTO y se adjuntan archivos")
+        void entrega_soloTexto_conArchivo_falla() {
+            entregable.setTipoArchivoEsperado(TipoMaterial.SOLO_TEXTO);
+            MockMultipartFile file = new MockMultipartFile(
+                    "file", "entrega.txt", "text/plain", "contenido".getBytes());
+
+            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(anyLong(), anyLong()))
+                    .thenReturn(Optional.of(estudiante));
+
+            assertThatThrownBy(() ->
+                    entregaService.realizarEntrega(1L, 1L, null, "Texto", List.of(file)))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("solo texto");
+        }
+
+        @Test
+        @DisplayName("Falla si tipo esperado es SOLO_TEXTO y no hay comentario")
+        void entrega_soloTexto_sinComentario_falla() {
+            entregable.setTipoArchivoEsperado(TipoMaterial.SOLO_TEXTO);
+
+            when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(anyLong(), anyLong()))
+                    .thenReturn(Optional.of(estudiante));
+
+            assertThatThrownBy(() ->
+                    entregaService.realizarEntrega(1L, 1L, "Entrega", "   ", null))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("debes escribir un comentario");
         }
 
         @Test
@@ -894,6 +1097,44 @@ class EntregaServiceTest {
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("No se pudo descargar");
         }
+
+            @Test
+            @DisplayName("Descarga desde Cloudinary cuando tiene referencia")
+            void descargar_desdeCloudinary() {
+                Material material = Material.builder()
+                    .id(1L).nombre("doc.pdf")
+                    .tipoMaterial(TipoMaterial.PDF)
+                    .cloudinaryPublicId("pub-1")
+                    .cloudinaryUrl("https://cloudinary.example.com/doc.pdf")
+                    .build();
+                byte[] contenido = "contenido-cloudinary".getBytes();
+
+                when(materialRepository.findById(1L)).thenReturn(Optional.of(material));
+                when(cloudinaryService.descargarArchivo("https://cloudinary.example.com/doc.pdf")).thenReturn(contenido);
+
+                byte[] result = entregaService.descargarContenidoArchivo(1L);
+
+                assertThat(result).isEqualTo(contenido);
+            }
+
+            @Test
+            @DisplayName("Cloudinary falla y propaga excepción de descarga")
+            void descargar_cloudinaryFalla() {
+                Material material = Material.builder()
+                    .id(1L).nombre("doc.pdf")
+                    .tipoMaterial(TipoMaterial.PDF)
+                    .cloudinaryPublicId("pub-1")
+                    .cloudinaryUrl("https://cloudinary.example.com/doc.pdf")
+                    .build();
+
+                when(materialRepository.findById(1L)).thenReturn(Optional.of(material));
+                when(cloudinaryService.descargarArchivo("https://cloudinary.example.com/doc.pdf"))
+                    .thenThrow(new RuntimeException("Cloudinary no disponible"));
+
+                assertThatThrownBy(() -> entregaService.descargarContenidoArchivo(1L))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Cloudinary");
+            }
     }
 
     @Nested
@@ -1087,6 +1328,185 @@ class EntregaServiceTest {
 
             assertThatThrownBy(() -> entregaService.listarContenidoZip(1L))
                     .isInstanceOf(UncheckedIOException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("helpers privados y compatibilidad")
+    class HelpersPrivadosYCompatibilidad {
+
+        @Test
+        @DisplayName("calificarEntrega(entregaId, calificacion) usa compatibilidad sin feedback")
+        void calificar_overloadSinProfesor_noCreaFeedback() {
+            CalificacionDTO cal = CalificacionDTO.builder()
+                    .nota(8.0)
+                    .comentario("Comentario del profesor")
+                    .build();
+
+            when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
+            when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
+            when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
+
+            EntregaDTO result = entregaService.calificarEntrega(1L, cal);
+
+            assertThat(result).isNotNull();
+            verify(feedbackRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("guardarEnCloudinary construye material con metadatos correctos")
+        @SuppressWarnings("unchecked")
+        void guardarEnCloudinary_ok() throws Exception {
+            MockMultipartFile archivo = new MockMultipartFile(
+                    "file", "informe.pdf", "application/pdf", "contenido".getBytes());
+
+            Map<String, String> cloudResult = Map.of(
+                    "publicId", "tfg-entregables/IS-001/P1/Entregable 1/informe",
+                    "secureUrl", "https://res.cloudinary.com/demo/raw/upload/informe");
+            when(cloudinaryService.subirArchivo(any(), anyString())).thenReturn(cloudResult);
+
+            Method method = EntregaService.class.getDeclaredMethod(
+                    "guardarEnCloudinary", org.springframework.web.multipart.MultipartFile.class,
+                    Entrega.class, Entregable.class, String.class);
+            method.setAccessible(true);
+
+            Material material = (Material) method.invoke(entregaService, archivo, entrega, entregable, "informe.pdf");
+
+            assertThat(material.getNombre()).isEqualTo("informe.pdf");
+            assertThat(material.getRuta()).isEqualTo("cloudinary://tfg-entregables/IS-001/P1/Entregable 1/informe");
+            assertThat(material.getCloudinaryPublicId()).isEqualTo("tfg-entregables/IS-001/P1/Entregable 1/informe");
+            assertThat(material.getCloudinaryUrl()).isEqualTo("https://res.cloudinary.com/demo/raw/upload/informe");
+            assertThat(material.getTipoMaterial()).isEqualTo(TipoMaterial.PDF);
+            assertThat(material.getTamanoBytes()).isEqualTo(archivo.getSize());
+        }
+
+        @Test
+        @DisplayName("leerArchivoLocal lee archivo cuando uploadBaseDir está vacío")
+        void leerArchivoLocal_uploadBaseDirVacio(@TempDir Path tempDir) throws Exception {
+            Path file = tempDir.resolve("local.txt");
+            Files.write(file, "hola-local".getBytes());
+            ReflectionTestUtils.setField(entregaService, "uploadBaseDir", "");
+
+            Method method = EntregaService.class.getDeclaredMethod("leerArchivoLocal", String.class);
+            method.setAccessible(true);
+            byte[] contenido = (byte[]) method.invoke(entregaService, file.toString());
+
+            assertThat(contenido).isEqualTo("hola-local".getBytes());
+        }
+
+        @Test
+        @DisplayName("leerArchivoLocal rechaza ruta fuera del directorio si no existe")
+        void leerArchivoLocal_rutaFueraNoExiste(@TempDir Path tempDir) throws Exception {
+            ReflectionTestUtils.setField(entregaService, "uploadBaseDir", tempDir.toString());
+            String rutaInexistenteFuera = tempDir.getParent().resolve("fuera-no-existe.txt").toString();
+
+            Method method = EntregaService.class.getDeclaredMethod("leerArchivoLocal", String.class);
+            method.setAccessible(true);
+
+                InvocationTargetException ex = (InvocationTargetException) catchThrowable(
+                    () -> method.invoke(entregaService, rutaInexistenteFuera));
+
+                assertThat(ex).isNotNull();
+                assertThat(ex.getCause())
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("fuera del directorio");
+        }
+
+        @Test
+        @DisplayName("evitarColisionZip agrega sufijos incrementales cuando hay duplicados")
+        @SuppressWarnings("unchecked")
+        void evitarColisionZip_incremental() throws Exception {
+            Method method = EntregaService.class.getDeclaredMethod("evitarColisionZip", String.class, Set.class);
+            method.setAccessible(true);
+
+            Set<String> used = new HashSet<>();
+            used.add("Alumno/archivo.txt");
+
+            String segundo = (String) method.invoke(entregaService, "Alumno/archivo.txt", used);
+            String tercero = (String) method.invoke(entregaService, "Alumno/archivo.txt", used);
+
+            assertThat(segundo).isEqualTo("Alumno/archivo (2).txt");
+            assertThat(tercero).isEqualTo("Alumno/archivo (3).txt");
+        }
+
+        @Test
+        @DisplayName("leerArchivoLocal permite ruta fuera del baseDir si el archivo existe")
+        void leerArchivoLocal_fueraBasePeroExiste(@TempDir Path tempDir) throws Exception {
+            ReflectionTestUtils.setField(entregaService, "uploadBaseDir", tempDir.toString());
+
+            Path externo = Files.createTempFile("ext-file", ".txt");
+            Files.write(externo, "externo-ok".getBytes());
+
+            try {
+                Method method = EntregaService.class.getDeclaredMethod("leerArchivoLocal", String.class);
+                method.setAccessible(true);
+
+                byte[] contenido = (byte[]) method.invoke(entregaService, externo.toString());
+                assertThat(contenido).isEqualTo("externo-ok".getBytes());
+            } finally {
+                Files.deleteIfExists(externo);
+            }
+        }
+
+        @Test
+        @DisplayName("guardarArchivoLocal rechaza path traversal en el nombre")
+        void guardarArchivoLocal_pathTraversal(@TempDir Path tempDir) throws Exception {
+            ReflectionTestUtils.setField(entregaService, "uploadBaseDir", tempDir.toString());
+            entrega.setId(123L);
+
+            MockMultipartFile archivo = new MockMultipartFile(
+                    "file", "doc.txt", "text/plain", "contenido".getBytes());
+
+            Method method = EntregaService.class.getDeclaredMethod(
+                    "guardarArchivoLocal",
+                    org.springframework.web.multipart.MultipartFile.class,
+                    Entrega.class,
+                    String.class,
+                    String.class);
+            method.setAccessible(true);
+
+                InvocationTargetException ex = (InvocationTargetException) catchThrowable(
+                    () -> method.invoke(entregaService, archivo, entrega, "doc.txt", "..\\..\\evil.txt"));
+
+                assertThat(ex).isNotNull();
+                assertThat(ex.getCause())
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Ruta de archivo no válida");
+        }
+
+        @Test
+        @DisplayName("sanitizarSegmentoZip cubre nulos y caracteres peligrosos")
+        void sanitizarSegmentoZip_ramas() throws Exception {
+            Method method = EntregaService.class.getDeclaredMethod("sanitizarSegmentoZip", String.class);
+            method.setAccessible(true);
+
+            String nulo = (String) method.invoke(entregaService, new Object[]{null});
+            String vacio = (String) method.invoke(entregaService, "   ");
+            String sucio = (String) method.invoke(entregaService, "a/b\\c:*?<>|");
+
+            assertThat(nulo).isEqualTo("sin_nombre");
+            assertThat(vacio).isEqualTo("sin_nombre");
+            assertThat(sucio).isNotBlank();
+            assertThat(sucio).doesNotContain("/").doesNotContain("\\");
+        }
+
+        @Test
+        @DisplayName("esEntradaZipPeligrosa detecta null, absoluto y traversal")
+        void esEntradaZipPeligrosa_ramas() throws Exception {
+            Method method = EntregaService.class.getDeclaredMethod("esEntradaZipPeligrosa", String.class);
+            method.setAccessible(true);
+
+            boolean nulo = (boolean) method.invoke(entregaService, new Object[]{null});
+            boolean unixAbs = (boolean) method.invoke(entregaService, "/etc/passwd");
+            boolean winAbs = (boolean) method.invoke(entregaService, "\\\\windows\\system32");
+            boolean traversal = (boolean) method.invoke(entregaService, "a/../b");
+            boolean seguro = (boolean) method.invoke(entregaService, "src/Main.java");
+
+            assertThat(nulo).isTrue();
+            assertThat(unixAbs).isTrue();
+            assertThat(winAbs).isTrue();
+            assertThat(traversal).isTrue();
+            assertThat(seguro).isFalse();
         }
     }
 

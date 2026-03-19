@@ -11,6 +11,11 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const getApiErrorMessage = (err: unknown, fallback: string): string => {
+    const axiosErr = err as { response?: { data?: { message?: string } } };
+    return axiosErr?.response?.data?.message || fallback;
+  };
+
   // Si ya está autenticado, redirigir al dashboard
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -36,11 +41,11 @@ const LoginPage: React.FC = () => {
       navigate('/dashboard');
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { status?: number } };
+        const axiosErr = err as { response?: { status?: number; data?: { message?: string } } };
         if (axiosErr.response?.status === 401) {
           setError('Correo electrónico o contraseña incorrectos');
         } else {
-          setError('Error al iniciar sesión. Inténtalo de nuevo.');
+          setError(getApiErrorMessage(err, 'Error al iniciar sesión. Inténtalo de nuevo.'));
         }
       } else {
         setError('Error de conexión con el servidor');

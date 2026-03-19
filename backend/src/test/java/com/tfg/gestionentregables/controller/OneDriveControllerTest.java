@@ -16,6 +16,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -47,6 +49,50 @@ class OneDriveControllerTest {
                 .fechaConexion(LocalDateTime.now().minusDays(1))
                 .fechaUltimoUso(LocalDateTime.now())
                 .build();
+    }
+
+    // =============================================
+    // GET /api/onedrive/folders/{usuarioId}
+    // =============================================
+
+    @Nested
+    @DisplayName("GET /api/onedrive/folders/{usuarioId}")
+    class GetFolders {
+
+        @Test
+        @DisplayName("400 - Integración deshabilitada")
+        void folders_disabled() throws Exception {
+            when(oneDriveService.isEnabled()).thenReturn(false);
+
+            mockMvc.perform(get("/api/onedrive/folders/1"))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("400 - Usuario no conectado")
+        void folders_notConnected() throws Exception {
+            when(oneDriveService.isEnabled()).thenReturn(true);
+            when(oneDriveService.estaConectado(1L)).thenReturn(false);
+
+            mockMvc.perform(get("/api/onedrive/folders/1"))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("200 - Lista carpetas")
+        void folders_ok() throws Exception {
+            List<Map<String, String>> carpetas = List.of(
+                    Map.of("id", "folder1", "name", "Entregas"));
+
+            when(oneDriveService.isEnabled()).thenReturn(true);
+            when(oneDriveService.estaConectado(1L)).thenReturn(true);
+            when(oneDriveService.listarCarpetas(1L, "root")).thenReturn(carpetas);
+
+            mockMvc.perform(get("/api/onedrive/folders/1").param("parentId", "root"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[0].id").value("folder1"))
+                    .andExpect(jsonPath("$[0].name").value("Entregas"));
+        }
     }
 
     // =============================================

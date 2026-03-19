@@ -375,6 +375,43 @@ class OneDriveServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("sanitizarNombreArchivo")
+    class SanitizarNombreArchivo {
+
+        private String invocarSanitizarArchivo(String nombre) {
+            try {
+                Method method = OneDriveService.class.getDeclaredMethod("sanitizarNombreArchivo", String.class);
+                method.setAccessible(true);
+                return (String) method.invoke(oneDriveService, nombre);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e.getCause());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        @DisplayName("Devuelve nombre por defecto si viene null")
+        void sanitizarArchivo_null() {
+            assertThat(invocarSanitizarArchivo(null)).isEqualTo("archivo_sin_nombre");
+        }
+
+        @Test
+        @DisplayName("Elimina rutas y caracteres no permitidos manteniendo el nombre legible")
+        void sanitizarArchivo_conRutaYEspeciales() {
+            String resultado = invocarSanitizarArchivo("C:\\\\temp\\\\Mi*archivo?.pdf");
+            assertThat(resultado).isEqualTo("Mi_archivo_.pdf");
+        }
+
+        @Test
+        @DisplayName("Recorta puntos y espacios finales")
+        void sanitizarArchivo_trimFinal() {
+            String resultado = invocarSanitizarArchivo("informe final. ");
+            assertThat(resultado).isEqualTo("informe final");
+        }
+    }
+
     // =============================================
     // subirArchivo
     // =============================================

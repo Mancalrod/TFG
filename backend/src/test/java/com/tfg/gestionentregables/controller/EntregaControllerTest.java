@@ -23,8 +23,11 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -102,7 +105,7 @@ class EntregaControllerTest {
         @Test
         @DisplayName("201 - Realiza entrega")
         void realizar_ok() throws Exception {
-            when(entregaService.realizarEntrega(eq(1L), eq(1L), eq("Mi entrega"), any()))
+            when(entregaService.realizarEntrega(eq(1L), eq(1L), eq("Mi entrega"), isNull(), any()))
                     .thenReturn(entregaDTO);
 
             mockMvc.perform(post("/api/entregas/entregable/1/estudiante/1")
@@ -150,9 +153,10 @@ class EntregaControllerTest {
         @DisplayName("200 - Califica entrega")
         void calificar_ok() throws Exception {
             CalificacionDTO cal = CalificacionDTO.builder().nota(8.5).build();
-            when(entregaService.calificarEntrega(eq(1L), any())).thenReturn(entregaDTO);
+                        when(entregaService.calificarEntrega(eq(1L), eq(1L), any())).thenReturn(entregaDTO);
 
             mockMvc.perform(post("/api/entregas/1/calificar")
+                                                        .param("profesorId", "1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(cal)))
                     .andExpect(status().isOk());
@@ -162,10 +166,11 @@ class EntregaControllerTest {
         @DisplayName("400 - Nota supera máxima")
         void calificar_notaInvalida() throws Exception {
             CalificacionDTO cal = CalificacionDTO.builder().nota(15.0).build();
-            when(entregaService.calificarEntrega(eq(1L), any()))
+            when(entregaService.calificarEntrega(eq(1L), eq(1L), any()))
                     .thenThrow(new IllegalArgumentException("La calificación no puede ser mayor"));
 
             mockMvc.perform(post("/api/entregas/1/calificar")
+                            .param("profesorId", "1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(cal)))
                     .andExpect(status().isBadRequest());
@@ -332,6 +337,120 @@ class EntregaControllerTest {
                     .andExpect(status().isNotFound());
         }
     }
+
+        @Nested
+        @DisplayName("GET /api/entregas/archivo/{materialId}")
+        class DescargarArchivo {
+
+                @Test
+                @DisplayName("200 - Descarga archivo desde servicio")
+                void descargar_ok() throws Exception {
+                        Material material = Material.builder()
+                                        .id(1L).nombre("entrega.pdf").ruta("onedrive://abc").tipoMaterial(TipoMaterial.PDF).build();
+                        byte[] contenido = "contenido".getBytes();
+
+                        when(entregaService.obtenerArchivo(1L)).thenReturn(material);
+                        when(entregaService.descargarContenidoArchivo(1L)).thenReturn(contenido);
+
+                        mockMvc.perform(get("/api/entregas/archivo/1"))
+                                        .andExpect(status().isOk())
+                                        .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
+                                        .andExpect(header().string("Content-Disposition", "attachment; filename=\"entrega.pdf\""))
+                                        .andExpect(content().bytes(contenido));
+                }
+
+                @Test
+                @DisplayName("200 - Fallback a ruta local cuando falla descarga remota")
+                void descargar_fallbackLocal() throws Exception {
+                        Path tempFile = Files.createTempFile("entrega-controller-", ".txt");
+                        byte[] esperado = "local-file-content".getBytes();
+                        Files.write(tempFile, esperado);
+
+                        Material material = Material.builder()
+                                        .id(2L).nombre("local.txt").ruta(tempFile.toString()).tipoMaterial(TipoMaterial.TXT).build();
+
+                        when(entregaService.obtenerArchivo(2L)).thenReturn(material);
+                        when(entregaService.descargarContenidoArchivo(2L)).thenThrow(new RuntimeException("Falla remota"));
+
+                        try {
+                                mockMvc.perform(get("/api/entregas/archivo/2"))
+                                                .andExpect(status().isOk())
+                                                .andExpect(content().bytes(esperado));
+                        } finally {
+                                Files.deleteIfExists(tempFile);
+                        }
+                }
+
+                @Test
+                @DisplayName("404 - Sin fallback local disponible")
+                void descargar_notFound() throws Exception {
+                        Material material = Material.builder()
+                                        .id(3L).nombre("missing.bin").ruta(null).tipoMaterial(TipoMaterial.OTRO).build();
+
+                        when(entregaService.obtenerArchivo(3L)).thenReturn(material);
+                        when(entregaService.descargarContenidoArchivo(3L)).thenThrow(new RuntimeException("Falla"));
+
+                        mockMvc.perform(get("/api/entregas/archivo/3"))
+                                        .andExpect(status().isNotFound());
+                }
+        }
+
+        @Nested
+        @DisplayName("GET /api/entregas/actividad/{actividadId}/descargar-todo")
+        class DescargarTodoActividad {
+
+                @Test
+                @DisplayName("200 - Descarga ZIP de actividad")
+                void descargarTodoActividad_ok() throws Exception {
+                        byte[] zipBytes = "zip-actividad".getBytes();
+                        ActividadDTO actividad = ActividadDTO.builder().id(1L).titulo("Actividad 1").build();
+
+                        when(actividadService.obtenerActividadPorId(1L)).thenReturn(actividad);
+                        when(entregaService.descargarTodoActividadComoZip(1L)).thenReturn(zipBytes);
+
+                        mockMvc.perform(get("/api/entregas/actividad/1/descargar-todo"))
+                                        .andExpect(status().isOk())
+                                        .andExpect(header().string("Content-Disposition", "attachment; filename=\"Actividad 1.zip\""))
+                                        .andExpect(content().contentType("application/zip"))
+                                        .andExpect(content().bytes(zipBytes));
+                }
+
+                @Test
+                @DisplayName("404 - Error al generar ZIP de actividad")
+                void descargarTodoActividad_error() throws Exception {
+                        when(actividadService.obtenerActividadPorId(1L)).thenThrow(new EntityNotFoundException("No encontrada"));
+
+                        mockMvc.perform(get("/api/entregas/actividad/1/descargar-todo"))
+                                        .andExpect(status().isNotFound());
+                }
+        }
+
+        @Nested
+        @DisplayName("GET /api/entregas/archivo/{materialId}/zip-contenido")
+        class ListarContenidoZip {
+
+                @Test
+                @DisplayName("200 - Lista contenido interno del ZIP")
+                void listarContenido_ok() throws Exception {
+                        List<Map<String, Object>> contenido = List.of(
+                                        Map.of("nombre", "docs/readme.txt", "esDirectorio", false, "tamano", 12L));
+
+                        when(entregaService.listarContenidoZip(1L)).thenReturn(contenido);
+
+                        mockMvc.perform(get("/api/entregas/archivo/1/zip-contenido"))
+                                        .andExpect(status().isOk())
+                                        .andExpect(jsonPath("$[0].nombre").value("docs/readme.txt"));
+                }
+
+                @Test
+                @DisplayName("404 - Error listando contenido ZIP")
+                void listarContenido_error() throws Exception {
+                        when(entregaService.listarContenidoZip(1L)).thenThrow(new RuntimeException("ZIP inválido"));
+
+                        mockMvc.perform(get("/api/entregas/archivo/1/zip-contenido"))
+                                        .andExpect(status().isNotFound());
+                }
+        }
 
     @Nested
     @DisplayName("GET /api/entregas/entregable/{entregableId}/descargar-todo")

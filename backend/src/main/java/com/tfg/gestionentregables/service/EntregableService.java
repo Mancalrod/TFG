@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
 /**
  * Servicio para gestión de entregables.
  * Implementa operaciones SYSOP-010 a SYSOP-012.
@@ -35,14 +34,6 @@ public class EntregableService {
         Actividad actividad = actividadRepository.findById(actividadId)
                 .orElseThrow(() -> new EntityNotFoundException("Actividad no encontrada con ID: " + actividadId));
 
-        // Validar que si el modo OneDrive es ENTREGABLES, la carpeta debe ser obligatoria
-        if (actividad.getModoOneDrive() == ModoOneDrive.ENTREGABLES) {
-            if (dto.getCarpetaOneDrive() == null || dto.getCarpetaOneDrive().trim().isEmpty()) {
-                throw new IllegalArgumentException(
-                    "La carpeta de OneDrive es obligatoria cuando el modo de almacenamiento de la actividad es por entregables");
-            }
-        }
-
         Entregable entregable = Entregable.builder()
                 .titulo(dto.getTitulo())
                 .descripcion(dto.getDescripcion())
@@ -56,7 +47,6 @@ public class EntregableService {
                 .estructuraZip(dto.getEstructuraZip())
                 .validacionZipEstricta(dto.getValidacionZipEstricta() != null ? dto.getValidacionZipEstricta() : false)
                 .nombreZipEsperado(dto.getNombreZipEsperado())
-                .carpetaOneDrive(dto.getCarpetaOneDrive())
                 .actividad(actividad)
                 .build();
 
@@ -72,7 +62,7 @@ public class EntregableService {
         if (!actividadRepository.existsById(actividadId)) {
             throw new EntityNotFoundException(ENTREGABLE_NOT_FOUND + actividadId);
         }
-        
+
         return entregableRepository.findByActividadId(actividadId).stream()
                 .map(mapper::toDTO)
                 .toList();
@@ -96,7 +86,7 @@ public class EntregableService {
         if (!actividadRepository.existsById(actividadId)) {
             throw new EntityNotFoundException(ENTREGABLE_NOT_FOUND + actividadId);
         }
-        
+
         return entregableRepository.findByActividadIdAndVisibilidad(actividadId, Visibilidad.VISIBLE).stream()
                 .map(mapper::toDTO)
                 .toList();
@@ -108,15 +98,6 @@ public class EntregableService {
     public EntregableDTO actualizarEntregable(Long id, CrearEntregableDTO dto) {
         Entregable entregable = entregableRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ENTREGABLE_NOT_FOUND + id));
-
-        // Validar que si el modo OneDrive es ENTREGABLES, la carpeta debe ser obligatoria
-        Actividad actividad = entregable.getActividad();
-        if (actividad.getModoOneDrive() == ModoOneDrive.ENTREGABLES) {
-            if (dto.getCarpetaOneDrive() == null || dto.getCarpetaOneDrive().trim().isEmpty()) {
-                throw new IllegalArgumentException(
-                    "La carpeta de OneDrive es obligatoria cuando el modo de almacenamiento de la actividad es por entregables");
-            }
-        }
 
         entregable.setTitulo(dto.getTitulo());
         entregable.setDescripcion(dto.getDescripcion());
@@ -136,9 +117,6 @@ public class EntregableService {
             entregable.setValidacionZipEstricta(dto.getValidacionZipEstricta());
         }
         entregable.setNombreZipEsperado(dto.getNombreZipEsperado());
-        if (dto.getCarpetaOneDrive() != null) {
-            entregable.setCarpetaOneDrive(dto.getCarpetaOneDrive());
-        }
 
         entregable = entregableRepository.save(entregable);
         return mapper.toDTO(entregable);
@@ -150,7 +128,7 @@ public class EntregableService {
     public EntregableDTO cambiarVisibilidad(Long entregableId, Visibilidad visibilidad) {
         Entregable entregable = entregableRepository.findById(entregableId)
                 .orElseThrow(() -> new EntityNotFoundException(ENTREGABLE_NOT_FOUND + entregableId));
-        
+
         entregable.setVisibilidad(visibilidad);
         entregable = entregableRepository.save(entregable);
         return mapper.toDTO(entregable);

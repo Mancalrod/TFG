@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 
-
 /**
  * Servicio para gestión de actividades.
  * Implementa operaciones SYSOP-005 a SYSOP-009.
@@ -50,7 +49,6 @@ public class ActividadService {
                 .subirAOneDrive(Boolean.TRUE.equals(dto.getSubirAOneDrive()))
                 .oneDriveUsuarioId(Boolean.TRUE.equals(dto.getSubirAOneDrive()) ? dto.getOneDriveUsuarioId() : null)
                 .carpetaOneDrive(Boolean.TRUE.equals(dto.getSubirAOneDrive()) ? dto.getCarpetaOneDrive() : null)
-                .modoOneDrive(dto.getModoOneDrive() != null ? dto.getModoOneDrive() : com.tfg.gestionentregables.entity.ModoOneDrive.ACTIVIDAD)
                 .curso(curso)
                 .build();
 
@@ -72,7 +70,7 @@ public class ActividadService {
         if (!cursoRepository.existsById(cursoId)) {
             throw new EntityNotFoundException("Curso no encontrado con ID: " + cursoId);
         }
-        
+
         return actividadRepository.findByCursoId(cursoId).stream()
                 .map(mapper::toDTO)
                 .toList();
@@ -86,7 +84,7 @@ public class ActividadService {
         if (!grupoRepository.existsById(grupoId)) {
             throw new EntityNotFoundException("Grupo no encontrado con ID: " + grupoId);
         }
-        
+
         return actividadRepository.findByGrupoIdAndVisibilidad(grupoId, Visibilidad.VISIBLE).stream()
                 .map(mapper::toDTO)
                 .toList();
@@ -108,7 +106,7 @@ public class ActividadService {
     public ActividadDTO cambiarVisibilidad(Long actividadId, Visibilidad visibilidad) {
         Actividad actividad = actividadRepository.findById(actividadId)
                 .orElseThrow(() -> new EntityNotFoundException("Actividad no encontrada con ID: " + actividadId));
-        
+
         actividad.setVisibilidad(visibilidad);
         actividad = actividadRepository.save(actividad);
         return mapper.toDTO(actividad);
@@ -147,9 +145,6 @@ public class ActividadService {
                 Boolean.TRUE.equals(dto.getSubirAOneDrive()) ? dto.getOneDriveUsuarioId() : null);
         actividad.setCarpetaOneDrive(
                 Boolean.TRUE.equals(dto.getSubirAOneDrive()) ? dto.getCarpetaOneDrive() : null);
-        if (dto.getModoOneDrive() != null) {
-            actividad.setModoOneDrive(dto.getModoOneDrive());
-        }
 
         // Actualizar grupos si se especifican
         if (dto.getGrupoIds() != null) {

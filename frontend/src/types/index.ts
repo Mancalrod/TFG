@@ -18,12 +18,14 @@ export enum TipoMaterial {
   IMAGEN = 'IMAGEN',
   VIDEO = 'VIDEO',
   ENLACE = 'ENLACE',
+  SOLO_TEXTO = 'SOLO_TEXTO',
   OTRO = 'OTRO'
 }
 
 export enum EstadoEntrega {
   ENTREGADO = 'ENTREGADO',
-  CALIFICADO = 'CALIFICADO'
+  CALIFICADO = 'CALIFICADO',
+  PUBLICADO = 'PUBLICADO'
 }
 
 export enum ModoOneDrive {
@@ -152,7 +154,7 @@ export interface NodoEstructuraZip {
   id: string;
   nombre: string;       // nombre del archivo/carpeta, "*" = cualquiera
   tipo: 'ARCHIVO' | 'CARPETA';
-  extensiones?: string[]; // para archivos: extensiones permitidas (vacío = cualquiera)
+  extensiones?: string[]; // para archivos: extensiones permitidas (vacio = cualquiera)
   hijos?: NodoEstructuraZip[]; // para carpetas: nodos hijos
 }
 
@@ -202,6 +204,12 @@ export interface EntregaDTO {
 
 export interface EntregaResumenDTO {
   entregaId: number;
+  cursoId: number;
+  cursoTitulo: string;
+  actividadId: number;
+  actividadTitulo: string;
+  entregableId: number;
+  entregableTitulo: string;
   estudianteId: number;
   estudianteNombre: string;
   estudianteCorreo: string;
@@ -214,7 +222,7 @@ export interface EntregaResumenDTO {
 }
 
 export interface CalificacionDTO {
-  calificacion: number;
+  nota: number;
   comentario?: string;
 }
 
@@ -273,3 +281,4 @@ export interface OneDriveFolder {
   name: string;
   path: string;
 }
+

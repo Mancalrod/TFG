@@ -15,6 +15,12 @@ import java.time.LocalDateTime;
 @Builder
 public class EntregaResumenDTO {
     private Long entregaId;
+    private Long cursoId;
+    private String cursoTitulo;
+    private Long actividadId;
+    private String actividadTitulo;
+    private Long entregableId;
+    private String entregableTitulo;
     private Long estudianteId;
     private String estudianteNombre;
     private String estudianteCorreo;
@@ -25,3 +31,4 @@ public class EntregaResumenDTO {
     private Boolean fueATiempo;
     private Integer version;
 }
+

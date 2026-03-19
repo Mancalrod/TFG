@@ -13,5 +13,6 @@ public enum TipoMaterial {
     IMAGEN,
     VIDEO,
     ENLACE,
+    SOLO_TEXTO,
     OTRO
 }

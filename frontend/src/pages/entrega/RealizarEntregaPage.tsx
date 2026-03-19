@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { EntregableDTO, NodoEstructuraZip } from '../../types';
 import { entregableService, entregaService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
 import './RealizarEntregaPage.css';
 
-// ── Constantes ──
+// â”€â”€ Constantes â”€â”€
 const TEMP_STORAGE_PREFIX = 'entrega_temp_';
 
 interface ArchivoTemporal {
@@ -50,21 +50,21 @@ const RealizarEntregaPage: React.FC = () => {
 
   const storageKey = id ? `${TEMP_STORAGE_PREFIX}${id}` : '';
 
-  // ── Cargar entregable ──
+  // â”€â”€ Cargar entregable â”€â”€
   useEffect(() => {
     if (id) {
       cargarEntregable(parseInt(id));
     }
   }, [id]);
 
-  // ── Redirigir si no es estudiante ──
+  // â”€â”€ Redirigir si no es estudiante â”€â”€
   useEffect(() => {
     if (!loading && !esEstudiante) {
       navigate(-1);
     }
   }, [loading, esEstudiante, navigate]);
 
-  // ── Cargar borrador desde localStorage ──
+  // â”€â”€ Cargar borrador desde localStorage â”€â”€
   useEffect(() => {
     if (!storageKey) return;
     try {
@@ -80,7 +80,7 @@ const RealizarEntregaPage: React.FC = () => {
     }
   }, [storageKey]);
 
-  // ── Guardar borrador en localStorage cuando cambie ──
+  // â”€â”€ Guardar borrador en localStorage cuando cambie â”€â”€
   const guardarBorrador = useCallback(() => {
     if (!storageKey || !id) return;
     const borrador: BorradorMeta = {
@@ -112,6 +112,33 @@ const RealizarEntregaPage: React.FC = () => {
     }
   };
 
+  const requiereZipEstructurado = !!entregable && (
+    !!entregable.estructuraZip ||
+    (!!entregable.nombreZipEsperado && entregable.nombreZipEsperado.trim() !== '' && entregable.nombreZipEsperado.trim() !== '*')
+  );
+  const tipoEsperado = (entregable?.tipoArchivoEsperado || '').toUpperCase();
+  const esSoloTexto = tipoEsperado === 'SOLO_TEXTO';
+  const esEnlace = tipoEsperado === 'ENLACE';
+  const noPermiteArchivos = esSoloTexto || esEnlace;
+  const permiteSoloComentario = !entregable?.tipoArchivoEsperado
+    || tipoEsperado === 'OTRO'
+    || esSoloTexto
+    || esEnlace;
+  const etiquetaTipoEsperado = entregable?.tipoArchivoEsperado === 'SOLO_TEXTO'
+    ? 'SOLO TEXTO (sin archivos)'
+    : entregable?.tipoArchivoEsperado === 'ENLACE'
+      ? 'ENLACE (en comentario, sin archivos)'
+      : (entregable?.tipoArchivoEsperado || 'CUALQUIERA');
+  const puedeEnviar = noPermiteArchivos
+    ? comentario.trim().length > 0 && archivos.length === 0
+    : archivos.length > 0 || (comentario.trim().length > 0 && permiteSoloComentario);
+
+  useEffect(() => {
+    if (noPermiteArchivos && archivos.length > 0) {
+      setArchivos([]);
+    }
+  }, [noPermiteArchivos, archivos.length]);
+
   const cargarEntregable = async (entregableId: number) => {
     setLoading(true);
     setError(null);
@@ -126,7 +153,7 @@ const RealizarEntregaPage: React.FC = () => {
     }
   };
 
-  // ── Manejo de archivos ──
+  // â”€â”€ Manejo de archivos â”€â”€
   const fileToTemporal = (file: File): Promise<ArchivoTemporal> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -147,6 +174,15 @@ const RealizarEntregaPage: React.FC = () => {
 
   const validarArchivo = (file: File): string | null => {
     if (!entregable) return null;
+    const tipoEsperado = (entregable.tipoArchivoEsperado || '').toUpperCase();
+
+    if (requiereZipEstructurado && !file.name.toLowerCase().endsWith('.zip')) {
+      return `Este entregable requiere un único archivo ZIP. "${file.name}" no es un .zip`;
+    }
+
+    if (tipoEsperado === 'SOLO_TEXTO') {
+      return 'Este entregable es de solo texto: no se permiten archivos adjuntos.';
+    }
 
     // Validar tamaño
     if (entregable.tamanoMaximoBytes && file.size > entregable.tamanoMaximoBytes) {
@@ -154,23 +190,64 @@ const RealizarEntregaPage: React.FC = () => {
       return `El archivo "${file.name}" excede el tamaño máximo de ${maxMB} MB`;
     }
 
-    // Validar tipo
-    if (entregable.tipoArchivoEsperado) {
-      const ext = file.name.split('.').pop()?.toUpperCase();
-      const tipoEsperado = entregable.tipoArchivoEsperado.toUpperCase();
-      if (ext !== tipoEsperado) {
-        return `Se espera un archivo de tipo ${tipoEsperado}, pero se seleccionó ".${ext}"`;
-      }
+    if (!tipoEsperado || tipoEsperado === 'OTRO') {
+      return null;
+    }
+
+    const ext = file.name.split('.').pop()?.toUpperCase() || '';
+    const mime = file.type.toLowerCase();
+
+    const permitidasPorTipo: Record<string, string[]> = {
+      PDF: ['PDF'],
+      DOCX: ['DOC', 'DOCX'],
+      ZIP: ['ZIP'],
+      RAR: ['RAR', '7Z'],
+      TXT: ['TXT'],
+      IMAGEN: ['PNG', 'JPG', 'JPEG', 'GIF', 'WEBP', 'BMP', 'SVG'],
+      VIDEO: ['MP4', 'AVI', 'MOV', 'MKV', 'WEBM'],
+      ENLACE: []
+    };
+
+    if (tipoEsperado === 'IMAGEN' && !mime.startsWith('image/')) {
+      return `Se espera una imagen, pero "${file.name}" no parece un archivo de imagen.`;
+    }
+
+    if (tipoEsperado === 'VIDEO' && !mime.startsWith('video/')) {
+      return `Se espera un video, pero "${file.name}" no parece un archivo de video.`;
+    }
+
+    if (tipoEsperado === 'ENLACE') {
+      return 'Este entregable espera texto/enlace en el comentario, no archivos adjuntos.';
+    }
+
+    const extensiones = permitidasPorTipo[tipoEsperado];
+    if (extensiones && extensiones.length > 0 && !extensiones.includes(ext)) {
+      return `Se espera un archivo de tipo ${tipoEsperado}, pero se seleccionó ".${ext || 'sin extensión'}"`;
     }
 
     return null;
   };
 
   const agregarArchivos = async (files: FileList | File[]) => {
+    const archivosEntrantes = Array.from(files);
+    if (noPermiteArchivos) {
+      setErrorEnvio(
+        esSoloTexto
+          ? 'Este entregable es de solo texto: escribe el contenido en el comentario.'
+          : 'Este entregable es de tipo ENLACE: pega el enlace en el comentario.'
+      );
+      return;
+    }
+
+    if (requiereZipEstructurado && (archivos.length + archivosEntrantes.length > 1)) {
+      setErrorEnvio('Este entregable solo permite adjuntar un único archivo ZIP');
+      return;
+    }
+
     const nuevosArchivos: ArchivoTemporal[] = [];
     const errores: string[] = [];
 
-    for (const file of Array.from(files)) {
+    for (const file of archivosEntrantes) {
       const errorValidacion = validarArchivo(file);
       if (errorValidacion) {
         errores.push(errorValidacion);
@@ -200,7 +277,7 @@ const RealizarEntregaPage: React.FC = () => {
     }
   };
 
-  // ── Drag & Drop handlers ──
+  // â”€â”€ Drag & Drop handlers â”€â”€
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -230,7 +307,7 @@ const RealizarEntregaPage: React.FC = () => {
     }
   };
 
-  // ── Preview ──
+  // â”€â”€ Preview â”€â”€
   const puedePrevisualizar = (archivo: ArchivoTemporal): boolean => {
     const tipo = archivo.tipo.toLowerCase();
     const ext = archivo.nombre.split('.').pop()?.toLowerCase() || '';
@@ -249,14 +326,14 @@ const RealizarEntregaPage: React.FC = () => {
     const ext = archivo.nombre.split('.').pop()?.toLowerCase() || '';
     const tipo = archivo.tipo.toLowerCase();
 
-    if (tipo === 'application/pdf' || ext === 'pdf') return '📄';
-    if (tipo.startsWith('image/')) return '🖼️';
-    if (ext === 'doc' || ext === 'docx' || tipo.includes('word')) return '📝';
-    if (ext === 'zip' || ext === 'rar' || ext === '7z') return '📦';
-    if (ext === 'txt') return '📃';
-    if (ext === 'xls' || ext === 'xlsx') return '📊';
-    if (ext === 'ppt' || ext === 'pptx') return '📽️';
-    return '📎';
+    if (tipo === 'application/pdf' || ext === 'pdf') return 'ðŸ“„';
+    if (tipo.startsWith('image/')) return 'ðŸ–¼ï¸';
+    if (ext === 'doc' || ext === 'docx' || tipo.includes('word')) return 'ðŸ“';
+    if (ext === 'zip' || ext === 'rar' || ext === '7z') return 'ðŸ“¦';
+    if (ext === 'txt') return 'ðŸ“ƒ';
+    if (ext === 'xls' || ext === 'xlsx') return 'ðŸ“Š';
+    if (ext === 'ppt' || ext === 'pptx') return 'ðŸ“½ï¸';
+    return 'ðŸ“Ž';
   };
 
   const renderPreview = (archivo: ArchivoTemporal) => {
@@ -324,7 +401,7 @@ const RealizarEntregaPage: React.FC = () => {
             </button>
           </div>
           <div className="re-preview-doc">
-            <div className="re-preview-doc-icon">📝</div>
+            <div className="re-preview-doc-icon">ðŸ“</div>
             <p className="re-preview-doc-name">{archivo.nombre}</p>
             <p className="re-preview-doc-info">
               Los archivos Word se pueden previsualizar una vez subidos a OneDrive.
@@ -344,17 +421,37 @@ const RealizarEntregaPage: React.FC = () => {
     return null;
   };
 
-  // ── Enviar entrega ──
+  // â”€â”€ Enviar entrega â”€â”€
   const handleEnviar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id || !usuario?.id) return;
 
-    // Validar que al menos haya archivos O comentario
+    // Validar combinaciones permitidas según el tipo de entregable
     const tieneArchivos = archivos.length > 0;
     const tieneComentario = comentario.trim().length > 0;
 
-    if (!tieneArchivos && !tieneComentario) {
+    if (noPermiteArchivos) {
+      if (tieneArchivos) {
+        setErrorEnvio(
+          esSoloTexto
+            ? 'Este entregable es de solo texto: no puedes adjuntar archivos.'
+            : 'Este entregable es de tipo ENLACE: no puedes adjuntar archivos.'
+        );
+        return;
+      }
+      if (!tieneComentario) {
+        setErrorEnvio(
+          esSoloTexto
+            ? 'Este entregable es de solo texto: debes escribir un comentario.'
+            : 'Este entregable es de tipo ENLACE: debes pegar el enlace en el comentario.'
+        );
+        return;
+      }
+    } else if (!tieneArchivos && !tieneComentario) {
       setErrorEnvio('Debes adjuntar al menos un archivo o escribir un comentario');
+      return;
+    } else if (!tieneArchivos && tieneComentario && !permiteSoloComentario) {
+      setErrorEnvio('Para este tipo de entregable debes adjuntar al menos un archivo. El comentario no sustituye al archivo.');
       return;
     }
 
@@ -434,7 +531,7 @@ const RealizarEntregaPage: React.FC = () => {
     setBorradorCargado(false);
   };
 
-  // ── Utilidades de formato ──
+  // â”€â”€ Utilidades de formato â”€â”€
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -452,7 +549,7 @@ const RealizarEntregaPage: React.FC = () => {
     });
   };
 
-  // ── Render ──
+  // â”€â”€ Render â”€â”€
   if (loading) {
     return (
       <div className="loading-container">
@@ -513,7 +610,7 @@ const RealizarEntregaPage: React.FC = () => {
         {entregable.tipoArchivoEsperado && (
           <div className="re-info-item">
             <span className="re-info-label">Tipo esperado</span>
-            <span className="re-info-value">{entregable.tipoArchivoEsperado}</span>
+            <span className="re-info-value">{etiquetaTipoEsperado}</span>
           </div>
         )}
         {entregable.tamanoMaximoBytes && (
@@ -539,7 +636,7 @@ const RealizarEntregaPage: React.FC = () => {
         return (
           <div className="re-zip-structure">
             <div className="re-zip-structure-header">
-              <span>📦 Estructura esperada del ZIP</span>
+              <span>ðŸ“¦ Estructura esperada del ZIP</span>
               <span className={`re-zip-mode-badge ${entregable.validacionZipEstricta ? 'estricta' : 'minima'}`}>
                 {entregable.validacionZipEstricta ? 'Estructura exacta' : 'Mínimo requerido'}
               </span>
@@ -587,37 +684,51 @@ const RealizarEntregaPage: React.FC = () => {
         )}
 
         {/* Zona de subida de archivos */}
-        <div className="re-field">
-          <label>Archivos</label>
-          <div
-            className={`re-dropzone ${dragOver ? 'drag-over' : ''} ${archivos.length > 0 ? 'has-files' : ''}`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              onChange={handleFileSelect}
-              className="re-file-input"
-              disabled={enviando}
-            />
-            <div className="re-dropzone-content">
-              <span className="re-dropzone-icon">📁</span>
-              <p className="re-dropzone-text">
-                Arrastra archivos aquí o <span className="re-dropzone-link">haz clic para seleccionar</span>
-              </p>
-              {entregable.tipoArchivoEsperado && (
-                <p className="re-dropzone-hint">Tipo esperado: {entregable.tipoArchivoEsperado}</p>
-              )}
-              {entregable.tamanoMaximoBytes && (
-                <p className="re-dropzone-hint">Tamaño máximo: {formatFileSize(entregable.tamanoMaximoBytes)}</p>
-              )}
+        {!noPermiteArchivos ? (
+          <div className="re-field">
+            <label>Archivos</label>
+            <div
+              className={`re-dropzone ${dragOver ? 'drag-over' : ''} ${archivos.length > 0 ? 'has-files' : ''}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple={!requiereZipEstructurado}
+                onChange={handleFileSelect}
+                className="re-file-input"
+                disabled={enviando}
+              />
+              <div className="re-dropzone-content">
+                <span className="re-dropzone-icon">ðŸ“</span>
+                <p className="re-dropzone-text">
+                  Arrastra archivos aquí o <span className="re-dropzone-link">haz clic para seleccionar</span>
+                </p>
+                {entregable.tipoArchivoEsperado && (
+                  <p className="re-dropzone-hint">Tipo esperado: {etiquetaTipoEsperado}</p>
+                )}
+                {entregable.tamanoMaximoBytes && (
+                  <p className="re-dropzone-hint">Tamaño máximo: {formatFileSize(entregable.tamanoMaximoBytes)}</p>
+                )}
+                {requiereZipEstructurado && (
+                  <p className="re-dropzone-hint">Este entregable acepta solo 1 archivo ZIP</p>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="re-field">
+            <label>Archivos</label>
+            <p className="re-hint">
+              {esSoloTexto
+                ? <>Este entregable es de <strong>solo texto</strong>. Escribe tu entrega en el comentario.</>
+                : <>Este entregable es de tipo <strong>enlace</strong>. Pega el enlace en el comentario.</>}
+            </p>
+          </div>
+        )}
 
         {/* Lista de archivos */}
         {archivos.length > 0 && (
@@ -643,7 +754,7 @@ const RealizarEntregaPage: React.FC = () => {
                         onClick={() => setArchivoPreview(archivo)}
                         title="Previsualizar"
                       >
-                        👁️
+                        ðŸ‘ï¸
                       </button>
                     )}
                     <a
@@ -653,7 +764,7 @@ const RealizarEntregaPage: React.FC = () => {
                       title="Descargar"
                       onClick={e => e.stopPropagation()}
                     >
-                      ⬇️
+                      ⬇️
                     </a>
                     <button
                       type="button"
@@ -662,7 +773,7 @@ const RealizarEntregaPage: React.FC = () => {
                       disabled={enviando}
                       title="Eliminar"
                     >
-                      🗑️
+                      ðŸ—‘ï¸
                     </button>
                   </div>
                 </li>
@@ -673,7 +784,9 @@ const RealizarEntregaPage: React.FC = () => {
 
         {/* Comentario/Observaciones */}
         <div className="re-field">
-          <label htmlFor="comentario">Comentario / Observaciones (opcional)</label>
+          <label htmlFor="comentario">
+            Comentario / Observaciones {noPermiteArchivos ? '(obligatorio)' : '(opcional)'}
+          </label>
           <textarea
             id="comentario"
             value={comentario}
@@ -688,7 +801,13 @@ const RealizarEntregaPage: React.FC = () => {
         </div>
 
         <p className="re-hint">
-          Debes adjuntar al menos un archivo <strong>o</strong> escribir un comentario.
+          {esSoloTexto
+            ? 'Este entregable solo admite texto en el comentario.'
+            : esEnlace
+              ? 'Este entregable espera un enlace en el comentario.'
+            : permiteSoloComentario
+              ? 'Puedes entregar con archivos, con comentario o con ambos.'
+              : 'Para este tipo de entregable debes adjuntar al menos un archivo. El comentario es adicional.'}
         </p>
 
         {/* Acciones */}
@@ -708,7 +827,7 @@ const RealizarEntregaPage: React.FC = () => {
             <button
               type="submit"
               className="btn-primary"
-              disabled={enviando || (archivos.length === 0 && !comentario.trim())}
+              disabled={enviando || !puedeEnviar}
             >
               {enviando ? 'Enviando...' : 'Enviar entrega'}
             </button>
@@ -728,7 +847,7 @@ const RealizarEntregaPage: React.FC = () => {
   );
 };
 
-// ── Componente read-only para mostrar la estructura esperada al estudiante ──
+// â”€â”€ Componente read-only para mostrar la estructura esperada al estudiante â”€â”€
 const EstructuraZipReadonly: React.FC<{ nodos: NodoEstructuraZip[]; nivel: number }> = ({ nodos, nivel }) => (
   <div className="re-zip-nodo-list">
     {nodos.map(nodo => {
@@ -744,7 +863,7 @@ const EstructuraZipReadonly: React.FC<{ nodos: NodoEstructuraZip[]; nivel: numbe
 
       return (
         <div key={nodo.id} className="re-zip-nodo" style={{ paddingLeft: nivel * 18 }}>
-          <span className="re-zip-nodo-icon">{esCarpeta ? '📁' : '📄'}</span>
+          <span className="re-zip-nodo-icon">{esCarpeta ? 'ðŸ“' : 'ðŸ“„'}</span>
           <span className="re-zip-nodo-name">
             {esWild ? <em>*</em> : nodo.nombre}
             {!esCarpeta && <span className="re-zip-nodo-ext">{extDisplay}</span>}
@@ -760,3 +879,5 @@ const EstructuraZipReadonly: React.FC<{ nodos: NodoEstructuraZip[]; nivel: numbe
 );
 
 export default RealizarEntregaPage;
+
+

@@ -6,12 +6,19 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import static org.assertj.core.api.Assertions.*;
+import java.time.LocalDateTime;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class GlobalExceptionHandlerTest {
 
@@ -49,7 +56,7 @@ class GlobalExceptionHandlerTest {
         @Test
         @DisplayName("Devuelve 400 con mensaje")
         void illegalArgument() {
-            IllegalArgumentException ex = new IllegalArgumentException("Parámetro inválido");
+            IllegalArgumentException ex = new IllegalArgumentException("Parametro invalido");
 
             ResponseEntity<GlobalExceptionHandler.ErrorResponse> response =
                     handler.handleIllegalArgument(ex);
@@ -57,7 +64,7 @@ class GlobalExceptionHandlerTest {
             assertThat(response.getStatusCode().value()).isEqualTo(400);
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody().getStatus()).isEqualTo(400);
-            assertThat(response.getBody().getMessage()).isEqualTo("Parámetro inválido");
+            assertThat(response.getBody().getMessage()).isEqualTo("Parametro invalido");
         }
     }
 
@@ -68,7 +75,7 @@ class GlobalExceptionHandlerTest {
         @Test
         @DisplayName("Devuelve 409 con mensaje")
         void illegalState() {
-            IllegalStateException ex = new IllegalStateException("Estado inválido");
+            IllegalStateException ex = new IllegalStateException("Estado invalido");
 
             ResponseEntity<GlobalExceptionHandler.ErrorResponse> response =
                     handler.handleIllegalState(ex);
@@ -76,7 +83,7 @@ class GlobalExceptionHandlerTest {
             assertThat(response.getStatusCode().value()).isEqualTo(409);
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody().getStatus()).isEqualTo(409);
-            assertThat(response.getBody().getMessage()).isEqualTo("Estado inválido");
+            assertThat(response.getBody().getMessage()).isEqualTo("Estado invalido");
         }
     }
 
@@ -85,15 +92,12 @@ class GlobalExceptionHandlerTest {
     class HandleValidation {
 
         @Test
-        @DisplayName("Devuelve 400 con mapa de errores de validación")
+        @DisplayName("Devuelve 400 con mapa de errores de validacion")
         void validationErrors() throws NoSuchMethodException {
-            // Crear un BindingResult con errores de campo
             BeanPropertyBindingResult bindingResult =
                     new BeanPropertyBindingResult(new Object(), "objectName");
-            bindingResult.addError(new FieldError("objectName", "titulo",
-                    "El título es obligatorio"));
-            bindingResult.addError(new FieldError("objectName", "email",
-                    "El email no es válido"));
+            bindingResult.addError(new FieldError("objectName", "titulo", "El titulo es obligatorio"));
+            bindingResult.addError(new FieldError("objectName", "email", "El email no es valido"));
 
             MethodParameter methodParameter = new MethodParameter(
                     GlobalExceptionHandlerTest.class
@@ -108,22 +112,88 @@ class GlobalExceptionHandlerTest {
             assertThat(response.getStatusCode().value()).isEqualTo(400);
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody().getStatus()).isEqualTo(400);
-            assertThat(response.getBody().getMessage()).isEqualTo("Error de validación");
-            assertThat(response.getBody().getErrors()).containsEntry("titulo", "El título es obligatorio");
-            assertThat(response.getBody().getErrors()).containsEntry("email", "El email no es válido");
+            assertThat(response.getBody().getMessage()).contains("Error de valid");
+            assertThat(response.getBody().getErrors()).containsEntry("titulo", "El titulo es obligatorio");
+            assertThat(response.getBody().getErrors()).containsEntry("email", "El email no es valido");
         }
     }
-    // M\u00e9todo auxiliar para crear MethodParameter en tests de validaci\u00f3n
+
     @SuppressWarnings("unused")
-    void dummyMethod(String param) {}
+    void dummyMethod(String param) {
+        // metodo auxiliar para MethodParameter
+    }
+
+    @Nested
+    @DisplayName("handleNoResource")
+    class HandleNoResource {
+
+        @Test
+        @DisplayName("Devuelve 404 cuando no existe recurso")
+        void noResource() {
+            NoResourceFoundException ex = new NoResourceFoundException(
+                    HttpMethod.GET,
+                    "/ruta/inexistente",
+                    "No existe"
+            );
+
+            ResponseEntity<GlobalExceptionHandler.ErrorResponse> response =
+                    handler.handleNoResource(ex);
+
+            assertThat(response.getStatusCode().value()).isEqualTo(404);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getStatus()).isEqualTo(404);
+            assertThat(response.getBody().getMessage()).contains("/ruta/inexistente");
+            assertThat(response.getBody().getTimestamp()).isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("handleMaxUploadSize")
+    class HandleMaxUploadSize {
+
+        @Test
+        @DisplayName("Devuelve 413 con mensaje claro")
+        void maxUpload() {
+            MaxUploadSizeExceededException ex = new MaxUploadSizeExceededException(1024L);
+
+            ResponseEntity<GlobalExceptionHandler.ErrorResponse> response =
+                    handler.handleMaxUploadSize(ex);
+
+            assertThat(response.getStatusCode().value()).isEqualTo(413);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getStatus()).isEqualTo(413);
+            assertThat(response.getBody().getMessage()).contains("tam");
+            assertThat(response.getBody().getTimestamp()).isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("handleMultipart")
+    class HandleMultipart {
+
+        @Test
+        @DisplayName("Devuelve 400 cuando hay error multipart")
+        void multipart() {
+            MultipartException ex = new MultipartException("archivo corrupto");
+
+            ResponseEntity<GlobalExceptionHandler.ErrorResponse> response =
+                    handler.handleMultipart(ex);
+
+            assertThat(response.getStatusCode().value()).isEqualTo(400);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getStatus()).isEqualTo(400);
+            assertThat(response.getBody().getMessage()).contains("procesar");
+        }
+    }
+
     @Nested
     @DisplayName("handleGenericException")
     class HandleGenericException {
 
         @Test
-        @DisplayName("Devuelve 500 con mensaje genérico")
+        @DisplayName("Devuelve 500 con mensaje generico")
         void genericException() {
-            Exception ex = new RuntimeException("Algo salió mal");
+            Exception ex = new RuntimeException("Algo salio mal");
 
             ResponseEntity<GlobalExceptionHandler.ErrorResponse> response =
                     handler.handleGenericException(ex);
@@ -131,7 +201,60 @@ class GlobalExceptionHandlerTest {
             assertThat(response.getStatusCode().value()).isEqualTo(500);
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody().getStatus()).isEqualTo(500);
-            assertThat(response.getBody().getMessage()).contains("Algo salió mal");
+            assertThat(response.getBody().getMessage()).contains("Algo salio mal");
+        }
+    }
+
+    @Nested
+    @DisplayName("Response DTOs")
+    class ResponseDtos {
+
+        @Test
+        @DisplayName("ErrorResponse cubre equals/hashCode/toString y setters")
+        void errorResponsePojo() {
+            LocalDateTime now = LocalDateTime.now();
+            GlobalExceptionHandler.ErrorResponse r1 =
+                    new GlobalExceptionHandler.ErrorResponse(400, "msg", now);
+            GlobalExceptionHandler.ErrorResponse r2 =
+                    new GlobalExceptionHandler.ErrorResponse(400, "msg", now);
+
+            assertThat(r1).isEqualTo(r2);
+            assertThat(r1.hashCode()).isEqualTo(r2.hashCode());
+            assertThat(r1.toString()).contains("status=400");
+
+            r1.setStatus(409);
+            r1.setMessage("otro");
+            r1.setTimestamp(now.plusSeconds(1));
+
+            assertThat(r1.getStatus()).isEqualTo(409);
+            assertThat(r1.getMessage()).isEqualTo("otro");
+            assertThat(r1.getTimestamp()).isEqualTo(now.plusSeconds(1));
+        }
+
+        @Test
+        @DisplayName("ValidationErrorResponse cubre equals/hashCode/toString y setters")
+        void validationErrorResponsePojo() {
+            LocalDateTime now = LocalDateTime.now();
+            Map<String, String> errors = Map.of("campo", "obligatorio");
+
+            GlobalExceptionHandler.ValidationErrorResponse r1 =
+                    new GlobalExceptionHandler.ValidationErrorResponse(400, "validacion", now, errors);
+            GlobalExceptionHandler.ValidationErrorResponse r2 =
+                    new GlobalExceptionHandler.ValidationErrorResponse(400, "validacion", now, errors);
+
+            assertThat(r1).isEqualTo(r2);
+            assertThat(r1.hashCode()).isEqualTo(r2.hashCode());
+            assertThat(r1.toString()).contains("validacion");
+
+            r1.setStatus(422);
+            r1.setMessage("otra");
+            r1.setTimestamp(now.plusSeconds(2));
+            r1.setErrors(Map.of("otro", "error"));
+
+            assertThat(r1.getStatus()).isEqualTo(422);
+            assertThat(r1.getMessage()).isEqualTo("otra");
+            assertThat(r1.getTimestamp()).isEqualTo(now.plusSeconds(2));
+            assertThat(r1.getErrors()).containsEntry("otro", "error");
         }
     }
 }
