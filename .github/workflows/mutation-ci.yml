@@ -32,7 +32,7 @@ jobs:
         run: ./mvnw -Pmutation test-compile org.pitest:pitest-maven:mutationCoverage --batch-mode --no-transfer-progress
 
       - name: Subir reporte PIT
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: pit-report
@@ -63,7 +63,7 @@ jobs:
         run: npm run test:mutation
 
       - name: Subir reporte Stryker
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: stryker-report
