@@ -186,6 +186,10 @@ const EditarEntregablePage: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleSelectOneDriveFolder = (path: string) => {
+    setFormData(prev => ({ ...prev, carpetaOneDrive: path }));
+  };
+
   const handleGuardar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
@@ -446,7 +450,7 @@ const EditarEntregablePage: React.FC = () => {
                   <OneDriveFolderBrowser
                     usuarioId={usuario.id}
                     selectedPath={formData.carpetaOneDrive || ''}
-                    onSelectFolder={(path) => handleChange({ target: { name: 'carpetaOneDrive', value: path } } as any)}
+                    onSelectFolder={handleSelectOneDriveFolder}
                   />
                 )}
                 <p className="ee-help-text">
@@ -527,7 +531,7 @@ const EditarEntregablePage: React.FC = () => {
             </p>
             {entregable.numeroEntregas > 0 && (
               <p className="ee-modal-warning">
-                âš  Este entregable tiene {entregable.numeroEntregas} entrega{entregable.numeroEntregas !== 1 ? 's' : ''} asociada{entregable.numeroEntregas !== 1 ? 's' : ''}.
+                Aviso: este entregable tiene {entregable.numeroEntregas} entrega{entregable.numeroEntregas !== 1 ? 's' : ''} asociada{entregable.numeroEntregas !== 1 ? 's' : ''}.
               </p>
             )}
             <div className="ee-modal-actions">

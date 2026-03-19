@@ -1466,7 +1466,7 @@ class EntregaServiceTest {
             method.setAccessible(true);
 
                 InvocationTargetException ex = (InvocationTargetException) catchThrowable(
-                    () -> method.invoke(entregaService, archivo, entrega, "doc.txt", "..\\..\\evil.txt"));
+                    () -> method.invoke(entregaService, archivo, entrega, "doc.txt", "../../evil.txt"));
 
                 assertThat(ex).isNotNull();
                 assertThat(ex.getCause())

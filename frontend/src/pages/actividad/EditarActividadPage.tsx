@@ -154,6 +154,10 @@ const EditarActividadPage: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleSelectOneDriveFolder = (path: string) => {
+    setFormData(prev => ({ ...prev, carpetaOneDrive: path }));
+  };
+
   const toggleGrupo = (grupoId: number) => {
     setFormData(prev => {
       const current = prev.grupoIds || [];
@@ -164,8 +168,7 @@ const EditarActividadPage: React.FC = () => {
     });
   };
 
-  const handleGuardar = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const guardarActividad = async () => {
     if (!id) return;
 
     // Detectar si cambió la carpeta OneDrive
@@ -207,12 +210,17 @@ const EditarActividadPage: React.FC = () => {
     }
   };
 
+  const handleGuardar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await guardarActividad();
+  };
+
   const confirmarCambioCarpeta = () => {
     if (confirmacionDoble) {
       setMostrarConfirmarCambioCarpeta(false);
       setConfirmacionDoble(false);
       // Proceder con el guardado
-      handleGuardar(new Event('submit') as any);
+      void guardarActividad();
     } else {
       setConfirmacionDoble(true);
     }
@@ -481,7 +489,7 @@ const EditarActividadPage: React.FC = () => {
                           <OneDriveFolderBrowser
                             usuarioId={usuario.id}
                             selectedPath={formData.carpetaOneDrive || ''}
-                            onSelectFolder={(path) => handleChange({ target: { name: 'carpetaOneDrive', value: path } } as any)}
+                            onSelectFolder={handleSelectOneDriveFolder}
                           />
                         )}
                         <p style={{fontSize: '0.85rem', color: '#64748b', marginTop: '10px'}}>

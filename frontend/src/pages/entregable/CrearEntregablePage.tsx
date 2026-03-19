@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CrearEntregableDTO, Visibilidad, TipoMaterial, ActividadDTO, NodoEstructuraZip, ModoOneDrive } from '../../types';
 import { entregableService, actividadService, oneDriveService } from '../../services';
@@ -46,19 +46,7 @@ const CrearEntregablePage: React.FC = () => {
   const [validacionZipEstricta, setValidacionZipEstricta] = useState(false);
   const [nombreZipEsperado, setNombreZipEsperado] = useState('');
 
-  useEffect(() => {
-    if (actividadId) {
-      cargarActividad(parseInt(actividadId));
-    }
-  }, [actividadId]);
-
-  useEffect(() => {
-    if (!loadingActividad && !esProfesor) {
-      navigate(-1);
-    }
-  }, [loadingActividad, esProfesor, navigate]);
-
-  const cargarActividad = async (id: number) => {
+  const cargarActividad = useCallback(async (id: number) => {
     setLoadingActividad(true);
     setError(null);
     try {
@@ -82,7 +70,19 @@ const CrearEntregablePage: React.FC = () => {
     } finally {
       setLoadingActividad(false);
     }
-  };
+  }, [usuario]);
+
+  useEffect(() => {
+    if (actividadId) {
+      cargarActividad(parseInt(actividadId));
+    }
+  }, [actividadId, cargarActividad]);
+
+  useEffect(() => {
+    if (!loadingActividad && !esProfesor) {
+      navigate(-1);
+    }
+  }, [loadingActividad, esProfesor, navigate]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -132,6 +132,10 @@ const CrearEntregablePage: React.FC = () => {
     }
 
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectOneDriveFolder = (path: string) => {
+    setFormData(prev => ({ ...prev, carpetaOneDrive: path }));
   };
 
   const handleCrear = async (e: React.FormEvent) => {
@@ -370,7 +374,7 @@ const CrearEntregablePage: React.FC = () => {
                   <OneDriveFolderBrowser
                     usuarioId={usuario.id}
                     selectedPath={formData.carpetaOneDrive || ''}
-                    onSelectFolder={(path) => handleChange({ target: { name: 'carpetaOneDrive', value: path } } as any)}
+                    onSelectFolder={handleSelectOneDriveFolder}
                   />
                 )}
                 <p className="ce-help-text">
@@ -434,3 +438,5 @@ const CrearEntregablePage: React.FC = () => {
 };
 
 export default CrearEntregablePage;
+
+
