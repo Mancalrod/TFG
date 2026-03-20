@@ -159,6 +159,52 @@ class EntregaServiceTest {
                     .hasMessageContaining("no permite reenvío");
         }
 
+                @Test
+                @DisplayName("Permite primera entrega aunque no se permita reenvio")
+                void realizar_primeraEntregaConReenvioDeshabilitado() {
+                    entregable.setPermiteReenvio(false);
+
+                    when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+                    when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(Optional.of(estudiante));
+                    when(entregaRepository.findByEntregableIdAndEstudianteId(1L, 1L)).thenReturn(List.of());
+                    when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
+                    when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
+                    when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
+
+                    assertThatNoException()
+                        .isThrownBy(() -> entregaService.realizarEntrega(1L, 1L, null, "Comentario inicial", null));
+
+                    verify(entregaRepository).save(argThat(e -> e.getVersion() == 1));
+                    verify(entregaRepository, never()).saveAll(anyList());
+                }
+
+                @Test
+                @DisplayName("Genera version y nombre por defecto en reenvio")
+                void realizar_reenvioGeneraVersionYNombre() {
+                    Entrega entregaAnterior = Entrega.builder()
+                        .id(20L)
+                        .version(2)
+                        .esVersionActiva(true)
+                        .entregable(entregable)
+                        .estudiante(estudiante)
+                        .build();
+
+                    when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
+                    when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(Optional.of(estudiante));
+                    when(entregaRepository.findByEntregableIdAndEstudianteId(1L, 1L)).thenReturn(List.of(entregaAnterior));
+                    when(entregaRepository.save(any(Entrega.class))).thenReturn(entrega);
+                    when(entregaRepository.findById(1L)).thenReturn(Optional.of(entrega));
+                    when(mapper.toDTO(any(Entrega.class))).thenReturn(entregaDTO);
+
+                    entregaService.realizarEntrega(1L, 1L, "   ", "Comentario con reenvio", null);
+
+                    verify(entregaRepository).save(argThat(e ->
+                        e.getVersion() == 3
+                            && e.getNombre().contains("Entregable 1")
+                            && e.getNombre().endsWith("v3")
+                    ));
+                }
+
         @Test
         @DisplayName("Lanza excepción si entregable no existe")
         void realizar_entregableNoExiste() {

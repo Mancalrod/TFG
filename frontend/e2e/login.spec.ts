@@ -48,3 +48,22 @@ test('login exitoso redirige al dashboard y muestra usuario', async ({ page }) =
   await expect(page.getByText('Profesor Demo')).toBeVisible();
 });
 
+test('login fallido muestra mensaje de credenciales incorrectas', async ({ page }) => {
+  await page.route('**/api/auth/login', async (route) => {
+    await route.fulfill({
+      status: 401,
+      contentType: 'application/json',
+      body: JSON.stringify({ message: 'Unauthorized' }),
+    });
+  });
+
+  await page.goto('/login');
+
+  await page.getByLabel('Correo electrónico').fill('profesor@demo.com');
+  await page.getByLabel('Contraseña').fill('incorrecta');
+  await page.getByRole('button', { name: 'Entrar' }).click();
+
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByText('Correo electrónico o contraseña incorrectos')).toBeVisible();
+});
+

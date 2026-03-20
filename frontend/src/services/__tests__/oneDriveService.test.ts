@@ -83,6 +83,51 @@ describe('oneDriveService', () => {
     await expect(promise).resolves.toBe(false);
   });
 
+  it('connectOneDrive ignora mensaje sin tipo esperado y termina en false al cerrar', async () => {
+    vi.useFakeTimers();
+    mockGet.mockResolvedValue({ data: { authUrl: 'https://microsoft.example/auth' } });
+
+    const popupState = { closed: false };
+    const popup = {
+      get closed() {
+        return popupState.closed;
+      },
+    } as Window;
+    vi.spyOn(globalThis, 'open').mockReturnValue(popup);
+
+    const promise = oneDriveService.connectOneDrive(12);
+    await vi.waitFor(() => expect(globalThis.open).toHaveBeenCalled());
+
+    globalThis.dispatchEvent(
+      new MessageEvent('message', {
+        data: { type: 'otro-evento', success: true },
+      })
+    );
+
+    popupState.closed = true;
+    await vi.advanceTimersByTimeAsync(1600);
+
+    await expect(promise).resolves.toBe(false);
+  });
+
+  it('connectOneDrive devuelve false cuando llega mensaje onedrive-auth sin success true', async () => {
+    mockGet.mockResolvedValue({ data: { authUrl: 'https://microsoft.example/auth' } });
+
+    const popup = { closed: false } as Window;
+    vi.spyOn(globalThis, 'open').mockReturnValue(popup);
+
+    const promise = oneDriveService.connectOneDrive(6);
+    await vi.waitFor(() => expect(globalThis.open).toHaveBeenCalled());
+
+    globalThis.dispatchEvent(
+      new MessageEvent('message', {
+        data: { type: 'onedrive-auth', success: false },
+      })
+    );
+
+    await expect(promise).resolves.toBe(false);
+  });
+
   it('disconnectOneDrive usa endpoint esperado', async () => {
     mockPost.mockResolvedValue({});
     await oneDriveService.disconnectOneDrive(11);

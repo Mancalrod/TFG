@@ -87,37 +87,59 @@ Salida:
 - `mutation-ci.yml` ejecuta PIT en backend y Stryker en frontend, y sube artifacts de ambos reportes.
 - La configuracion de Stryker se ajusto para mutar codigo de produccion y excluir tests (`__tests__`, `*.test.*`, `*.spec.*`).
 
-## 5. Resultados verificados (2026-03-19)
+## 5. Resultados verificados (2026-03-20)
 
 ### Frontend E2E
 
 - Comando: `npm run test:e2e`
-- Resultado: `2 passed (5.9s)`
+- Resultado: `3 passed (12.1s)`
 - Specs ejecutadas:
 	- `frontend/e2e/login.spec.ts`
 	- `frontend/e2e/evaluaciones.spec.ts`
+	- Nuevo escenario: login fallido con mensaje de credenciales incorrectas
 
 ### Frontend mutacion (Stryker)
 
 - Comando: `npm run test:mutation`
-- Resultado global: `64.26%`
+- Resultado global: `95.42%`
 - Umbral `break`: `50` (en verde)
 - Detalle principal:
-	- `services`: `51.63%`
+	- `services`: `96.17%`
 	- `utils/zipStructureParser.ts`: `93.67%`
 
 ### Frontend coverage (unitarias)
 
-- Ultimo reporte disponible en `frontend/coverage/index.html`:
-	- Statements: `11.85%`
-	- Branches: `9.03%`
-	- Functions: `12.25%`
-	- Lines: `12.35%`
+- Comando: `npm run test:coverage`
+- Ultimo reporte en `frontend/coverage/index.html`:
+	- Statements: `98.66%`
+	- Branches: `86.25%`
+	- Functions: `98.44%`
+	- Lines: `98.63%`
+	- Umbrales configurados en Vitest:
+		- Statements: `95%`
+		- Functions: `95%`
+		- Lines: `95%`
+		- Branches: `85%`
+	- Cobertura destacada por modulo:
+		- `src/services`: `99.50%` statements
+		- `src/utils/zipStructureParser.ts`: `100%` statements
+		- `src/context`: `98.30%` statements
+		- `src/pages/login/LoginPage.tsx`: `97.14%` statements
+		- `src/components/Navbar.tsx`: `100%` statements
 
 ### Backend
 
-- En esta revision no se relanzo `mvnw verify` ni PIT manualmente.
-- Se mantiene la estrategia y rutas de reporte documentadas en este archivo.
+- Comandos ejecutados:
+	- `./mvnw -Dtest=EntregaServiceTest test`
+	- `./mvnw -Pmutation test-compile org.pitest:pitest-maven:mutationCoverage`
+- Resultado PIT global:
+	- Mutations generated: `1225`
+	- Mutations killed: `915`
+	- Mutation score: `75%`
+	- Line coverage (clases mutadas): `99%`
+	- Test strength: `76%`
+- Resultado tests objetivo:
+	- `EntregaServiceTest`: `87 tests`, `0 failures`, `0 errors`
 
 ## 6. Criterios recomendados de aceptacion
 
