@@ -38,4 +38,23 @@ class HealthControllerTest {
                 .andExpect(jsonPath("$.message").exists())
                 .andExpect(jsonPath("$.documentation").exists());
     }
+
+    @Test
+    @DisplayName("GET /api/health/liveness - Devuelve estado UP")
+    void liveness_ok() throws Exception {
+        mockMvc.perform(get("/api/health/liveness"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"))
+                .andExpect(jsonPath("$.type").value("LIVENESS"));
+    }
+
+    @Test
+    @DisplayName("GET /api/health/readiness - Incluye estado de BD")
+    void readiness_ok() throws Exception {
+        mockMvc.perform(get("/api/health/readiness"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"))
+                .andExpect(jsonPath("$.type").value("READINESS"))
+                .andExpect(jsonPath("$.database").value("UP"));
+    }
 }

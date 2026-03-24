@@ -12,7 +12,7 @@
 8. [Keep-Alive](#8-keep-alive)
 9. [Containerización con Docker](#9-containerización-con-docker)
 10. [Despliegue en Render](#10-despliegue-en-render)
-11. [Base de Datos en Producción — Neon PostgreSQL](#11-base-de-datos-en-producción--neon-postgresql)
+11. [Base de Datos en Producción — PostgreSQL Gestionado](#11-base-de-datos-en-producción--postgresql-gestionado)
 12. [Problemas Encontrados y Soluciones](#12-problemas-encontrados-y-soluciones)
 13. [Diagrama Completo del Pipeline](#13-diagrama-completo-del-pipeline)
 14. [Secrets y Variables de Entorno](#14-secrets-y-variables-de-entorno)
@@ -443,9 +443,13 @@ Se eligió desplegar el frontend como **Static Site** en lugar de como servicio 
 
 ---
 
-## 11. Base de Datos en Producción — Neon PostgreSQL
+## 11. Base de Datos en Producción — PostgreSQL Gestionado
 
-### 11.1 ¿Por qué Neon?
+### 11.1 Proveedor recomendado
+
+Se recomienda **Render Postgres** como primera opción para producción por simplicidad operativa (mismo proveedor que el backend) y menor riesgo de incidencias de cuota entre plataformas.
+
+Neon puede seguir usándose como alternativa, pero si se usa tier gratuito es importante vigilar límites de cómputo.
 
 1. **PostgreSQL serverless:** Se escala automáticamente
 2. **Tier gratuito permanente:** 512 MB de almacenamiento, sin límite de tiempo
@@ -457,7 +461,7 @@ Se eligió desplegar el frontend como **Static Site** en lugar de como servicio 
 | Perfil | Base de datos | Uso |
 |---|---|---|
 | **default** (sin perfil) | H2 en memoria | Desarrollo local |
-| **prod** | Neon PostgreSQL | Producción (Render) |
+| **prod** | PostgreSQL gestionado | Producción (Render) |
 
 **`application.properties`** (desarrollo):
 - H2 en memoria con `ddl-auto=create-drop`
@@ -473,11 +477,11 @@ Se eligió desplegar el frontend como **Static Site** en lugar de como servicio 
 
 El `DataSeeder.java` es un `CommandLineRunner` con `@Profile("!prod")` que crea datos de prueba automáticamente al arrancar la aplicación en perfiles no-productivos.
 
-**Para seedear Neon (producción):** Se ejecutó el backend local apuntando a Neon mediante variables de entorno:
+**Para seedear PostgreSQL de producción:** Se ejecutó el backend local apuntando al proveedor PostgreSQL mediante variables de entorno:
 ```
-SPRING_DATASOURCE_URL → URL de Neon
-SPRING_DATASOURCE_USERNAME → neondb_owner
-SPRING_DATASOURCE_PASSWORD → contraseña de Neon
+SPRING_DATASOURCE_URL → URL JDBC PostgreSQL
+SPRING_DATASOURCE_USERNAME → usuario PostgreSQL
+SPRING_DATASOURCE_PASSWORD → contraseña PostgreSQL
 ```
 
 El seeder tiene protección anti-duplicados: `if (usuarioRepository.count() > 0) return;`
@@ -612,6 +616,18 @@ El seeder tiene protección anti-duplicados: `if (usuarioRepository.count() > 0)
 
 ---
 
+### 12.13 Neon — Cuota gratuita de cómputo agotada
+
+**Problema:** El backend en Render fallaba al arrancar con error JDBC al abrir conexión para DDL/migraciones.
+
+**Error:** `ERROR: Your account or project has exceeded the compute time quota. Upgrade your plan to increase limits.`
+
+**Causa:** La base de datos Neon alcanzó el límite de cómputo del plan gratuito.
+
+**Solución:** Migrar a una alternativa PostgreSQL gestionada (recomendado: Render Postgres) y actualizar variables `DATABASE_URL`, `DATABASE_USER`, `DATABASE_PASSWORD` en Render. Ver guía detallada en `docs/MIGRACION_NEON_A_RENDER_POSTGRES.md`.
+
+---
+
 ## 13. Diagrama Completo del Pipeline
 
 ```
@@ -686,9 +702,9 @@ El seeder tiene protección anti-duplicados: `if (usuarioRepository.count() > 0)
 | Variable | Servicio | Valor |
 |---|---|---|
 | `SPRING_PROFILES_ACTIVE` | Backend | `prod` |
-| `DATABASE_URL` | Backend | `jdbc:postgresql://...neon.tech/neondb?sslmode=require` |
-| `DATABASE_USER` | Backend | `neondb_owner` |
-| `DATABASE_PASSWORD` | Backend | `(contraseña de Neon)` |
+| `DATABASE_URL` | Backend | `jdbc:postgresql://<host>:<port>/<database>?sslmode=require` |
+| `DATABASE_USER` | Backend | `<usuario_postgresql>` |
+| `DATABASE_PASSWORD` | Backend | `<password_postgresql>` |
 | `PORT` | Backend | Asignado automáticamente por Render |
 
 ---

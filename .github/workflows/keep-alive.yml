@@ -15,4 +15,4 @@ jobs:
     steps:
       - name: Ping backend para evitar cold start
         run: |
-          curl -sf https://tfg-backend-jdjl.onrender.com/api/health || echo "Backend no respondió (puede estar arrancando)"
+          curl -sf https://tfg-backend-jdjl.onrender.com/api/health/liveness || echo "Backend no respondió (puede estar arrancando)"

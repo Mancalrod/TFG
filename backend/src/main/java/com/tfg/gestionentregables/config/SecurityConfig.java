@@ -64,7 +64,7 @@ public class SecurityConfig {
                 // Endpoints públicos de la API
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
-                .requestMatchers("/api/health").permitAll()
+                .requestMatchers("/api/health/**").permitAll()
                 .requestMatchers("/api/onedrive/callback").permitAll()
                 .requestMatchers("/api/onedrive/enabled").permitAll()
                 // H2 console se gestiona en h2ConsoleSecurityFilterChain
