@@ -108,7 +108,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(
             "http://localhost:3000",
             "http://localhost:5173",
-            "https://tfg-frontend-zmc3.onrender.com"
+            "https://tfg-frontend-zmc3.onrender.com",
+            "https://tfg-85os.onrender.com"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
