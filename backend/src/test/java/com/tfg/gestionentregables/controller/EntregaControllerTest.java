@@ -57,6 +57,11 @@ class EntregaControllerTest {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
+                when(securityContextUserService.getCurrentUserId(any())).thenReturn(1L);
+                when(securityContextUserService.hasRole(any(), eq("ADMIN"))).thenReturn(true);
+                when(securityContextUserService.hasRole(any(), eq("PROFESOR"))).thenReturn(true);
+                when(securityContextUserService.hasRole(any(), eq("ESTUDIANTE"))).thenReturn(false);
+
         entregaDTO = EntregaDTO.builder()
                 .id(1L).nombre("Mi entrega").version(1)
                 .fechaEntrega(LocalDateTime.now())

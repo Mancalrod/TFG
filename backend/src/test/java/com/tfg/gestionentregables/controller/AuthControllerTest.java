@@ -161,6 +161,7 @@ class AuthControllerTest {
             RefreshTokenRequestDTO req = RefreshTokenRequestDTO.builder()
                     .refreshToken("old-refresh").build();
 
+                        when(jwtTokenProvider.isRefreshToken("old-refresh")).thenReturn(true);
             when(jwtTokenProvider.extractUsername("old-refresh")).thenReturn("juan@test.com");
             when(userDetailsService.loadUserByUsername("juan@test.com")).thenReturn(userDetails);
             when(jwtTokenProvider.isTokenValid("old-refresh", userDetails)).thenReturn(true);
@@ -182,6 +183,7 @@ class AuthControllerTest {
             RefreshTokenRequestDTO req = RefreshTokenRequestDTO.builder()
                     .refreshToken("invalid").build();
 
+                        when(jwtTokenProvider.isRefreshToken("invalid")).thenReturn(true);
             when(jwtTokenProvider.extractUsername("invalid")).thenReturn("juan@test.com");
             when(userDetailsService.loadUserByUsername("juan@test.com")).thenReturn(userDetails);
             when(jwtTokenProvider.isTokenValid("invalid", userDetails)).thenReturn(false);
@@ -198,6 +200,7 @@ class AuthControllerTest {
             RefreshTokenRequestDTO req = RefreshTokenRequestDTO.builder()
                     .refreshToken("bad-token").build();
 
+            when(jwtTokenProvider.isRefreshToken("bad-token")).thenReturn(true);
             when(jwtTokenProvider.extractUsername("bad-token"))
                     .thenThrow(new RuntimeException("Token corrupto"));
 

@@ -48,6 +48,9 @@ class ActividadControllerTest {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
+        when(securityContextUserService.getCurrentUserId(any())).thenReturn(1L);
+        when(securityContextUserService.hasRole(any(), anyString())).thenReturn(false);
+
         actividadDTO = ActividadDTO.builder()
                 .id(1L).titulo("Práctica 1").descripcion("Desc")
                 .tipoActividad(TipoActividad.EVALUABLE)
@@ -95,7 +98,7 @@ class ActividadControllerTest {
         @Test
         @DisplayName("201 - Crea actividad")
         void crear_ok() throws Exception {
-            when(actividadService.crearActividad(any(), eq(1L))).thenReturn(actividadDTO);
+            when(actividadService.crearActividad(any(), eq(1L), any(), anyBoolean())).thenReturn(actividadDTO);
 
             mockMvc.perform(post("/api/actividades/curso/1")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -112,7 +115,8 @@ class ActividadControllerTest {
         @Test
         @DisplayName("200 - Lista actividades del curso")
         void listar_ok() throws Exception {
-            when(actividadService.listarActividadesCurso(1L)).thenReturn(List.of(actividadDTO));
+            when(actividadService.listarActividadesCurso(eq(1L), any(), anyBoolean(), anyBoolean(), anyBoolean()))
+                    .thenReturn(List.of(actividadDTO));
 
             mockMvc.perform(get("/api/actividades/curso/1"))
                     .andExpect(status().isOk())
@@ -127,7 +131,8 @@ class ActividadControllerTest {
         @Test
         @DisplayName("200 - Lista actividades del grupo")
         void listar_ok() throws Exception {
-            when(actividadService.listarActividadesVisiblesGrupo(1L)).thenReturn(List.of(actividadDTO));
+            when(actividadService.listarActividadesVisiblesGrupo(eq(1L), any(), anyBoolean(), anyBoolean(), anyBoolean()))
+                    .thenReturn(List.of(actividadDTO));
 
             mockMvc.perform(get("/api/actividades/grupo/1"))
                     .andExpect(status().isOk())
@@ -157,7 +162,8 @@ class ActividadControllerTest {
         @Test
         @DisplayName("200 - Cambia visibilidad")
         void cambiar_ok() throws Exception {
-            when(actividadService.cambiarVisibilidad(1L, Visibilidad.OCULTO)).thenReturn(actividadDTO);
+            when(actividadService.cambiarVisibilidad(eq(1L), eq(Visibilidad.OCULTO), any(), anyBoolean()))
+                    .thenReturn(actividadDTO);
 
             mockMvc.perform(patch("/api/actividades/1/visibilidad")
                             .param("visibilidad", "OCULTO"))
@@ -172,7 +178,7 @@ class ActividadControllerTest {
         @Test
         @DisplayName("200 - Actualiza actividad")
         void actualizar_ok() throws Exception {
-            when(actividadService.actualizarActividad(eq(1L), any())).thenReturn(actividadDTO);
+            when(actividadService.actualizarActividad(eq(1L), any(), any(), anyBoolean())).thenReturn(actividadDTO);
 
             mockMvc.perform(put("/api/actividades/1")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -188,7 +194,7 @@ class ActividadControllerTest {
         @Test
         @DisplayName("204 - Elimina actividad")
         void eliminar_ok() throws Exception {
-            doNothing().when(actividadService).eliminarActividad(1L);
+            doNothing().when(actividadService).eliminarActividad(eq(1L), any(), anyBoolean());
 
             mockMvc.perform(delete("/api/actividades/1"))
                     .andExpect(status().isNoContent());
@@ -198,7 +204,7 @@ class ActividadControllerTest {
         @DisplayName("404 - Actividad no encontrada")
         void eliminar_notFound() throws Exception {
             doThrow(new EntityNotFoundException("No encontrada"))
-                    .when(actividadService).eliminarActividad(99L);
+                    .when(actividadService).eliminarActividad(eq(99L), any(), anyBoolean());
 
             mockMvc.perform(delete("/api/actividades/99"))
                     .andExpect(status().isNotFound());

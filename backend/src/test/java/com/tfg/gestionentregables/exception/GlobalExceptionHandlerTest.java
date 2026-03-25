@@ -201,7 +201,7 @@ class GlobalExceptionHandlerTest {
             assertThat(response.getStatusCode().value()).isEqualTo(500);
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody().getStatus()).isEqualTo(500);
-            assertThat(response.getBody().getMessage()).contains("Algo salio mal");
+            assertThat(response.getBody().getMessage()).isEqualTo("Error interno del servidor");
         }
     }
 

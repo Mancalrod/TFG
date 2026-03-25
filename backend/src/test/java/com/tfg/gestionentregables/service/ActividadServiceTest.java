@@ -29,6 +29,7 @@ class ActividadServiceTest {
     @Mock private CursoRepository cursoRepository;
     @Mock private GrupoRepository grupoRepository;
     @Mock private ProfesorRepository profesorRepository;
+    @Mock private EstudianteRepository estudianteRepository;
     @Mock private EntityMapper mapper;
 
     @InjectMocks
@@ -211,7 +212,8 @@ class ActividadServiceTest {
         @Test
         @DisplayName("Lista actividades visibles de un grupo")
         void listar_ok() {
-            when(grupoRepository.existsById(1L)).thenReturn(true);
+            Grupo grupo = Grupo.builder().id(1L).titulo("G1").curso(curso).build();
+            when(grupoRepository.findById(1L)).thenReturn(Optional.of(grupo));
             when(actividadRepository.findByGrupoIdAndVisibilidad(1L, Visibilidad.VISIBLE))
                     .thenReturn(List.of(actividad));
             when(mapper.toDTO(actividad)).thenReturn(actividadDTO);
@@ -224,7 +226,7 @@ class ActividadServiceTest {
         @Test
         @DisplayName("Lanza excepción si grupo no existe")
         void listar_grupoNoExiste() {
-            when(grupoRepository.existsById(99L)).thenReturn(false);
+            when(grupoRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> actividadService.listarActividadesVisiblesGrupo(99L))
                     .isInstanceOf(EntityNotFoundException.class);

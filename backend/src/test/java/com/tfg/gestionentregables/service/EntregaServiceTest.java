@@ -99,6 +99,8 @@ class EntregaServiceTest {
         entregaResumenDTO = EntregaResumenDTO.builder()
                 .entregaId(1L).estudianteId(1L).estudianteNombre("Alumno")
                 .estado(EstadoEntrega.ENTREGADO).version(1).build();
+
+        lenient().when(profesorRepository.existsByUsuarioIdAndCursoId(anyLong(), anyLong())).thenReturn(true);
     }
 
     @Nested
