@@ -35,7 +35,9 @@ const ActividadesPorCursoPage: React.FC = () => {
       setError(null);
       try {
         let cursos: CursoDTO[];
-        if (esProfesor || esAdmin) {
+        if (esAdmin) {
+          cursos = await cursoService.listarTodos();
+        } else if (esProfesor) {
           cursos = await cursoService.listarPorProfesor(usuario.id);
         } else {
           cursos = await cursoService.listarPorEstudiante(usuario.id);
@@ -122,8 +124,10 @@ const ActividadesPorCursoPage: React.FC = () => {
         <div>
           <h1>Actividades por Curso</h1>
           <p className="apc-subtitle">
-            {esProfesor || esAdmin
-              ? 'Gestiona las actividades de tus cursos'
+            {esAdmin
+              ? 'Consulta las actividades de todos los cursos'
+              : esProfesor
+                ? 'Gestiona las actividades de tus cursos'
               : 'Consulta las actividades de tus cursos'}
           </p>
         </div>

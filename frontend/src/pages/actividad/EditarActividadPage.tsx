@@ -10,7 +10,7 @@ import './EditarActividadPage.css';
 const EditarActividadPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { esProfesor, usuario } = useAuth();
+  const { esProfesor, esAdmin, usuario } = useAuth();
 
   const [actividad, setActividad] = useState<ActividadDTO | null>(null);
   const [grupos, setGrupos] = useState<GrupoDTO[]>([]);
@@ -23,6 +23,9 @@ const EditarActividadPage: React.FC = () => {
 
   // Variables para detectar cambio de carpeta OneDrive
   const [carpetaOriginal, setCarpetaOriginal] = useState<string | undefined>(undefined);
+  const [modoOriginal, setModoOriginal] = useState<ModoOneDrive>(ModoOneDrive.ACTIVIDAD);
+  const [mostrarConfirmarCambioFormato, setMostrarConfirmarCambioFormato] = useState(false);
+  const [confirmarCambioFormatoAceptado, setConfirmarCambioFormatoAceptado] = useState(false);
   const [mostrarConfirmarCambioCarpeta, setMostrarConfirmarCambioCarpeta] = useState(false);
   const [confirmacionDoble, setConfirmacionDoble] = useState(false);
 
@@ -64,6 +67,8 @@ const EditarActividadPage: React.FC = () => {
 
       // Guardar carpeta original para detectar cambios
       setCarpetaOriginal(data.carpetaOneDrive);
+      setModoOriginal(data.modoOneDrive || ModoOneDrive.ACTIVIDAD);
+      setConfirmarCambioFormatoAceptado(false);
 
       setFormData({
         titulo: data.titulo,
@@ -106,10 +111,10 @@ const EditarActividadPage: React.FC = () => {
   }, [id, cargarActividad]);
 
   useEffect(() => {
-    if (!loading && !esProfesor) {
+    if (!loading && (!esProfesor || esAdmin)) {
       navigate(-1);
     }
-  }, [loading, esProfesor, navigate]);
+  }, [loading, esProfesor, esAdmin, navigate]);
 
   const toDatetimeLocal = (iso: string): string => {
     const date = new Date(iso);
@@ -171,6 +176,17 @@ const EditarActividadPage: React.FC = () => {
   const guardarActividad = async () => {
     if (!id) return;
 
+    // Detectar si cambió el formato de entrega (modo OneDrive)
+    const modoActual = formData.modoOneDrive || ModoOneDrive.ACTIVIDAD;
+    const cambioFormatoEntrega = Boolean(formData.subirAOneDrive) &&
+      Boolean(actividad?.subirAOneDrive) &&
+      modoActual !== modoOriginal;
+
+    if (cambioFormatoEntrega && !confirmarCambioFormatoAceptado) {
+      setMostrarConfirmarCambioFormato(true);
+      return;
+    }
+
     // Detectar si cambió la carpeta OneDrive
     const cambioCarpeta = formData.subirAOneDrive &&
                           carpetaOriginal &&
@@ -213,6 +229,17 @@ const EditarActividadPage: React.FC = () => {
   const handleGuardar = async (e: React.FormEvent) => {
     e.preventDefault();
     await guardarActividad();
+  };
+
+  const confirmarCambioFormato = () => {
+    setMostrarConfirmarCambioFormato(false);
+    setConfirmarCambioFormatoAceptado(true);
+    void guardarActividad();
+  };
+
+  const cancelarCambioFormato = () => {
+    setMostrarConfirmarCambioFormato(false);
+    setConfirmarCambioFormatoAceptado(false);
   };
 
   const confirmarCambioCarpeta = () => {
@@ -465,11 +492,14 @@ const EditarActividadPage: React.FC = () => {
                       <select
                         name="modoOneDrive"
                         value={formData.modoOneDrive || ModoOneDrive.ACTIVIDAD}
-                        onChange={e => setFormData(prev => ({
-                          ...prev,
-                          modoOneDrive: e.target.value as ModoOneDrive,
-                          carpetaOneDrive: e.target.value === ModoOneDrive.ACTIVIDAD ? prev.carpetaOneDrive : ''
-                        }))}
+                        onChange={e => {
+                          setConfirmarCambioFormatoAceptado(false);
+                          setFormData(prev => ({
+                            ...prev,
+                            modoOneDrive: e.target.value as ModoOneDrive,
+                            carpetaOneDrive: e.target.value === ModoOneDrive.ACTIVIDAD ? prev.carpetaOneDrive : ''
+                          }));
+                        }}
                         style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '6px' }}
                       >
                         <option value={ModoOneDrive.ACTIVIDAD}>Por actividad (una carpeta para toda la actividad)</option>
@@ -601,9 +631,9 @@ const EditarActividadPage: React.FC = () => {
             <p>
               Estás a punto de cambiar la carpeta de destino de <strong>"{carpetaOriginal}"</strong> a <strong>"{formData.carpetaOneDrive}"</strong>.
             </p>
-            <div className="ea-modal-warning" style={{backgroundColor: '#fef3c7', border: '1px solid #fbbf24', padding: '12px', borderRadius: '6px', marginTop: '12px'}}>
+            <div className="ea-modal-note">
               <p><strong>Importante:</strong></p>
-              <ul style={{marginLeft: '20px', marginTop: '8px'}}>
+              <ul>
                 <li>Los archivos de entregas ya existentes NO se moverán automáticamente</li>
                 <li>Solo las NUEVAS entregas se guardarán en la nueva carpeta</li>
                 <li>Tendrás que mover manualmente los archivos antiguos si lo deseas</li>
@@ -611,8 +641,8 @@ const EditarActividadPage: React.FC = () => {
             </div>
             {!confirmacionDoble ? (
               <>
-                <p style={{marginTop: '15px', fontWeight: 500}}>¿Estás seguro de que deseas continuar?</p>
-                <div className="ea-modal-actions" style={{marginTop: '15px'}}>
+                <p className="ea-modal-question">¿Estás seguro de que deseas continuar?</p>
+                <div className="ea-modal-actions">
                   <button
                     className="btn-secondary"
                     onClick={cancelarCambioCarpeta}
@@ -620,9 +650,8 @@ const EditarActividadPage: React.FC = () => {
                     Cancelar
                   </button>
                   <button
-                    className="btn-primary"
+                    className="ea-btn-modal-confirm"
                     onClick={confirmarCambioCarpeta}
-                    style={{backgroundColor: '#f59e0b', borderColor: '#f59e0b'}}
                   >
                     Sí, continuar
                   </button>
@@ -630,10 +659,10 @@ const EditarActividadPage: React.FC = () => {
               </>
             ) : (
               <>
-                <p style={{marginTop: '15px', fontWeight: 600, color: '#dc2626'}}>
+                <p className="ea-modal-danger-text">
                   Segunda confirmación requerida: ¿Realmente deseas cambiar la carpeta sabiendo que no se moverán los archivos existentes?
                 </p>
-                <div className="ea-modal-actions" style={{marginTop: '15px'}}>
+                <div className="ea-modal-actions">
                   <button
                     className="btn-secondary"
                     onClick={cancelarCambioCarpeta}
@@ -641,15 +670,54 @@ const EditarActividadPage: React.FC = () => {
                     Cancelar
                   </button>
                   <button
-                    className="btn-primary"
+                    className="ea-btn-modal-danger"
                     onClick={confirmarCambioCarpeta}
-                    style={{backgroundColor: '#dc2626', borderColor: '#dc2626'}}
                   >
                     Sí, confirmo el cambio
                   </button>
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal confirmar cambio de formato de entrega */}
+      {mostrarConfirmarCambioFormato && (
+        <div className="modal-overlay" onClick={cancelarCambioFormato}>
+          <div className="ea-modal" onClick={e => e.stopPropagation()}>
+            <h2>⚠ Cambiar formato de entrega</h2>
+            <p>
+              Estás cambiando el formato de entrega de
+              {' '}
+              <strong>{modoOriginal === ModoOneDrive.ACTIVIDAD ? 'Por actividad' : 'Por entregables'}</strong>
+              {' '}
+              a
+              {' '}
+              <strong>{(formData.modoOneDrive || ModoOneDrive.ACTIVIDAD) === ModoOneDrive.ACTIVIDAD ? 'Por actividad' : 'Por entregables'}</strong>.
+            </p>
+
+            <div className="ea-modal-note">
+              <p><strong>Importante:</strong></p>
+              <ul>
+                <li>Las entregas anteriores NO se moverán al nuevo formato.</li>
+                <li>Las entregas antiguas se quedarán exactamente donde están ahora.</li>
+                <li>Si intentas mover manualmente archivos antiguos, estos podrían corromperse.</li>
+              </ul>
+            </div>
+
+            <p className="ea-modal-question">
+              ¿Quieres aplicar igualmente el cambio de formato?
+            </p>
+
+            <div className="ea-modal-actions">
+              <button className="btn-secondary" onClick={cancelarCambioFormato}>
+                Cancelar
+              </button>
+              <button className="ea-btn-modal-confirm" onClick={confirmarCambioFormato}>
+                Sí, cambiar formato
+              </button>
+            </div>
           </div>
         </div>
       )}

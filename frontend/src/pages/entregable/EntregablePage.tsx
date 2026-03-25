@@ -29,8 +29,9 @@ const EntregablePage: React.FC = () => {
   const [misEntregas, setMisEntregas] = useState<EntregaDTO[]>([]);
   const [estadisticas, setEstadisticas] = useState<EntregaEstadisticasDTO | null>(null);
   const [loading, setLoading] = useState(true);
-  const { esProfesor, usuario } = useAuth();
+  const { esProfesor, esAdmin, usuario } = useAuth();
   const navigate = useNavigate();
+  const puedeEditarEntregable = esProfesor && !esAdmin;
 
   const cargarEntregable = useCallback(async (entregableId: number) => {
     setLoading(true);
@@ -155,7 +156,7 @@ const EntregablePage: React.FC = () => {
           </div>
         </div>
 
-        {esProfesor && (
+        {puedeEditarEntregable && (
           <button 
             className="btn-secondary"
             onClick={() => navigate(`/entregables/${id}/editar`)}

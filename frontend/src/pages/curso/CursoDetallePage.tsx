@@ -256,8 +256,9 @@ const CursoDetallePage: React.FC = () => {
   }
 
   const esProfesorEnCurso = rolVistaCurso === 'PROFESOR';
+  const puedeEditarCurso = esProfesorEnCurso && !esAdmin;
   const tieneAmbosRolesEnCurso = rolesEnCurso.profesor && rolesEnCurso.estudiante;
-  const puedeCrear = esProfesorEnCurso && !modoPreview;
+  const puedeCrear = puedeEditarCurso && !modoPreview;
 
   // En modo preview: solo actividades visibles y del grupo seleccionado
   const actividadesMostradas = modoPreview
@@ -707,7 +708,7 @@ const CursoDetallePage: React.FC = () => {
               )}
 
               {/* OneDrive */}
-              {esProfesorEnCurso && oneDriveEnabled && !cargandoOneDrive && (
+              {puedeEditarCurso && oneDriveEnabled && !cargandoOneDrive && (
                 <div className="cd-form-group">
                   <label>Subir entregas a OneDrive</label>
                   {oneDriveConectado ? (
