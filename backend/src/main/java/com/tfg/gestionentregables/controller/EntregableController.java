@@ -3,10 +3,13 @@ package com.tfg.gestionentregables.controller;
 import com.tfg.gestionentregables.dto.*;
 import com.tfg.gestionentregables.entity.enums.Visibilidad;
 import com.tfg.gestionentregables.service.EntregableService;
+import com.tfg.gestionentregables.service.SecurityContextUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +25,7 @@ import java.util.List;
 public class EntregableController {
 
     private final EntregableService entregableService;
+    private final SecurityContextUserService securityContextUserService;
 
     /**
      * SYSOP-012: Obtener detalle de un entregable.
@@ -37,8 +41,11 @@ public class EntregableController {
     @PostMapping("/actividad/{actividadId}")
     public ResponseEntity<EntregableDTO> crearEntregable(
             @PathVariable Long actividadId,
-            @Valid @RequestBody CrearEntregableDTO dto) {
-        EntregableDTO entregable = entregableService.crearEntregable(dto, actividadId);
+            @Valid @RequestBody CrearEntregableDTO dto,
+            Authentication authentication) {
+        Long actorId = securityContextUserService.getCurrentUserId(authentication);
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        EntregableDTO entregable = entregableService.crearEntregable(dto, actividadId, actorId, actorEsAdmin);
         return ResponseEntity.status(HttpStatus.CREATED).body(entregable);
     }
 
@@ -60,20 +67,29 @@ public class EntregableController {
     @PutMapping("/{id}")
     public ResponseEntity<EntregableDTO> actualizarEntregable(
             @PathVariable Long id,
-            @Valid @RequestBody CrearEntregableDTO dto) {
-        return ResponseEntity.ok(entregableService.actualizarEntregable(id, dto));
+            @Valid @RequestBody CrearEntregableDTO dto,
+            Authentication authentication) {
+        Long actorId = securityContextUserService.getCurrentUserId(authentication);
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        return ResponseEntity.ok(entregableService.actualizarEntregable(id, dto, actorId, actorEsAdmin));
     }
 
     @PatchMapping("/{id}/visibilidad")
     public ResponseEntity<EntregableDTO> cambiarVisibilidad(
             @PathVariable Long id,
-            @RequestParam Visibilidad visibilidad) {
-        return ResponseEntity.ok(entregableService.cambiarVisibilidad(id, visibilidad));
+            @RequestParam Visibilidad visibilidad,
+            Authentication authentication) {
+        Long actorId = securityContextUserService.getCurrentUserId(authentication);
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        return ResponseEntity.ok(entregableService.cambiarVisibilidad(id, visibilidad, actorId, actorEsAdmin));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarEntregable(@PathVariable Long id) {
-        entregableService.eliminarEntregable(id);
+    public ResponseEntity<Void> eliminarEntregable(@PathVariable Long id,
+                                                   Authentication authentication) {
+        Long actorId = securityContextUserService.getCurrentUserId(authentication);
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        entregableService.eliminarEntregable(id, actorId, actorEsAdmin);
         return ResponseEntity.noContent().build();
     }
 
@@ -93,7 +109,14 @@ public class EntregableController {
     @GetMapping("/actividad/{actividadId}/pendientes/{estudianteId}")
     public ResponseEntity<List<EntregableDTO>> listarEntregablesPendientes(
             @PathVariable Long actividadId,
-            @PathVariable Long estudianteId) {
+            @PathVariable Long estudianteId,
+            Authentication authentication) {
+        Long actorId = securityContextUserService.getCurrentUserId(authentication);
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        boolean actorEsEstudiante = securityContextUserService.hasRole(authentication, "ESTUDIANTE");
+        if (actorEsEstudiante && !actorEsAdmin && actorId != null && !actorId.equals(estudianteId)) {
+            throw new AccessDeniedException("No puedes consultar entregables pendientes de otro estudiante");
+        }
         return ResponseEntity.ok(entregableService.listarEntregablesPendientesEstudiante(actividadId, estudianteId));
     }
 }

@@ -6,6 +6,7 @@ import com.tfg.gestionentregables.entity.enums.Visibilidad;
 import com.tfg.gestionentregables.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,14 +26,21 @@ public class EntregableService {
 
     private final EntregableRepository entregableRepository;
     private final ActividadRepository actividadRepository;
+    private final ProfesorRepository profesorRepository;
     private final EntityMapper mapper;
 
     /**
      * SYSOP-010: Crea un nuevo entregable en una actividad.
      */
     public EntregableDTO crearEntregable(CrearEntregableDTO dto, Long actividadId) {
+        return crearEntregable(dto, actividadId, null, false);
+    }
+
+    public EntregableDTO crearEntregable(CrearEntregableDTO dto, Long actividadId, Long actorUsuarioId, boolean actorEsAdmin) {
         Actividad actividad = actividadRepository.findById(actividadId)
                 .orElseThrow(() -> new EntityNotFoundException("Actividad no encontrada con ID: " + actividadId));
+
+        verificarAccesoProfesorACurso(actividad.getCurso().getId(), actorUsuarioId, actorEsAdmin);
 
         Entregable entregable = Entregable.builder()
                 .titulo(dto.getTitulo())
@@ -96,8 +104,14 @@ public class EntregableService {
      * Actualiza un entregable existente.
      */
     public EntregableDTO actualizarEntregable(Long id, CrearEntregableDTO dto) {
+        return actualizarEntregable(id, dto, null, false);
+    }
+
+    public EntregableDTO actualizarEntregable(Long id, CrearEntregableDTO dto, Long actorUsuarioId, boolean actorEsAdmin) {
         Entregable entregable = entregableRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ENTREGABLE_NOT_FOUND + id));
+
+        verificarAccesoProfesorACurso(entregable.getActividad().getCurso().getId(), actorUsuarioId, actorEsAdmin);
 
         entregable.setTitulo(dto.getTitulo());
         entregable.setDescripcion(dto.getDescripcion());
@@ -126,8 +140,14 @@ public class EntregableService {
      * Cambia la visibilidad de un entregable.
      */
     public EntregableDTO cambiarVisibilidad(Long entregableId, Visibilidad visibilidad) {
+        return cambiarVisibilidad(entregableId, visibilidad, null, false);
+    }
+
+    public EntregableDTO cambiarVisibilidad(Long entregableId, Visibilidad visibilidad, Long actorUsuarioId, boolean actorEsAdmin) {
         Entregable entregable = entregableRepository.findById(entregableId)
                 .orElseThrow(() -> new EntityNotFoundException(ENTREGABLE_NOT_FOUND + entregableId));
+
+        verificarAccesoProfesorACurso(entregable.getActividad().getCurso().getId(), actorUsuarioId, actorEsAdmin);
 
         entregable.setVisibilidad(visibilidad);
         entregable = entregableRepository.save(entregable);
@@ -138,8 +158,17 @@ public class EntregableService {
      * Elimina un entregable.
      */
     public void eliminarEntregable(Long id) {
+        eliminarEntregable(id, null, false);
+    }
+
+    public void eliminarEntregable(Long id, Long actorUsuarioId, boolean actorEsAdmin) {
         if (!entregableRepository.existsById(id)) {
             throw new EntityNotFoundException(ENTREGABLE_NOT_FOUND + id);
+        }
+        if (!actorEsAdmin && actorUsuarioId != null) {
+            Entregable entregable = entregableRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException(ENTREGABLE_NOT_FOUND + id));
+            verificarAccesoProfesorACurso(entregable.getActividad().getCurso().getId(), actorUsuarioId, false);
         }
         entregableRepository.deleteById(id);
     }
@@ -176,5 +205,15 @@ public class EntregableService {
         return entregableRepository.findByActividadId(actividadId).stream()
                 .map(mapper::toDTO)
                 .toList();
+    }
+
+    private void verificarAccesoProfesorACurso(Long cursoId, Long actorUsuarioId, boolean actorEsAdmin) {
+        if (actorEsAdmin || actorUsuarioId == null) {
+            return;
+        }
+        boolean esProfesorDelCurso = profesorRepository.existsByUsuarioIdAndCursoId(actorUsuarioId, cursoId);
+        if (!esProfesorDelCurso) {
+            throw new AccessDeniedException("No tienes permisos sobre este curso");
+        }
     }
 }

@@ -80,7 +80,8 @@ public class AuthController {
                 .telefono(dto.getTelefono())
                 .correoElectronico(dto.getCorreoElectronico())
                 .contrasena(passwordEncoder.encode(dto.getContrasena()))
-                .esAdmin(Boolean.TRUE.equals(dto.getEsAdmin()))
+                // Seguridad: el registro público nunca puede crear cuentas admin.
+                .esAdmin(false)
                 .build();
 
         usuario = usuarioRepository.save(usuario);
@@ -107,6 +108,10 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponseDTO> refreshToken(@Valid @RequestBody RefreshTokenRequestDTO request) {
         try {
+                        if (!jwtTokenProvider.isRefreshToken(request.getRefreshToken())) {
+                                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                        }
+
             String userEmail = jwtTokenProvider.extractUsername(request.getRefreshToken());
             UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 

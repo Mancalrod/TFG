@@ -2,9 +2,12 @@ package com.tfg.gestionentregables.controller;
 
 import com.tfg.gestionentregables.entity.MicrosoftToken;
 import com.tfg.gestionentregables.service.MicrosoftOAuthService;
+import com.tfg.gestionentregables.service.SecurityContextUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -21,6 +24,7 @@ import java.util.Map;
 public class MicrosoftOAuthController {
 
     private final MicrosoftOAuthService oAuthService;
+    private final SecurityContextUserService securityContextUserService;
 
     /**
      * Genera la URL de autorización de Microsoft y la devuelve al frontend.
@@ -30,7 +34,9 @@ public class MicrosoftOAuthController {
      * @return URL de autorización de Microsoft
      */
     @GetMapping("/authorize")
-    public ResponseEntity<Map<String, String>> authorize(@RequestParam Long usuarioId) {
+    public ResponseEntity<Map<String, String>> authorize(@RequestParam Long usuarioId,
+                                                         Authentication authentication) {
+        assertSameUserOrAdmin(authentication, usuarioId);
         String authUrl = oAuthService.buildAuthorizationUrl(usuarioId);
         return ResponseEntity.ok(Map.of("authUrl", authUrl));
     }
@@ -86,7 +92,9 @@ public class MicrosoftOAuthController {
      * @return Estado de conexión con email de Microsoft si conectado
      */
     @GetMapping("/status")
-    public ResponseEntity<Map<String, Object>> status(@RequestParam Long usuarioId) {
+    public ResponseEntity<Map<String, Object>> status(@RequestParam Long usuarioId,
+                                                      Authentication authentication) {
+        assertSameUserOrAdmin(authentication, usuarioId);
         boolean connected = oAuthService.isConnected(usuarioId);
         if (connected) {
             String msEmail = oAuthService.getMicrosoftEmail(usuarioId).orElse(null);
@@ -105,8 +113,21 @@ public class MicrosoftOAuthController {
      * @return 204 No Content
      */
     @DeleteMapping("/disconnect")
-    public ResponseEntity<Void> disconnect(@RequestParam Long usuarioId) {
+    public ResponseEntity<Void> disconnect(@RequestParam Long usuarioId,
+                                           Authentication authentication) {
+        assertSameUserOrAdmin(authentication, usuarioId);
         oAuthService.disconnect(usuarioId);
         return ResponseEntity.noContent().build();
+    }
+
+    private void assertSameUserOrAdmin(Authentication authentication, Long usuarioId) {
+        if (authentication == null) {
+            return;
+        }
+        Long actorId = securityContextUserService.getCurrentUserId(authentication);
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        if (!actorEsAdmin && actorId != null && !actorId.equals(usuarioId)) {
+            throw new AccessDeniedException("No puedes operar sobre la cuenta de otro usuario");
+        }
     }
 }

@@ -3,10 +3,13 @@ package com.tfg.gestionentregables.controller;
 import com.tfg.gestionentregables.dto.OneDriveConnectionDTO;
 import com.tfg.gestionentregables.entity.OneDriveToken;
 import com.tfg.gestionentregables.service.OneDriveService;
+import com.tfg.gestionentregables.service.SecurityContextUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +32,7 @@ import java.util.Map;
 public class OneDriveController {
 
     private final OneDriveService oneDriveService;
+    private final SecurityContextUserService securityContextUserService;
 
     /**
      * Verifica si la integración con OneDrive está habilitada en el servidor.
@@ -44,7 +48,9 @@ public class OneDriveController {
     @GetMapping("/folders/{usuarioId}")
     public ResponseEntity<List<Map<String, String>>> getFolders(
             @PathVariable Long usuarioId,
-            @RequestParam(required = false) String parentId) {
+            @RequestParam(required = false) String parentId,
+            Authentication authentication) {
+        assertSameUserOrAdmin(authentication, usuarioId);
         if (!oneDriveService.isEnabled() || !oneDriveService.estaConectado(usuarioId)) {
             return ResponseEntity.badRequest().build();
         }
@@ -55,7 +61,9 @@ public class OneDriveController {
      * Obtiene el estado de conexión de OneDrive para un usuario.
      */
     @GetMapping("/status/{usuarioId}")
-    public ResponseEntity<OneDriveConnectionDTO> getConnectionStatus(@PathVariable Long usuarioId) {
+    public ResponseEntity<OneDriveConnectionDTO> getConnectionStatus(@PathVariable Long usuarioId,
+                                                                     Authentication authentication) {
+        assertSameUserOrAdmin(authentication, usuarioId);
         if (!oneDriveService.isEnabled()) {
             return ResponseEntity.ok(OneDriveConnectionDTO.builder()
                     .conectado(false)
@@ -86,7 +94,9 @@ public class OneDriveController {
      * El frontend debe redirigir al usuario a esta URL.
      */
     @GetMapping("/auth-url/{usuarioId}")
-    public ResponseEntity<Map<String, String>> getAuthUrl(@PathVariable Long usuarioId) {
+    public ResponseEntity<Map<String, String>> getAuthUrl(@PathVariable Long usuarioId,
+                                                          Authentication authentication) {
+        assertSameUserOrAdmin(authentication, usuarioId);
         if (!oneDriveService.isEnabled()) {
             return ResponseEntity.badRequest().body(Map.of(
                     "error", "La integración con OneDrive no está habilitada"));
@@ -142,9 +152,22 @@ public class OneDriveController {
      * Desconecta la cuenta de OneDrive de un usuario.
      */
     @PostMapping("/disconnect/{usuarioId}")
-    public ResponseEntity<Map<String, String>> disconnect(@PathVariable Long usuarioId) {
+    public ResponseEntity<Map<String, String>> disconnect(@PathVariable Long usuarioId,
+                                                          Authentication authentication) {
+        assertSameUserOrAdmin(authentication, usuarioId);
         oneDriveService.desconectar(usuarioId);
         return ResponseEntity.ok(Map.of("message", "OneDrive desconectado correctamente"));
+    }
+
+    private void assertSameUserOrAdmin(Authentication authentication, Long usuarioId) {
+        if (authentication == null) {
+            return;
+        }
+        Long actorId = securityContextUserService.getCurrentUserId(authentication);
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        if (!actorEsAdmin && actorId != null && !actorId.equals(usuarioId)) {
+            throw new AccessDeniedException("No puedes operar sobre la cuenta OneDrive de otro usuario");
+        }
     }
 
     /**

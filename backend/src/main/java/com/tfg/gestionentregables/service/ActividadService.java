@@ -7,11 +7,14 @@ import com.tfg.gestionentregables.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Servicio para gestión de actividades.
@@ -27,14 +30,22 @@ public class ActividadService {
     private final ActividadRepository actividadRepository;
     private final CursoRepository cursoRepository;
     private final GrupoRepository grupoRepository;
+    private final ProfesorRepository profesorRepository;
+    private final EstudianteRepository estudianteRepository;
     private final EntityMapper mapper;
 
     /**
      * SYSOP-005: Crea una nueva actividad en un curso.
      */
     public ActividadDTO crearActividad(CrearActividadDTO dto, Long cursoId) {
+        return crearActividad(dto, cursoId, null, false);
+    }
+
+    public ActividadDTO crearActividad(CrearActividadDTO dto, Long cursoId, Long actorUsuarioId, boolean actorEsAdmin) {
         Curso curso = cursoRepository.findById(cursoId)
                 .orElseThrow(() -> new EntityNotFoundException("Curso no encontrado con ID: " + cursoId));
+
+        verificarAccesoProfesorACurso(cursoId, actorUsuarioId, actorEsAdmin);
 
         boolean subirAOneDrive = Boolean.TRUE.equals(dto.getSubirAOneDrive());
         ModoOneDrive modoOneDrive = subirAOneDrive
@@ -63,6 +74,7 @@ public class ActividadService {
         // Asignar grupos si se especifican
         if (dto.getGrupoIds() != null && !dto.getGrupoIds().isEmpty()) {
             List<Grupo> grupos = grupoRepository.findAllById(dto.getGrupoIds());
+            validarGruposDelCurso(dto.getGrupoIds(), grupos, cursoId);
             actividad.setGrupos(new HashSet<>(grupos));
         }
 
@@ -75,8 +87,28 @@ public class ActividadService {
      */
     @Transactional(readOnly = true)
     public List<ActividadDTO> listarActividadesCurso(Long cursoId) {
+        return listarActividadesCurso(cursoId, null, false, false, false);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ActividadDTO> listarActividadesCurso(Long cursoId,
+                                                     Long actorUsuarioId,
+                                                     boolean actorEsAdmin,
+                                                     boolean actorEsProfesor,
+                                                     boolean actorEsEstudiante) {
         if (!cursoRepository.existsById(cursoId)) {
             throw new EntityNotFoundException("Curso no encontrado con ID: " + cursoId);
+        }
+
+        if (!actorEsAdmin) {
+            if (actorEsProfesor) {
+                verificarAccesoProfesorACurso(cursoId, actorUsuarioId, false);
+            } else if (actorEsEstudiante) {
+                boolean inscrito = estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(actorUsuarioId, cursoId).isPresent();
+                if (!inscrito) {
+                    throw new AccessDeniedException("No tienes acceso a este curso");
+                }
+            }
         }
 
         return actividadRepository.findByCursoId(cursoId).stream()
@@ -89,8 +121,27 @@ public class ActividadService {
      */
     @Transactional(readOnly = true)
     public List<ActividadDTO> listarActividadesVisiblesGrupo(Long grupoId) {
-        if (!grupoRepository.existsById(grupoId)) {
-            throw new EntityNotFoundException("Grupo no encontrado con ID: " + grupoId);
+        return listarActividadesVisiblesGrupo(grupoId, null, false, false, false);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ActividadDTO> listarActividadesVisiblesGrupo(Long grupoId,
+                                                              Long actorUsuarioId,
+                                                              boolean actorEsAdmin,
+                                                              boolean actorEsProfesor,
+                                                              boolean actorEsEstudiante) {
+        Grupo grupo = grupoRepository.findById(grupoId)
+                .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con ID: " + grupoId));
+
+        if (!actorEsAdmin && actorUsuarioId != null) {
+            if (actorEsEstudiante) {
+                boolean pertenece = estudianteRepository.existsByUsuarioIdAndGrupoId(actorUsuarioId, grupoId);
+                if (!pertenece) {
+                    throw new AccessDeniedException("No tienes acceso a este grupo");
+                }
+            } else if (actorEsProfesor) {
+                verificarAccesoProfesorACurso(grupo.getCurso().getId(), actorUsuarioId, false);
+            }
         }
 
         return actividadRepository.findByGrupoIdAndVisibilidad(grupoId, Visibilidad.VISIBLE).stream()
@@ -112,8 +163,14 @@ public class ActividadService {
      * SYSOP-009: Publica/oculta una actividad.
      */
     public ActividadDTO cambiarVisibilidad(Long actividadId, Visibilidad visibilidad) {
+        return cambiarVisibilidad(actividadId, visibilidad, null, false);
+    }
+
+    public ActividadDTO cambiarVisibilidad(Long actividadId, Visibilidad visibilidad, Long actorUsuarioId, boolean actorEsAdmin) {
         Actividad actividad = actividadRepository.findById(actividadId)
                 .orElseThrow(() -> new EntityNotFoundException("Actividad no encontrada con ID: " + actividadId));
+
+        verificarAccesoProfesorACurso(actividad.getCurso().getId(), actorUsuarioId, actorEsAdmin);
 
         actividad.setVisibilidad(visibilidad);
         actividad = actividadRepository.save(actividad);
@@ -134,8 +191,14 @@ public class ActividadService {
      * Actualiza una actividad existente.
      */
     public ActividadDTO actualizarActividad(Long id, CrearActividadDTO dto) {
+        return actualizarActividad(id, dto, null, false);
+    }
+
+    public ActividadDTO actualizarActividad(Long id, CrearActividadDTO dto, Long actorUsuarioId, boolean actorEsAdmin) {
         Actividad actividad = actividadRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Actividad no encontrada con ID: " + id));
+
+        verificarAccesoProfesorACurso(actividad.getCurso().getId(), actorUsuarioId, actorEsAdmin);
 
         actividad.setTitulo(dto.getTitulo());
         actividad.setDescripcion(dto.getDescripcion());
@@ -164,6 +227,7 @@ public class ActividadService {
         // Actualizar grupos si se especifican
         if (dto.getGrupoIds() != null) {
             List<Grupo> grupos = grupoRepository.findAllById(dto.getGrupoIds());
+            validarGruposDelCurso(dto.getGrupoIds(), grupos, actividad.getCurso().getId());
             actividad.setGrupos(new HashSet<>(grupos));
         }
 
@@ -175,8 +239,17 @@ public class ActividadService {
      * Elimina una actividad.
      */
     public void eliminarActividad(Long id) {
+        eliminarActividad(id, null, false);
+    }
+
+    public void eliminarActividad(Long id, Long actorUsuarioId, boolean actorEsAdmin) {
         if (!actividadRepository.existsById(id)) {
             throw new EntityNotFoundException(ACTIVIDAD_NOT_FOUND + id);
+        }
+        if (!actorEsAdmin && actorUsuarioId != null) {
+            Actividad actividad = actividadRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException(ACTIVIDAD_NOT_FOUND + id));
+            verificarAccesoProfesorACurso(actividad.getCurso().getId(), actorUsuarioId, false);
         }
         actividadRepository.deleteById(id);
     }
@@ -202,5 +275,31 @@ public class ActividadService {
         return actividadRepository.findByCursoIdAndFechaLimiteBetween(cursoId, ahora, limite).stream()
                 .map(mapper::toDTO)
                 .toList();
+    }
+
+    private void validarGruposDelCurso(List<Long> grupoIdsSolicitados, List<Grupo> grupos, Long cursoId) {
+        Set<Long> idsEncontrados = grupos.stream().map(Grupo::getId).collect(Collectors.toSet());
+        List<Long> faltantes = grupoIdsSolicitados.stream()
+                .filter(id -> !idsEncontrados.contains(id))
+                .toList();
+        if (!faltantes.isEmpty()) {
+            throw new EntityNotFoundException("Grupos no encontrados: " + faltantes);
+        }
+
+        boolean hayGrupoDeOtroCurso = grupos.stream()
+                .anyMatch(g -> g.getCurso() == null || !cursoId.equals(g.getCurso().getId()));
+        if (hayGrupoDeOtroCurso) {
+            throw new IllegalArgumentException("Todos los grupos deben pertenecer al mismo curso de la actividad");
+        }
+    }
+
+    private void verificarAccesoProfesorACurso(Long cursoId, Long actorUsuarioId, boolean actorEsAdmin) {
+        if (actorEsAdmin || actorUsuarioId == null) {
+            return;
+        }
+        boolean esProfesorDelCurso = profesorRepository.existsByUsuarioIdAndCursoId(actorUsuarioId, cursoId);
+        if (!esProfesorDelCurso) {
+            throw new AccessDeniedException("No tienes permisos sobre este curso");
+        }
     }
 }

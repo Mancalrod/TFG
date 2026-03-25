@@ -19,10 +19,12 @@ import com.tfg.gestionentregables.repository.EntregaRepository;
 import com.tfg.gestionentregables.repository.EstudianteRepository;
 import com.tfg.gestionentregables.repository.FeedbackRepository;
 import com.tfg.gestionentregables.repository.MaterialRepository;
+import com.tfg.gestionentregables.repository.ProfesorRepository;
 import com.tfg.gestionentregables.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,6 +65,7 @@ public class EntregaService {
     private final MaterialRepository materialRepository;
     private final FeedbackRepository feedbackRepository;
     private final UsuarioRepository usuarioRepository;
+    private final ProfesorRepository profesorRepository;
     private final EntityMapper mapper;
     private final OneDriveService oneDriveService;
     private final ZipValidationService zipValidationService;
@@ -211,6 +214,14 @@ public class EntregaService {
     public EntregaDTO calificarEntrega(Long entregaId, Long profesorId, CalificacionDTO calificacion) {
         Entrega entrega = entregaRepository.findById(entregaId)
                 .orElseThrow(() -> new EntityNotFoundException("Entrega no encontrada con ID: " + entregaId));
+
+        Long cursoId = entrega.getEntregable().getActividad().getCurso().getId();
+        if (profesorId != null && profesorId > 0) {
+            boolean esProfesorDelCurso = profesorRepository.existsByUsuarioIdAndCursoId(profesorId, cursoId);
+            if (!esProfesorDelCurso) {
+                throw new AccessDeniedException("No tienes permisos para calificar entregas de este curso");
+            }
+        }
 
         if (calificacion.getNota() == null) {
             throw new IllegalArgumentException("La nota es obligatoria");

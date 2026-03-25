@@ -3,6 +3,7 @@ package com.tfg.gestionentregables.controller;
 import com.tfg.gestionentregables.dto.*;
 import com.tfg.gestionentregables.entity.Material;
 import com.tfg.gestionentregables.service.EntregaService;
+import com.tfg.gestionentregables.service.SecurityContextUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -11,6 +12,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +36,7 @@ public class EntregaController {
     private final EntregaService entregaService;
     private final com.tfg.gestionentregables.service.EntregableService entregableService;
     private final com.tfg.gestionentregables.service.ActividadService actividadService;
+    private final SecurityContextUserService securityContextUserService;
 
     /**
      * SYSOP-014: Obtener detalle de una entrega.
@@ -53,7 +57,13 @@ public class EntregaController {
             @PathVariable Long usuarioId,
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) String comentario,
-            @RequestParam(required = false) List<MultipartFile> archivos) {
+            @RequestParam(required = false) List<MultipartFile> archivos,
+            Authentication authentication) {
+        Long actorId = securityContextUserService.getCurrentUserId(authentication);
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        if (!actorEsAdmin && actorId != null && !actorId.equals(usuarioId)) {
+            throw new AccessDeniedException("No puedes realizar entregas en nombre de otro usuario");
+        }
         EntregaDTO entrega = entregaService.realizarEntrega(entregableId, usuarioId, nombre, comentario, archivos);
         return ResponseEntity.status(HttpStatus.CREATED).body(entrega);
     }
@@ -73,7 +83,13 @@ public class EntregaController {
     @GetMapping("/entregable/{entregableId}/estudiante/{usuarioId}")
     public ResponseEntity<List<EntregaDTO>> listarEntregasEstudiante(
             @PathVariable Long entregableId,
-            @PathVariable Long usuarioId) {
+            @PathVariable Long usuarioId,
+            Authentication authentication) {
+        Long actorId = securityContextUserService.getCurrentUserId(authentication);
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        if (!actorEsAdmin && actorId != null && !actorId.equals(usuarioId)) {
+            throw new AccessDeniedException("No puedes consultar entregas de otro usuario");
+        }
         return ResponseEntity.ok(entregaService.listarEntregasEstudiante(entregableId, usuarioId));
     }
 
@@ -85,7 +101,17 @@ public class EntregaController {
     public ResponseEntity<EntregaDTO> calificarEntrega(
             @PathVariable Long id,
             @RequestParam Long profesorId,
-            @Valid @RequestBody CalificacionDTO calificacion) {
+            @Valid @RequestBody CalificacionDTO calificacion,
+            Authentication authentication) {
+        Long actorId = securityContextUserService.getCurrentUserId(authentication);
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        boolean actorEsProfesor = securityContextUserService.hasRole(authentication, "PROFESOR");
+        if (!actorEsAdmin && !actorEsProfesor) {
+            throw new AccessDeniedException("Solo profesores o administradores pueden calificar entregas");
+        }
+        if (!actorEsAdmin && actorId != null && !actorId.equals(profesorId)) {
+            throw new AccessDeniedException("No puedes calificar en nombre de otro profesor");
+        }
         return ResponseEntity.ok(entregaService.calificarEntrega(id, profesorId, calificacion));
     }
 
@@ -201,13 +227,25 @@ public class EntregaController {
 
     @GetMapping("/estudiante/{estudianteId}")
     public ResponseEntity<List<EntregaDTO>> listarTodasEntregasEstudiante(
-            @PathVariable Long estudianteId) {
+            @PathVariable Long estudianteId,
+            Authentication authentication) {
+        Long actorId = securityContextUserService.getCurrentUserId(authentication);
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        if (!actorEsAdmin && actorId != null && !actorId.equals(estudianteId)) {
+            throw new AccessDeniedException("No puedes consultar entregas de otro estudiante");
+        }
         return ResponseEntity.ok(entregaService.listarTodasEntregasEstudiante(estudianteId));
     }
 
     @GetMapping("/profesor/{profesorId}/pendientes")
     public ResponseEntity<List<EntregaResumenDTO>> listarEntregasPendientesCalificar(
-            @PathVariable Long profesorId) {
+            @PathVariable Long profesorId,
+            Authentication authentication) {
+        Long actorId = securityContextUserService.getCurrentUserId(authentication);
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        if (!actorEsAdmin && actorId != null && !actorId.equals(profesorId)) {
+            throw new AccessDeniedException("No puedes consultar pendientes de otro profesor");
+        }
         return ResponseEntity.ok(entregaService.listarEntregasPendientesCalificar(profesorId));
     }
 

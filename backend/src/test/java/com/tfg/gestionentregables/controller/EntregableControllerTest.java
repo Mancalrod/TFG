@@ -7,6 +7,7 @@ import com.tfg.gestionentregables.entity.enums.TipoMaterial;
 import com.tfg.gestionentregables.entity.enums.Visibilidad;
 import com.tfg.gestionentregables.security.jwt.JwtTokenProvider;
 import com.tfg.gestionentregables.service.EntregableService;
+import com.tfg.gestionentregables.service.SecurityContextUserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,6 +35,7 @@ class EntregableControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @MockitoBean private EntregableService entregableService;
+    @MockitoBean private SecurityContextUserService securityContextUserService;
     @MockitoBean private JwtTokenProvider jwtTokenProvider;
     @MockitoBean private UserDetailsService userDetailsService;
 

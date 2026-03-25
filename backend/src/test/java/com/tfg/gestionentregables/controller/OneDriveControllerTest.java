@@ -4,6 +4,7 @@ import com.tfg.gestionentregables.entity.OneDriveToken;
 import com.tfg.gestionentregables.entity.Usuario;
 import com.tfg.gestionentregables.security.jwt.JwtTokenProvider;
 import com.tfg.gestionentregables.service.OneDriveService;
+import com.tfg.gestionentregables.service.SecurityContextUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -14,6 +15,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.core.Authentication;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,6 +31,7 @@ class OneDriveControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @MockitoBean private OneDriveService oneDriveService;
+    @MockitoBean private SecurityContextUserService securityContextUserService;
     @MockitoBean private JwtTokenProvider jwtTokenProvider;
     @MockitoBean private UserDetailsService userDetailsService;
 
@@ -36,6 +39,9 @@ class OneDriveControllerTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(securityContextUserService.getCurrentUserId(any(Authentication.class))).thenReturn(1L);
+        lenient().when(securityContextUserService.hasRole(any(Authentication.class), eq("ADMIN"))).thenReturn(false);
+
         Usuario usuario = Usuario.builder().id(1L).nombre("Test User")
                 .correoElectronico("test@test.com").contrasena("pass").build();
 
