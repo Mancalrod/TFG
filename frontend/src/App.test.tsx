@@ -44,6 +44,22 @@ const renderAt = (path: string) => {
 };
 
 describe('App routes', () => {
+  it('muestra loading en home mientras se resuelve auth', () => {
+    mockUseAuth.mockReturnValue({ isAuthenticated: false, loading: true });
+
+    renderAt('/');
+
+    expect(screen.getByText('Cargando...')).toBeInTheDocument();
+  });
+
+  it('muestra HomePage en home cuando no hay sesión', () => {
+    mockUseAuth.mockReturnValue({ isAuthenticated: false, loading: false });
+
+    renderAt('/');
+
+    expect(screen.getByText('HomePage')).toBeInTheDocument();
+  });
+
   it('muestra loading mientras se resuelve auth en ruta protegida', () => {
     mockUseAuth.mockReturnValue({ isAuthenticated: false, loading: true });
 

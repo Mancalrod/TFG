@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -36,6 +36,16 @@ vi.mock('react-router-dom', async () => {
 });
 
 describe('Navbar', () => {
+  const renderNavbarAt = (path: string) => {
+    render(
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="*" element={<Navbar />} />
+        </Routes>
+      </MemoryRouter>
+    );
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseTheme.mockReturnValue({ isDark: true, toggleTheme: mockToggleTheme });
@@ -108,5 +118,98 @@ describe('Navbar', () => {
     );
 
     expect(await screen.findByText('Profesor')).toBeInTheDocument();
+  });
+
+  it('no muestra rol contextual fuera de rutas de curso', async () => {
+    mockUseAuth.mockReturnValue({
+      usuario: { id: 8, nombre: 'Usuario' },
+      esProfesor: true,
+      esEstudiante: true,
+      esAdmin: false,
+      logout: mockLogout,
+    });
+
+    renderNavbarAt('/dashboard');
+
+    await waitFor(() => {
+      expect(screen.queryByText('Profesor/Estudiante')).not.toBeInTheDocument();
+    });
+  });
+
+  it('muestra Estudiante cuando solo pertenece como estudiante al curso', async () => {
+    mockUseAuth.mockReturnValue({
+      usuario: { id: 9, nombre: 'Alumno' },
+      esProfesor: false,
+      esEstudiante: true,
+      esAdmin: false,
+      logout: mockLogout,
+    });
+    mockListarPorEstudiante.mockResolvedValue([{ id: 22, titulo: 'Curso Y' }]);
+
+    renderNavbarAt('/cursos/22');
+
+    expect(await screen.findByText('Estudiante')).toBeInTheDocument();
+  });
+
+  it('muestra Profesor/Estudiante cuando tiene ambos roles en el curso', async () => {
+    mockUseAuth.mockReturnValue({
+      usuario: { id: 10, nombre: 'Mixto' },
+      esProfesor: true,
+      esEstudiante: true,
+      esAdmin: false,
+      logout: mockLogout,
+    });
+    mockListarPorProfesor.mockResolvedValue([{ id: 5, titulo: 'Curso Mixto' }]);
+    mockListarPorEstudiante.mockResolvedValue([{ id: 5, titulo: 'Curso Mixto' }]);
+
+    renderNavbarAt('/cursos/5');
+
+    expect(await screen.findByText('Profesor/Estudiante')).toBeInTheDocument();
+  });
+
+  it('en error de API aplica fallback de roles', async () => {
+    mockUseAuth.mockReturnValue({
+      usuario: { id: 11, nombre: 'Fallback' },
+      esProfesor: false,
+      esEstudiante: true,
+      esAdmin: false,
+      logout: mockLogout,
+    });
+    mockListarPorEstudiante.mockRejectedValue(new Error('boom'));
+
+    renderNavbarAt('/cursos/90');
+
+    expect(await screen.findByText('Estudiante')).toBeInTheDocument();
+  });
+
+  it('si es admin en curso muestra Profesor sin consultar listados', async () => {
+    mockUseAuth.mockReturnValue({
+      usuario: { id: 12, nombre: 'Admin' },
+      esProfesor: false,
+      esEstudiante: false,
+      esAdmin: true,
+      logout: mockLogout,
+    });
+
+    renderNavbarAt('/cursos/7');
+
+    expect(await screen.findByText('Profesor')).toBeInTheDocument();
+    expect(mockListarPorProfesor).not.toHaveBeenCalled();
+    expect(mockListarPorEstudiante).not.toHaveBeenCalled();
+  });
+
+  it('renderiza toggle con label de modo oscuro cuando isDark=false', () => {
+    mockUseTheme.mockReturnValue({ isDark: false, toggleTheme: mockToggleTheme });
+    mockUseAuth.mockReturnValue({
+      usuario: { id: 13, nombre: 'Tema' },
+      esProfesor: false,
+      esEstudiante: false,
+      esAdmin: false,
+      logout: mockLogout,
+    });
+
+    renderNavbarAt('/dashboard');
+
+    expect(screen.getByRole('button', { name: 'Cambiar a modo oscuro' })).toBeInTheDocument();
   });
 });
