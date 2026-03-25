@@ -1,13 +1,73 @@
-import React from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, NavLink, useMatch, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { cursoService } from '../services/cursoService';
 import './Navbar.css';
 
 const Navbar: React.FC = () => {
-  const { usuario, esProfesor, esAdmin, logout } = useAuth();
+  const { usuario, esProfesor, esEstudiante, esAdmin, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const courseMatch = useMatch('/cursos/:id');
+  const cursoIdActual = courseMatch?.params?.id ? Number(courseMatch.params.id) : null;
+  const [rolEnCursoNavbar, setRolEnCursoNavbar] = useState<'PROFESOR' | 'ESTUDIANTE' | 'AMBOS' | null>(null);
+
+  useEffect(() => {
+    if (!usuario || !cursoIdActual) {
+      setRolEnCursoNavbar(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const resolverRolEnCurso = async () => {
+      if (esAdmin) {
+        if (!cancelled) setRolEnCursoNavbar('PROFESOR');
+        return;
+      }
+
+      try {
+        let profesorEnCurso = false;
+        let estudianteEnCurso = false;
+
+        if (esProfesor) {
+          const cursosProfesor = await cursoService.listarPorProfesor(usuario.id);
+          profesorEnCurso = cursosProfesor.some(c => c.id === cursoIdActual);
+        }
+
+        if (esEstudiante) {
+          const cursosEstudiante = await cursoService.listarPorEstudiante(usuario.id);
+          estudianteEnCurso = cursosEstudiante.some(c => c.id === cursoIdActual);
+        }
+
+        if (cancelled) return;
+
+        if (profesorEnCurso && estudianteEnCurso) {
+          setRolEnCursoNavbar('AMBOS');
+        } else if (profesorEnCurso) {
+          setRolEnCursoNavbar('PROFESOR');
+        } else if (estudianteEnCurso) {
+          setRolEnCursoNavbar('ESTUDIANTE');
+        } else {
+          setRolEnCursoNavbar(null);
+        }
+      } catch {
+        if (cancelled) return;
+
+        if (esProfesor && esEstudiante) setRolEnCursoNavbar('AMBOS');
+        else if (esProfesor) setRolEnCursoNavbar('PROFESOR');
+        else if (esEstudiante) setRolEnCursoNavbar('ESTUDIANTE');
+        else setRolEnCursoNavbar(null);
+      }
+    };
+
+    resolverRolEnCurso();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [usuario, cursoIdActual, esProfesor, esEstudiante, esAdmin]);
 
   const handleLogout = () => {
     logout();
@@ -88,9 +148,15 @@ const Navbar: React.FC = () => {
           <div className="navbar-user">
             <div className="user-info-nav">
               <span className="user-name">{usuario.nombre}</span>
-              <span className="user-role">
-                {esAdmin ? 'Administrador' : esProfesor ? 'Profesor' : 'Estudiante'}
-              </span>
+              {cursoIdActual && rolEnCursoNavbar && (
+                <span className={`user-role-navbar ${rolEnCursoNavbar.toLowerCase()}`}>
+                  {rolEnCursoNavbar === 'AMBOS'
+                    ? 'Profesor/Estudiante'
+                    : rolEnCursoNavbar === 'PROFESOR'
+                      ? 'Profesor'
+                      : 'Estudiante'}
+                </span>
+              )}
             </div>
             <button onClick={handleLogout} className="btn-logout">
               Cerrar Sesión

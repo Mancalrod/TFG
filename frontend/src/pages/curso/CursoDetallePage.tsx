@@ -11,12 +11,14 @@ import './CursoDetallePage.css';
 const CursoDetallePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { esProfesor, esAdmin, usuario } = useAuth();
+  const { esProfesor, esEstudiante, esAdmin, usuario } = useAuth();
 
   const [curso, setCurso] = useState<CursoDTO | null>(null);
   const [actividades, setActividades] = useState<ActividadDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [rolesEnCurso, setRolesEnCurso] = useState({ profesor: false, estudiante: false });
+  const [rolVistaCurso, setRolVistaCurso] = useState<'PROFESOR' | 'ESTUDIANTE' | null>(null);
 
   // Modal crear actividad
   const [mostrarModal, setMostrarModal] = useState(false);
@@ -77,6 +79,64 @@ const CursoDetallePage: React.FC = () => {
 
     fetchData();
   }, [id, cursoId]);
+
+  // Detectar roles del usuario dentro del curso actual
+  useEffect(() => {
+    if (!usuario || !id) return;
+
+    let cancelled = false;
+
+    const detectarRolesEnCurso = async () => {
+      // Los administradores mantienen capacidad de gestión como profesor
+      if (esAdmin) {
+        if (!cancelled) {
+          setRolesEnCurso({ profesor: true, estudiante: false });
+          setRolVistaCurso('PROFESOR');
+        }
+        return;
+      }
+
+      try {
+        let esProfesorEnCurso = false;
+        let esEstudianteEnCurso = false;
+
+        if (esProfesor) {
+          const cursosProfesor = await cursoService.listarPorProfesor(usuario.id);
+          esProfesorEnCurso = cursosProfesor.some(c => c.id === cursoId);
+        }
+
+        if (esEstudiante) {
+          const cursosEstudiante = await cursoService.listarPorEstudiante(usuario.id);
+          esEstudianteEnCurso = cursosEstudiante.some(c => c.id === cursoId);
+        }
+
+        if (!cancelled) {
+          setRolesEnCurso({ profesor: esProfesorEnCurso, estudiante: esEstudianteEnCurso });
+          setRolVistaCurso(prev => {
+            if (prev === 'PROFESOR' && esProfesorEnCurso) return prev;
+            if (prev === 'ESTUDIANTE' && esEstudianteEnCurso) return prev;
+            if (esProfesorEnCurso) return 'PROFESOR';
+            if (esEstudianteEnCurso) return 'ESTUDIANTE';
+            return null;
+          });
+        }
+      } catch {
+        // Fallback razonable si no se puede resolver por API
+        if (!cancelled) {
+          const fallbackProfesor = esProfesor;
+          const fallbackEstudiante = esEstudiante;
+          setRolesEnCurso({ profesor: fallbackProfesor, estudiante: fallbackEstudiante });
+          setRolVistaCurso(fallbackProfesor ? 'PROFESOR' : fallbackEstudiante ? 'ESTUDIANTE' : null);
+        }
+      }
+    };
+
+    detectarRolesEnCurso();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [usuario, id, cursoId, esProfesor, esEstudiante, esAdmin]);
 
   // Comprobar estado de OneDrive al abrir modal de crear actividad
   useEffect(() => {
@@ -195,7 +255,9 @@ const CursoDetallePage: React.FC = () => {
     );
   }
 
-  const puedeCrear = (esProfesor || esAdmin) && !modoPreview;
+  const esProfesorEnCurso = rolVistaCurso === 'PROFESOR';
+  const tieneAmbosRolesEnCurso = rolesEnCurso.profesor && rolesEnCurso.estudiante;
+  const puedeCrear = esProfesorEnCurso && !modoPreview;
 
   // En modo preview: solo actividades visibles y del grupo seleccionado
   const actividadesMostradas = modoPreview
@@ -254,7 +316,37 @@ const CursoDetallePage: React.FC = () => {
 
         <div className="cd-header-content">
           <div className="cd-header-info">
-            <span className="cd-codigo">{curso.codigo}</span>
+            <div className="cd-curso-badges">
+              <span className="cd-codigo">{curso.codigo}</span>
+              {rolVistaCurso && (
+                <span className={`cd-rol-curso ${rolVistaCurso === 'PROFESOR' ? 'profesor' : 'estudiante'}`}>
+                  {rolVistaCurso === 'PROFESOR' ? 'Profesor' : 'Estudiante'}
+                </span>
+              )}
+            </div>
+            {tieneAmbosRolesEnCurso && (
+              <div className="cd-role-switch" role="group" aria-label="Cambiar vista de rol en el curso">
+                <button
+                  type="button"
+                  className={`cd-role-switch-btn ${rolVistaCurso === 'PROFESOR' ? 'active' : ''}`}
+                  onClick={() => setRolVistaCurso('PROFESOR')}
+                >
+                  Vista profesor
+                </button>
+                <button
+                  type="button"
+                  className={`cd-role-switch-btn ${rolVistaCurso === 'ESTUDIANTE' ? 'active' : ''}`}
+                  onClick={() => {
+                    setRolVistaCurso('ESTUDIANTE');
+                    setModoPreview(false);
+                    setGrupoPreviewId(null);
+                    setMostrarSelectorGrupo(false);
+                  }}
+                >
+                  Vista estudiante
+                </button>
+              </div>
+            )}
             <h1>{curso.titulo}</h1>
             {curso.descripcion && <p className="cd-descripcion">{curso.descripcion}</p>}
           </div>
@@ -271,7 +363,7 @@ const CursoDetallePage: React.FC = () => {
               <span className="cd-stat-value">{curso.grupos.length}</span>
               <span className="cd-stat-label">Grupos</span>
             </div>
-            {!modoPreview && (esProfesor || esAdmin) && curso.grupos.length > 0 && (
+            {!modoPreview && esProfesorEnCurso && curso.grupos.length > 0 && (
               <button
                 className="cd-btn-preview"
                 onClick={() => setMostrarSelectorGrupo(true)}
@@ -615,7 +707,7 @@ const CursoDetallePage: React.FC = () => {
               )}
 
               {/* OneDrive */}
-              {(esProfesor || esAdmin) && oneDriveEnabled && !cargandoOneDrive && (
+              {esProfesorEnCurso && oneDriveEnabled && !cargandoOneDrive && (
                 <div className="cd-form-group">
                   <label>Subir entregas a OneDrive</label>
                   {oneDriveConectado ? (

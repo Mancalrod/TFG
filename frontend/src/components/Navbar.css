@@ -85,13 +85,27 @@
   color: var(--text-primary);
 }
 
-.user-role {
+.user-role-navbar {
   font-size: 0.75rem;
-  background-color: var(--accent-blue-bg);
-  color: var(--accent-blue-light);
   padding: 4px 10px;
   border-radius: 999px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.user-role-navbar.profesor {
+  background-color: rgba(52, 152, 219, 0.16);
+  color: var(--accent-blue-light);
+}
+
+.user-role-navbar.estudiante {
+  background-color: rgba(46, 204, 113, 0.16);
+  color: var(--badge-success-color);
+}
+
+.user-role-navbar.ambos {
+  background-color: rgba(241, 196, 15, 0.18);
+  color: var(--warning-color);
 }
 
 .btn-logout {

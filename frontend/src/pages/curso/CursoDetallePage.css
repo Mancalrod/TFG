@@ -241,6 +241,48 @@
   min-width: 0;
 }
 
+.cd-curso-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.cd-role-switch {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border-secondary);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.cd-role-switch-btn {
+  border: none;
+  background-color: transparent;
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.cd-role-switch-btn + .cd-role-switch-btn {
+  border-left: 1px solid var(--border-secondary);
+}
+
+.cd-role-switch-btn:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.cd-role-switch-btn.active {
+  background-color: var(--accent-blue-bg);
+  color: var(--accent-blue);
+}
+
 .cd-codigo {
   display: inline-block;
   background-color: var(--accent-blue-bg);
@@ -251,7 +293,30 @@
   border-radius: 4px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 0;
+}
+
+.cd-rol-curso {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.cd-rol-curso.profesor {
+  background: rgba(52, 152, 219, 0.15);
+  color: var(--accent-blue);
+  border: 1px solid rgba(52, 152, 219, 0.25);
+}
+
+.cd-rol-curso.estudiante {
+  background: rgba(46, 204, 113, 0.14);
+  color: var(--badge-success-color);
+  border: 1px solid rgba(46, 204, 113, 0.28);
 }
 
 .cd-header-info h1 {
