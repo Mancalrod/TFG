@@ -23,6 +23,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,

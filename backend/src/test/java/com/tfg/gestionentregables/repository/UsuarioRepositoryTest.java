@@ -9,7 +9,6 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,16 +23,14 @@ class UsuarioRepositoryTest {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    private Usuario usuario;
-
     @BeforeEach
     void setUp() {
-        usuario = em.persistAndFlush(Usuario.builder()
-                .nombre("Juan García")
-                .correoElectronico("juan@test.com")
-                .contrasena("pass123")
-                .esAdmin(false)
-                .build());
+       em.persistAndFlush(Usuario.builder()
+            .nombre("Juan García")
+            .correoElectronico("juan@test.com")
+            .contrasena("pass123")
+            .esAdmin(false)
+            .build());
     }
 
     @Test

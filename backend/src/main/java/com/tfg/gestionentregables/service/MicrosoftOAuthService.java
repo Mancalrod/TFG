@@ -71,7 +71,7 @@ public class MicrosoftOAuthService {
      * @param state Parámetro state (contiene usuarioId:uuid)
      * @return MicrosoftToken almacenado
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public MicrosoftToken exchangeCodeForTokens(String code, String state) {
         // Extraer el usuarioId del state
         Long usuarioId = extractUsuarioIdFromState(state);
@@ -111,7 +111,7 @@ public class MicrosoftOAuthService {
      * @param usuarioId ID del usuario
      * @return Token actualizado, o empty si no hay token almacenado
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public Optional<MicrosoftToken> refreshAccessToken(Long usuarioId) {
         Optional<MicrosoftToken> tokenOpt = tokenRepository.findByUsuarioId(usuarioId);
         if (tokenOpt.isEmpty()) {
@@ -219,7 +219,6 @@ public class MicrosoftOAuthService {
 
     // ── Métodos privados ──
 
-    @SuppressWarnings("unchecked")
     private MicrosoftToken saveTokens(Usuario usuario, Map<String, Object> tokenResponse) {
         String accessToken = (String) tokenResponse.get("access_token");
         String refreshToken = (String) tokenResponse.get("refresh_token");
@@ -251,7 +250,8 @@ public class MicrosoftOAuthService {
     /**
      * Obtiene el email de Microsoft usando el access token para /me.
      */
-    @SuppressWarnings("unchecked")
+
+    @SuppressWarnings("rawtypes")
     private String fetchMicrosoftEmail(String accessToken) {
         try {
             HttpHeaders headers = new HttpHeaders();

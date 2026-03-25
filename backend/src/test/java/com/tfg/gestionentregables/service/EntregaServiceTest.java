@@ -1401,7 +1401,6 @@ class EntregaServiceTest {
 
         @Test
         @DisplayName("guardarEnCloudinary construye material con metadatos correctos")
-        @SuppressWarnings("unchecked")
         void guardarEnCloudinary_ok() throws Exception {
             MockMultipartFile archivo = new MockMultipartFile(
                     "file", "informe.pdf", "application/pdf", "contenido".getBytes());
@@ -1460,7 +1459,6 @@ class EntregaServiceTest {
 
         @Test
         @DisplayName("evitarColisionZip agrega sufijos incrementales cuando hay duplicados")
-        @SuppressWarnings("unchecked")
         void evitarColisionZip_incremental() throws Exception {
             Method method = EntregaService.class.getDeclaredMethod("evitarColisionZip", String.class, Set.class);
             method.setAccessible(true);

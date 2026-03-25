@@ -132,6 +132,7 @@ class CloudinaryServiceTest {
                     .hasMessageContaining("no está habilitado");
         }
 
+        @SuppressWarnings("resource")
         @Test
         @DisplayName("Descarga archivo correctamente con status 200")
         void descargarOk() {

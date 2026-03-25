@@ -360,8 +360,6 @@ public class ZipValidationService {
         for (NodoEstructura nodo : nodos) {
             if ("CARPETA".equals(nodo.tipo())) {
                 if ("*".equals(nodo.nombre())) {
-                    // Cualquier carpeta en este nivel
-                    Set<String> posiblesCarpetas = new HashSet<>();
                     String resto = archivoZip.substring(pathActual.length());
                     int slashIdx = resto.indexOf('/');
                     if (slashIdx >= 0) {

@@ -599,6 +599,7 @@ class OneDriveServiceMockServerTest {
     @DisplayName("descargarArchivo - flujo completo")
     class DescargarArchivoCompleto {
 
+        @SuppressWarnings("resource")
         @Test
         @DisplayName("Descarga archivo correctamente y devuelve bytes")
         void descargar_exitoso() throws InterruptedException {
@@ -879,6 +880,7 @@ class OneDriveServiceMockServerTest {
             verify(tokenRepository).save(any(OneDriveToken.class));
         }
 
+        @SuppressWarnings("resource")
         @Test
         @DisplayName("Refresca token antes de descargar archivo")
         void descargar_conTokenExpirado() {

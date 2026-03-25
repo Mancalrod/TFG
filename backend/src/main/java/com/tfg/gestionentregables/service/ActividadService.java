@@ -27,7 +27,6 @@ public class ActividadService {
     private final ActividadRepository actividadRepository;
     private final CursoRepository cursoRepository;
     private final GrupoRepository grupoRepository;
-    private final ProfesorRepository profesorRepository;
     private final EntityMapper mapper;
 
     /**

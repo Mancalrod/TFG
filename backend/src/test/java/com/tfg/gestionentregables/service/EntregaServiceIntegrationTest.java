@@ -5,7 +5,6 @@ import com.tfg.gestionentregables.entity.*;
 import com.tfg.gestionentregables.entity.enums.EstadoEntrega;
 import com.tfg.gestionentregables.entity.enums.TipoMaterial;
 import com.tfg.gestionentregables.repository.*;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;

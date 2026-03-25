@@ -427,6 +427,7 @@ class UsuarioServiceTest {
     @DisplayName("eliminarRolProfesor")
     class EliminarRolProfesor {
 
+        @SuppressWarnings("unused")
         @Test
         @DisplayName("Elimina todos los roles de profesor del usuario")
         void eliminar_ok() {
@@ -459,6 +460,7 @@ class UsuarioServiceTest {
     @DisplayName("eliminarRolEstudiante")
     class EliminarRolEstudiante {
 
+        @SuppressWarnings("unused")
         @Test
         @DisplayName("Elimina todos los roles de estudiante del usuario")
         void eliminar_ok() {

@@ -2,7 +2,6 @@ package com.tfg.gestionentregables.entity;
 
 import com.tfg.gestionentregables.entity.enums.TipoActividad;
 import com.tfg.gestionentregables.entity.enums.Visibilidad;
-import com.tfg.gestionentregables.entity.ModoOneDrive;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
