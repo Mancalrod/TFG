@@ -229,9 +229,15 @@ public class OneDriveService {
 
         String rutaOneDrive;
         if (carpetaOpcional != null && !carpetaOpcional.isBlank()) {
-            rutaOneDrive = String.format("%s/%s/%s", 
-                    carpetaOpcional, 
-                    sanitizarNombreCarpeta(estudianteNombre), 
+            String carpetaBase = sanitizarRutaCarpetas(carpetaOpcional);
+            if (carpetaBase.isBlank()) {
+                carpetaBase = sanitizarNombreCarpeta(config.getRootFolder());
+            }
+
+            rutaOneDrive = String.format("%s/%s/%s/%s",
+                    carpetaBase,
+                sanitizarNombreCarpeta(entregableTitulo),
+                sanitizarNombreCarpeta(estudianteNombre),
                     nombreArchivoSeguro);
         } else {
             // Construir ruta predeterminada: TFG-Entregables/Curso/Actividad/Entregable/Alumno/archivo.ext
@@ -256,6 +262,31 @@ public class OneDriveService {
                                             String nombreArchivo) {
         return subirArchivo(usuarioId, archivo, cursoTitulo, actividadTitulo,
                 entregableTitulo, estudianteNombre, nombreArchivo, null);
+    }
+
+    /**
+     * Sube un archivo a una ruta explícita de carpetas.
+     *
+     * @param usuarioId ID del usuario dueño del OneDrive
+     * @param archivo Archivo a subir
+     * @param rutaCarpetas Ruta de carpetas (ej: Mis Entregas/v3)
+     * @param nombreArchivo Nombre final del archivo
+     * @return Mapa con fileId y webUrl del archivo subido
+     */
+    public Map<String, String> subirArchivoEnRuta(Long usuarioId,
+                                                  MultipartFile archivo,
+                                                  String rutaCarpetas,
+                                                  String nombreArchivo) {
+        String accessToken = obtenerAccessTokenValido(usuarioId);
+        String nombreArchivoSeguro = sanitizarNombreArchivo(nombreArchivo);
+
+        String rutaBase = sanitizarRutaCarpetas(rutaCarpetas);
+        if (rutaBase.isBlank()) {
+            rutaBase = sanitizarNombreCarpeta(config.getRootFolder());
+        }
+
+        String rutaOneDrive = rutaBase + "/" + nombreArchivoSeguro;
+        return subirArchivoAOneDrive(accessToken, rutaOneDrive, archivo);
     }
 
     /**
@@ -389,17 +420,28 @@ public class OneDriveService {
      * @return Contenido del archivo como byte[]
      */
     public byte[] descargarArchivo(Long usuarioId, String fileId) {
-        String accessToken = obtenerAccessTokenValido(usuarioId);
-
         try {
-            String url = config.getGraphApiUrl() + "/me/drive/items/" + fileId + "/content";
+            String downloadUrl = obtenerUrlDescarga(usuarioId, fileId);
 
+            // Si Graph devuelve una URL temporal firmada, no requiere Authorization.
+            if (downloadUrl != null
+                    && !downloadUrl.isBlank()
+                    && !downloadUrl.startsWith(config.getGraphApiUrl())) {
+                return restClient.get()
+                        .uri(downloadUrl)
+                        .retrieve()
+                        .body(byte[].class);
+            }
+
+            // Fallback para entornos donde no se entregue @microsoft.graph.downloadUrl.
+            String accessToken = obtenerAccessTokenValido(usuarioId);
+            String url = config.getGraphApiUrl() + "/me/drive/items/" + fileId + "/content";
             return restClient.get()
                     .uri(url)
                     .header("Authorization", "Bearer " + accessToken)
                     .retrieve()
                     .body(byte[].class);
-        } catch (RestClientException e) {
+        } catch (RuntimeException e) {
             log.error("Error al descargar archivo de OneDrive (fileId: {}): {}", fileId, e.getMessage());
             throw new RuntimeException("Error al descargar archivo de OneDrive: " + e.getMessage(), e);
         }
@@ -619,6 +661,33 @@ public class OneDriveService {
         return nombre.replaceAll("[\"*:<>?/\\\\|]", "_")
                 .replaceAll("\\s+", " ")
                 .trim();
+    }
+
+    /**
+     * Sanitiza una ruta de carpetas preservando el enrutado por segmentos.
+     * Ejemplo: "Mis Entregas/v1" -> "Mis Entregas/v1"
+     */
+    private String sanitizarRutaCarpetas(String ruta) {
+        if (ruta == null || ruta.isBlank()) {
+            return "";
+        }
+
+        String normalizada = ruta.replace('\\', '/');
+        String[] segmentos = normalizada.split("/");
+        StringBuilder sb = new StringBuilder();
+
+        for (String segmento : segmentos) {
+            String limpio = sanitizarNombreCarpeta(segmento);
+            if (limpio.isBlank() || ".".equals(limpio) || "..".equals(limpio)) {
+                continue;
+            }
+            if (sb.length() > 0) {
+                sb.append('/');
+            }
+            sb.append(limpio);
+        }
+
+        return sb.toString();
     }
 
     /**

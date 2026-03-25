@@ -156,8 +156,7 @@ class EntregaServiceIntegrationTest {
             when(oneDriveService.isEnabled()).thenReturn(true);
             when(oneDriveService.estaConectado(10L)).thenReturn(false);
             when(oneDriveService.estaConectado(1L)).thenReturn(true);
-            when(oneDriveService.subirArchivo(eq(1L), any(), eq("Curso Test"),
-                    eq("Actividad 1"), eq("Entregable 1"), eq("Mis Entregas"), anyString()))
+            when(oneDriveService.subirArchivoEnRuta(eq(1L), any(), startsWith("TFG-Entregables/Mis Entregas/"), anyString()))
                     .thenReturn(Map.of("fileId", "alum-file-1", "webUrl", "https://onedrive/alum-file-1"));
 
             entregaService.realizarEntrega(1L, 1L, "Entrega OD alumno", List.of(archivo));
@@ -181,8 +180,7 @@ class EntregaServiceIntegrationTest {
             when(oneDriveService.subirArchivo(eq(10L), any(), anyString(),
                     anyString(), anyString(), eq("Alumno Test"), anyString()))
                     .thenReturn(Map.of("fileId", "prof-f", "webUrl", "https://od/prof"));
-            when(oneDriveService.subirArchivo(eq(1L), any(), anyString(),
-                    anyString(), anyString(), eq("Mis Entregas"), anyString()))
+            when(oneDriveService.subirArchivoEnRuta(eq(1L), any(), startsWith("TFG-Entregables/Mis Entregas/"), anyString()))
                     .thenReturn(Map.of("fileId", "alum-f", "webUrl", "https://od/alum"));
 
             entregaService.realizarEntrega(1L, 1L, "Entrega ambos", List.of(archivo));
@@ -196,8 +194,7 @@ class EntregaServiceIntegrationTest {
             // Ambas subidas fueron invocadas
             verify(oneDriveService).subirArchivo(eq(10L), any(), anyString(),
                     anyString(), anyString(), eq("Alumno Test"), anyString());
-            verify(oneDriveService).subirArchivo(eq(1L), any(), anyString(),
-                    anyString(), anyString(), eq("Mis Entregas"), anyString());
+            verify(oneDriveService).subirArchivoEnRuta(eq(1L), any(), startsWith("TFG-Entregables/Mis Entregas/"), anyString());
         }
 
         @Test
@@ -212,8 +209,7 @@ class EntregaServiceIntegrationTest {
             when(oneDriveService.subirArchivo(eq(10L), any(), anyString(),
                     anyString(), anyString(), eq("Alumno Test"), anyString()))
                     .thenThrow(new RuntimeException("OneDrive profesor caído"));
-            when(oneDriveService.subirArchivo(eq(1L), any(), anyString(),
-                    anyString(), anyString(), eq("Mis Entregas"), anyString()))
+            when(oneDriveService.subirArchivoEnRuta(eq(1L), any(), startsWith("TFG-Entregables/Mis Entregas/"), anyString()))
                     .thenReturn(Map.of("fileId", "alum-fallback", "webUrl", "https://od/alum"));
 
             entregaService.realizarEntrega(1L, 1L, "Entrega fallback", List.of(archivo));
@@ -237,8 +233,7 @@ class EntregaServiceIntegrationTest {
             when(oneDriveService.subirArchivo(eq(10L), any(), anyString(),
                     anyString(), anyString(), eq("Alumno Test"), anyString()))
                     .thenThrow(new RuntimeException("Error profesor"));
-            when(oneDriveService.subirArchivo(eq(1L), any(), anyString(),
-                    anyString(), anyString(), eq("Mis Entregas"), anyString()))
+            when(oneDriveService.subirArchivoEnRuta(eq(1L), any(), startsWith("TFG-Entregables/Mis Entregas/"), anyString()))
                     .thenThrow(new RuntimeException("Error alumno"));
 
             entregaService.realizarEntrega(1L, 1L, "Entrega local fallback", List.of(archivo));
@@ -310,8 +305,7 @@ class EntregaServiceIntegrationTest {
             prepararMocksBaseRealizarEntrega();
             when(oneDriveService.isEnabled()).thenReturn(true);
             when(oneDriveService.estaConectado(1L)).thenReturn(true);
-            when(oneDriveService.subirArchivo(eq(1L), any(), anyString(),
-                    anyString(), anyString(), eq("Mis Entregas"), anyString()))
+            when(oneDriveService.subirArchivoEnRuta(eq(1L), any(), startsWith("TFG-Entregables/Mis Entregas/"), anyString()))
                     .thenReturn(Map.of("fileId", "alum-only", "webUrl", "https://od/alum"));
 
             entregaService.realizarEntrega(1L, 1L, "Entrega solo alumno", List.of(archivo));

@@ -80,6 +80,7 @@ public class EntityMapper {
                 .subirAOneDrive(actividad.getSubirAOneDrive())
                 .oneDriveUsuarioId(actividad.getOneDriveUsuarioId())
                 .carpetaOneDrive(actividad.getCarpetaOneDrive())
+                .modoOneDrive(actividad.getModoOneDrive())
                 .build();
     }
 

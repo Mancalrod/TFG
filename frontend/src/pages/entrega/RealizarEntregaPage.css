@@ -4,6 +4,20 @@
   margin: 0 auto;
 }
 
+.re-icon {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.re-inline-icon-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
 /* ── Header ── */
 .re-header {
   display: flex;
@@ -213,6 +227,8 @@
 
 .re-dropzone-icon {
   font-size: 2.5rem;
+  color: var(--text-secondary);
+  line-height: 1;
 }
 
 .re-dropzone-text {
@@ -287,6 +303,8 @@
 
 .re-file-icon {
   font-size: 1.5rem;
+  color: var(--text-secondary);
+  line-height: 1;
   flex-shrink: 0;
 }
 
@@ -329,6 +347,11 @@
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+}
+
+.re-btn-icon {
+  font-size: 1.05rem;
 }
 
 .re-btn-preview:hover {
@@ -517,6 +540,8 @@
 
 .re-preview-doc-icon {
   font-size: 4rem;
+  color: var(--accent-blue);
+  line-height: 1;
 }
 
 .re-preview-doc-name {
@@ -677,6 +702,8 @@
 
 .re-zip-nodo-icon {
   font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1;
 }
 
 .re-zip-nodo-name {

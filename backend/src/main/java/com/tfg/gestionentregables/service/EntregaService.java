@@ -581,13 +581,16 @@ public class EntregaService {
 
         if (oneDriveService.estaConectado(estudianteUsuarioId)) {
             try {
-                Map<String, String> alumnoResult = oneDriveService.subirArchivo(
-                    estudianteUsuarioId,
-                    archivo,
+                String carpetaVersionAlumno = String.format(
+                    "TFG-Entregables/Mis Entregas/%s/%s/%s/v%d",
                     cursoTitulo,
                     actividadTitulo,
                     entregableTitulo,
-                    "Mis Entregas",
+                    entrega.getVersion());
+                Map<String, String> alumnoResult = oneDriveService.subirArchivoEnRuta(
+                    estudianteUsuarioId,
+                    archivo,
+                    carpetaVersionAlumno,
                     nombreArchivo);
 
                 if (onedriveFileId == null) {

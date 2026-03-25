@@ -147,6 +147,24 @@ class ActividadServiceTest {
 
             verify(actividadRepository).save(any(Actividad.class));
         }
+
+        @Test
+        @DisplayName("Mantiene modo OneDrive ENTREGABLES al crear")
+        void crearActividad_modoOneDriveEntregables() {
+            crearActividadDTO.setSubirAOneDrive(true);
+            crearActividadDTO.setModoOneDrive(ModoOneDrive.ENTREGABLES);
+            crearActividadDTO.setCarpetaOneDrive("/NoDebePersistirEnActividad");
+
+            when(cursoRepository.findById(1L)).thenReturn(Optional.of(curso));
+            when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
+            when(mapper.toDTO(any(Actividad.class))).thenReturn(actividadDTO);
+
+            actividadService.crearActividad(crearActividadDTO, 1L);
+
+            verify(actividadRepository).save(argThat(a ->
+                    a.getModoOneDrive() == ModoOneDrive.ENTREGABLES
+                            && a.getCarpetaOneDrive() == null));
+        }
     }
 
     @Nested
@@ -354,6 +372,29 @@ class ActividadServiceTest {
 
             assertThatThrownBy(() -> actividadService.actualizarActividad(99L, crearActividadDTO))
                     .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("Mantiene modo OneDrive ENTREGABLES al actualizar")
+        void actualizar_modoOneDriveEntregables() {
+            CrearActividadDTO updateDTO = CrearActividadDTO.builder()
+                .titulo("Práctica 1")
+                .tipoActividad(TipoActividad.EVALUABLE)
+                .fechaLimite(LocalDateTime.now().plusDays(7))
+                .subirAOneDrive(true)
+                .modoOneDrive(ModoOneDrive.ENTREGABLES)
+                .carpetaOneDrive("/NoDebePersistirEnActividad")
+                .build();
+
+            when(actividadRepository.findById(1L)).thenReturn(Optional.of(actividad));
+            when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
+            when(mapper.toDTO(any(Actividad.class))).thenReturn(actividadDTO);
+
+            actividadService.actualizarActividad(1L, updateDTO);
+
+            verify(actividadRepository).save(argThat(a ->
+                a.getModoOneDrive() == ModoOneDrive.ENTREGABLES
+                    && a.getCarpetaOneDrive() == null));
         }
     }
 

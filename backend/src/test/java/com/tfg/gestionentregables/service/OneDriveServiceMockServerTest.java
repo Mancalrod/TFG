@@ -387,6 +387,7 @@ class OneDriveServiceMockServerTest {
             RecordedRequest request = mockServer.takeRequest();
             assertThat(request.getMethod()).isEqualTo("PUT");
             assertThat(request.getPath()).contains("Carpeta%20Personalizada");
+            assertThat(request.getPath()).contains("Entregable");
             assertThat(request.getPath()).contains("Alumno%20Uno");
             assertThat(request.getPath()).doesNotContain("%2520");
             assertThat(request.getPath()).contains("doc.txt");
@@ -606,6 +607,15 @@ class OneDriveServiceMockServerTest {
             byte[] contenidoEsperado = "contenido binario del archivo".getBytes();
 
             mockServer.enqueue(new MockResponse()
+                    .setBody("""
+                        {
+                            "id": "file-id-abc",
+                            "@microsoft.graph.downloadUrl": "%sdownload/file-id-abc"
+                        }
+                        """.formatted(baseUrl()))
+                    .addHeader("Content-Type", "application/json"));
+
+            mockServer.enqueue(new MockResponse()
                     .setBody(new okio.Buffer().write(contenidoEsperado))
                     .addHeader("Content-Type", "application/octet-stream"));
 
@@ -617,10 +627,14 @@ class OneDriveServiceMockServerTest {
 
             assertThat(result).isEqualTo(contenidoEsperado);
 
-            RecordedRequest request = mockServer.takeRequest();
-            assertThat(request.getMethod()).isEqualTo("GET");
-            assertThat(request.getPath()).isEqualTo("/v1.0/me/drive/items/file-id-abc/content");
-            assertThat(request.getHeader("Authorization")).isEqualTo("Bearer valid-access-token");
+            RecordedRequest metadataRequest = mockServer.takeRequest();
+            assertThat(metadataRequest.getMethod()).isEqualTo("GET");
+            assertThat(metadataRequest.getPath()).isEqualTo("/v1.0/me/drive/items/file-id-abc");
+            assertThat(metadataRequest.getHeader("Authorization")).isEqualTo("Bearer valid-access-token");
+
+            RecordedRequest downloadRequest = mockServer.takeRequest();
+            assertThat(downloadRequest.getMethod()).isEqualTo("GET");
+            assertThat(downloadRequest.getPath()).isEqualTo("/download/file-id-abc");
         }
 
         @Test
@@ -893,7 +907,17 @@ class OneDriveServiceMockServerTest {
                         """)
                     .addHeader("Content-Type", "application/json"));
 
-            // 2. Descarga
+            // 2. Metadata con URL de descarga
+            mockServer.enqueue(new MockResponse()
+                    .setBody("""
+                        {
+                            "id": "fid",
+                            "@microsoft.graph.downloadUrl": "%sdownload/fid"
+                        }
+                        """.formatted(baseUrl()))
+                    .addHeader("Content-Type", "application/json"));
+
+            // 3. Descarga
             mockServer.enqueue(new MockResponse()
                     .setBody(new okio.Buffer().write("file-content".getBytes()))
                     .addHeader("Content-Type", "application/octet-stream"));

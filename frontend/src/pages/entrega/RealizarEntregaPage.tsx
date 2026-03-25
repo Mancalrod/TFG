@@ -5,8 +5,69 @@ import { entregableService, entregaService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
 import './RealizarEntregaPage.css';
 
-// â”€â”€ Constantes â”€â”€
+// Constantes
 const TEMP_STORAGE_PREFIX = 'entrega_temp_';
+
+type IconName =
+  | 'file'
+  | 'file-pdf'
+  | 'file-image'
+  | 'file-doc'
+  | 'file-archive'
+  | 'file-text'
+  | 'file-sheet'
+  | 'file-slides'
+  | 'folder'
+  | 'download'
+  | 'preview'
+  | 'remove'
+  | 'upload'
+  | 'zip'
+  | 'success'
+  | 'draft'
+  | 'save';
+
+const Icon: React.FC<{ name: IconName; className?: string }> = ({ name, className }) => {
+  const cls = className ? `re-icon ${className}` : 're-icon';
+
+  switch (name) {
+    case 'file-pdf':
+      return <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l5 5v13H7z" stroke="currentColor" strokeWidth="1.8" /><path d="M14 3v5h5" stroke="currentColor" strokeWidth="1.8" /><path d="M9 16h6M9 12h6" stroke="currentColor" strokeWidth="1.8" /></svg>;
+    case 'file-image':
+      return <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="1.8" /><circle cx="9" cy="10" r="1.3" fill="currentColor" /><path d="m6 17 4.3-4 2.8 2.6 2.9-3.1L18 17" stroke="currentColor" strokeWidth="1.8" /></svg>;
+    case 'file-doc':
+      return <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l5 5v13H7z" stroke="currentColor" strokeWidth="1.8" /><path d="M14 3v5h5" stroke="currentColor" strokeWidth="1.8" /><path d="M9 16h6M9 12h6M9 9h3" stroke="currentColor" strokeWidth="1.8" /></svg>;
+    case 'file-archive':
+      return <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="2" stroke="currentColor" strokeWidth="1.8" /><path d="M9 7h6M9 10h6M11 13h2v4h-2z" stroke="currentColor" strokeWidth="1.8" /></svg>;
+    case 'file-text':
+      return <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l5 5v13H7z" stroke="currentColor" strokeWidth="1.8" /><path d="M14 3v5h5" stroke="currentColor" strokeWidth="1.8" /><path d="M9 11h6M9 14h6M9 17h4" stroke="currentColor" strokeWidth="1.8" /></svg>;
+    case 'file-sheet':
+      return <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l5 5v13H7z" stroke="currentColor" strokeWidth="1.8" /><path d="M14 3v5h5M9 11h8M9 15h8M12 9v10" stroke="currentColor" strokeWidth="1.8" /></svg>;
+    case 'file-slides':
+      return <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="4" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="1.8" /><path d="M9 18h6M12 16v2" stroke="currentColor" strokeWidth="1.8" /></svg>;
+    case 'folder':
+      return <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" strokeWidth="1.8" /></svg>;
+    case 'download':
+      return <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v10m0 0 4-4m-4 4-4-4M5 19h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+    case 'preview':
+      return <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" strokeWidth="1.8" /><circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" /></svg>;
+    case 'remove':
+      return <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2m-7 0 1 12h6l1-12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+    case 'upload':
+      return <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 15V5m0 0 4 4m-4-4-4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+    case 'zip':
+      return <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="2" stroke="currentColor" strokeWidth="1.8" /><path d="M10 7h4M10 10h4M11 13h2v4h-2z" stroke="currentColor" strokeWidth="1.8" /></svg>;
+    case 'success':
+      return <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" /><path d="m8 12 2.5 2.5L16 9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+    case 'draft':
+      return <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 5h14v14H5z" stroke="currentColor" strokeWidth="1.8" /><path d="M8 9h8M8 12h8M8 15h5" stroke="currentColor" strokeWidth="1.8" /></svg>;
+    case 'save':
+      return <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 4h12l2 2v14H5z" stroke="currentColor" strokeWidth="1.8" /><path d="M8 4v6h8V4M9 17h6" stroke="currentColor" strokeWidth="1.8" /></svg>;
+    case 'file':
+    default:
+      return <svg className={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l5 5v13H7z" stroke="currentColor" strokeWidth="1.8" /><path d="M14 3v5h5" stroke="currentColor" strokeWidth="1.8" /></svg>;
+  }
+};
 
 interface ArchivoTemporal {
   id: string;
@@ -50,21 +111,21 @@ const RealizarEntregaPage: React.FC = () => {
 
   const storageKey = id ? `${TEMP_STORAGE_PREFIX}${id}` : '';
 
-  // â”€â”€ Cargar entregable â”€â”€
+  // Cargar entregable
   useEffect(() => {
     if (id) {
       cargarEntregable(parseInt(id));
     }
   }, [id]);
 
-  // â”€â”€ Redirigir si no es estudiante â”€â”€
+  // Redirigir si no es estudiante
   useEffect(() => {
     if (!loading && !esEstudiante) {
       navigate(-1);
     }
   }, [loading, esEstudiante, navigate]);
 
-  // â”€â”€ Cargar borrador desde localStorage â”€â”€
+  // Cargar borrador desde localStorage
   useEffect(() => {
     if (!storageKey) return;
     try {
@@ -80,7 +141,7 @@ const RealizarEntregaPage: React.FC = () => {
     }
   }, [storageKey]);
 
-  // â”€â”€ Guardar borrador en localStorage cuando cambie â”€â”€
+  // Guardar borrador en localStorage cuando cambie
   const guardarBorrador = useCallback(() => {
     if (!storageKey || !id) return;
     const borrador: BorradorMeta = {
@@ -153,7 +214,7 @@ const RealizarEntregaPage: React.FC = () => {
     }
   };
 
-  // â”€â”€ Manejo de archivos â”€â”€
+  // Manejo de archivos
   const fileToTemporal = (file: File): Promise<ArchivoTemporal> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -277,7 +338,7 @@ const RealizarEntregaPage: React.FC = () => {
     }
   };
 
-  // â”€â”€ Drag & Drop handlers â”€â”€
+  // Drag & Drop handlers
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -307,7 +368,7 @@ const RealizarEntregaPage: React.FC = () => {
     }
   };
 
-  // â”€â”€ Preview â”€â”€
+  // Preview
   const puedePrevisualizar = (archivo: ArchivoTemporal): boolean => {
     const tipo = archivo.tipo.toLowerCase();
     const ext = archivo.nombre.split('.').pop()?.toLowerCase() || '';
@@ -322,18 +383,18 @@ const RealizarEntregaPage: React.FC = () => {
     );
   };
 
-  const getIconoArchivo = (archivo: ArchivoTemporal): string => {
+  const getIconoArchivo = (archivo: ArchivoTemporal): IconName => {
     const ext = archivo.nombre.split('.').pop()?.toLowerCase() || '';
     const tipo = archivo.tipo.toLowerCase();
 
-    if (tipo === 'application/pdf' || ext === 'pdf') return 'ðŸ“„';
-    if (tipo.startsWith('image/')) return 'ðŸ–¼ï¸';
-    if (ext === 'doc' || ext === 'docx' || tipo.includes('word')) return 'ðŸ“';
-    if (ext === 'zip' || ext === 'rar' || ext === '7z') return 'ðŸ“¦';
-    if (ext === 'txt') return 'ðŸ“ƒ';
-    if (ext === 'xls' || ext === 'xlsx') return 'ðŸ“Š';
-    if (ext === 'ppt' || ext === 'pptx') return 'ðŸ“½ï¸';
-    return 'ðŸ“Ž';
+    if (tipo === 'application/pdf' || ext === 'pdf') return 'file-pdf';
+    if (tipo.startsWith('image/')) return 'file-image';
+    if (ext === 'doc' || ext === 'docx' || tipo.includes('word')) return 'file-doc';
+    if (ext === 'zip' || ext === 'rar' || ext === '7z') return 'file-archive';
+    if (ext === 'txt') return 'file-text';
+    if (ext === 'xls' || ext === 'xlsx') return 'file-sheet';
+    if (ext === 'ppt' || ext === 'pptx') return 'file-slides';
+    return 'file';
   };
 
   const renderPreview = (archivo: ArchivoTemporal) => {
@@ -401,7 +462,7 @@ const RealizarEntregaPage: React.FC = () => {
             </button>
           </div>
           <div className="re-preview-doc">
-            <div className="re-preview-doc-icon">ðŸ“</div>
+            <div className="re-preview-doc-icon"><Icon name="file-doc" /></div>
             <p className="re-preview-doc-name">{archivo.nombre}</p>
             <p className="re-preview-doc-info">
               Los archivos Word se pueden previsualizar una vez subidos a OneDrive.
@@ -421,7 +482,7 @@ const RealizarEntregaPage: React.FC = () => {
     return null;
   };
 
-  // â”€â”€ Enviar entrega â”€â”€
+  // Enviar entrega
   const handleEnviar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id || !usuario?.id) return;
@@ -531,7 +592,7 @@ const RealizarEntregaPage: React.FC = () => {
     setBorradorCargado(false);
   };
 
-  // â”€â”€ Utilidades de formato â”€â”€
+  // Utilidades de formato
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -549,7 +610,7 @@ const RealizarEntregaPage: React.FC = () => {
     });
   };
 
-  // â”€â”€ Render â”€â”€
+  // Render
   if (loading) {
     return (
       <div className="loading-container">
@@ -636,7 +697,7 @@ const RealizarEntregaPage: React.FC = () => {
         return (
           <div className="re-zip-structure">
             <div className="re-zip-structure-header">
-              <span>ðŸ“¦ Estructura esperada del ZIP</span>
+              <span className="re-inline-icon-text"><Icon name="zip" />Estructura esperada del ZIP</span>
               <span className={`re-zip-mode-badge ${entregable.validacionZipEstricta ? 'estricta' : 'minima'}`}>
                 {entregable.validacionZipEstricta ? 'Estructura exacta' : 'Mínimo requerido'}
               </span>
@@ -659,7 +720,7 @@ const RealizarEntregaPage: React.FC = () => {
       {/* Aviso de borrador recuperado */}
       {borradorCargado && (
         <div className="re-borrador-banner">
-          <span>📋 Se ha recuperado un borrador guardado automáticamente.</span>
+          <span className="re-inline-icon-text"><Icon name="draft" />Se ha recuperado un borrador guardado automáticamente.</span>
           <button
             className="re-borrador-descartar"
             onClick={handleDescartarBorrador}
@@ -672,7 +733,7 @@ const RealizarEntregaPage: React.FC = () => {
       {/* Mensaje de éxito */}
       {successMsg && (
         <div className="re-success-banner">
-          ✅ {successMsg}
+          <span className="re-inline-icon-text"><Icon name="success" />{successMsg}</span>
         </div>
       )}
 
@@ -703,7 +764,7 @@ const RealizarEntregaPage: React.FC = () => {
                 disabled={enviando}
               />
               <div className="re-dropzone-content">
-                <span className="re-dropzone-icon">ðŸ“</span>
+                <span className="re-dropzone-icon"><Icon name="upload" /></span>
                 <p className="re-dropzone-text">
                   Arrastra archivos aquí o <span className="re-dropzone-link">haz clic para seleccionar</span>
                 </p>
@@ -740,7 +801,7 @@ const RealizarEntregaPage: React.FC = () => {
               {archivos.map(archivo => (
                 <li key={archivo.id} className="re-file-item">
                   <div className="re-file-info">
-                    <span className="re-file-icon">{getIconoArchivo(archivo)}</span>
+                    <span className="re-file-icon"><Icon name={getIconoArchivo(archivo)} /></span>
                     <div className="re-file-details">
                       <span className="re-file-name">{archivo.nombre}</span>
                       <span className="re-file-size">{formatFileSize(archivo.tamano)}</span>
@@ -754,7 +815,7 @@ const RealizarEntregaPage: React.FC = () => {
                         onClick={() => setArchivoPreview(archivo)}
                         title="Previsualizar"
                       >
-                        ðŸ‘ï¸
+                        <Icon name="preview" className="re-btn-icon" />
                       </button>
                     )}
                     <a
@@ -764,7 +825,7 @@ const RealizarEntregaPage: React.FC = () => {
                       title="Descargar"
                       onClick={e => e.stopPropagation()}
                     >
-                      ⬇️
+                      <Icon name="download" className="re-btn-icon" />
                     </a>
                     <button
                       type="button"
@@ -773,7 +834,7 @@ const RealizarEntregaPage: React.FC = () => {
                       disabled={enviando}
                       title="Eliminar"
                     >
-                      ðŸ—‘ï¸
+                      <Icon name="remove" className="re-btn-icon" />
                     </button>
                   </div>
                 </li>
@@ -813,7 +874,7 @@ const RealizarEntregaPage: React.FC = () => {
         {/* Acciones */}
         <div className="re-actions">
           <span className="re-autosave-hint">
-            💾 Los archivos se guardan automáticamente como borrador
+            <span className="re-inline-icon-text"><Icon name="save" />Los archivos se guardan automáticamente como borrador</span>
           </span>
           <div className="re-actions-right">
             <button
@@ -847,7 +908,7 @@ const RealizarEntregaPage: React.FC = () => {
   );
 };
 
-// â”€â”€ Componente read-only para mostrar la estructura esperada al estudiante â”€â”€
+// Componente read-only para mostrar la estructura esperada al estudiante
 const EstructuraZipReadonly: React.FC<{ nodos: NodoEstructuraZip[]; nivel: number }> = ({ nodos, nivel }) => (
   <div className="re-zip-nodo-list">
     {nodos.map(nodo => {
@@ -863,7 +924,7 @@ const EstructuraZipReadonly: React.FC<{ nodos: NodoEstructuraZip[]; nivel: numbe
 
       return (
         <div key={nodo.id} className="re-zip-nodo" style={{ paddingLeft: nivel * 18 }}>
-          <span className="re-zip-nodo-icon">{esCarpeta ? 'ðŸ“' : 'ðŸ“„'}</span>
+          <span className="re-zip-nodo-icon"><Icon name={esCarpeta ? 'folder' : 'file'} /></span>
           <span className="re-zip-nodo-name">
             {esWild ? <em>*</em> : nodo.nombre}
             {!esCarpeta && <span className="re-zip-nodo-ext">{extDisplay}</span>}

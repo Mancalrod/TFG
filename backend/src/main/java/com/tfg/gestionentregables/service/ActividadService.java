@@ -36,6 +36,14 @@ public class ActividadService {
         Curso curso = cursoRepository.findById(cursoId)
                 .orElseThrow(() -> new EntityNotFoundException("Curso no encontrado con ID: " + cursoId));
 
+        boolean subirAOneDrive = Boolean.TRUE.equals(dto.getSubirAOneDrive());
+        ModoOneDrive modoOneDrive = subirAOneDrive
+            ? (dto.getModoOneDrive() != null ? dto.getModoOneDrive() : ModoOneDrive.ACTIVIDAD)
+            : null;
+        String carpetaOneDrive = (subirAOneDrive && modoOneDrive == ModoOneDrive.ACTIVIDAD)
+            ? dto.getCarpetaOneDrive()
+            : null;
+
         Actividad actividad = Actividad.builder()
                 .titulo(dto.getTitulo())
                 .descripcion(dto.getDescripcion())
@@ -45,9 +53,10 @@ public class ActividadService {
                 .fechaLimite(dto.getFechaLimite())
                 .visibilidad(dto.getVisibilidad() != null ? dto.getVisibilidad() : Visibilidad.OCULTO)
                 .notaMaxima(dto.getNotaMaxima())
-                .subirAOneDrive(Boolean.TRUE.equals(dto.getSubirAOneDrive()))
-                .oneDriveUsuarioId(Boolean.TRUE.equals(dto.getSubirAOneDrive()) ? dto.getOneDriveUsuarioId() : null)
-                .carpetaOneDrive(Boolean.TRUE.equals(dto.getSubirAOneDrive()) ? dto.getCarpetaOneDrive() : null)
+                .subirAOneDrive(subirAOneDrive)
+                .oneDriveUsuarioId(subirAOneDrive ? dto.getOneDriveUsuarioId() : null)
+                .carpetaOneDrive(carpetaOneDrive)
+                .modoOneDrive(modoOneDrive)
                 .curso(curso)
                 .build();
 
@@ -139,11 +148,18 @@ public class ActividadService {
         actividad.setNotaMaxima(dto.getNotaMaxima());
 
         // OneDrive
-        actividad.setSubirAOneDrive(Boolean.TRUE.equals(dto.getSubirAOneDrive()));
-        actividad.setOneDriveUsuarioId(
-                Boolean.TRUE.equals(dto.getSubirAOneDrive()) ? dto.getOneDriveUsuarioId() : null);
+        boolean subirAOneDrive = Boolean.TRUE.equals(dto.getSubirAOneDrive());
+        ModoOneDrive modoOneDrive = subirAOneDrive
+            ? (dto.getModoOneDrive() != null ? dto.getModoOneDrive() : ModoOneDrive.ACTIVIDAD)
+            : null;
+
+        actividad.setSubirAOneDrive(subirAOneDrive);
+        actividad.setOneDriveUsuarioId(subirAOneDrive ? dto.getOneDriveUsuarioId() : null);
+        actividad.setModoOneDrive(modoOneDrive);
         actividad.setCarpetaOneDrive(
-                Boolean.TRUE.equals(dto.getSubirAOneDrive()) ? dto.getCarpetaOneDrive() : null);
+            (subirAOneDrive && modoOneDrive == ModoOneDrive.ACTIVIDAD)
+                ? dto.getCarpetaOneDrive()
+                : null);
 
         // Actualizar grupos si se especifican
         if (dto.getGrupoIds() != null) {
