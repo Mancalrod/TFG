@@ -87,7 +87,7 @@ describe('cursoService', () => {
     const grupo = await cursoService.crearGrupo(10, 'Grupo A');
     const grupoConCursos = await cursoService.crearGrupoConCursos({
       titulo: 'Grupo Unificado',
-      cursosIds: [10, 11],
+      cursoIds: [10, 11],
     });
 
     expect(mockPost).toHaveBeenNthCalledWith(1, '/api/cursos/profesor/7', {
@@ -108,7 +108,7 @@ describe('cursoService', () => {
     });
     expect(mockPost).toHaveBeenNthCalledWith(6, '/api/cursos/grupos', {
       titulo: 'Grupo Unificado',
-      cursosIds: [10, 11],
+      cursoIds: [10, 11],
     });
 
     expect(creado.id).toBe(10);
@@ -140,7 +140,7 @@ describe('cursoService', () => {
     const grupoActualizado = await cursoService.actualizarGrupo(33, 'Grupo Renombrado');
     const grupoConCursosActualizado = await cursoService.actualizarGrupoConCursos(33, {
       titulo: 'Grupo + Cursos',
-      cursosIds: [10],
+      cursoIds: [10],
     });
 
     await cursoService.eliminar(10);
@@ -158,7 +158,7 @@ describe('cursoService', () => {
     });
     expect(mockPut).toHaveBeenNthCalledWith(3, '/api/cursos/grupos/33/cursos', {
       titulo: 'Grupo + Cursos',
-      cursosIds: [10],
+      cursoIds: [10],
     });
 
     expect(mockDelete).toHaveBeenNthCalledWith(1, '/api/cursos/10');
