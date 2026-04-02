@@ -51,6 +51,7 @@ class EntregaServiceTest {
     @Mock private MicrosoftOAuthService microsoftOAuthService;
     @Mock private ZipValidationService zipValidationService;
     @Mock private CloudinaryService cloudinaryService;
+    @Mock private NotificacionService notificacionService;
     @Mock private FeedbackRepository feedbackRepository;
     @Mock private UsuarioRepository usuarioRepository;
 

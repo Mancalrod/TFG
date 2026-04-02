@@ -139,10 +139,28 @@ const Navbar: React.FC = () => {
 
   const abrirNotificacion = (notificacion: NotificacionDTO) => {
     handleMarcarLeida(notificacion);
+    setOpenNotificaciones(false);
+    if (notificacion.entregaId) {
+      navigate(`/entregas/${notificacion.entregaId}`);
+      return;
+    }
+    if (notificacion.entregableId) {
+      navigate(`/entregables/${notificacion.entregableId}`);
+      return;
+    }
+    if (notificacion.actividadId) {
+      navigate(`/actividades/${notificacion.actividadId}`);
+      return;
+    }
     if (notificacion.cursoId) {
-      setOpenNotificaciones(false);
       navigate(`/cursos/${notificacion.cursoId}`);
     }
+  };
+
+  const decodeHtmlEntities = (value: string): string => {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = value;
+    return textarea.value;
   };
 
   const renderNotificacionesContenido = () => {
@@ -162,8 +180,8 @@ const Navbar: React.FC = () => {
               className={`notification-item ${n.leida ? 'read' : 'unread'}`}
               onClick={() => abrirNotificacion(n)}
             >
-              <span className="notification-title">{n.titulo}</span>
-              <span className="notification-message">{n.mensaje ?? 'Sin detalle'}</span>
+              <span className="notification-title">{decodeHtmlEntities(n.titulo)}</span>
+              <span className="notification-message">{decodeHtmlEntities(n.mensaje ?? 'Sin detalle')}</span>
             </button>
           </li>
         ))}
@@ -227,30 +245,27 @@ const Navbar: React.FC = () => {
 
       {/* Lado derecho: Theme Toggle, Perfil y Acciones */}
       <div className="navbar-actions">
-        {usuario && (
-          <div className="navbar-notifications">
-            <button
-              type="button"
-              className="btn-notifications"
-              onClick={toggleNotificaciones}
-              aria-label="Abrir notificaciones"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-              {unreadCount > 0 && <span className="notifications-badge">{unreadCount}</span>}
-            </button>
-            {openNotificaciones && (
-              <div className="notifications-panel" aria-label="Panel de notificaciones">
-                <div className="notifications-header">
-                  <strong>Notificaciones</strong>
-                </div>
-                {renderNotificacionesContenido()}
+        <div className="navbar-notifications">
+          <button
+            type="button"
+            className="btn-notifications"
+            onClick={usuario ? toggleNotificaciones : undefined}
+            aria-label={usuario ? 'Abrir notificaciones' : 'Notificaciones (inicia sesion)'}
+            title={usuario ? 'Notificaciones' : 'Inicia sesion para ver notificaciones'}
+            disabled={!usuario}
+          >
+            <span className="navbar-icon" aria-hidden="true">🔔</span>
+            {usuario && unreadCount > 0 && <span className="notifications-badge">{unreadCount}</span>}
+          </button>
+          {usuario && openNotificaciones && (
+            <div className="notifications-panel" aria-label="Panel de notificaciones">
+              <div className="notifications-header">
+                <strong>Notificaciones</strong>
               </div>
-            )}
-          </div>
-        )}
+              {renderNotificacionesContenido()}
+            </div>
+          )}
+        </div>
 
         <button
           onClick={toggleTheme}
@@ -258,23 +273,7 @@ const Navbar: React.FC = () => {
           title={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
           aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
         >
-          {isDark ? (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="5"/>
-              <line x1="12" y1="1" x2="12" y2="3"/>
-              <line x1="12" y1="21" x2="12" y2="23"/>
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-              <line x1="1" y1="12" x2="3" y2="12"/>
-              <line x1="21" y1="12" x2="23" y2="12"/>
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-            </svg>
-          ) : (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-            </svg>
-          )}
+          <span className="navbar-icon" aria-hidden="true">{isDark ? '🌙' : '☀️'}</span>
         </button>
 
         {usuario ? (

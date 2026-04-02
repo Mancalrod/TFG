@@ -40,7 +40,7 @@ const EntregaDetallePage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (id) cargarEntrega(parseInt(id));
+    if (id) cargarEntrega(Number.parseInt(id, 10));
   }, [id, cargarEntrega]);
 
   const handleDescargar = async (material: MaterialDTO) => {
@@ -96,21 +96,32 @@ const EntregaDetallePage: React.FC = () => {
   };
 
   const esPrevisualizeable = (nombre: string) => {
-    return /\.(pdf|png|jpe?g|gif|svg|txt|md|json|xml|html?|css|js|ts|java|py|c|cpp|h|log|csv|zip|rar|7z)$/i.test(nombre);
+    const extension = nombre.split('.').pop()?.toLowerCase();
+    if (!extension) return false;
+    const extensionesPermitidas = new Set([
+      'pdf', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'txt', 'md', 'json', 'xml', 'html', 'htm',
+      'css', 'js', 'ts', 'java', 'py', 'c', 'cpp', 'h', 'log', 'csv', 'zip', 'rar', '7z'
+    ]);
+    return extensionesPermitidas.has(extension);
   };
 
   // Handler para calificar
   const handleCalificar = async () => {
     if (!entrega || !usuario?.id) return;
 
-    if (!nota || isNaN(parseFloat(nota))) {
+    const notaNum = Number.parseFloat(nota);
+    if (!nota || Number.isNaN(notaNum)) {
       setErrorCalificacion('La nota es obligatoria');
       return;
     }
 
-    const notaNum = parseFloat(nota);
+    const notaMaxima = entrega.notaMaximaEntregable;
     if (notaNum < 0) {
       setErrorCalificacion('La nota no puede ser negativa');
+      return;
+    }
+    if (notaMaxima !== undefined && notaMaxima !== null && notaNum > notaMaxima) {
+      setErrorCalificacion(`La nota no puede ser mayor que ${notaMaxima}`);
       return;
     }
 
@@ -159,6 +170,18 @@ const EntregaDetallePage: React.FC = () => {
     );
   }
 
+  const notaMaximaEntregable = entrega.notaMaximaEntregable;
+  const rangoNota = notaMaximaEntregable !== undefined && notaMaximaEntregable !== null
+    ? `0 - ${notaMaximaEntregable}`
+    : '0 - 10';
+  const calificacionVisible = esProfesor || entrega.estado === 'PUBLICADO' || Boolean(entrega.notasVisiblesEstudiante);
+  const notaConMaximo = entrega.calificacion !== undefined && entrega.calificacion !== null
+    ? `${entrega.calificacion}/${notaMaximaEntregable ?? 10}`
+    : null;
+  const textoCalificacion = calificacionVisible && entrega.calificacion !== undefined && entrega.calificacion !== null
+    ? notaConMaximo
+    : 'Sin evaluar';
+
   return (
     <div className="edp-page">
       <div className="edp-header">
@@ -178,25 +201,23 @@ const EntregaDetallePage: React.FC = () => {
         <div className="edp-info-panel">
           <div className="edp-info-grid">
             <div className="edp-info-item">
-              <label>Estudiante</label>
+              <span>Estudiante</span>
               <p>{entrega.estudianteNombre}</p>
             </div>
             <div className="edp-info-item">
-              <label>Fecha de entrega</label>
+              <span>Fecha de entrega</span>
               <p className={entrega.fueATiempo ? 'edp-text-ok' : 'edp-text-warn'}>
                 {formatDate(entrega.fechaEntrega)}
                 {entrega.fueATiempo ? ' ✓ A tiempo' : ' ⚠ Tardía'}
               </p>
             </div>
-            {entrega.calificacion !== undefined && entrega.calificacion !== null && (
-              <div className="edp-info-item">
-                <label>Calificación</label>
-                <p className="edp-calificacion">{entrega.calificacion} pts</p>
-              </div>
-            )}
+            <div className="edp-info-item">
+              <span>Calificación</span>
+              <p className="edp-calificacion">{textoCalificacion}</p>
+            </div>
             {entrega.fechaCalificacion && (
               <div className="edp-info-item">
-                <label>Fecha calificación</label>
+                <span>Fecha calificación</span>
                 <p>{formatDate(entrega.fechaCalificacion)}</p>
               </div>
             )}
@@ -303,26 +324,20 @@ const EntregaDetallePage: React.FC = () => {
         {/* Panel de calificación (para profesores) */}
         {esProfesor && entrega.estado === 'ENTREGADO' && (
           <div className="edp-calificar-panel">
-            {!mostrarFormCalificar ? (
-              <button
-                className="edp-btn-calificar"
-                onClick={() => setMostrarFormCalificar(true)}
-              >
-                Calificar esta entrega
-              </button>
-            ) : (
+            {mostrarFormCalificar ? (
               <div className="edp-calificar-form">
                 <h3>Calificar Entrega</h3>
                 {errorCalificacion && (
                   <div className="edp-calificar-error">{errorCalificacion}</div>
                 )}
                 <div className="edp-form-group">
-                  <label htmlFor="nota">Nota *</label>
+                  <label htmlFor="nota">Nota * (rango {rangoNota})</label>
                   <input
                     id="nota"
                     type="number"
                     step="0.1"
                     min="0"
+                    max={notaMaximaEntregable ?? undefined}
                     value={nota}
                     onChange={e => setNota(e.target.value)}
                     disabled={calificando}
@@ -362,6 +377,13 @@ const EntregaDetallePage: React.FC = () => {
                   </button>
                 </div>
               </div>
+            ) : (
+              <button
+                className="edp-btn-calificar"
+                onClick={() => setMostrarFormCalificar(true)}
+              >
+                Calificar esta entrega
+              </button>
             )}
           </div>
         )}
@@ -369,7 +391,7 @@ const EntregaDetallePage: React.FC = () => {
         {/* Ya calificada - mostrar info */}
         {esProfesor && (entrega.estado === 'CALIFICADO' || entrega.estado === 'PUBLICADO') && (
           <div className="edp-calificada-info">
-            ✓ Esta entrega ya ha sido calificada con <strong>{entrega.calificacion} pts</strong>
+            ✓ Esta entrega ya ha sido calificada con <strong>{entrega.calificacion}/{notaMaximaEntregable ?? 10}</strong>
           </div>
         )}
       </div>

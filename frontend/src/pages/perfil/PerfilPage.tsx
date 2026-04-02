@@ -20,6 +20,21 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
   return maybeError.response?.data?.message ?? fallback;
 };
 
+const EyeOpenIcon: React.FC = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
+    <circle cx="12" cy="12" r="2" />
+  </svg>
+);
+
+const EyeClosedIcon: React.FC = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M2 5.27 3.28 4 20 20.72 18.73 22l-3.05-3.05A11.79 11.79 0 0 1 12 19c-5 0-9.27-3.11-11-7a11.85 11.85 0 0 1 3.44-4.57L2 5.27z" />
+    <path d="M8.53 10.8A3.5 3.5 0 0 0 13.2 15.47" />
+    <path d="M9.88 5.08A12.21 12.21 0 0 1 12 5c5 0 9.27 3.11 11 7a11.86 11.86 0 0 1-3.29 4.4" />
+  </svg>
+);
+
 const PerfilPage: React.FC = () => {
   const { usuario, actualizarFotoPerfil } = useAuth();
   const [actual, setActual] = useState('');
@@ -150,13 +165,10 @@ const PerfilPage: React.FC = () => {
             <button
               type="button"
               className="password-eye-btn"
-              aria-label={mostrarActual ? 'Ocultar valor campo 1' : 'Mostrar valor campo 1'}
+              aria-label={mostrarActual ? 'Ocultar contraseña actual' : 'Mostrar contraseña actual'}
               onClick={() => setMostrarActual((prev) => !prev)}
             >
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
-                <circle cx="12" cy="12" r="2" />
-              </svg>
+              {mostrarActual ? <EyeClosedIcon /> : <EyeOpenIcon />}
             </button>
           </div>
           <label htmlFor="contrasena-nueva">
@@ -173,13 +185,10 @@ const PerfilPage: React.FC = () => {
             <button
               type="button"
               className="password-eye-btn"
-              aria-label={mostrarNueva ? 'Ocultar valor campo 2' : 'Mostrar valor campo 2'}
+              aria-label={mostrarNueva ? 'Ocultar nueva contraseña' : 'Mostrar nueva contraseña'}
               onClick={() => setMostrarNueva((prev) => !prev)}
             >
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
-                <circle cx="12" cy="12" r="2" />
-              </svg>
+              {mostrarNueva ? <EyeClosedIcon /> : <EyeOpenIcon />}
             </button>
           </div>
           <label htmlFor="contrasena-confirmacion">
@@ -196,13 +205,10 @@ const PerfilPage: React.FC = () => {
             <button
               type="button"
               className="password-eye-btn"
-              aria-label={mostrarConfirmacion ? 'Ocultar valor campo 3' : 'Mostrar valor campo 3'}
+              aria-label={mostrarConfirmacion ? 'Ocultar confirmación de contraseña' : 'Mostrar confirmación de contraseña'}
               onClick={() => setMostrarConfirmacion((prev) => !prev)}
             >
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
-                <circle cx="12" cy="12" r="2" />
-              </svg>
+              {mostrarConfirmacion ? <EyeClosedIcon /> : <EyeOpenIcon />}
             </button>
           </div>
           {passwordError && <p className="perfil-error">{passwordError}</p>}

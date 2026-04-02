@@ -7,7 +7,6 @@ import com.tfg.gestionentregables.entity.enums.CanalNotificacion;
 import com.tfg.gestionentregables.entity.enums.TipoNotificacion;
 import com.tfg.gestionentregables.entity.enums.Visibilidad;
 import com.tfg.gestionentregables.repository.*;
-import com.tfg.gestionentregables.security.InputSanitizer;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,13 +41,19 @@ public class NotificacionService {
      */
     public void enviarNotificacion(Long usuarioId, TipoNotificacion tipo,
                                     String titulo, String mensaje, Long cursoId) {
+        enviarNotificacion(usuarioId, tipo, titulo, mensaje, cursoId, null, null, null);
+        }
+
+        public void enviarNotificacion(Long usuarioId, TipoNotificacion tipo,
+                        String titulo, String mensaje, Long cursoId,
+                        Long actividadId, Long entregableId, Long entregaId) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado: " + usuarioId));
 
         CanalNotificacion canal = obtenerCanalPreferido(usuarioId);
 
-        String tituloSeguro = InputSanitizer.sanitize(titulo);
-        String mensajeSeguro = InputSanitizer.sanitize(mensaje);
+        String tituloSeguro = limpiarTextoNotificacion(titulo);
+        String mensajeSeguro = limpiarTextoNotificacion(mensaje);
 
         // Notificación in-app (si canal es APP o AMBOS)
         if (canal == CanalNotificacion.APP || canal == CanalNotificacion.AMBOS) {
@@ -58,6 +63,9 @@ public class NotificacionService {
                 .titulo(tituloSeguro)
                 .mensaje(mensajeSeguro)
                     .cursoId(cursoId)
+                    .actividadId(actividadId)
+                    .entregableId(entregableId)
+                    .entregaId(entregaId)
                     .build();
             notificacionRepository.save(notificacion);
         }
@@ -152,6 +160,9 @@ public class NotificacionService {
         Actividad actividad = entregable.getActividad();
         Curso curso = actividad.getCurso();
         Set<Grupo> grupos = actividad.getGrupos();
+        if (grupos == null || grupos.isEmpty()) {
+            grupos = curso.getGrupos();
+        }
 
         String titulo = "Nuevo entregable: " + entregable.getTitulo();
         String mensaje = String.format(
@@ -170,13 +181,88 @@ public class NotificacionService {
                     TipoNotificacion.NUEVO_ENTREGABLE,
                     titulo,
                     mensaje,
-                    curso.getId()
+                    curso.getId(),
+                    actividad.getId(),
+                    entregable.getId(),
+                    null
                 );
             }
         }
 
         log.info("Notificaciones enviadas para nuevo entregable '{}' a {} grupos",
             entregable.getTitulo(), grupos.size());
+    }
+
+    /**
+     * TRIGGER: Notifica a estudiantes cuando se publica una actividad visible.
+     */
+    public void notificarNuevaActividad(Actividad actividad) {
+        if (actividad.getVisibilidad() != Visibilidad.VISIBLE) {
+            return;
+        }
+
+        Curso curso = actividad.getCurso();
+        Set<Grupo> grupos = actividad.getGrupos();
+        if (grupos == null || grupos.isEmpty()) {
+            grupos = curso.getGrupos();
+        }
+
+        String titulo = "Nueva actividad: " + actividad.getTitulo();
+        String mensaje = String.format(
+            "Se ha publicado la actividad '%s' en el curso '%s'. Fecha límite: %s",
+            actividad.getTitulo(),
+            curso.getTitulo(),
+            actividad.getFechaLimite()
+        );
+
+        for (Grupo grupo : grupos) {
+            for (Estudiante estudiante : grupo.getEstudiantes()) {
+                enviarNotificacion(
+                    estudiante.getUsuario().getId(),
+                    TipoNotificacion.NUEVA_ACTIVIDAD,
+                    titulo,
+                    mensaje,
+                    curso.getId(),
+                    actividad.getId(),
+                    null,
+                    null
+                );
+            }
+        }
+    }
+
+    /**
+     * Notifica al alumno cuando su nota es visible/publicada.
+     */
+    public void notificarEntregaEvaluada(Entrega entrega, boolean notaVisible) {
+        if (entrega == null || entrega.getEstudiante() == null || entrega.getEntregable() == null) {
+            return;
+        }
+
+        if (!notaVisible || entrega.getCalificacion() == null) {
+            return;
+        }
+
+        Long usuarioId = entrega.getEstudiante().getUsuario().getId();
+        Entregable entregable = entrega.getEntregable();
+        Actividad actividad = entregable.getActividad();
+        Curso curso = actividad.getCurso();
+
+        String titulo = "Nota publicada: " + entregable.getTitulo();
+        String mensaje = String.format(
+            "Tu entrega de '%s' ya tiene nota publicada: %.2f",
+            entregable.getTitulo(),
+            entrega.getCalificacion()
+        );
+        enviarNotificacion(
+            usuarioId,
+            TipoNotificacion.NOTA_PUBLICADA,
+            titulo,
+            mensaje,
+            curso.getId(),
+            actividad.getId(),
+            entregable.getId(),
+            entrega.getId());
     }
 
     /**
@@ -227,7 +313,10 @@ public class NotificacionService {
                             TipoNotificacion.DEADLINE_CERCANO,
                             titulo,
                             mensaje,
-                            curso.getId()
+                            curso.getId(),
+                            actividad.getId(),
+                            entregable.getId(),
+                            null
                         );
                     }
                 }
@@ -246,5 +335,14 @@ public class NotificacionService {
         return preferenciaRepository.findByUsuarioId(usuarioId)
                 .map(PreferenciaNotificacion::getCanal)
                 .orElse(CanalNotificacion.APP);
+    }
+
+    private String limpiarTextoNotificacion(String value) {
+        if (value == null) {
+            return null;
+        }
+        return value
+            .replaceAll("[\\p{Cntrl}&&[^\\r\\n\\t]]", "")
+            .trim();
     }
 }

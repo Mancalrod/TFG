@@ -23,6 +23,8 @@ public class EntregaDTO {
     private Boolean esVersionActiva;
     private Long entregableId;
     private String entregableTitulo;
+    private Double notaMaximaEntregable;
+    private Boolean notasVisiblesEstudiante;
     private Long estudianteId;
     private String estudianteNombre;
     private Boolean fueATiempo;

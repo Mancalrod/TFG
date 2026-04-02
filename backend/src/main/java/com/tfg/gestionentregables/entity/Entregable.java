@@ -89,6 +89,10 @@ public class Entregable {
     @Builder.Default
     private Boolean validacionZipEstricta = false;
 
+    @Column(name = "notas_visibles_estudiante")
+    @Builder.Default
+    private Boolean notasVisiblesEstudiante = false;
+
     // Relación: Un entregable pertenece a una actividad
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "actividad_id", nullable = false)

@@ -182,11 +182,13 @@ const CursoDetallePage: React.FC = () => {
       resetForm();
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string; errors?: Record<string, string> } } };
+      const detalleErrores = axiosErr?.response?.data?.errors
+        ? Object.values(axiosErr.response.data.errors).join(', ')
+        : null;
       const msg =
+        detalleErrores ||
         axiosErr?.response?.data?.message ||
-        (axiosErr?.response?.data?.errors
-          ? Object.values(axiosErr.response.data.errors).join(', ')
-          : 'Error al crear la actividad. Inténtalo de nuevo.');
+        'Error al crear la actividad. Inténtalo de nuevo.';
       setErrorCrear(typeof msg === 'string' ? msg : 'Error al crear la actividad. Inténtalo de nuevo.');
     } finally {
       setCreando(false);

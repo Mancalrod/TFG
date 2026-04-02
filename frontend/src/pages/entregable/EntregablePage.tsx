@@ -8,14 +8,14 @@ import './EntregablePage.css';
 const descargarTodo = async (entregableId: number) => {
   try {
     const { blob, filename } = await entregaService.descargarTodo(entregableId);
-    const url = window.URL.createObjectURL(blob);
+    const url = globalThis.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
     a.click();
     a.remove();
-    window.URL.revokeObjectURL(url);
+    globalThis.URL.revokeObjectURL(url);
   } catch (err) {
     console.error('Error al descargar todo:', err);
     alert('Error al descargar las entregas');
@@ -29,6 +29,7 @@ const EntregablePage: React.FC = () => {
   const [misEntregas, setMisEntregas] = useState<EntregaDTO[]>([]);
   const [estadisticas, setEstadisticas] = useState<EntregaEstadisticasDTO | null>(null);
   const [loading, setLoading] = useState(true);
+  const [actualizandoVisibilidadNotas, setActualizandoVisibilidadNotas] = useState(false);
   const { esProfesor, esAdmin, usuario } = useAuth();
   const navigate = useNavigate();
   const puedeEditarEntregable = esProfesor && !esAdmin;
@@ -60,9 +61,33 @@ const EntregablePage: React.FC = () => {
 
   useEffect(() => {
     if (id) {
-      cargarEntregable(parseInt(id));
+      cargarEntregable(Number.parseInt(id, 10));
     }
   }, [id, cargarEntregable]);
+
+  const toggleNotasVisibles = async () => {
+    if (!entregable || actualizandoVisibilidadNotas) return;
+    setActualizandoVisibilidadNotas(true);
+    try {
+      const actualizado = await entregableService.cambiarVisibilidadNotas(
+        entregable.id,
+        !entregable.notasVisiblesEstudiante,
+      );
+      setEntregable(actualizado);
+      if (esProfesor) {
+        const entregasData = await entregaService.listarParaEvaluar(actualizado.id);
+        setEntregas(entregasData);
+      } else if (usuario?.id) {
+        const misEntregasData = await entregaService.listarHistorial(actualizado.id, usuario.id);
+        setMisEntregas(misEntregasData);
+      }
+    } catch (err) {
+      console.error('Error al cambiar visibilidad de notas:', err);
+      alert('No se pudo actualizar la visibilidad de las notas.');
+    } finally {
+      setActualizandoVisibilidadNotas(false);
+    }
+  };
 
   const formatDate = (dateStr: string | undefined) => {
     if (!dateStr) return 'Sin fecha';
@@ -73,6 +98,22 @@ const EntregablePage: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const formatearNota = (entrega: EntregaDTO) => {
+    if (entrega.calificacion === undefined || entrega.calificacion === null) {
+      return 'Sin evaluar';
+    }
+    const notaMaxima = entrega.notaMaximaEntregable ?? entregable.notaMaxima;
+    if (notaMaxima === undefined || notaMaxima === null) {
+      return `${entrega.calificacion}`;
+    }
+    return `${entrega.calificacion}/${notaMaxima}`;
+  };
+
+  const puedeVerNotaAlumno = (entrega: EntregaDTO) => {
+    if (esProfesor) return true;
+    return entrega.estado === 'PUBLICADO' || Boolean(entrega.notasVisiblesEstudiante) || Boolean(entregable.notasVisiblesEstudiante);
   };
 
   const formatFileSize = (bytes: number | undefined) => {
@@ -136,6 +177,13 @@ const EntregablePage: React.FC = () => {
     );
   }
 
+  let textoBotonVisibilidadNotas = 'Mostrar notas al alumnado';
+  if (actualizandoVisibilidadNotas) {
+    textoBotonVisibilidadNotas = 'Actualizando...';
+  } else if (entregable.notasVisiblesEstudiante) {
+    textoBotonVisibilidadNotas = 'Ocultar notas al alumnado';
+  }
+
   return (
     <div className="entregable-page">
       <div className="entregable-header">
@@ -152,6 +200,11 @@ const EntregablePage: React.FC = () => {
             </span>
             {entregable.permiteReenvio && (
               <span className="reenvio-badge">Permite reenvío</span>
+            )}
+            {esProfesor && (
+              <span className="reenvio-badge">
+                {entregable.notasVisiblesEstudiante ? 'Notas visibles al alumnado' : 'Notas ocultas al alumnado'}
+              </span>
             )}
           </div>
         </div>
@@ -274,10 +327,17 @@ const EntregablePage: React.FC = () => {
           <div className="entregas-panel">
             <div className="entregas-panel-header">
               <h2>Entregas Recibidas ({entregas.length})</h2>
+              <button
+                className="btn-secondary"
+                onClick={toggleNotasVisibles}
+                disabled={actualizandoVisibilidadNotas}
+              >
+                {textoBotonVisibilidadNotas}
+              </button>
               {entregas.length > 0 && (
                 <button
                   className="btn-secondary btn-descargar-todo"
-                  onClick={() => descargarTodo(parseInt(id!))}
+                  onClick={() => descargarTodo(Number.parseInt(id!, 10))}
                 >
                   ⬇ Descargar Todo
                 </button>
@@ -317,7 +377,7 @@ const EntregablePage: React.FC = () => {
                           {entrega.estado}
                         </span>
                       </td>
-                      <td>{entrega.calificacion ?? '-'}</td>
+                      <td>{formatearNota(entrega)}</td>
                       <td>
                         <button 
                           className="btn-sm"
@@ -340,20 +400,24 @@ const EntregablePage: React.FC = () => {
             <h2>Mis Entregas ({misEntregas.length})</h2>
             <ul className="mis-entregas-list">
               {misEntregas.map(entrega => (
-                <li
-                  key={entrega.id}
-                  className="mi-entrega-item mi-entrega-clickable"
-                  onClick={() => navigate(`/entregas/${entrega.id}`)}
-                >
-                  <div className="mi-entrega-info">
-                    <span className="version">v{entrega.version}</span>
-                    <span className="fecha">{formatDate(entrega.fechaEntrega)}</span>
-                    <span className={`estado ${entrega.estado.toLowerCase()}`}>{entrega.estado}</span>
-                    {entrega.calificacion !== undefined && (
-                      <span className="calificacion">{entrega.calificacion} pts</span>
-                    )}
-                  </div>
-                  <span className="mi-entrega-arrow">→</span>
+                <li key={entrega.id}>
+                  <button
+                    type="button"
+                    className="mi-entrega-item mi-entrega-clickable"
+                    onClick={() => navigate(`/entregas/${entrega.id}`)}
+                  >
+                    <div className="mi-entrega-info">
+                      <span className="version">v{entrega.version}</span>
+                      <span className="fecha">{formatDate(entrega.fechaEntrega)}</span>
+                      <span className={`estado ${entrega.estado.toLowerCase()}`}>{entrega.estado}</span>
+                      {puedeVerNotaAlumno(entrega) && entrega.calificacion !== undefined && entrega.calificacion !== null ? (
+                        <span className="calificacion">{formatearNota(entrega)}</span>
+                      ) : (
+                        <span className="calificacion">Sin evaluar</span>
+                      )}
+                    </div>
+                    <span className="mi-entrega-arrow">→</span>
+                  </button>
                 </li>
               ))}
             </ul>

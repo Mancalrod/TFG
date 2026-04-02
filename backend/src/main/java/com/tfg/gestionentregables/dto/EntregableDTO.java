@@ -25,6 +25,7 @@ public class EntregableDTO {
     private String estructuraZip;
     private Boolean validacionZipEstricta;
     private String nombreZipEsperado;
+    private Boolean notasVisiblesEstudiante;
     private Long actividadId;
     private String actividadTitulo;
     private Long numeroEntregas;

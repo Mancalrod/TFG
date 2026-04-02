@@ -266,4 +266,35 @@ describe('Navbar', () => {
     expect(await screen.findByText('Nuevo entregable')).toBeInTheDocument();
     expect(await screen.findByText('Hay una nueva tarea')).toBeInTheDocument();
   });
+
+  it('navega al recurso especifico de la notificacion cuando existe entregaId', async () => {
+    const user = userEvent.setup();
+    mockUseAuth.mockReturnValue({
+      usuario: { id: 16, nombre: 'Noti Deep Link' },
+      esProfesor: false,
+      esEstudiante: true,
+      esAdmin: false,
+      logout: mockLogout,
+    });
+    mockNotiContar.mockResolvedValue(1);
+    mockNotiListar.mockResolvedValue([
+      {
+        id: 202,
+        titulo: 'Entrega evaluada',
+        mensaje: 'Tu entrega ha sido evaluada',
+        leida: false,
+        tipo: 'ENTREGA_EVALUADA',
+        fechaCreacion: '2026-04-02T11:58:00',
+        cursoId: 5,
+        entregaId: 88,
+      },
+    ]);
+
+    renderNavbarAt('/dashboard');
+
+    await user.click(screen.getByRole('button', { name: 'Abrir notificaciones' }));
+    await user.click(await screen.findByRole('button', { name: /Entrega evaluada/i }));
+
+    expect(mockNavigate).toHaveBeenCalledWith('/entregas/88');
+  });
 });

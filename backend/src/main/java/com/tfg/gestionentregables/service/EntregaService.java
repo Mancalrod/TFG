@@ -80,6 +80,7 @@ public class EntregaService {
     private final OneDriveService oneDriveService;
     private final ZipValidationService zipValidationService;
     private final CloudinaryService cloudinaryService;
+    private final NotificacionService notificacionService;
 
     @Value("${app.upload.dir:uploads}")
     private String uploadBaseDir;
@@ -284,6 +285,9 @@ public class EntregaService {
 
         entrega.setCalificacion(calificacion.getNota());
         entrega.setEstado(EstadoEntrega.CALIFICADO);
+        if (Boolean.TRUE.equals(entrega.getEntregable().getNotasVisiblesEstudiante())) {
+            entrega.setEstado(EstadoEntrega.PUBLICADO);
+        }
         entrega.setFechaCalificacion(LocalDateTime.now());
         entrega = entregaRepository.save(entrega);
 
@@ -304,6 +308,9 @@ public class EntregaService {
         }
 
         Entrega entregaActualizada = entregaRepository.findById(entrega.getId()).orElse(entrega);
+        notificacionService.notificarEntregaEvaluada(
+            entregaActualizada,
+            Boolean.TRUE.equals(entregaActualizada.getEntregable().getNotasVisiblesEstudiante()));
         return mapper.toDTO(entregaActualizada);
     }
 

@@ -84,6 +84,16 @@ public class EntregableController {
         return ResponseEntity.ok(entregableService.cambiarVisibilidad(id, visibilidad, actorId, actorEsAdmin));
     }
 
+    @PatchMapping("/{id}/notas-visibles")
+    public ResponseEntity<EntregableDTO> cambiarVisibilidadNotas(
+            @PathVariable Long id,
+            @RequestParam boolean visible,
+            Authentication authentication) {
+        Long actorId = securityContextUserService.getCurrentUserId(authentication);
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        return ResponseEntity.ok(entregableService.cambiarVisibilidadNotasEstudiante(id, visible, actorId, actorEsAdmin));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarEntregable(@PathVariable Long id,
                                                    Authentication authentication) {

@@ -2,6 +2,7 @@ package com.tfg.gestionentregables.service;
 
 import com.tfg.gestionentregables.dto.*;
 import com.tfg.gestionentregables.entity.*;
+import com.tfg.gestionentregables.entity.enums.EstadoEntrega;
 import com.tfg.gestionentregables.entity.enums.Visibilidad;
 import com.tfg.gestionentregables.repository.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -26,6 +27,7 @@ public class EntregableService {
 
     private final EntregableRepository entregableRepository;
     private final ActividadRepository actividadRepository;
+    private final EntregaRepository entregaRepository;
     private final ProfesorRepository profesorRepository;
     private final EntityMapper mapper;
     private final NotificacionService notificacionService;
@@ -155,6 +157,35 @@ public class EntregableService {
 
         entregable.setVisibilidad(visibilidad);
         entregable = entregableRepository.save(entregable);
+        return mapper.toDTO(entregable);
+    }
+
+    public EntregableDTO cambiarVisibilidadNotasEstudiante(Long entregableId,
+                                                           boolean visible,
+                                                           Long actorUsuarioId,
+                                                           boolean actorEsAdmin) {
+        Entregable entregable = entregableRepository.findById(entregableId)
+            .orElseThrow(() -> new EntityNotFoundException(ENTREGABLE_NOT_FOUND + entregableId));
+
+        verificarAccesoProfesorACurso(entregable.getActividad().getCurso().getId(), actorUsuarioId, actorEsAdmin);
+
+        entregable.setNotasVisiblesEstudiante(visible);
+        entregable = entregableRepository.save(entregable);
+
+        List<Entrega> entregasActivas = entregaRepository.findByEntregableIdAndEsVersionActiva(entregableId, true);
+        for (Entrega entrega : entregasActivas) {
+            if (entrega.getCalificacion() == null) {
+                continue;
+            }
+            if (visible) {
+                entrega.setEstado(EstadoEntrega.PUBLICADO);
+                notificacionService.notificarEntregaEvaluada(entrega, true);
+            } else if (entrega.getEstado() == EstadoEntrega.PUBLICADO) {
+                entrega.setEstado(EstadoEntrega.CALIFICADO);
+            }
+        }
+        entregaRepository.saveAll(entregasActivas);
+
         return mapper.toDTO(entregable);
     }
 
