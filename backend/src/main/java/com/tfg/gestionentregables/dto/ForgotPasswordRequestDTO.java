@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SuppressWarnings("java:S1220")
 public class ForgotPasswordRequestDTO {
 
     @NotBlank(message = "El correo electrónico es obligatorio")

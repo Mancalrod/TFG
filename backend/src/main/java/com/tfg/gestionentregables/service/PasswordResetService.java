@@ -30,6 +30,7 @@ public class PasswordResetService {
 
     private static final Locale LOCALE_ES = Locale.forLanguageTag("es-ES");
     private static final DateTimeFormatter FECHA_HUMANA = DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy 'a las' HH:mm", LOCALE_ES);
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
@@ -104,7 +105,7 @@ public class PasswordResetService {
 
     private String generarTokenSeguro() {
         byte[] randomBytes = new byte[32];
-        new SecureRandom().nextBytes(randomBytes);
+        SECURE_RANDOM.nextBytes(randomBytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
     }
 

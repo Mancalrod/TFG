@@ -6,6 +6,64 @@ import { useAuth } from '../../context/AuthContext';
 import FilePreviewModal from '../../components/FilePreviewModal';
 import './EntregaDetallePage.css';
 
+const formatDateDisplay = (dateStr: string) => {
+  return new Date(dateStr).toLocaleDateString('es-ES', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+};
+
+const formatFileSizeDisplay = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const getFileIcon = (nombre: string) => {
+  const lower = nombre.toLowerCase();
+  if (lower.endsWith('.pdf')) return '📕';
+  if (/\.(png|jpe?g|gif|svg|webp)$/.test(lower)) return '🖼️';
+  if (/\.(zip|rar|7z|tar|gz)$/.test(lower)) return '📦';
+  if (/\.(doc|docx)$/.test(lower)) return '📘';
+  if (/\.(xls|xlsx)$/.test(lower)) return '📊';
+  if (/\.(ppt|pptx)$/.test(lower)) return '📙';
+  if (/\.(txt|md|log|csv)$/.test(lower)) return '📝';
+  if (/\.(js|ts|java|py|c|cpp|h|html|css|json|xml)$/.test(lower)) return '💻';
+  return '📄';
+};
+
+const esPrevisualizable = (nombre: string) => {
+  const extension = nombre.split('.').pop()?.toLowerCase();
+  if (!extension) return false;
+  const extensionesPermitidas = new Set([
+    'pdf', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'txt', 'md', 'json', 'xml', 'html', 'htm',
+    'css', 'js', 'ts', 'java', 'py', 'c', 'cpp', 'h', 'log', 'csv', 'zip', 'rar', '7z'
+  ]);
+  return extensionesPermitidas.has(extension);
+};
+
+const validarNotaCalificacion = (nota: string, notaMaxima: number | null | undefined): string | null => {
+  const notaNum = Number.parseFloat(nota);
+  if (!nota || Number.isNaN(notaNum)) {
+    return 'La nota es obligatoria';
+  }
+  if (notaNum < 0) {
+    return 'La nota no puede ser negativa';
+  }
+  if (notaMaxima !== undefined && notaMaxima !== null && notaNum > notaMaxima) {
+    return `La nota no puede ser mayor que ${notaMaxima}`;
+  }
+  return null;
+};
+
+const construirTextoCalificacion = (entrega: EntregaDTO, esProfesor: boolean): string => {
+  const calificacionVisible = esProfesor || entrega.estado === 'PUBLICADO' || Boolean(entrega.notasVisiblesEstudiante);
+  if (!calificacionVisible || entrega.calificacion === undefined || entrega.calificacion === null) {
+    return 'Sin evaluar';
+  }
+  return `${entrega.calificacion}/${entrega.notaMaximaEntregable ?? 10}`;
+};
+
 const EntregaDetallePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -69,61 +127,16 @@ const EntregaDetallePage: React.FC = () => {
     }
   };
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('es-ES', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-      hour: '2-digit', minute: '2-digit'
-    });
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
-  const getFileIcon = (nombre: string) => {
-    const lower = nombre.toLowerCase();
-    if (lower.endsWith('.pdf')) return '📕';
-    if (/\.(png|jpe?g|gif|svg|webp)$/.test(lower)) return '🖼️';
-    if (/\.(zip|rar|7z|tar|gz)$/.test(lower)) return '📦';
-    if (/\.(doc|docx)$/.test(lower)) return '📘';
-    if (/\.(xls|xlsx)$/.test(lower)) return '📊';
-    if (/\.(ppt|pptx)$/.test(lower)) return '📙';
-    if (/\.(txt|md|log|csv)$/.test(lower)) return '📝';
-    if (/\.(js|ts|java|py|c|cpp|h|html|css|json|xml)$/.test(lower)) return '💻';
-    return '📄';
-  };
-
-  const esPrevisualizeable = (nombre: string) => {
-    const extension = nombre.split('.').pop()?.toLowerCase();
-    if (!extension) return false;
-    const extensionesPermitidas = new Set([
-      'pdf', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'txt', 'md', 'json', 'xml', 'html', 'htm',
-      'css', 'js', 'ts', 'java', 'py', 'c', 'cpp', 'h', 'log', 'csv', 'zip', 'rar', '7z'
-    ]);
-    return extensionesPermitidas.has(extension);
-  };
-
   // Handler para calificar
   const handleCalificar = async () => {
     if (!entrega || !usuario?.id) return;
 
+    const errorValidacion = validarNotaCalificacion(nota, entrega.notaMaximaEntregable);
+    if (errorValidacion) {
+      setErrorCalificacion(errorValidacion);
+      return;
+    }
     const notaNum = Number.parseFloat(nota);
-    if (!nota || Number.isNaN(notaNum)) {
-      setErrorCalificacion('La nota es obligatoria');
-      return;
-    }
-
-    const notaMaxima = entrega.notaMaximaEntregable;
-    if (notaNum < 0) {
-      setErrorCalificacion('La nota no puede ser negativa');
-      return;
-    }
-    if (notaMaxima !== undefined && notaMaxima !== null && notaNum > notaMaxima) {
-      setErrorCalificacion(`La nota no puede ser mayor que ${notaMaxima}`);
-      return;
-    }
 
     setCalificando(true);
     setErrorCalificacion(null);
@@ -174,13 +187,7 @@ const EntregaDetallePage: React.FC = () => {
   const rangoNota = notaMaximaEntregable !== undefined && notaMaximaEntregable !== null
     ? `0 - ${notaMaximaEntregable}`
     : '0 - 10';
-  const calificacionVisible = esProfesor || entrega.estado === 'PUBLICADO' || Boolean(entrega.notasVisiblesEstudiante);
-  const notaConMaximo = entrega.calificacion !== undefined && entrega.calificacion !== null
-    ? `${entrega.calificacion}/${notaMaximaEntregable ?? 10}`
-    : null;
-  const textoCalificacion = calificacionVisible && entrega.calificacion !== undefined && entrega.calificacion !== null
-    ? notaConMaximo
-    : 'Sin evaluar';
+  const textoCalificacion = construirTextoCalificacion(entrega, esProfesor);
 
   return (
     <div className="edp-page">
@@ -207,7 +214,7 @@ const EntregaDetallePage: React.FC = () => {
             <div className="edp-info-item">
               <span>Fecha de entrega</span>
               <p className={entrega.fueATiempo ? 'edp-text-ok' : 'edp-text-warn'}>
-                {formatDate(entrega.fechaEntrega)}
+                {formatDateDisplay(entrega.fechaEntrega)}
                 {entrega.fueATiempo ? ' ✓ A tiempo' : ' ⚠ Tardía'}
               </p>
             </div>
@@ -218,7 +225,7 @@ const EntregaDetallePage: React.FC = () => {
             {entrega.fechaCalificacion && (
               <div className="edp-info-item">
                 <span>Fecha calificación</span>
-                <p>{formatDate(entrega.fechaCalificacion)}</p>
+                <p>{formatDateDisplay(entrega.fechaCalificacion)}</p>
               </div>
             )}
           </div>
@@ -253,10 +260,10 @@ const EntregaDetallePage: React.FC = () => {
                   <div className="edp-file-icon">{getFileIcon(archivo.nombre)}</div>
                   <div className="edp-file-info">
                     <span className="edp-file-name">{archivo.nombre}</span>
-                    <span className="edp-file-size">{formatFileSize(archivo.tamanoBytes)}</span>
+                    <span className="edp-file-size">{formatFileSizeDisplay(archivo.tamanoBytes)}</span>
                   </div>
                   <div className="edp-file-actions">
-                    {esPrevisualizeable(archivo.nombre) && (
+                    {esPrevisualizable(archivo.nombre) && (
                       <button
                         className="edp-btn-preview"
                         onClick={() => setPreviewMaterial(archivo)}
@@ -312,7 +319,7 @@ const EntregaDetallePage: React.FC = () => {
                 <div key={fb.id} className="edp-feedback-item">
                   <div className="edp-feedback-header">
                     <span className="edp-feedback-autor">{fb.profesorNombre}</span>
-                    <span className="edp-feedback-fecha">{formatDate(fb.fechaCreacion)}</span>
+                    <span className="edp-feedback-fecha">{formatDateDisplay(fb.fechaCreacion)}</span>
                   </div>
                   <p className="edp-feedback-texto">{fb.comentario}</p>
                 </div>

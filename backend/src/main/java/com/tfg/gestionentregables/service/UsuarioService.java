@@ -169,6 +169,7 @@ public class UsuarioService {
      * Valida estrictamente el MIME type (real, no solo extensión) y el tamaño.
      * Previene subida de webshells o archivos maliciosos.
      */
+    @SuppressWarnings("java:S3776")
     public UsuarioDTO subirFotoPerfil(Long usuarioId, MultipartFile archivo) {
         if (archivo == null || archivo.isEmpty()) {
             throw new IllegalArgumentException("No se ha proporcionado ningún archivo");

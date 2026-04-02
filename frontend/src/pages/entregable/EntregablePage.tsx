@@ -211,6 +211,13 @@ const EntregablePage: React.FC = () => {
     textoBotonVisibilidadNotas = 'Ocultar notas al alumnado';
   }
 
+  let textoBotonVisibilidadEntregable = 'Hacer visible entregable';
+  if (actualizandoVisibilidad) {
+    textoBotonVisibilidadEntregable = 'Actualizando...';
+  } else if (entregable.visibilidad === 'VISIBLE') {
+    textoBotonVisibilidadEntregable = 'Ocultar entregable';
+  }
+
   return (
     <div className="entregable-page">
       <div className="entregable-header">
@@ -243,9 +250,7 @@ const EntregablePage: React.FC = () => {
               onClick={alternarVisibilidadEntregable}
               disabled={actualizandoVisibilidad}
             >
-              {actualizandoVisibilidad
-                ? 'Actualizando...'
-                : (entregable.visibilidad === 'VISIBLE' ? 'Ocultar entregable' : 'Hacer visible entregable')}
+              {textoBotonVisibilidadEntregable}
             </button>
             <button
               className="btn-secondary"

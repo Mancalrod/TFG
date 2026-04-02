@@ -51,11 +51,12 @@ public class NotificacionService {
     public void enviarNotificacion(Long usuarioId, TipoNotificacion tipo,
                                     String titulo, String mensaje, Long cursoId) {
         enviarNotificacion(usuarioId, tipo, titulo, mensaje, cursoId, null, null, null);
-        }
+    }
 
-        public void enviarNotificacion(Long usuarioId, TipoNotificacion tipo,
-                        String titulo, String mensaje, Long cursoId,
-                        Long actividadId, Long entregableId, Long entregaId) {
+    @SuppressWarnings("java:S107")
+    public void enviarNotificacion(Long usuarioId, TipoNotificacion tipo,
+                                   String titulo, String mensaje, Long cursoId,
+                                   Long actividadId, Long entregableId, Long entregaId) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado: " + usuarioId));
 

@@ -55,6 +55,12 @@ const CursoDetallePage: React.FC = () => {
 
   const cursoId = Number(id);
 
+  const calcularRolInicial = (profesor: boolean, estudiante: boolean): 'PROFESOR' | 'ESTUDIANTE' | null => {
+    if (profesor) return 'PROFESOR';
+    if (estudiante) return 'ESTUDIANTE';
+    return null;
+  };
+
   // Cargar datos del curso y sus actividades
   useEffect(() => {
     if (!id) return;
@@ -126,7 +132,7 @@ const CursoDetallePage: React.FC = () => {
           const fallbackProfesor = esProfesor;
           const fallbackEstudiante = esEstudiante;
           setRolesEnCurso({ profesor: fallbackProfesor, estudiante: fallbackEstudiante });
-          setRolVistaCurso(fallbackProfesor ? 'PROFESOR' : fallbackEstudiante ? 'ESTUDIANTE' : null);
+          setRolVistaCurso(calcularRolInicial(fallbackProfesor, fallbackEstudiante));
         }
       }
     };
@@ -263,15 +269,21 @@ const CursoDetallePage: React.FC = () => {
   const puedeCrear = puedeEditarCurso && !modoPreview;
 
   // En modo preview: solo actividades visibles y del grupo seleccionado
-  const actividadesMostradas = modoPreview
-    ? actividades.filter(act => {
-      if (act.visibilidad !== 'VISIBLE') return false;
-      if (act.grupoIds.length === 0) return true; // actividad para todos los grupos
-      return grupoPreviewId !== null && act.grupoIds.includes(grupoPreviewId);
-    })
-    : (rolVistaCurso === 'ESTUDIANTE'
-      ? actividades.filter(act => act.visibilidad === 'VISIBLE')
-      : actividades);
+  const actividadesMostradas = (() => {
+    if (modoPreview) {
+      return actividades.filter(act => {
+        if (act.visibilidad !== 'VISIBLE') return false;
+        if (act.grupoIds.length === 0) return true; // actividad para todos los grupos
+        return grupoPreviewId !== null && act.grupoIds.includes(grupoPreviewId);
+      });
+    }
+
+    if (rolVistaCurso === 'ESTUDIANTE') {
+      return actividades.filter(act => act.visibilidad === 'VISIBLE');
+    }
+
+    return actividades;
+  })();
 
   const grupoPreview = curso?.grupos.find(g => g.id === grupoPreviewId);
 
@@ -330,7 +342,10 @@ const CursoDetallePage: React.FC = () => {
               )}
             </div>
             {tieneAmbosRolesEnCurso && (
-              <div className="cd-role-switch" role="group" aria-label="Cambiar vista de rol en el curso">
+              <fieldset className="cd-role-switch" aria-label="Cambiar vista de rol en el curso">
+                <legend style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', border: 0 }}>
+                  Cambiar vista de rol en el curso
+                </legend>
                 <button
                   type="button"
                   className={`cd-role-switch-btn ${rolVistaCurso === 'PROFESOR' ? 'active' : ''}`}
@@ -350,7 +365,7 @@ const CursoDetallePage: React.FC = () => {
                 >
                   Vista estudiante
                 </button>
-              </div>
+              </fieldset>
             )}
             <h1>{curso.titulo}</h1>
             {curso.descripcion && <p className="cd-descripcion">{curso.descripcion}</p>}
@@ -714,7 +729,7 @@ const CursoDetallePage: React.FC = () => {
               {/* OneDrive */}
               {puedeEditarCurso && oneDriveEnabled && !cargandoOneDrive && (
                 <div className="cd-form-group">
-                  <label>Subir entregas a OneDrive</label>
+                  <p style={{ marginBottom: '8px' }}>Subir entregas a OneDrive</p>
                   {oneDriveConectado ? (
                     <div className="cd-onedrive-options">
                       <label className="cd-onedrive-toggle">
@@ -737,8 +752,9 @@ const CursoDetallePage: React.FC = () => {
                       {formData.subirAOneDrive && (
                         <>
                           <div className="cd-form-group" style={{ marginTop: '15px' }}>
-                            <label style={{ marginBottom: '8px', display: 'block' }}>Modo de organización</label>
+                            <label htmlFor="modo-onedrive-select" style={{ marginBottom: '8px', display: 'block' }}>Modo de organización</label>
                             <select
+                              id="modo-onedrive-select"
                               value={formData.modoOneDrive || ModoOneDrive.ACTIVIDAD}
                               onChange={e => setFormData(prev => ({
                                 ...prev,
@@ -759,7 +775,7 @@ const CursoDetallePage: React.FC = () => {
 
                           {formData.modoOneDrive === ModoOneDrive.ACTIVIDAD && (
                             <div className="cd-form-group cd-onedrive-folder-select" style={{ marginTop: '15px' }}>
-                              <label style={{ marginBottom: '8px', display: 'block' }}>Carpeta de destino en OneDrive</label>
+                              <p style={{ marginBottom: '8px', display: 'block' }}>Carpeta de destino en OneDrive</p>
                               {usuario && (
                                 <OneDriveFolderBrowser
                                   usuarioId={usuario.id}

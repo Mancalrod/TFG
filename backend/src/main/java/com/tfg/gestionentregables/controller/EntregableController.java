@@ -24,6 +24,8 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:3000")
 public class EntregableController {
 
+    private static final String ROLE_ADMIN = "ADMIN";
+
     private final EntregableService entregableService;
     private final SecurityContextUserService securityContextUserService;
 
@@ -44,7 +46,7 @@ public class EntregableController {
             @Valid @RequestBody CrearEntregableDTO dto,
             Authentication authentication) {
         Long actorId = securityContextUserService.getCurrentUserId(authentication);
-        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, ROLE_ADMIN);
         EntregableDTO entregable = entregableService.crearEntregable(dto, actividadId, actorId, actorEsAdmin);
         return ResponseEntity.status(HttpStatus.CREATED).body(entregable);
     }
@@ -70,7 +72,7 @@ public class EntregableController {
             @Valid @RequestBody CrearEntregableDTO dto,
             Authentication authentication) {
         Long actorId = securityContextUserService.getCurrentUserId(authentication);
-        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, ROLE_ADMIN);
         return ResponseEntity.ok(entregableService.actualizarEntregable(id, dto, actorId, actorEsAdmin));
     }
 
@@ -80,7 +82,7 @@ public class EntregableController {
             @RequestParam Visibilidad visibilidad,
             Authentication authentication) {
         Long actorId = securityContextUserService.getCurrentUserId(authentication);
-        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, ROLE_ADMIN);
         return ResponseEntity.ok(entregableService.cambiarVisibilidad(id, visibilidad, actorId, actorEsAdmin));
     }
 
@@ -90,7 +92,7 @@ public class EntregableController {
             @RequestParam boolean visible,
             Authentication authentication) {
         Long actorId = securityContextUserService.getCurrentUserId(authentication);
-        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, ROLE_ADMIN);
         return ResponseEntity.ok(entregableService.cambiarVisibilidadNotasEstudiante(id, visible, actorId, actorEsAdmin));
     }
 
@@ -98,7 +100,7 @@ public class EntregableController {
     public ResponseEntity<Void> eliminarEntregable(@PathVariable Long id,
                                                    Authentication authentication) {
         Long actorId = securityContextUserService.getCurrentUserId(authentication);
-        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, ROLE_ADMIN);
         entregableService.eliminarEntregable(id, actorId, actorEsAdmin);
         return ResponseEntity.noContent().build();
     }
@@ -122,7 +124,7 @@ public class EntregableController {
             @PathVariable Long estudianteId,
             Authentication authentication) {
         Long actorId = securityContextUserService.getCurrentUserId(authentication);
-        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, ROLE_ADMIN);
         boolean actorEsEstudiante = securityContextUserService.hasRole(authentication, "ESTUDIANTE");
         if (actorEsEstudiante && !actorEsAdmin && actorId != null && !actorId.equals(estudianteId)) {
             throw new AccessDeniedException("No puedes consultar entregables pendientes de otro estudiante");

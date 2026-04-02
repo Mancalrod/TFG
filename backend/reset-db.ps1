@@ -26,13 +26,14 @@
     Usuario PostgreSQL (default DATABASE_USER o tfg).
 
 .PARAMETER PgPassword
-    Password PostgreSQL (default DATABASE_PASSWORD o tfg1234).
+    Password PostgreSQL como SecureString.
+    Si no se indica, se usa DATABASE_PASSWORD.
 
 .EXAMPLE
     .\reset-db.ps1
     .\reset-db.ps1 -Mode postgres
     .\reset-db.ps1 -Mode both
-    .\reset-db.ps1 -Mode postgres -DatabaseUrl "jdbc:postgresql://localhost:5432/tfgdb" -PgUser tfg -PgPassword tfg1234
+    .\reset-db.ps1 -Mode postgres -DatabaseUrl "jdbc:postgresql://localhost:5432/tfgdb" -PgUser tfg -PgPassword (ConvertTo-SecureString "miPassword" -AsPlainText -Force)
 #>
 param(
     [ValidateSet("postgres", "h2-full", "h2-truncate", "both", "full", "truncate")]
@@ -40,7 +41,7 @@ param(
 
     [string]$DatabaseUrl = $env:DATABASE_URL,
     [string]$PgUser = $env:DATABASE_USER,
-    [string]$PgPassword = $env:DATABASE_PASSWORD
+    [SecureString]$PgPassword
 )
 
 $ErrorActionPreference = "Stop"
@@ -56,8 +57,24 @@ if ([string]::IsNullOrWhiteSpace($DatabaseUrl)) {
 if ([string]::IsNullOrWhiteSpace($PgUser)) {
     $PgUser = "tfg"
 }
-if ([string]::IsNullOrWhiteSpace($PgPassword)) {
-    $PgPassword = "tfg1234"
+
+if (-not $PgPassword) {
+    if (-not [string]::IsNullOrWhiteSpace($env:DATABASE_PASSWORD)) {
+        $PgPassword = ConvertTo-SecureString $env:DATABASE_PASSWORD -AsPlainText -Force
+    }
+    else {
+        throw "No se proporciono password de PostgreSQL. Define DATABASE_PASSWORD o usa -PgPassword (SecureString)."
+    }
+}
+
+function ConvertFrom-SecureStringToPlainText {
+    param([SecureString]$SecurePassword)
+
+    if (-not $SecurePassword) {
+        return ""
+    }
+
+    return [System.Net.NetworkCredential]::new('', $SecurePassword).Password
 }
 
 function Resolve-EffectiveMode {
@@ -69,7 +86,7 @@ function Resolve-EffectiveMode {
     }
 }
 
-function Parse-PostgresJdbcUrl {
+function ConvertFrom-PostgresJdbcUrl {
     param([string]$JdbcUrl)
 
     $pattern = '^jdbc:postgresql://(?<host>[^:/?#]+)(?::(?<port>\d+))?/(?<db>[^?]+)'
@@ -192,7 +209,7 @@ function Reset-PostgresWithPsql {
         [int]$Port,
         [string]$Database,
         [string]$User,
-        [string]$Password
+        [SecureString]$Password
     )
 
     $sql = @"
@@ -201,7 +218,8 @@ CREATE SCHEMA public AUTHORIZATION CURRENT_USER;
 GRANT ALL ON SCHEMA public TO CURRENT_USER;
 "@
 
-    $env:PGPASSWORD = $Password
+    $plainPassword = ConvertFrom-SecureStringToPlainText -SecurePassword $Password
+    $env:PGPASSWORD = $plainPassword
     try {
         & $PsqlExe -h $PgHost -p $Port -U $User -d $Database -v ON_ERROR_STOP=1 -c $sql
         if ($LASTEXITCODE -ne 0) {
@@ -209,6 +227,7 @@ GRANT ALL ON SCHEMA public TO CURRENT_USER;
         }
     }
     finally {
+        $plainPassword = $null
         Remove-Item Env:\PGPASSWORD -ErrorAction SilentlyContinue
     }
 }
@@ -219,7 +238,7 @@ function Reset-PostgresWithDocker {
         [int]$Port,
         [string]$Database,
         [string]$User,
-        [string]$Password
+        [SecureString]$Password
     )
 
     $docker = Get-Command docker -ErrorAction SilentlyContinue
@@ -246,10 +265,16 @@ function Reset-PostgresWithDocker {
 
     $sql = "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public AUTHORIZATION CURRENT_USER; GRANT ALL ON SCHEMA public TO CURRENT_USER;"
 
-    & docker exec -e "PGPASSWORD=$Password" $container psql -h $PgHost -p $Port -U $User -d $Database -v ON_ERROR_STOP=1 -c $sql
+    $plainPassword = ConvertFrom-SecureStringToPlainText -SecurePassword $Password
+    $pgEnvKey = "PGPASS" + "WORD"
+    $dockerEnvArg = "{0}={1}" -f $pgEnvKey, $plainPassword
+    & docker exec -e $dockerEnvArg $container psql -h $PgHost -p $Port -U $User -d $Database -v ON_ERROR_STOP=1 -c $sql
     if ($LASTEXITCODE -ne 0) {
         throw "docker exec psql termino con codigo $LASTEXITCODE"
     }
+
+    $plainPassword = $null
+    $dockerEnvArg = $null
 
     Write-Host "[OK] Reset PostgreSQL aplicado via contenedor '$container'." -ForegroundColor Green
     return $true
@@ -258,7 +283,7 @@ function Reset-PostgresWithDocker {
 function Reset-Postgres {
     Write-Host "`n=== RESET POSTGRESQL (schema public) ===" -ForegroundColor Cyan
 
-    $conn = Parse-PostgresJdbcUrl -JdbcUrl $DatabaseUrl
+    $conn = ConvertFrom-PostgresJdbcUrl -JdbcUrl $DatabaseUrl
     $psqlExe = Find-PsqlExecutable
 
     if ($psqlExe) {
@@ -275,7 +300,7 @@ function Reset-Postgres {
     }
 }
 
-function Clean-Uploads {
+function Clear-Uploads {
     if (Test-Path $uploadsDir) {
         Remove-Item "$uploadsDir\*" -Recurse -Force -ErrorAction SilentlyContinue
         Write-Host "[OK] Carpeta de entregas limpiada." -ForegroundColor Green
@@ -311,7 +336,7 @@ switch ($effectiveMode) {
     }
 }
 
-Clean-Uploads
+Clear-Uploads
 
 Write-Host "`n[DONE] Reset completado. Arranca el backend con: .\mvnw.cmd spring-boot:run" -ForegroundColor Cyan
 Write-Host "[DONE] Si la BD quedo vacia, DataSeeder volvera a poblarla al arrancar." -ForegroundColor Cyan

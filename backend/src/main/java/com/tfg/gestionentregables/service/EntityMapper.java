@@ -62,32 +62,34 @@ public class EntityMapper {
     }
 
     public GrupoDTO toDTO(Grupo grupo) {
-        if (grupo == null) return null;
+        if (grupo == null) {
+            return null;
+        }
 
-                Map<Long, Curso> cursosAsociados = new LinkedHashMap<>();
-                if (grupo.getCurso() != null && grupo.getCurso().getId() != null) {
-                        cursosAsociados.put(grupo.getCurso().getId(), grupo.getCurso());
+        Map<Long, Curso> cursosAsociados = new LinkedHashMap<>();
+        if (grupo.getCurso() != null && grupo.getCurso().getId() != null) {
+            cursosAsociados.put(grupo.getCurso().getId(), grupo.getCurso());
+        }
+        if (grupo.getCursos() != null) {
+            for (Curso curso : grupo.getCursos()) {
+                if (curso != null && curso.getId() != null) {
+                    cursosAsociados.put(curso.getId(), curso);
                 }
-                if (grupo.getCursos() != null) {
-                        for (Curso curso : grupo.getCursos()) {
-                                if (curso != null && curso.getId() != null) {
-                                        cursosAsociados.put(curso.getId(), curso);
-                                }
-                        }
-                }
+            }
+        }
 
-                List<Long> cursoIds = new ArrayList<>(cursosAsociados.keySet());
-                List<String> cursoTitulos = cursosAsociados.values().stream()
-                                .map(Curso::getTitulo)
-                                .toList();
+        List<Long> cursoIds = new ArrayList<>(cursosAsociados.keySet());
+        List<String> cursoTitulos = cursosAsociados.values().stream()
+                .map(Curso::getTitulo)
+                .toList();
 
         return GrupoDTO.builder()
                 .id(grupo.getId())
                 .titulo(grupo.getTitulo())
-                                .cursoId(grupo.getCurso() != null ? grupo.getCurso().getId() : null)
-                                .cursoTitulo(grupo.getCurso() != null ? grupo.getCurso().getTitulo() : null)
-                                .cursoIds(cursoIds)
-                                .cursoTitulos(cursoTitulos)
+                .cursoId(grupo.getCurso() != null ? grupo.getCurso().getId() : null)
+                .cursoTitulo(grupo.getCurso() != null ? grupo.getCurso().getTitulo() : null)
+                .cursoIds(cursoIds)
+                .cursoTitulos(cursoTitulos)
                 .numeroEstudiantes(grupo.getEstudiantes().size())
                 .build();
     }

@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,12 +50,8 @@ public class ActividadService {
         verificarAccesoProfesorACurso(cursoId, actorUsuarioId, actorEsAdmin);
 
         boolean subirAOneDrive = Boolean.TRUE.equals(dto.getSubirAOneDrive());
-        ModoOneDrive modoOneDrive = subirAOneDrive
-            ? (dto.getModoOneDrive() != null ? dto.getModoOneDrive() : ModoOneDrive.ACTIVIDAD)
-            : null;
-        String carpetaOneDrive = (subirAOneDrive && modoOneDrive == ModoOneDrive.ACTIVIDAD)
-            ? dto.getCarpetaOneDrive()
-            : null;
+        ModoOneDrive modoOneDrive = resolverModoOneDrive(dto, subirAOneDrive);
+        String carpetaOneDrive = resolverCarpetaOneDrive(dto, subirAOneDrive, modoOneDrive);
 
         Actividad actividad = Actividad.builder()
                 .titulo(dto.getTitulo())
@@ -86,7 +83,7 @@ public class ActividadService {
      */
     @Transactional(readOnly = true)
     public List<ActividadDTO> listarActividadesCurso(Long cursoId) {
-        return listarActividadesCurso(cursoId, null, false, false, false);
+        return listarActividadesCursoInterno(cursoId, null, false, false, false);
     }
 
     @Transactional(readOnly = true)
@@ -95,6 +92,14 @@ public class ActividadService {
                                                      boolean actorEsAdmin,
                                                      boolean actorEsProfesor,
                                                      boolean actorEsEstudiante) {
+        return listarActividadesCursoInterno(cursoId, actorUsuarioId, actorEsAdmin, actorEsProfesor, actorEsEstudiante);
+    }
+
+    private List<ActividadDTO> listarActividadesCursoInterno(Long cursoId,
+                                                             Long actorUsuarioId,
+                                                             boolean actorEsAdmin,
+                                                             boolean actorEsProfesor,
+                                                             boolean actorEsEstudiante) {
         if (!cursoRepository.existsById(cursoId)) {
             throw new EntityNotFoundException("Curso no encontrado con ID: " + cursoId);
         }
@@ -128,7 +133,7 @@ public class ActividadService {
      */
     @Transactional(readOnly = true)
     public List<ActividadDTO> listarActividadesVisiblesGrupo(Long grupoId) {
-        return listarActividadesVisiblesGrupo(grupoId, null, false, false, false);
+        return listarActividadesVisiblesGrupoInterno(grupoId, null, false, false, false);
     }
 
     @Transactional(readOnly = true)
@@ -137,31 +142,18 @@ public class ActividadService {
                                                               boolean actorEsAdmin,
                                                               boolean actorEsProfesor,
                                                               boolean actorEsEstudiante) {
+        return listarActividadesVisiblesGrupoInterno(grupoId, actorUsuarioId, actorEsAdmin, actorEsProfesor, actorEsEstudiante);
+        }
+
+        private List<ActividadDTO> listarActividadesVisiblesGrupoInterno(Long grupoId,
+                                          Long actorUsuarioId,
+                                          boolean actorEsAdmin,
+                                          boolean actorEsProfesor,
+                                          boolean actorEsEstudiante) {
         Grupo grupo = grupoRepository.findById(grupoId)
                 .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con ID: " + grupoId));
 
-        if (!actorEsAdmin && actorUsuarioId != null) {
-            if (actorEsEstudiante) {
-                boolean pertenece = estudianteRepository.existsByUsuarioIdAndGrupoId(actorUsuarioId, grupoId);
-                if (!pertenece) {
-                    throw new AccessDeniedException("No tienes acceso a este grupo");
-                }
-            } else if (actorEsProfesor) {
-                boolean acceso = false;
-                if (grupo.getCurso() != null && grupo.getCurso().getId() != null) {
-                    acceso = profesorRepository.existsByUsuarioIdAndCursoId(actorUsuarioId, grupo.getCurso().getId());
-                }
-                if (!acceso && grupo.getCursos() != null) {
-                    acceso = grupo.getCursos().stream()
-                            .map(Curso::getId)
-                            .filter(id -> id != null)
-                            .anyMatch(cid -> profesorRepository.existsByUsuarioIdAndCursoId(actorUsuarioId, cid));
-                }
-                if (!acceso) {
-                    throw new AccessDeniedException("No tienes acceso a este grupo");
-                }
-            }
-        }
+        validarAccesoAGrupo(grupo, grupoId, actorUsuarioId, actorEsAdmin, actorEsProfesor, actorEsEstudiante);
 
         return actividadRepository.findByGrupoIdAndVisibilidad(grupoId, Visibilidad.VISIBLE).stream()
                 .map(mapper::toDTO)
@@ -237,17 +229,12 @@ public class ActividadService {
 
         // OneDrive
         boolean subirAOneDrive = Boolean.TRUE.equals(dto.getSubirAOneDrive());
-        ModoOneDrive modoOneDrive = subirAOneDrive
-            ? (dto.getModoOneDrive() != null ? dto.getModoOneDrive() : ModoOneDrive.ACTIVIDAD)
-            : null;
+        ModoOneDrive modoOneDrive = resolverModoOneDrive(dto, subirAOneDrive);
 
         actividad.setSubirAOneDrive(subirAOneDrive);
         actividad.setOneDriveUsuarioId(subirAOneDrive ? dto.getOneDriveUsuarioId() : null);
         actividad.setModoOneDrive(modoOneDrive);
-        actividad.setCarpetaOneDrive(
-            (subirAOneDrive && modoOneDrive == ModoOneDrive.ACTIVIDAD)
-                ? dto.getCarpetaOneDrive()
-                : null);
+        actividad.setCarpetaOneDrive(resolverCarpetaOneDrive(dto, subirAOneDrive, modoOneDrive));
 
         // Actualizar grupos si se especifican
         if (dto.getGrupoIds() != null) {
@@ -335,6 +322,68 @@ public class ActividadService {
         boolean esProfesorDelCurso = profesorRepository.existsByUsuarioIdAndCursoId(actorUsuarioId, cursoId);
         if (!esProfesorDelCurso) {
             throw new AccessDeniedException("No tienes permisos sobre este curso");
+        }
+    }
+
+    private ModoOneDrive resolverModoOneDrive(CrearActividadDTO dto, boolean subirAOneDrive) {
+        if (!subirAOneDrive) {
+            return null;
+        }
+        if (dto.getModoOneDrive() != null) {
+            return dto.getModoOneDrive();
+        }
+        return ModoOneDrive.ACTIVIDAD;
+    }
+
+    private String resolverCarpetaOneDrive(CrearActividadDTO dto, boolean subirAOneDrive, ModoOneDrive modoOneDrive) {
+        if (!subirAOneDrive || modoOneDrive != ModoOneDrive.ACTIVIDAD) {
+            return null;
+        }
+        return dto.getCarpetaOneDrive();
+    }
+
+    private void validarAccesoAGrupo(Grupo grupo,
+                                     Long grupoId,
+                                     Long actorUsuarioId,
+                                     boolean actorEsAdmin,
+                                     boolean actorEsProfesor,
+                                     boolean actorEsEstudiante) {
+        if (actorEsAdmin || actorUsuarioId == null) {
+            return;
+        }
+
+        if (actorEsEstudiante) {
+            validarAccesoEstudianteAGrupo(actorUsuarioId, grupoId);
+            return;
+        }
+
+        if (actorEsProfesor) {
+            validarAccesoProfesorAGrupo(grupo, actorUsuarioId);
+        }
+    }
+
+    private void validarAccesoEstudianteAGrupo(Long actorUsuarioId, Long grupoId) {
+        boolean pertenece = estudianteRepository.existsByUsuarioIdAndGrupoId(actorUsuarioId, grupoId);
+        if (!pertenece) {
+            throw new AccessDeniedException("No tienes acceso a este grupo");
+        }
+    }
+
+    private void validarAccesoProfesorAGrupo(Grupo grupo, Long actorUsuarioId) {
+        boolean acceso = false;
+        if (grupo.getCurso() != null && grupo.getCurso().getId() != null) {
+            acceso = profesorRepository.existsByUsuarioIdAndCursoId(actorUsuarioId, grupo.getCurso().getId());
+        }
+
+        if (!acceso && grupo.getCursos() != null) {
+            acceso = grupo.getCursos().stream()
+                    .map(Curso::getId)
+                    .filter(Objects::nonNull)
+                    .anyMatch(cid -> profesorRepository.existsByUsuarioIdAndCursoId(actorUsuarioId, cid));
+        }
+
+        if (!acceso) {
+            throw new AccessDeniedException("No tienes acceso a este grupo");
         }
     }
 }
