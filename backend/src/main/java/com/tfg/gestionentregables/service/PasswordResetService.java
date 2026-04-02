@@ -99,8 +99,27 @@ public class PasswordResetService {
     }
 
     private String construirUrlReset(String tokenPlano) {
-        String base = frontendBaseUrl != null ? frontendBaseUrl.replaceAll("/+$", "") : "http://localhost:3000";
+        String base = normalizarFrontendBaseUrl(frontendBaseUrl);
         return base + "/reset-password?token=" + URLEncoder.encode(tokenPlano, StandardCharsets.UTF_8);
+    }
+
+    private String normalizarFrontendBaseUrl(String baseUrl) {
+        String fallback = "http://localhost:3000";
+        if (baseUrl == null) {
+            return fallback;
+        }
+
+        String base = baseUrl.strip();
+        if (base.isEmpty()) {
+            return fallback;
+        }
+
+        int end = base.length();
+        while (end > 0 && base.charAt(end - 1) == '/') {
+            end--;
+        }
+
+        return end == 0 ? fallback : base.substring(0, end);
     }
 
     private String generarTokenSeguro() {

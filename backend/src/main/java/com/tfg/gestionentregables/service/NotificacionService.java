@@ -373,7 +373,7 @@ public class NotificacionService {
     }
 
     private String construirUrlDestino(Long actividadId, Long entregableId, Long entregaId, Long cursoId) {
-        String base = frontendBaseUrl != null ? frontendBaseUrl.replaceAll("/+$", "") : "http://localhost:3000";
+        String base = normalizarFrontendBaseUrl(frontendBaseUrl);
         if (entregaId != null) {
             return base + "/entregas/" + entregaId;
         }
@@ -387,5 +387,24 @@ public class NotificacionService {
             return base + "/cursos/" + cursoId;
         }
         return null;
+    }
+
+    private String normalizarFrontendBaseUrl(String baseUrl) {
+        String fallback = "http://localhost:3000";
+        if (baseUrl == null) {
+            return fallback;
+        }
+
+        String base = baseUrl.strip();
+        if (base.isEmpty()) {
+            return fallback;
+        }
+
+        int end = base.length();
+        while (end > 0 && base.charAt(end - 1) == '/') {
+            end--;
+        }
+
+        return end == 0 ? fallback : base.substring(0, end);
     }
 }
