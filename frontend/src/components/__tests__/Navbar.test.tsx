@@ -82,6 +82,7 @@ describe('Navbar', () => {
     );
 
     expect(screen.getByRole('link', { name: 'Iniciar Sesión' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Notificaciones (inicia sesion)' })).toBeDisabled();
     expect(screen.queryByText('Dashboard')).not.toBeInTheDocument();
   });
 
@@ -265,6 +266,88 @@ describe('Navbar', () => {
     expect(await screen.findByText('Notificaciones')).toBeInTheDocument();
     expect(await screen.findByText('Nuevo entregable')).toBeInTheDocument();
     expect(await screen.findByText('Hay una nueva tarea')).toBeInTheDocument();
+  });
+
+  it('muestra estado vacio si falla carga de notificaciones', async () => {
+    const user = userEvent.setup();
+    mockUseAuth.mockReturnValue({
+      usuario: { id: 17, nombre: 'Sin Notis' },
+      esProfesor: false,
+      esEstudiante: true,
+      esAdmin: false,
+      logout: mockLogout,
+    });
+    mockNotiContar.mockRejectedValue(new Error('count error'));
+    mockNotiListar.mockRejectedValue(new Error('list error'));
+
+    renderNavbarAt('/dashboard');
+
+    await user.click(screen.getByRole('button', { name: 'Abrir notificaciones' }));
+
+    expect(await screen.findByText('No hay notificaciones.')).toBeInTheDocument();
+  });
+
+  it('decodifica entidades html en notificaciones y navega por actividadId', async () => {
+    const user = userEvent.setup();
+    mockUseAuth.mockReturnValue({
+      usuario: { id: 18, nombre: 'HTML User' },
+      esProfesor: false,
+      esEstudiante: true,
+      esAdmin: false,
+      logout: mockLogout,
+    });
+    mockNotiContar.mockResolvedValue(1);
+    mockNotiListar.mockResolvedValue([
+      {
+        id: 303,
+        titulo: 'Nueva &amp; actividad',
+        mensaje: 'Detalle &lt;importante&gt;',
+        leida: false,
+        tipo: 'NUEVA_ACTIVIDAD',
+        fechaCreacion: '2026-04-02T12:01:00',
+        actividadId: 77,
+      },
+    ]);
+
+    renderNavbarAt('/dashboard');
+
+    await user.click(screen.getByRole('button', { name: 'Abrir notificaciones' }));
+    expect(await screen.findByText('Nueva & actividad')).toBeInTheDocument();
+    expect(await screen.findByText('Detalle <importante>')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /Nueva & actividad/i }));
+    expect(mockNavigate).toHaveBeenCalledWith('/actividades/77');
+    expect(mockNotiMarcar).toHaveBeenCalledWith(303);
+  });
+
+  it('no intenta marcar como leida cuando ya esta leida', async () => {
+    const user = userEvent.setup();
+    mockUseAuth.mockReturnValue({
+      usuario: { id: 19, nombre: 'Read User' },
+      esProfesor: false,
+      esEstudiante: true,
+      esAdmin: false,
+      logout: mockLogout,
+    });
+    mockNotiListar.mockResolvedValue([
+      {
+        id: 404,
+        titulo: 'Leida',
+        mensaje: 'ya estaba leida',
+        leida: true,
+        tipo: 'NUEVO_ENTREGABLE',
+        fechaCreacion: '2026-04-02T12:03:00',
+        cursoId: 55,
+      },
+    ]);
+
+    renderNavbarAt('/dashboard');
+
+    await user.click(screen.getByRole('button', { name: 'Abrir notificaciones' }));
+    await user.click(await screen.findByRole('button', { name: /Leida/i }));
+
+    expect(mockNotiMarcar).not.toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith('/cursos/55');
   });
 
   it('navega al recurso especifico de la notificacion cuando existe entregaId', async () => {

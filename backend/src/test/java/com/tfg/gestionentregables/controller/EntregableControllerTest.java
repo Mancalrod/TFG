@@ -18,6 +18,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -107,6 +108,19 @@ class EntregableControllerTest {
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.titulo").value("Entregable 1"));
         }
+
+                @Test
+                @DisplayName("403 - Acceso denegado al crear entregable")
+                void crear_forbidden() throws Exception {
+                    when(entregableService.crearEntregable(any(), eq(1L), anyLong(), anyBoolean()))
+                        .thenThrow(new AccessDeniedException("No tienes permisos sobre este curso"));
+
+                    mockMvc.perform(post("/api/entregables/actividad/1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(crearEntregableDTO)))
+                        .andExpect(status().isForbidden())
+                        .andExpect(jsonPath("$.message").value("No tienes permisos sobre este curso"));
+                }
     }
 
     @Nested
@@ -168,6 +182,34 @@ class EntregableControllerTest {
             mockMvc.perform(patch("/api/entregables/1/visibilidad")
                             .param("visibilidad", "OCULTO"))
                     .andExpect(status().isOk());
+        }
+    }
+
+    @Nested
+    @DisplayName("PATCH /api/entregables/{id}/notas-visibles")
+    class CambiarVisibilidadNotas {
+
+        @Test
+        @DisplayName("200 - Cambia visibilidad de notas")
+        void cambiar_notas_ok() throws Exception {
+            when(entregableService.cambiarVisibilidadNotasEstudiante(eq(1L), eq(true), anyLong(), anyBoolean()))
+                    .thenReturn(entregableDTO);
+
+            mockMvc.perform(patch("/api/entregables/1/notas-visibles")
+                            .param("visible", "true"))
+                    .andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("403 - Acceso denegado al cambiar visibilidad de notas")
+        void cambiar_notas_forbidden() throws Exception {
+            when(entregableService.cambiarVisibilidadNotasEstudiante(eq(1L), eq(false), anyLong(), anyBoolean()))
+                    .thenThrow(new AccessDeniedException("No tienes permisos sobre este curso"));
+
+            mockMvc.perform(patch("/api/entregables/1/notas-visibles")
+                            .param("visible", "false"))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.message").value("No tienes permisos sobre este curso"));
         }
     }
 
@@ -238,6 +280,20 @@ class EntregableControllerTest {
             mockMvc.perform(get("/api/entregables/actividad/1/pendientes/1"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.length()").value(1));
+        }
+
+        @Test
+        @DisplayName("403 - Estudiante no puede consultar pendientes de otro estudiante")
+        void listar_forbidden_estudiante_otro_id() throws Exception {
+            when(securityContextUserService.getCurrentUserId(any())).thenReturn(1L);
+            when(securityContextUserService.hasRole(any(), eq("ADMIN"))).thenReturn(false);
+            when(securityContextUserService.hasRole(any(), eq("ESTUDIANTE"))).thenReturn(true);
+
+            mockMvc.perform(get("/api/entregables/actividad/1/pendientes/2"))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.message").value("No puedes consultar entregables pendientes de otro estudiante"));
+
+            verify(entregableService, never()).listarEntregablesPendientesEstudiante(anyLong(), anyLong());
         }
     }
 }

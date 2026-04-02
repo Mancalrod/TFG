@@ -100,11 +100,14 @@ const EntregablePage: React.FC = () => {
     });
   };
 
-  const formatearNota = (entrega: EntregaDTO) => {
+  const formatearNota = (entrega: EntregaDTO | EntregaResumenDTO) => {
     if (entrega.calificacion === undefined || entrega.calificacion === null) {
       return 'Sin evaluar';
     }
-    const notaMaxima = entrega.notaMaximaEntregable ?? entregable.notaMaxima;
+    const notaMaximaEntrega = 'notaMaximaEntregable' in entrega
+      ? entrega.notaMaximaEntregable
+      : undefined;
+    const notaMaxima = notaMaximaEntrega ?? entregable?.notaMaxima;
     if (notaMaxima === undefined || notaMaxima === null) {
       return `${entrega.calificacion}`;
     }
@@ -113,7 +116,7 @@ const EntregablePage: React.FC = () => {
 
   const puedeVerNotaAlumno = (entrega: EntregaDTO) => {
     if (esProfesor) return true;
-    return entrega.estado === 'PUBLICADO' || Boolean(entrega.notasVisiblesEstudiante) || Boolean(entregable.notasVisiblesEstudiante);
+    return entrega.estado === 'PUBLICADO' || Boolean(entrega.notasVisiblesEstudiante) || Boolean(entregable?.notasVisiblesEstudiante);
   };
 
   const formatFileSize = (bytes: number | undefined) => {
