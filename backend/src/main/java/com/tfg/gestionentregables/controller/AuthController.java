@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +35,14 @@ public class AuthController {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
 
+        private UserDetails cargarUserDetails(String email) {
+                try {
+                        return userDetailsService.loadUserByUsername(email);
+                } catch (UsernameNotFoundException e) {
+                        return null;
+                }
+        }
+
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
         try {
@@ -44,7 +53,9 @@ public class AuthController {
                     )
             );
 
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                        if (!(authentication.getPrincipal() instanceof UserDetails userDetails)) {
+                                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                        }
             String accessToken = jwtTokenProvider.generateToken(userDetails);
             String refreshToken = jwtTokenProvider.generateRefreshToken(userDetails);
 
@@ -58,6 +69,7 @@ public class AuthController {
                     .usuarioId(usuario.getId())
                     .nombre(usuario.getNombre())
                     .correoElectronico(usuario.getCorreoElectronico())
+                    .fotoPerfilUrl(usuario.getFotoPerfilUrl())
                     .roles(userDetails.getAuthorities().stream()
                             .map(GrantedAuthority::getAuthority)
                             .toList())
@@ -86,17 +98,21 @@ public class AuthController {
 
         usuario = usuarioRepository.save(usuario);
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(usuario.getCorreoElectronico());
+                UserDetails userDetails = cargarUserDetails(usuario.getCorreoElectronico());
+                if (userDetails == null) {
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                }
         String accessToken = jwtTokenProvider.generateToken(userDetails);
         String refreshToken = jwtTokenProvider.generateRefreshToken(userDetails);
 
         AuthResponseDTO response = AuthResponseDTO.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .tokenType("Bearer")
+                .tokenType(BEARER_TOKEN_TYPE)
                 .usuarioId(usuario.getId())
                 .nombre(usuario.getNombre())
                 .correoElectronico(usuario.getCorreoElectronico())
+                .fotoPerfilUrl(usuario.getFotoPerfilUrl())
                 .roles(userDetails.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .toList())
@@ -113,7 +129,10 @@ public class AuthController {
                         }
 
             String userEmail = jwtTokenProvider.extractUsername(request.getRefreshToken());
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+                        UserDetails userDetails = cargarUserDetails(userEmail);
+                        if (userDetails == null) {
+                                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                        }
 
             if (jwtTokenProvider.isTokenValid(request.getRefreshToken(), userDetails)) {
                 String newAccessToken = jwtTokenProvider.generateToken(userDetails);
@@ -125,10 +144,11 @@ public class AuthController {
                 AuthResponseDTO response = AuthResponseDTO.builder()
                         .accessToken(newAccessToken)
                         .refreshToken(newRefreshToken)
-                        .tokenType("Bearer")
+                        .tokenType(BEARER_TOKEN_TYPE)
                         .usuarioId(usuario.getId())
                         .nombre(usuario.getNombre())
                         .correoElectronico(usuario.getCorreoElectronico())
+                        .fotoPerfilUrl(usuario.getFotoPerfilUrl())
                         .roles(userDetails.getAuthorities().stream()
                                 .map(GrantedAuthority::getAuthority)
                                 .toList())
@@ -149,15 +169,18 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        if (!(authentication.getPrincipal() instanceof UserDetails userDetails)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         Usuario usuario = usuarioRepository.findByCorreoElectronico(userDetails.getUsername())
                 .orElseThrow();
 
         AuthResponseDTO response = AuthResponseDTO.builder()
-                .tokenType("Bearer")
+                .tokenType(BEARER_TOKEN_TYPE)
                 .usuarioId(usuario.getId())
                 .nombre(usuario.getNombre())
                 .correoElectronico(usuario.getCorreoElectronico())
+                .fotoPerfilUrl(usuario.getFotoPerfilUrl())
                 .roles(userDetails.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .toList())

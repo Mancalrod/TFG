@@ -154,6 +154,7 @@ npm run build
 - [Product Backlog](docs/PRODUCT_BACKLOG.md)
 - [Plan de Sprints](docs/PLAN_SPRINTS.md)
 - [Sprint Backlog](docs/SPRINT_BACKLOG.md)
+- [Seguridad Preproduccion y Auditoria de Permisos](docs/SECURITY_PREPROD_AUDIT.md)
 
 ## Equipo de Desarrollo
 

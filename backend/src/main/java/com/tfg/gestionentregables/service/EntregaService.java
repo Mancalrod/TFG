@@ -3,6 +3,7 @@ package com.tfg.gestionentregables.service;
 import com.tfg.gestionentregables.dto.CalificacionDTO;
 import com.tfg.gestionentregables.dto.EntregaDTO;
 import com.tfg.gestionentregables.dto.EntregaEstadisticasDTO;
+import com.tfg.gestionentregables.dto.EntregaPendienteDTO;
 import com.tfg.gestionentregables.dto.EntregaResumenDTO;
 import com.tfg.gestionentregables.entity.Actividad;
 import com.tfg.gestionentregables.entity.Curso;
@@ -14,8 +15,10 @@ import com.tfg.gestionentregables.entity.Material;
 import com.tfg.gestionentregables.entity.Usuario;
 import com.tfg.gestionentregables.entity.enums.EstadoEntrega;
 import com.tfg.gestionentregables.entity.enums.TipoMaterial;
+import com.tfg.gestionentregables.entity.enums.Visibilidad;
 import com.tfg.gestionentregables.repository.EntregableRepository;
 import com.tfg.gestionentregables.repository.EntregaRepository;
+import com.tfg.gestionentregables.repository.ActividadRepository;
 import com.tfg.gestionentregables.repository.EstudianteRepository;
 import com.tfg.gestionentregables.repository.FeedbackRepository;
 import com.tfg.gestionentregables.repository.MaterialRepository;
@@ -39,11 +42,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Comparator;
 import java.util.Set;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
@@ -58,9 +63,14 @@ public class EntregaService {
 
     private static final String ENTREGA_NOT_FOUND = "Entrega no encontrada con ID: ";
     private static final int MAX_ARCHIVOS_POR_ENTREGA = 50;
+    private static final String ONEDRIVE_SCHEME = "onedrive://";
+    private static final String CLOUDINARY_SCHEME = "cloudinary://";
+    private static final String ONE_DRIVE_STUDENT_BASE_FOLDER = "TFG-Entregables/Mis Entregas";
+    private static final char ZIP_SEPARATOR = '/';
 
     private final EntregaRepository entregaRepository;
     private final EntregableRepository entregableRepository;
+    private final ActividadRepository actividadRepository;
     private final EstudianteRepository estudianteRepository;
     private final MaterialRepository materialRepository;
     private final FeedbackRepository feedbackRepository;
@@ -73,6 +83,19 @@ public class EntregaService {
 
     @Value("${app.upload.dir:uploads}")
     private String uploadBaseDir;
+
+    private record EntregaEntrada(String nombre,
+                                  String comentarioNormalizado,
+                                  List<MultipartFile> archivos,
+                                  boolean tieneComentario,
+                                  boolean tieneArchivos) {
+    }
+
+    private record OneDriveMetadata(String fileId, String webUrl, Long ownerId) {
+        private boolean disponible() {
+            return fileId != null;
+        }
+    }
 
     public EntregaDTO realizarEntrega(Long entregableId,
                                       Long usuarioId,
@@ -87,39 +110,7 @@ public class EntregaService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Estudiante no encontrado para el usuario con ID: " + usuarioId + " en el curso correspondiente"));
 
-        String comentarioNormalizado = comentario != null ? comentario.trim() : null;
-        boolean tieneComentario = comentarioNormalizado != null && !comentarioNormalizado.isEmpty();
-        boolean tieneArchivos = archivos != null && !archivos.isEmpty();
-        TipoMaterial tipoEsperado = entregable.getTipoArchivoEsperado();
-        boolean esSoloTexto = tipoEsperado == TipoMaterial.SOLO_TEXTO;
-        boolean permiteSoloComentario = permiteEntregaSoloComentario(tipoEsperado);
-
-        boolean tieneNombreLegado = nombre != null && !nombre.trim().isEmpty();
-        if (!tieneComentario && !tieneArchivos && !tieneNombreLegado) {
-            throw new IllegalArgumentException("Debes adjuntar al menos un archivo o escribir un comentario");
-        }
-
-        if (esSoloTexto) {
-            if (tieneArchivos) {
-                throw new IllegalArgumentException("Este entregable es de solo texto: no se permiten archivos adjuntos");
-            }
-            if (!tieneComentario) {
-                throw new IllegalArgumentException("Este entregable es de solo texto: debes escribir un comentario");
-            }
-        } else if (!tieneArchivos && tieneComentario && !permiteSoloComentario) {
-            throw new IllegalArgumentException(
-                    "Para este tipo de entregable debes adjuntar al menos un archivo; el comentario es opcional pero no sustituye al archivo");
-        }
-
-        if (tieneComentario && comentarioNormalizado.length() > 5000) {
-            throw new IllegalArgumentException("El comentario no puede exceder 5000 caracteres");
-        }
-
-        if (tieneArchivos && archivos.size() > MAX_ARCHIVOS_POR_ENTREGA) {
-            throw new IllegalArgumentException("No se pueden adjuntar más de " + MAX_ARCHIVOS_POR_ENTREGA + " archivos en una entrega");
-        }
-
-        validarArchivosAdjuntos(entregable, archivos);
+        EntregaEntrada entrada = validarYPrepararEntrada(entregable, nombre, comentario, archivos);
 
         List<Entrega> entregasAnteriores = entregaRepository
                 .findByEntregableIdAndEstudianteId(entregableId, estudiante.getId());
@@ -132,13 +123,13 @@ public class EntregaService {
         desactivarVersionesAnteriores(entregable.getActividad(), entregasAnteriores);
 
         int nuevaVersion = ultimaVersion + 1;
-        String nombreEntrega = (nombre != null && !nombre.trim().isEmpty())
-                ? nombre.trim()
+        String nombreEntrega = !entrada.nombre().isBlank()
+            ? entrada.nombre()
                 : "Entrega " + entregable.getTitulo() + " v" + nuevaVersion;
 
         Entrega entrega = Entrega.builder()
                 .nombre(nombreEntrega)
-                .comentarioAlumno(tieneComentario ? comentarioNormalizado : null)
+                .comentarioAlumno(entrada.tieneComentario() ? entrada.comentarioNormalizado() : null)
                 .version(nuevaVersion)
                 .fechaEntrega(LocalDateTime.now())
                 .estado(EstadoEntrega.ENTREGADO)
@@ -149,14 +140,8 @@ public class EntregaService {
 
         entrega = entregaRepository.save(entrega);
 
-        if (tieneArchivos) {
-            for (MultipartFile archivo : archivos) {
-                if (archivo == null || archivo.isEmpty()) {
-                    throw new IllegalArgumentException("No se permiten archivos vacíos en la entrega");
-                }
-                Material material = guardarArchivoConOneDrive(archivo, entrega, entregable, estudiante);
-                materialRepository.save(material);
-            }
+        if (entrada.tieneArchivos()) {
+            guardarArchivosAdjuntos(entrada.archivos(), entrega, entregable, estudiante);
         }
 
         Long entregaId = entrega.getId();
@@ -173,6 +158,68 @@ public class EntregaService {
                                       String nombre,
                                       List<MultipartFile> archivos) {
         return realizarEntrega(entregableId, usuarioId, nombre, null, archivos);
+    }
+
+    private EntregaEntrada validarYPrepararEntrada(Entregable entregable,
+                                                   String nombre,
+                                                   String comentario,
+                                                   List<MultipartFile> archivos) {
+        String nombreNormalizado = nombre == null ? "" : nombre.trim();
+        String comentarioNormalizado = comentario == null ? "" : comentario.trim();
+        List<MultipartFile> archivosNormalizados = archivos == null ? List.of() : archivos;
+
+        boolean tieneComentario = !comentarioNormalizado.isEmpty();
+        boolean tieneArchivos = !archivosNormalizados.isEmpty();
+
+        validarContenidoEntrega(entregable, nombreNormalizado, comentarioNormalizado, tieneComentario, tieneArchivos, archivosNormalizados);
+        validarArchivosAdjuntos(entregable, archivosNormalizados);
+
+        return new EntregaEntrada(nombreNormalizado, comentarioNormalizado, archivosNormalizados, tieneComentario, tieneArchivos);
+    }
+
+    private void validarContenidoEntrega(Entregable entregable,
+                                         String nombreNormalizado,
+                                         String comentarioNormalizado,
+                                         boolean tieneComentario,
+                                         boolean tieneArchivos,
+                                         List<MultipartFile> archivosNormalizados) {
+        TipoMaterial tipoEsperado = entregable.getTipoArchivoEsperado();
+        boolean esSoloTexto = tipoEsperado == TipoMaterial.SOLO_TEXTO;
+        boolean permiteSoloComentario = permiteEntregaSoloComentario(tipoEsperado);
+
+        if (!tieneComentario && !tieneArchivos && nombreNormalizado.isBlank()) {
+            throw new IllegalArgumentException("Debes adjuntar al menos un archivo o escribir un comentario");
+        }
+
+        if (esSoloTexto && tieneArchivos) {
+            throw new IllegalArgumentException("Este entregable es de solo texto: no se permiten archivos adjuntos");
+        }
+        if (esSoloTexto && !tieneComentario) {
+            throw new IllegalArgumentException("Este entregable es de solo texto: debes escribir un comentario");
+        }
+        if (!esSoloTexto && !tieneArchivos && tieneComentario && !permiteSoloComentario) {
+            throw new IllegalArgumentException(
+                    "Para este tipo de entregable debes adjuntar al menos un archivo; el comentario es opcional pero no sustituye al archivo");
+        }
+        if (tieneComentario && comentarioNormalizado.length() > 5000) {
+            throw new IllegalArgumentException("El comentario no puede exceder 5000 caracteres");
+        }
+        if (tieneArchivos && archivosNormalizados.size() > MAX_ARCHIVOS_POR_ENTREGA) {
+            throw new IllegalArgumentException("No se pueden adjuntar más de " + MAX_ARCHIVOS_POR_ENTREGA + " archivos en una entrega");
+        }
+    }
+
+    private void guardarArchivosAdjuntos(List<MultipartFile> archivos,
+                                         Entrega entrega,
+                                         Entregable entregable,
+                                         Estudiante estudiante) {
+        for (MultipartFile archivo : archivos) {
+            if (archivo == null || archivo.isEmpty()) {
+                throw new IllegalArgumentException("No se permiten archivos vacíos en la entrega");
+            }
+            Material material = guardarArchivoConOneDrive(archivo, entrega, entregable, estudiante);
+            materialRepository.save(material);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -291,9 +338,86 @@ public class EntregaService {
     public List<EntregaResumenDTO> listarEntregasPendientesCalificar(Long profesorId) {
         return entregaRepository.findByEstadoAndEsVersionActiva(EstadoEntrega.ENTREGADO, true)
                 .stream()
+            .filter(e -> profesorRepository.existsByUsuarioIdAndCursoId(
+                profesorId,
+                e.getEntregable().getActividad().getCurso().getId()))
                 .map(mapper::toResumenDTO)
                 .toList();
     }
+
+    @Transactional(readOnly = true)
+    public List<EntregaPendienteDTO> listarPendientesEstudiante(Long usuarioId) {
+        LocalDateTime ahora = LocalDateTime.now();
+        List<Estudiante> matriculas = estudianteRepository.findByUsuarioId(usuarioId);
+
+        return matriculas.stream()
+            .flatMap(estudiante -> pendientesPorMatricula(estudiante, ahora).stream())
+            .sorted(Comparator.comparing(EntregaPendienteDTO::getFechaLimite,
+                Comparator.nullsLast(LocalDateTime::compareTo)))
+            .toList();
+    }
+
+    private List<EntregaPendienteDTO> pendientesPorMatricula(Estudiante estudiante, LocalDateTime ahora) {
+        Long grupoId = estudiante.getGrupo().getId();
+        return actividadRepository.findByGrupoId(grupoId).stream()
+            .filter(actividad -> perteneceActividadAGrupo(actividad, estudiante))
+            .flatMap(actividad -> actividad.getEntregables().stream()
+                .filter(entregable -> entregableVisibleYVigente(entregable, ahora))
+                .filter(entregable -> !tieneEntregaActiva(entregable, estudiante))
+                .map(entregable -> construirPendienteDTO(estudiante, actividad, entregable, ahora)))
+            .toList();
+    }
+
+    private boolean perteneceActividadAGrupo(Actividad actividad, Estudiante estudiante) {
+        return actividad.getGrupos().stream()
+            .anyMatch(grupo -> grupo.getId().equals(estudiante.getGrupo().getId()));
+    }
+
+    private boolean entregableVisibleYVigente(Entregable entregable, LocalDateTime ahora) {
+        return entregable.getVisibilidad() == Visibilidad.VISIBLE
+            && (entregable.getFechaInicio() == null || !entregable.getFechaInicio().isAfter(ahora))
+            && (entregable.getFechaLimite() == null || entregable.getFechaLimite().isAfter(ahora));
+    }
+
+    private boolean tieneEntregaActiva(Entregable entregable, Estudiante estudiante) {
+        return entregaRepository
+            .findByEntregableIdAndEstudianteIdAndEsVersionActivaTrue(entregable.getId(), estudiante.getId())
+            .isPresent();
+    }
+
+    private EntregaPendienteDTO construirPendienteDTO(Estudiante estudiante,
+                                                      Actividad actividad,
+                                                      Entregable entregable,
+                                                      LocalDateTime ahora) {
+        Curso curso = estudiante.getGrupo().getCurso();
+        LocalDateTime fechaLimite = entregable.getFechaLimite();
+        return EntregaPendienteDTO.builder()
+            .cursoId(curso.getId())
+            .cursoTitulo(curso.getTitulo())
+            .actividadId(actividad.getId())
+            .actividadTitulo(actividad.getTitulo())
+            .entregableId(entregable.getId())
+            .entregableTitulo(entregable.getTitulo())
+            .fechaLimite(fechaLimite)
+            .tiempoRestante(formatearTiempoRestante(ahora, fechaLimite))
+            .build();
+    }
+
+    private String formatearTiempoRestante(LocalDateTime ahora, LocalDateTime fechaLimite) {
+        if (fechaLimite == null) {
+            return "Sin límite";
+        }
+        long totalHoras = ChronoUnit.HOURS.between(ahora, fechaLimite);
+        if (totalHoras <= 0) {
+            return "Expirado";
+        }
+        long dias = totalHoras / 24;
+        long horas = totalHoras % 24;
+        if (dias == 0) {
+            return horas + "h";
+        }
+        return dias + "d " + horas + "h";
+        }
 
     @Transactional(readOnly = true)
     public EntregaEstadisticasDTO obtenerEstadisticas(Long entregableId) {
@@ -336,7 +460,6 @@ public class EntregaService {
         entregaRepository.delete(entrega);
     }
 
-    @Transactional(readOnly = true)
     public byte[] descargarContenidoArchivo(Long materialId) {
         Material material = materialRepository.findById(materialId)
                 .orElseThrow(() -> new EntityNotFoundException("Archivo no encontrado con ID: " + materialId));
@@ -346,10 +469,10 @@ public class EntregaService {
                 return oneDriveService.descargarArchivo(material.getOnedriveOwnerId(), material.getOnedriveFileId());
             } catch (Exception e) {
                 log.error("Error al descargar desde OneDrive, intentando fallback local: {}", e.getMessage());
-                if (material.getRuta() != null && !material.getRuta().startsWith("onedrive://")) {
+                if (material.getRuta() != null && !material.getRuta().startsWith(ONEDRIVE_SCHEME)) {
                     return leerArchivoLocal(material.getRuta());
                 }
-                throw new RuntimeException("No se pudo descargar el archivo de OneDrive", e);
+                throw new IllegalStateException("No se pudo descargar el archivo de OneDrive", e);
             }
         }
 
@@ -358,7 +481,7 @@ public class EntregaService {
                 return cloudinaryService.descargarArchivo(material.getCloudinaryUrl());
             } catch (Exception e) {
                 log.error("Error al descargar desde Cloudinary: {}", e.getMessage());
-                throw new RuntimeException("No se pudo descargar el archivo de Cloudinary", e);
+                throw new IllegalStateException("No se pudo descargar el archivo de Cloudinary", e);
             }
         }
 
@@ -366,7 +489,7 @@ public class EntregaService {
             return leerArchivoLocal(material.getRuta());
         }
 
-        throw new RuntimeException("El archivo no tiene ruta de almacenamiento válida");
+        throw new IllegalStateException("El archivo no tiene ruta de almacenamiento válida");
     }
 
     @Transactional(readOnly = true)
@@ -447,70 +570,89 @@ public class EntregaService {
             return;
         }
 
+        boolean requiereZipEstructurado = requiereZipEstructurado(entregable);
+        validarArchivoUnicoZipSiAplica(archivos, requiereZipEstructurado);
+
+        for (MultipartFile archivo : archivos) {
+            validarArchivoNoVacio(archivo);
+            validarZipEstructurado(entregable, archivo, requiereZipEstructurado);
+        }
+    }
+
+    private boolean requiereZipEstructurado(Entregable entregable) {
         boolean tieneEstructura = entregable.getEstructuraZip() != null && !entregable.getEstructuraZip().isBlank();
         boolean tieneNombreZipEsperado = entregable.getNombreZipEsperado() != null
                 && !entregable.getNombreZipEsperado().isBlank()
                 && !"*".equals(entregable.getNombreZipEsperado().trim());
-        boolean requiereZipEstructurado = tieneEstructura || tieneNombreZipEsperado;
+        return tieneEstructura || tieneNombreZipEsperado;
+    }
 
-        if (requiereZipEstructurado) {
-            if (archivos.size() != 1) {
-                throw new IllegalArgumentException("Este entregable requiere adjuntar un único archivo ZIP");
-            }
-
-            MultipartFile unicoArchivo = archivos.get(0);
-            String nombreUnico = unicoArchivo != null ? unicoArchivo.getOriginalFilename() : null;
-            if (nombreUnico == null || !nombreUnico.toLowerCase().endsWith(".zip")) {
-                throw new IllegalArgumentException("Este entregable requiere adjuntar un único archivo con extensión .zip");
-            }
+    private void validarArchivoUnicoZipSiAplica(List<MultipartFile> archivos, boolean requiereZipEstructurado) {
+        if (!requiereZipEstructurado) {
+            return;
+        }
+        if (archivos.size() != 1) {
+            throw new IllegalArgumentException("Este entregable requiere adjuntar un único archivo ZIP");
         }
 
-        for (MultipartFile archivo : archivos) {
-            if (archivo == null || archivo.isEmpty()) {
-                throw new IllegalArgumentException("No se permiten archivos vacíos en la entrega");
-            }
+        MultipartFile unicoArchivo = archivos.get(0);
+        String nombreUnico = unicoArchivo != null ? unicoArchivo.getOriginalFilename() : null;
+        if (nombreUnico == null || !nombreUnico.toLowerCase().endsWith(".zip")) {
+            throw new IllegalArgumentException("Este entregable requiere adjuntar un único archivo con extensión .zip");
+        }
+    }
 
-            String nombreArchivo = archivo.getOriginalFilename();
-            if (nombreArchivo == null || nombreArchivo.isBlank()) {
-                nombreArchivo = "archivo_sin_nombre";
-            }
+    private void validarArchivoNoVacio(MultipartFile archivo) {
+        if (archivo == null || archivo.isEmpty()) {
+            throw new IllegalArgumentException("No se permiten archivos vacíos en la entrega");
+        }
+    }
 
-            if (requiereZipEstructurado && nombreArchivo.toLowerCase().endsWith(".zip")) {
-                boolean estricta = Boolean.TRUE.equals(entregable.getValidacionZipEstricta());
-                ZipValidationService.ResultadoValidacion resultado = zipValidationService.validarZip(
-                        archivo,
-                        entregable.getEstructuraZip(),
-                        estricta,
-                        entregable.getNombreZipEsperado());
+    private void validarZipEstructurado(Entregable entregable, MultipartFile archivo, boolean requiereZipEstructurado) {
+        String nombreArchivo = archivo.getOriginalFilename();
+        if (nombreArchivo == null || nombreArchivo.isBlank()) {
+            nombreArchivo = "archivo_sin_nombre";
+        }
+        if (!requiereZipEstructurado || !nombreArchivo.toLowerCase().endsWith(".zip")) {
+            return;
+        }
 
-                if (!resultado.valido()) {
-                    throw new IllegalStateException("El archivo ZIP no cumple la estructura esperada:\n"
-                            + String.join("\n", resultado.errores()));
-                }
-            }
+        boolean estricta = Boolean.TRUE.equals(entregable.getValidacionZipEstricta());
+        ZipValidationService.ResultadoValidacion resultado = zipValidationService.validarZip(
+                archivo,
+                entregable.getEstructuraZip(),
+                estricta,
+                entregable.getNombreZipEsperado());
+
+        if (!resultado.valido()) {
+            throw new IllegalStateException("El archivo ZIP no cumple la estructura esperada:\n"
+                    + String.join("\n", resultado.errores()));
         }
     }
 
     private void desactivarVersionesAnteriores(Actividad actividad, List<Entrega> entregasAnteriores) {
         if (Boolean.TRUE.equals(actividad.getSubirAOneDrive()) && oneDriveService.isEnabled()) {
-            for (Entrega entregaAnterior : entregasAnteriores) {
-                if (Boolean.TRUE.equals(entregaAnterior.getEsVersionActiva())) {
-                    for (Material mat : entregaAnterior.getArchivos()) {
-                        if (mat.getOnedriveFileId() != null && mat.getOnedriveOwnerId() != null) {
-                            try {
-                                oneDriveService.eliminarArchivo(mat.getOnedriveOwnerId(), mat.getOnedriveFileId());
-                            } catch (Exception e) {
-                                log.warn("No se pudo eliminar archivo OneDrive al reenviar: {}", e.getMessage());
-                            }
-                        }
-                    }
-                }
-            }
+            entregasAnteriores.stream()
+                    .filter(entregaAnterior -> Boolean.TRUE.equals(entregaAnterior.getEsVersionActiva()))
+                    .forEach(this::eliminarArchivosOneDriveEntrega);
         }
 
         entregasAnteriores.forEach(e -> e.setEsVersionActiva(false));
         if (!entregasAnteriores.isEmpty()) {
             entregaRepository.saveAll(entregasAnteriores);
+        }
+    }
+
+    private void eliminarArchivosOneDriveEntrega(Entrega entregaAnterior) {
+        for (Material mat : entregaAnterior.getArchivos()) {
+            if (mat.getOnedriveFileId() == null || mat.getOnedriveOwnerId() == null) {
+                continue;
+            }
+            try {
+                oneDriveService.eliminarArchivo(mat.getOnedriveOwnerId(), mat.getOnedriveFileId());
+            } catch (Exception e) {
+                log.warn("No se pudo eliminar archivo OneDrive al reenviar: {}", e.getMessage());
+            }
         }
     }
 
@@ -528,10 +670,9 @@ public class EntregaService {
         String nombreUnico = UUID.randomUUID() + extension;
 
         Actividad actividad = entregable.getActividad();
-        Curso curso = actividad.getCurso();
 
         if (Boolean.TRUE.equals(actividad.getSubirAOneDrive()) && oneDriveService.isEnabled()) {
-            return guardarEnOneDrive(archivo, entrega, curso, actividad, entregable, estudiante, nombreOriginal, nombreOriginal);
+            return guardarEnOneDrive(archivo, entrega, entregable, estudiante, nombreOriginal);
         }
 
         if (cloudinaryService.isEnabled()) {
@@ -543,92 +684,121 @@ public class EntregaService {
 
     private Material guardarEnOneDrive(MultipartFile archivo,
                                        Entrega entrega,
-                                       Curso curso,
-                                       Actividad actividad,
                                        Entregable entregable,
                                        Estudiante estudiante,
-                                       String nombreOriginal,
-                                       String nombreArchivo) {
+                                       String nombreOriginal) {
+        Actividad actividad = entregable.getActividad();
+        Curso curso = actividad.getCurso();
+        String nombreArchivo = nombreOriginal;
         String cursoTitulo = curso.getTitulo();
         String actividadTitulo = actividad.getTitulo();
         String entregableTitulo = entregable.getTitulo();
         String estudianteNombre = estudiante.getUsuario().getNombre();
-        Long estudianteUsuarioId = estudiante.getUsuario().getId();
 
-        String onedriveFileId = null;
-        String onedriveWebUrl = null;
-        Long onedriveOwnerId = null;
+        OneDriveMetadata metadataProfesor = subirAlOneDriveProfesor(
+                archivo,
+                actividad,
+                cursoTitulo,
+                actividadTitulo,
+                entregableTitulo,
+                estudianteNombre,
+                nombreArchivo);
+        OneDriveMetadata metadataAlumno = subirAlOneDriveAlumno(
+                archivo,
+                entrega,
+            nombreArchivo,
+            estudiante,
+            entregable);
 
-        Long profesorUsuarioId = actividad.getOneDriveUsuarioId();
-        if (profesorUsuarioId != null && oneDriveService.estaConectado(profesorUsuarioId)) {
-            try {
-                Map<String, String> result = actividad.getCarpetaOneDrive() != null
-                    && !actividad.getCarpetaOneDrive().isBlank()
-                    ? oneDriveService.subirArchivo(
-                        profesorUsuarioId,
-                        archivo,
-                        cursoTitulo,
-                        actividadTitulo,
-                        entregableTitulo,
-                        estudianteNombre,
-                        nombreArchivo,
-                        actividad.getCarpetaOneDrive())
-                    : oneDriveService.subirArchivo(
-                        profesorUsuarioId,
-                        archivo,
-                        cursoTitulo,
-                        actividadTitulo,
-                        entregableTitulo,
-                        estudianteNombre,
-                        nombreArchivo);
-
-                onedriveFileId = result.get("fileId");
-                onedriveWebUrl = result.get("webUrl");
-                onedriveOwnerId = profesorUsuarioId;
-            } catch (Exception e) {
-                log.warn("Error al subir al OneDrive del profesor {}: {}", profesorUsuarioId, e.getMessage());
-            }
-        }
-
-        if (oneDriveService.estaConectado(estudianteUsuarioId)) {
-            try {
-                String carpetaVersionAlumno = String.format(
-                    "TFG-Entregables/Mis Entregas/%s/%s/%s/v%d",
-                    cursoTitulo,
-                    actividadTitulo,
-                    entregableTitulo,
-                    entrega.getVersion());
-                Map<String, String> alumnoResult = oneDriveService.subirArchivoEnRuta(
-                    estudianteUsuarioId,
-                    archivo,
-                    carpetaVersionAlumno,
-                    nombreArchivo);
-
-                if (onedriveFileId == null) {
-                    onedriveFileId = alumnoResult.get("fileId");
-                    onedriveWebUrl = alumnoResult.get("webUrl");
-                    onedriveOwnerId = estudianteUsuarioId;
-                }
-            } catch (Exception e) {
-                log.warn("Error al subir al OneDrive del alumno {}: {}", estudianteNombre, e.getMessage());
-            }
-        }
-
-        if (onedriveFileId != null) {
+        OneDriveMetadata metadataFinal = metadataProfesor.disponible() ? metadataProfesor : metadataAlumno;
+        if (metadataFinal.disponible()) {
             return Material.builder()
                     .nombre(nombreOriginal)
                     .tipoMaterial(determinarTipoMaterial(archivo.getContentType()))
-                    .ruta("onedrive://" + onedriveFileId)
+                    .ruta(ONEDRIVE_SCHEME + metadataFinal.fileId())
                     .tamanoBytes(archivo.getSize())
-                    .onedriveFileId(onedriveFileId)
-                    .onedriveWebUrl(onedriveWebUrl)
-                    .onedriveOwnerId(onedriveOwnerId)
+                    .onedriveFileId(metadataFinal.fileId())
+                    .onedriveWebUrl(metadataFinal.webUrl())
+                    .onedriveOwnerId(metadataFinal.ownerId())
                     .entrega(entrega)
                     .build();
         }
 
         return guardarArchivoLocal(archivo, entrega, nombreOriginal,
                 UUID.randomUUID() + (nombreOriginal.contains(".") ? nombreOriginal.substring(nombreOriginal.lastIndexOf(".")) : ""));
+    }
+
+    private OneDriveMetadata subirAlOneDriveProfesor(MultipartFile archivo,
+                                                     Actividad actividad,
+                                                     String cursoTitulo,
+                                                     String actividadTitulo,
+                                                     String entregableTitulo,
+                                                     String estudianteNombre,
+                                                     String nombreArchivo) {
+        Long profesorUsuarioId = actividad.getOneDriveUsuarioId();
+        if (profesorUsuarioId == null || !oneDriveService.estaConectado(profesorUsuarioId)) {
+            return new OneDriveMetadata(null, null, null);
+        }
+
+        try {
+            Map<String, String> result = actividad.getCarpetaOneDrive() != null
+                && !actividad.getCarpetaOneDrive().isBlank()
+                ? oneDriveService.subirArchivo(
+                    profesorUsuarioId,
+                    archivo,
+                    cursoTitulo,
+                    actividadTitulo,
+                    entregableTitulo,
+                    estudianteNombre,
+                    nombreArchivo,
+                    actividad.getCarpetaOneDrive())
+                : oneDriveService.subirArchivo(
+                    profesorUsuarioId,
+                    archivo,
+                    cursoTitulo,
+                    actividadTitulo,
+                    entregableTitulo,
+                    estudianteNombre,
+                    nombreArchivo);
+
+            return new OneDriveMetadata(result.get("fileId"), result.get("webUrl"), profesorUsuarioId);
+        } catch (Exception e) {
+            log.warn("Error al subir al OneDrive del profesor {}: {}", profesorUsuarioId, e.getMessage());
+            return new OneDriveMetadata(null, null, null);
+        }
+    }
+
+    private OneDriveMetadata subirAlOneDriveAlumno(MultipartFile archivo,
+                                                   Entrega entrega,
+                                                   String nombreArchivo,
+                                                   Estudiante estudiante,
+                                                   Entregable entregable) {
+        Long estudianteUsuarioId = estudiante.getUsuario().getId();
+        String estudianteNombre = estudiante.getUsuario().getNombre();
+        if (!oneDriveService.estaConectado(estudianteUsuarioId)) {
+            return new OneDriveMetadata(null, null, null);
+        }
+
+        try {
+            Actividad actividad = entregable.getActividad();
+            Curso curso = actividad.getCurso();
+            String carpetaVersionAlumno = String.format(
+                "%s/%s/%s/%s/v%d",
+                ONE_DRIVE_STUDENT_BASE_FOLDER,
+                curso.getTitulo(),
+                actividad.getTitulo(),
+                entregable.getTitulo(),
+                entrega.getVersion());
+            Map<String, String> alumnoResult = oneDriveService.subirArchivoEnRuta(
+                estudianteUsuarioId,
+                archivo,
+                carpetaVersionAlumno,
+                nombreArchivo);
+            return new OneDriveMetadata(alumnoResult.get("fileId"), alumnoResult.get("webUrl"), estudianteUsuarioId);
+        } catch (Exception e) {
+            log.warn("Error al subir al OneDrive del alumno {}: {}", estudianteNombre, e.getMessage());
+            return new OneDriveMetadata(null, null, null);
+        }
     }
 
     private Material guardarArchivoLocal(MultipartFile archivo,
@@ -671,7 +841,7 @@ public class EntregaService {
         return Material.builder()
                 .nombre(nombreOriginal)
                 .tipoMaterial(determinarTipoMaterial(archivo.getContentType()))
-                .ruta("cloudinary://" + result.get("publicId"))
+            .ruta(CLOUDINARY_SCHEME + result.get("publicId"))
                 .tamanoBytes(archivo.getSize())
                 .cloudinaryPublicId(result.get("publicId"))
                 .cloudinaryUrl(result.get("secureUrl"))
@@ -703,8 +873,8 @@ public class EntregaService {
             for (Material material : entrega.getArchivos()) {
                 String nombreArchivo = sanitizarSegmentoZip(material.getNombre());
                 String basePath = (prefijoBase == null || prefijoBase.isBlank())
-                        ? carpetaEstudiante + "/" + nombreArchivo
-                        : prefijoBase + "/" + carpetaEstudiante + "/" + nombreArchivo;
+                        ? unirSegmentosZip(carpetaEstudiante, nombreArchivo)
+                        : unirSegmentosZip(prefijoBase, carpetaEstudiante, nombreArchivo);
 
                 String entryName = evitarColisionZip(basePath, usedEntries);
 
@@ -768,8 +938,12 @@ public class EntregaService {
         return candidate;
     }
 
+    private String unirSegmentosZip(String... segmentos) {
+        return String.join(String.valueOf(ZIP_SEPARATOR), segmentos);
+    }
+
     private boolean esEntradaZipPeligrosa(String name) {
-        return name == null || name.contains("..") || name.startsWith("/") || name.startsWith("\\");
+        return name == null || name.contains("..") || name.indexOf('/') == 0 || name.indexOf('\\') == 0;
     }
 
     private TipoMaterial determinarTipoMaterial(String contentType) {

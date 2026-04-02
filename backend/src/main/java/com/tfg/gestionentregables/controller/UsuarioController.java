@@ -1,12 +1,18 @@
 package com.tfg.gestionentregables.controller;
-
 import com.tfg.gestionentregables.dto.*;
+import com.tfg.gestionentregables.service.SecurityContextUserService;
 import com.tfg.gestionentregables.service.UsuarioService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,10 +22,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/usuarios")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+@Validated
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final SecurityContextUserService securityContextUserService;
 
     @GetMapping
     public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {
@@ -107,5 +114,45 @@ public class UsuarioController {
     @GetMapping("/{id}/profesor-id")
     public ResponseEntity<Long> obtenerProfesorId(@PathVariable Long id) {
         return ResponseEntity.ok(usuarioService.obtenerProfesorId(id));
+    }
+
+    // ==================== PERFIL DE USUARIO ====================
+
+    /**
+     * Endpoint para cambiar la contraseña del usuario autenticado.
+     * Verifica que el usuario solicitante sea el mismo que el target.
+     */
+    @PutMapping("/{id}/contrasena")
+    public ResponseEntity<Void> cambiarContrasena(
+            @PathVariable @Positive Long id,
+            @Valid @RequestBody CambiarContrasenaDTO dto,
+            Authentication authentication) {
+        verificarPermisoUsuario(id, authentication);
+        usuarioService.cambiarContrasena(id, dto);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Endpoint para subir/actualizar la foto de perfil.
+     * Acepta multipart/form-data con el campo "archivo".
+     */
+    @PostMapping(value = "/{id}/foto-perfil", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UsuarioDTO> subirFotoPerfil(
+            @PathVariable @Positive Long id,
+            @RequestPart("archivo") MultipartFile archivo,
+            Authentication authentication) {
+        verificarPermisoUsuario(id, authentication);
+        return ResponseEntity.ok(usuarioService.subirFotoPerfil(id, archivo));
+    }
+
+    /**
+     * Verifica que el usuario autenticado sea el mismo que el target.
+     * Previene que un usuario modifique el perfil de otro.
+     */
+    private void verificarPermisoUsuario(Long targetUserId, Authentication authentication) {
+        Long currentUserId = securityContextUserService.getCurrentUserId(authentication);
+        if (currentUserId == null || !currentUserId.equals(targetUserId)) {
+            throw new AccessDeniedException("No tienes permiso para modificar este perfil");
+        }
     }
 }

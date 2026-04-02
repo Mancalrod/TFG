@@ -3,7 +3,11 @@ import { Link, NavLink, useMatch, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { cursoService } from '../services/cursoService';
+import { notificacionService } from '../services/notificacionService';
+import { NotificacionDTO } from '../types';
 import './Navbar.css';
+
+type RolEnCurso = 'PROFESOR' | 'ESTUDIANTE' | 'AMBOS' | null;
 
 const Navbar: React.FC = () => {
   const { usuario, esProfesor, esEstudiante, esAdmin, logout } = useAuth();
@@ -11,7 +15,27 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const courseMatch = useMatch('/cursos/:id');
   const cursoIdActual = courseMatch?.params?.id ? Number(courseMatch.params.id) : null;
-  const [rolEnCursoNavbar, setRolEnCursoNavbar] = useState<'PROFESOR' | 'ESTUDIANTE' | 'AMBOS' | null>(null);
+  const [rolEnCursoNavbar, setRolEnCursoNavbar] = useState<RolEnCurso>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notificaciones, setNotificaciones] = useState<NotificacionDTO[]>([]);
+  const [openNotificaciones, setOpenNotificaciones] = useState(false);
+  const [loadingNotificaciones, setLoadingNotificaciones] = useState(false);
+
+  const navItemClassName = ({ isActive }: { isActive: boolean }) =>
+    isActive ? 'navbar-item active' : 'navbar-item';
+
+  const resolverRol = (profesorEnCurso: boolean, estudianteEnCurso: boolean): RolEnCurso => {
+    if (profesorEnCurso && estudianteEnCurso) return 'AMBOS';
+    if (profesorEnCurso) return 'PROFESOR';
+    if (estudianteEnCurso) return 'ESTUDIANTE';
+    return null;
+  };
+
+  const obtenerEtiquetaRol = (rol: Exclude<RolEnCurso, null>) => {
+    if (rol === 'AMBOS') return 'Profesor/Estudiante';
+    if (rol === 'PROFESOR') return 'Profesor';
+    return 'Estudiante';
+  };
 
   useEffect(() => {
     if (!usuario || !cursoIdActual) {
@@ -43,22 +67,11 @@ const Navbar: React.FC = () => {
 
         if (cancelled) return;
 
-        if (profesorEnCurso && estudianteEnCurso) {
-          setRolEnCursoNavbar('AMBOS');
-        } else if (profesorEnCurso) {
-          setRolEnCursoNavbar('PROFESOR');
-        } else if (estudianteEnCurso) {
-          setRolEnCursoNavbar('ESTUDIANTE');
-        } else {
-          setRolEnCursoNavbar(null);
-        }
+        setRolEnCursoNavbar(resolverRol(profesorEnCurso, estudianteEnCurso));
       } catch {
         if (cancelled) return;
 
-        if (esProfesor && esEstudiante) setRolEnCursoNavbar('AMBOS');
-        else if (esProfesor) setRolEnCursoNavbar('PROFESOR');
-        else if (esEstudiante) setRolEnCursoNavbar('ESTUDIANTE');
-        else setRolEnCursoNavbar(null);
+        setRolEnCursoNavbar(resolverRol(esProfesor, esEstudiante));
       }
     };
 
@@ -68,6 +81,95 @@ const Navbar: React.FC = () => {
       cancelled = true;
     };
   }, [usuario, cursoIdActual, esProfesor, esEstudiante, esAdmin]);
+
+  useEffect(() => {
+    if (!usuario) {
+      setUnreadCount(0);
+      setNotificaciones([]);
+      setOpenNotificaciones(false);
+      return;
+    }
+
+    let cancelled = false;
+    const cargarCount = async () => {
+      try {
+        const count = await notificacionService.contarNoLeidas();
+        if (!cancelled) setUnreadCount(count);
+      } catch {
+        if (!cancelled) setUnreadCount(0);
+      }
+    };
+
+    cargarCount();
+    return () => {
+      cancelled = true;
+    };
+  }, [usuario]);
+
+  const toggleNotificaciones = async () => {
+    const siguienteEstado = !openNotificaciones;
+    setOpenNotificaciones(siguienteEstado);
+    if (!siguienteEstado || loadingNotificaciones) return;
+
+    setLoadingNotificaciones(true);
+    try {
+      const data = await notificacionService.listar();
+      setNotificaciones(data);
+    } catch {
+      setNotificaciones([]);
+    } finally {
+      setLoadingNotificaciones(false);
+    }
+  };
+
+  const handleMarcarLeida = async (notificacion: NotificacionDTO) => {
+    if (notificacion.leida) return;
+    try {
+      await notificacionService.marcarComoLeida(notificacion.id);
+      setNotificaciones((prev) =>
+        prev.map((item) =>
+          item.id === notificacion.id ? { ...item, leida: true } : item,
+        ),
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch {
+      // no-op
+    }
+  };
+
+  const abrirNotificacion = (notificacion: NotificacionDTO) => {
+    handleMarcarLeida(notificacion);
+    if (notificacion.cursoId) {
+      setOpenNotificaciones(false);
+      navigate(`/cursos/${notificacion.cursoId}`);
+    }
+  };
+
+  const renderNotificacionesContenido = () => {
+    if (loadingNotificaciones) {
+      return <p className="notifications-empty">Cargando...</p>;
+    }
+    if (notificaciones.length === 0) {
+      return <p className="notifications-empty">No hay notificaciones.</p>;
+    }
+
+    return (
+      <ul className="notifications-list">
+        {notificaciones.slice(0, 10).map((n) => (
+          <li key={n.id}>
+            <button
+              type="button"
+              className={`notification-item ${n.leida ? 'read' : 'unread'}`}
+              onClick={() => abrirNotificacion(n)}
+            >
+              <span className="notification-title">{n.titulo}</span>
+              <span className="notification-message">{n.mensaje ?? 'Sin detalle'}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    );
+  };
 
   const handleLogout = () => {
     logout();
@@ -87,20 +189,26 @@ const Navbar: React.FC = () => {
           <>
             <NavLink 
               to="/dashboard" 
-              className={({ isActive }) => isActive ? "navbar-item active" : "navbar-item"}
+              className={navItemClassName}
             >
               Dashboard
             </NavLink>
             <NavLink 
               to="/actividades-por-curso" 
-              className={({ isActive }) => isActive ? "navbar-item active" : "navbar-item"}
+              className={navItemClassName}
             >
               Actividades
+            </NavLink>
+            <NavLink
+              to="/perfil"
+              className={navItemClassName}
+            >
+              Perfil
             </NavLink>
             {esProfesor && (
               <NavLink 
                 to="/evaluaciones" 
-                className={({ isActive }) => isActive ? "navbar-item active" : "navbar-item"}
+                className={navItemClassName}
               >
                 Evaluaciones
               </NavLink>
@@ -108,7 +216,7 @@ const Navbar: React.FC = () => {
             {esAdmin && (
               <NavLink 
                 to="/admin" 
-                className={({ isActive }) => isActive ? "navbar-item active" : "navbar-item"}
+                className={navItemClassName}
               >
                 Administración
               </NavLink>
@@ -119,6 +227,31 @@ const Navbar: React.FC = () => {
 
       {/* Lado derecho: Theme Toggle, Perfil y Acciones */}
       <div className="navbar-actions">
+        {usuario && (
+          <div className="navbar-notifications">
+            <button
+              type="button"
+              className="btn-notifications"
+              onClick={toggleNotificaciones}
+              aria-label="Abrir notificaciones"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              {unreadCount > 0 && <span className="notifications-badge">{unreadCount}</span>}
+            </button>
+            {openNotificaciones && (
+              <div className="notifications-panel" aria-label="Panel de notificaciones">
+                <div className="notifications-header">
+                  <strong>Notificaciones</strong>
+                </div>
+                {renderNotificacionesContenido()}
+              </div>
+            )}
+          </div>
+        )}
+
         <button
           onClick={toggleTheme}
           className="btn-theme-toggle"
@@ -147,14 +280,21 @@ const Navbar: React.FC = () => {
         {usuario ? (
           <div className="navbar-user">
             <div className="user-info-nav">
+              {usuario.fotoPerfilUrl ? (
+                <img
+                  src={usuario.fotoPerfilUrl}
+                  alt="Foto de perfil"
+                  className="navbar-avatar"
+                />
+              ) : (
+                <div className="navbar-avatar navbar-avatar-fallback" aria-label="Avatar por defecto">
+                  {usuario.nombre.charAt(0).toUpperCase()}
+                </div>
+              )}
               <span className="user-name">{usuario.nombre}</span>
               {cursoIdActual && rolEnCursoNavbar && (
                 <span className={`user-role-navbar ${rolEnCursoNavbar.toLowerCase()}`}>
-                  {rolEnCursoNavbar === 'AMBOS'
-                    ? 'Profesor/Estudiante'
-                    : rolEnCursoNavbar === 'PROFESOR'
-                      ? 'Profesor'
-                      : 'Estudiante'}
+                  {obtenerEtiquetaRol(rolEnCursoNavbar)}
                 </span>
               )}
             </div>

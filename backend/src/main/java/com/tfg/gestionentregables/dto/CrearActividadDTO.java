@@ -32,6 +32,7 @@ public class CrearActividadDTO {
     @NotNull(message = "La fecha límite es obligatoria")
     private LocalDateTime fechaLimite;
     
+    @Builder.Default
     private Visibilidad visibilidad = Visibilidad.OCULTO;
     
     private Double notaMaxima;
@@ -46,5 +47,6 @@ public class CrearActividadDTO {
 
     private String carpetaOneDrive;
 
+    @Builder.Default
     private ModoOneDrive modoOneDrive = ModoOneDrive.ACTIVIDAD;
 }

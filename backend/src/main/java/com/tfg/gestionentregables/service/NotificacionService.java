@@ -1,0 +1,250 @@
+package com.tfg.gestionentregables.service;
+
+import com.tfg.gestionentregables.dto.NotificacionDTO;
+import com.tfg.gestionentregables.dto.PreferenciaNotificacionDTO;
+import com.tfg.gestionentregables.entity.*;
+import com.tfg.gestionentregables.entity.enums.CanalNotificacion;
+import com.tfg.gestionentregables.entity.enums.TipoNotificacion;
+import com.tfg.gestionentregables.entity.enums.Visibilidad;
+import com.tfg.gestionentregables.repository.*;
+import com.tfg.gestionentregables.security.InputSanitizer;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * Servicio de notificaciones configurable.
+ * Gestiona notificaciones in-app y por email según preferencias del usuario.
+ */
+@Service
+@RequiredArgsConstructor
+@Transactional
+@Slf4j
+public class NotificacionService {
+
+    private final NotificacionRepository notificacionRepository;
+    private final PreferenciaNotificacionRepository preferenciaRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final EntregableRepository entregableRepository;
+    private final EntityMapper mapper;
+    private final EmailService emailService;
+
+    /**
+     * Envía una notificación respetando las preferencias del usuario.
+     */
+    public void enviarNotificacion(Long usuarioId, TipoNotificacion tipo,
+                                    String titulo, String mensaje, Long cursoId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado: " + usuarioId));
+
+        CanalNotificacion canal = obtenerCanalPreferido(usuarioId);
+
+        String tituloSeguro = InputSanitizer.sanitize(titulo);
+        String mensajeSeguro = InputSanitizer.sanitize(mensaje);
+
+        // Notificación in-app (si canal es APP o AMBOS)
+        if (canal == CanalNotificacion.APP || canal == CanalNotificacion.AMBOS) {
+            Notificacion notificacion = Notificacion.builder()
+                    .usuario(usuario)
+                    .tipo(tipo)
+                .titulo(tituloSeguro)
+                .mensaje(mensajeSeguro)
+                    .cursoId(cursoId)
+                    .build();
+            notificacionRepository.save(notificacion);
+        }
+
+        // Notificación por email (si canal es EMAIL o AMBOS)
+        if (canal == CanalNotificacion.EMAIL || canal == CanalNotificacion.AMBOS) {
+            emailService.enviarCorreo(
+                usuario.getCorreoElectronico(),
+                "[TFG Entregables] " + tituloSeguro,
+                mensajeSeguro
+            );
+        }
+    }
+
+    /**
+     * Obtiene las notificaciones del usuario.
+     */
+    @Transactional(readOnly = true)
+    public List<NotificacionDTO> obtenerNotificaciones(Long usuarioId) {
+        return notificacionRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuarioId)
+                .stream()
+                .map(mapper::toDTO)
+                .toList();
+    }
+
+    /**
+     * Marca una notificación como leída (con verificación de propiedad).
+     */
+    public void marcarComoLeida(Long notificacionId, Long usuarioId) {
+        Notificacion notificacion = notificacionRepository.findById(notificacionId)
+                .orElseThrow(() -> new EntityNotFoundException("Notificación no encontrada: " + notificacionId));
+
+        if (!notificacion.getUsuario().getId().equals(usuarioId)) {
+            throw new AccessDeniedException("No tienes permiso para modificar esta notificación");
+        }
+
+        notificacion.setLeida(true);
+        notificacionRepository.save(notificacion);
+    }
+
+    /**
+     * Cuenta las notificaciones no leídas del usuario.
+     */
+    @Transactional(readOnly = true)
+    public Long contarNoLeidas(Long usuarioId) {
+        return notificacionRepository.countByUsuarioIdAndLeidaFalse(usuarioId);
+    }
+
+    /**
+     * Obtiene las preferencias de notificación del usuario.
+     */
+    @Transactional(readOnly = true)
+    public PreferenciaNotificacionDTO obtenerPreferencias(Long usuarioId) {
+        CanalNotificacion canal = obtenerCanalPreferido(usuarioId);
+        return new PreferenciaNotificacionDTO(canal.name());
+    }
+
+    /**
+     * Actualiza las preferencias de notificación del usuario.
+     */
+    public PreferenciaNotificacionDTO actualizarPreferencias(Long usuarioId, PreferenciaNotificacionDTO dto) {
+        CanalNotificacion canal;
+        try {
+            canal = CanalNotificacion.valueOf(dto.getCanal().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Canal de notificación no válido: " + dto.getCanal());
+        }
+
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado: " + usuarioId));
+
+        PreferenciaNotificacion preferencia = preferenciaRepository.findByUsuarioId(usuarioId)
+                .orElseGet(() -> PreferenciaNotificacion.builder()
+                        .usuario(usuario)
+                        .build());
+
+        preferencia.setCanal(canal);
+        preferenciaRepository.save(preferencia);
+
+        return new PreferenciaNotificacionDTO(canal.name());
+    }
+
+    /**
+     * TRIGGER: Notifica a los estudiantes cuando un profesor sube un nuevo entregable.
+     * Se llama desde EntregableService al crear un entregable visible.
+     */
+    public void notificarNuevoEntregable(Entregable entregable) {
+        if (entregable.getVisibilidad() != Visibilidad.VISIBLE) {
+            return; // Solo notificar entregables visibles
+        }
+
+        Actividad actividad = entregable.getActividad();
+        Curso curso = actividad.getCurso();
+        Set<Grupo> grupos = actividad.getGrupos();
+
+        String titulo = "Nuevo entregable: " + entregable.getTitulo();
+        String mensaje = String.format(
+            "Se ha publicado un nuevo entregable '%s' en la actividad '%s' del curso '%s'. Fecha límite: %s",
+            entregable.getTitulo(),
+            actividad.getTitulo(),
+            curso.getTitulo(),
+            entregable.getFechaLimite()
+        );
+
+        // Notificar a todos los estudiantes de los grupos asignados
+        for (Grupo grupo : grupos) {
+            for (Estudiante estudiante : grupo.getEstudiantes()) {
+                enviarNotificacion(
+                    estudiante.getUsuario().getId(),
+                    TipoNotificacion.NUEVO_ENTREGABLE,
+                    titulo,
+                    mensaje,
+                    curso.getId()
+                );
+            }
+        }
+
+        log.info("Notificaciones enviadas para nuevo entregable '{}' a {} grupos",
+            entregable.getTitulo(), grupos.size());
+    }
+
+    /**
+     * TRIGGER CRON: Cada hora, busca entregables con deadline en las próximas 24h
+     * y notifica a estudiantes que aún no han entregado.
+     */
+    @Scheduled(cron = "0 0 * * * *") // Cada hora en punto
+    public void notificarDeadlinesCercanos() {
+        LocalDateTime ahora = LocalDateTime.now();
+        LocalDateTime limite = ahora.plusHours(24);
+
+        // Buscar entregables visibles con deadline entre ahora y 24h
+        List<Entregable> entregablesProximaDeadline = entregableRepository.findAll().stream()
+                .filter(e -> e.getVisibilidad() == Visibilidad.VISIBLE)
+                .filter(e -> e.getFechaLimite().isAfter(ahora) && e.getFechaLimite().isBefore(limite))
+                .toList();
+
+        for (Entregable entregable : entregablesProximaDeadline) {
+            Actividad actividad = entregable.getActividad();
+            Curso curso = actividad.getCurso();
+
+            String titulo = "⏰ Deadline cercano: " + entregable.getTitulo();
+            String mensaje = String.format(
+                "El entregable '%s' de la actividad '%s' (curso '%s') vence el %s. ¡Recuerda entregar a tiempo!",
+                entregable.getTitulo(),
+                actividad.getTitulo(),
+                curso.getTitulo(),
+                entregable.getFechaLimite()
+            );
+
+            // Notificar solo a estudiantes que NO han entregado
+            for (Grupo grupo : actividad.getGrupos()) {
+                for (Estudiante estudiante : grupo.getEstudiantes()) {
+                    boolean yaEntrego = entregable.getEntregas().stream()
+                            .anyMatch(e -> e.getEstudiante().getId().equals(estudiante.getId())
+                                        && Boolean.TRUE.equals(e.getEsVersionActiva()));
+                    boolean yaNotificado = notificacionRepository
+                        .existsByUsuarioIdAndTipoAndCursoIdAndTituloAndFechaCreacionAfter(
+                            estudiante.getUsuario().getId(),
+                            TipoNotificacion.DEADLINE_CERCANO,
+                            curso.getId(),
+                            titulo,
+                            ahora.minusHours(24)
+                        );
+                    if (!yaEntrego && !yaNotificado) {
+                        enviarNotificacion(
+                            estudiante.getUsuario().getId(),
+                            TipoNotificacion.DEADLINE_CERCANO,
+                            titulo,
+                            mensaje,
+                            curso.getId()
+                        );
+                    }
+                }
+            }
+        }
+
+        if (!entregablesProximaDeadline.isEmpty()) {
+            log.info("Notificaciones de deadline enviadas para {} entregables", entregablesProximaDeadline.size());
+        }
+    }
+
+    /**
+     * Obtiene el canal preferido del usuario, o APP por defecto.
+     */
+    private CanalNotificacion obtenerCanalPreferido(Long usuarioId) {
+        return preferenciaRepository.findByUsuarioId(usuarioId)
+                .map(PreferenciaNotificacion::getCanal)
+                .orElse(CanalNotificacion.APP);
+    }
+}

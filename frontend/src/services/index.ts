@@ -6,4 +6,5 @@ export { entregableService } from './entregableService';
 export { entregaService } from './entregaService';
 export { feedbackService } from './feedbackService';
 export { oneDriveService } from './oneDriveService';
+export { notificacionService } from './notificacionService';
 export { default as api } from './api';

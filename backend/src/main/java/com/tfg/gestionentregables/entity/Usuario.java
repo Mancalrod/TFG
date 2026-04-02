@@ -47,6 +47,10 @@ public class Usuario {
     @Builder.Default
     private Boolean esAdmin = false;
 
+    @Size(max = 500)
+    @Column(name = "foto_perfil_url", length = 500)
+    private String fotoPerfilUrl;
+
     // Relación: Un usuario puede ser profesor en varios cursos
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

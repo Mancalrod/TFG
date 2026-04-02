@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -41,6 +42,7 @@ class EntregaServiceTest {
 
     @Mock private EntregaRepository entregaRepository;
     @Mock private EntregableRepository entregableRepository;
+    @Mock private ActividadRepository actividadRepository;
     @Mock private EstudianteRepository estudianteRepository;
     @Mock private ProfesorRepository profesorRepository;
     @Mock private MaterialRepository materialRepository;
@@ -99,6 +101,8 @@ class EntregaServiceTest {
         entregaResumenDTO = EntregaResumenDTO.builder()
                 .entregaId(1L).estudianteId(1L).estudianteNombre("Alumno")
                 .estado(EstadoEntrega.ENTREGADO).version(1).build();
+
+        lenient().when(profesorRepository.existsByUsuarioIdAndCursoId(anyLong(), anyLong())).thenReturn(true);
     }
 
     @Nested
@@ -237,8 +241,9 @@ class EntregaServiceTest {
             when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(Optional.of(estudiante));
             when(zipValidationService.validarZip(any(), eq("src/main.java"), eq(false), eq("entrega.zip")))
                     .thenReturn(new ZipValidationService.ResultadoValidacion(false, List.of("Falta src/main.java")));
+                List<MultipartFile> archivos = List.of(zipFile);
 
-            assertThatThrownBy(() -> entregaService.realizarEntrega(1L, 1L, "Mi entrega", List.of(zipFile)))
+                assertThatThrownBy(() -> entregaService.realizarEntrega(1L, 1L, "Mi entrega", archivos))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("no cumple la estructura");
         }
@@ -252,11 +257,12 @@ class EntregaServiceTest {
                     "file", "entrega1.zip", "application/zip", new byte[]{1, 2, 3});
                 MockMultipartFile zipDos = new MockMultipartFile(
                     "file", "entrega2.zip", "application/zip", new byte[]{4, 5, 6});
+                List<MultipartFile> archivos = List.of(zipUno, zipDos);
 
                 when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
                 when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(Optional.of(estudiante));
 
-                assertThatThrownBy(() -> entregaService.realizarEntrega(1L, 1L, "Mi entrega", List.of(zipUno, zipDos)))
+                assertThatThrownBy(() -> entregaService.realizarEntrega(1L, 1L, "Mi entrega", archivos))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("único archivo ZIP");
             }
@@ -268,11 +274,12 @@ class EntregaServiceTest {
 
                 MockMultipartFile txt = new MockMultipartFile(
                     "file", "entrega.txt", "text/plain", "contenido".getBytes());
+                List<MultipartFile> archivos = List.of(txt);
 
                 when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
                 when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(Optional.of(estudiante));
 
-                assertThatThrownBy(() -> entregaService.realizarEntrega(1L, 1L, "Mi entrega", List.of(txt)))
+                assertThatThrownBy(() -> entregaService.realizarEntrega(1L, 1L, "Mi entrega", archivos))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("extensión .zip");
             }
@@ -779,13 +786,14 @@ class EntregaServiceTest {
             entregable.setTipoArchivoEsperado(TipoMaterial.SOLO_TEXTO);
             MockMultipartFile file = new MockMultipartFile(
                     "file", "entrega.txt", "text/plain", "contenido".getBytes());
+            List<MultipartFile> archivos = List.of(file);
 
             when(entregableRepository.findById(1L)).thenReturn(Optional.of(entregable));
             when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(anyLong(), anyLong()))
                     .thenReturn(Optional.of(estudiante));
 
             assertThatThrownBy(() ->
-                    entregaService.realizarEntrega(1L, 1L, null, "Texto", List.of(file)))
+                    entregaService.realizarEntrega(1L, 1L, null, "Texto", archivos))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("solo texto");
         }
@@ -892,6 +900,7 @@ class EntregaServiceTest {
         void listar_ok() {
             when(entregaRepository.findByEstadoAndEsVersionActiva(EstadoEntrega.ENTREGADO, true))
                     .thenReturn(List.of(entrega));
+            when(profesorRepository.existsByUsuarioIdAndCursoId(1L, 1L)).thenReturn(true);
             when(mapper.toResumenDTO(entrega)).thenReturn(entregaResumenDTO);
 
             List<EntregaResumenDTO> result = entregaService.listarEntregasPendientesCalificar(1L);
@@ -909,6 +918,80 @@ class EntregaServiceTest {
 
             assertThat(result).isEmpty();
         }
+    }
+
+    @Nested
+    @DisplayName("listarPendientesEstudiante")
+    class ListarPendientesEstudiante {
+
+        @Test
+        @DisplayName("Devuelve solo entregables no entregados y visibles")
+        void listar_ok() {
+            Curso curso = Curso.builder().id(1L).titulo("IS").codigo("IS-001").build();
+            Grupo grupo = Grupo.builder().id(3L).titulo("G3").curso(curso).build();
+            Estudiante est = Estudiante.builder().id(7L).usuario(estudiante.getUsuario()).grupo(grupo).build();
+
+            Actividad actividad = Actividad.builder()
+                    .id(50L)
+                    .titulo("P2")
+                    .curso(curso)
+                    .grupos(new HashSet<>(Set.of(grupo)))
+                    .entregables(new HashSet<>())
+                    .build();
+            Entregable pendiente = Entregable.builder()
+                    .id(80L)
+                    .titulo("Pendiente")
+                    .actividad(actividad)
+                    .visibilidad(com.tfg.gestionentregables.entity.enums.Visibilidad.VISIBLE)
+                    .fechaLimite(LocalDateTime.now().plusDays(1))
+                    .build();
+            actividad.getEntregables().add(pendiente);
+
+            when(estudianteRepository.findByUsuarioId(1L)).thenReturn(List.of(est));
+        when(actividadRepository.findByGrupoId(3L)).thenReturn(List.of(actividad));
+            when(entregaRepository.findByEntregableIdAndEstudianteIdAndEsVersionActivaTrue(80L, 7L))
+                    .thenReturn(Optional.empty());
+
+            List<EntregaPendienteDTO> result = entregaService.listarPendientesEstudiante(1L);
+
+            assertThat(result).hasSize(1);
+            assertThat(result.getFirst().getEntregableTitulo()).isEqualTo("Pendiente");
+        }
+
+            @Test
+            @DisplayName("Incluye entregables visibles sin fecha límite")
+            void listar_sinFechaLimite() {
+                Curso curso = Curso.builder().id(1L).titulo("IS").codigo("IS-001").build();
+                Grupo grupo = Grupo.builder().id(3L).titulo("G3").curso(curso).build();
+                Estudiante est = Estudiante.builder().id(7L).usuario(estudiante.getUsuario()).grupo(grupo).build();
+
+                Actividad actividad = Actividad.builder()
+                    .id(50L)
+                    .titulo("P2")
+                    .curso(curso)
+                    .grupos(new HashSet<>(Set.of(grupo)))
+                    .entregables(new HashSet<>())
+                    .build();
+                Entregable pendiente = Entregable.builder()
+                    .id(81L)
+                    .titulo("Pendiente sin fecha")
+                    .actividad(actividad)
+                    .visibilidad(com.tfg.gestionentregables.entity.enums.Visibilidad.VISIBLE)
+                    .fechaLimite(null)
+                    .build();
+                actividad.getEntregables().add(pendiente);
+
+                when(estudianteRepository.findByUsuarioId(1L)).thenReturn(List.of(est));
+                when(actividadRepository.findByGrupoId(3L)).thenReturn(List.of(actividad));
+                when(entregaRepository.findByEntregableIdAndEstudianteIdAndEsVersionActivaTrue(81L, 7L))
+                    .thenReturn(Optional.empty());
+
+                List<EntregaPendienteDTO> result = entregaService.listarPendientesEstudiante(1L);
+
+                assertThat(result).hasSize(1);
+                assertThat(result.getFirst().getEntregableTitulo()).isEqualTo("Pendiente sin fecha");
+                assertThat(result.getFirst().getTiempoRestante()).isEqualTo("Sin límite");
+            }
     }
 
     @Nested
@@ -1205,8 +1288,7 @@ class EntregaServiceTest {
 
             byte[] result = entregaService.descargarTodoComoZip(1L);
 
-            assertThat(result).isNotNull();
-            assertThat(result.length).isGreaterThan(0);
+            assertThat(result).isNotNull().hasSizeGreaterThan(0);
         }
 
         @Test
@@ -1262,8 +1344,7 @@ class EntregaServiceTest {
 
             byte[] result = entregaService.descargarTodoActividadComoZip(1L);
 
-            assertThat(result).isNotNull();
-            assertThat(result.length).isGreaterThan(0);
+            assertThat(result).isNotNull().hasSizeGreaterThan(0);
         }
 
         @Test
@@ -1336,10 +1417,10 @@ class EntregaServiceTest {
 
             List<Map<String, Object>> result = entregaService.listarContenidoZip(1L);
 
-            assertThat(result).hasSize(3);
-            assertThat(result).anyMatch(m -> "src/".equals(m.get("nombre")) && Boolean.TRUE.equals(m.get("esCarpeta")));
-            assertThat(result).anyMatch(m -> "src/Main.java".equals(m.get("nombre")) && Boolean.FALSE.equals(m.get("esCarpeta")));
-            assertThat(result).anyMatch(m -> "README.md".equals(m.get("nombre")));
+                assertThat(result).hasSize(3)
+                    .anyMatch(m -> "src/".equals(m.get("nombre")) && Boolean.TRUE.equals(m.get("esCarpeta")))
+                    .anyMatch(m -> "src/Main.java".equals(m.get("nombre")) && Boolean.FALSE.equals(m.get("esCarpeta")))
+                    .anyMatch(m -> "README.md".equals(m.get("nombre")));
         }
 
         @Test
@@ -1530,8 +1611,7 @@ class EntregaServiceTest {
 
             assertThat(nulo).isEqualTo("sin_nombre");
             assertThat(vacio).isEqualTo("sin_nombre");
-            assertThat(sucio).isNotBlank();
-            assertThat(sucio).doesNotContain("/").doesNotContain("\\");
+            assertThat(sucio).isNotBlank().doesNotContain("/").doesNotContain("\\");
         }
 
         @Test

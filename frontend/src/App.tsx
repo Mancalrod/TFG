@@ -24,6 +24,7 @@ import EntregaDetallePage from './pages/entrega/EntregaDetallePage'
 import ActividadesPorCursoPage from './pages/actividades-por-curso/ActividadesPorCursoPage'
 import AdminPage from './pages/admin/AdminPage'
 import EvaluacionesPage from './pages/evaluaciones/EvaluacionesPage'
+import PerfilPage from './pages/perfil/PerfilPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 // Componente para proteger rutas que requieren autenticación
@@ -89,6 +90,7 @@ function App() {
             <Route path="/entregas/:id" element={<ProtectedRoute><EntregaDetallePage /></ProtectedRoute>} />
             <Route path="/entregables/:id/editar" element={<ProtectedRoute><EditarEntregablePage /></ProtectedRoute>} />
             <Route path="/evaluaciones" element={<ProtectedRoute><EvaluacionesPage /></ProtectedRoute>} />
+            <Route path="/perfil" element={<ProtectedRoute><PerfilPage /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
             
             {/* 404 */}

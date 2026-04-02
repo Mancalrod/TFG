@@ -12,8 +12,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.nio.file.Path;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
@@ -29,6 +34,7 @@ class UsuarioServiceTest {
     @Mock private GrupoRepository grupoRepository;
     @Mock private EntityMapper mapper;
     @Mock private PasswordEncoder passwordEncoder;
+    @Mock private CloudinaryService cloudinaryService;
 
     @InjectMocks
     private UsuarioService usuarioService;
@@ -544,6 +550,103 @@ class UsuarioServiceTest {
             assertThatThrownBy(() -> usuarioService.eliminarEstudianteDeGrupo(1L, 99L))
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasMessageContaining("no es estudiante del grupo");
+        }
+    }
+
+    @Nested
+    @DisplayName("cambiarContrasena")
+    class CambiarContrasena {
+
+        @Test
+        @DisplayName("Cambia contraseña cuando actual es correcta")
+        void cambiar_ok() {
+            CambiarContrasenaDTO dto = new CambiarContrasenaDTO("Actual123!", "Nueva123!");
+            when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+            when(passwordEncoder.matches("Actual123!", "encoded")).thenReturn(true);
+            when(passwordEncoder.matches("Nueva123!", "encoded")).thenReturn(false);
+            when(passwordEncoder.encode("Nueva123!")).thenReturn("encoded-nueva");
+
+            usuarioService.cambiarContrasena(1L, dto);
+
+            verify(usuarioRepository).save(argThat(u -> "encoded-nueva".equals(u.getContrasena())));
+        }
+
+        @Test
+        @DisplayName("Bloquea cambio cuando contraseña actual no coincide")
+        void cambiar_actualIncorrecta() {
+            CambiarContrasenaDTO dto = new CambiarContrasenaDTO("Bad123!", "Nueva123!");
+            when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+            when(passwordEncoder.matches("Bad123!", "encoded")).thenReturn(false);
+
+            assertThatThrownBy(() -> usuarioService.cambiarContrasena(1L, dto))
+                    .isInstanceOf(AccessDeniedException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("subirFotoPerfil")
+    class SubirFotoPerfil {
+
+        @Test
+        @DisplayName("Sube imagen válida y devuelve usuario actualizado")
+        void subir_ok() {
+            byte[] pngMinimo = new byte[] {
+                    (byte) 0x89, 0x50, 0x4E, 0x47,
+                    0x0D, 0x0A, 0x1A, 0x0A,
+                    0x00, 0x00, 0x00, 0x0D
+            };
+            MockMultipartFile archivo = new MockMultipartFile(
+                    "archivo", "avatar.png", "image/png", pngMinimo);
+            UsuarioDTO dto = UsuarioDTO.builder().id(1L).fotoPerfilUrl("https://cdn/avatar.png").build();
+
+            when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+            when(cloudinaryService.isEnabled()).thenReturn(true);
+            when(cloudinaryService.subirArchivo(any(), anyString()))
+                    .thenReturn(Map.of("secureUrl", "https://cdn/avatar.png"));
+            when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
+            when(mapper.toDTO(any(Usuario.class))).thenReturn(dto);
+
+            UsuarioDTO result = usuarioService.subirFotoPerfil(1L, archivo);
+
+            assertThat(result.getFotoPerfilUrl()).isEqualTo("https://cdn/avatar.png");
+            verify(cloudinaryService).subirArchivo(any(), eq("profile-photos/1"));
+        }
+
+        @Test
+        @DisplayName("Guarda imagen en local cuando Cloudinary está deshabilitado")
+        void subir_ok_localFallback(@TempDir Path tempDir) {
+            byte[] pngMinimo = new byte[] {
+                    (byte) 0x89, 0x50, 0x4E, 0x47,
+                    0x0D, 0x0A, 0x1A, 0x0A,
+                    0x00, 0x00, 0x00, 0x0D
+            };
+            MockMultipartFile archivo = new MockMultipartFile(
+                    "archivo", "avatar.png", "image/png", pngMinimo);
+
+            ReflectionTestUtils.setField(usuarioService, "uploadBaseDir", tempDir.toString());
+            when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+            when(cloudinaryService.isEnabled()).thenReturn(false);
+            when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+            when(mapper.toDTO(any(Usuario.class))).thenAnswer(inv -> {
+                Usuario u = inv.getArgument(0);
+                return UsuarioDTO.builder().id(u.getId()).fotoPerfilUrl(u.getFotoPerfilUrl()).build();
+            });
+
+            UsuarioDTO result = usuarioService.subirFotoPerfil(1L, archivo);
+
+            assertThat(result.getFotoPerfilUrl()).startsWith("/uploads/profile-photos/1/");
+            verify(cloudinaryService, never()).subirArchivo(any(), anyString());
+        }
+
+        @Test
+        @DisplayName("Bloquea archivo que no es imagen válida")
+        void subir_firmaInvalida() {
+            MockMultipartFile archivo = new MockMultipartFile(
+                    "archivo", "avatar.gif", "image/gif", "no-es-imagen".getBytes());
+
+            assertThatThrownBy(() -> usuarioService.subirFotoPerfil(1L, archivo))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("imagen válida");
         }
     }
 }

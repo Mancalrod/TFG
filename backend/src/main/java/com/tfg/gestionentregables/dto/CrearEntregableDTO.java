@@ -33,12 +33,15 @@ public class CrearEntregableDTO {
 
     private Long tamanoMaximoBytes;
 
+    @Builder.Default
     private Visibilidad visibilidad = Visibilidad.OCULTO;
 
+    @Builder.Default
     private Boolean permiteReenvio = true;
 
     private String estructuraZip;
 
+    @Builder.Default
     private Boolean validacionZipEstricta = false;
 
     private String nombreZipEsperado;

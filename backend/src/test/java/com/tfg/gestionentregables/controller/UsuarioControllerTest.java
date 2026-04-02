@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.tfg.gestionentregables.dto.*;
 import com.tfg.gestionentregables.security.jwt.JwtTokenProvider;
+import com.tfg.gestionentregables.service.SecurityContextUserService;
 import com.tfg.gestionentregables.service.UsuarioService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,7 @@ class UsuarioControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @MockitoBean private UsuarioService usuarioService;
+    @MockitoBean private SecurityContextUserService securityContextUserService;
     @MockitoBean private JwtTokenProvider jwtTokenProvider;
     @MockitoBean private UserDetailsService userDetailsService;
 

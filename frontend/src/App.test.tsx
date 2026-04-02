@@ -33,6 +33,7 @@ vi.mock('./pages/entrega/EntregaDetallePage', () => ({ default: () => <div>Entre
 vi.mock('./pages/actividades-por-curso/ActividadesPorCursoPage', () => ({ default: () => <div>ActividadesPorCursoPage</div> }));
 vi.mock('./pages/admin/AdminPage', () => ({ default: () => <div>AdminPage</div> }));
 vi.mock('./pages/evaluaciones/EvaluacionesPage', () => ({ default: () => <div>EvaluacionesPage</div> }));
+vi.mock('./pages/perfil/PerfilPage', () => ({ default: () => <div>PerfilPage</div> }));
 vi.mock('./pages/NotFoundPage', () => ({ default: () => <div>NotFoundPage</div> }));
 
 const renderAt = (path: string) => {

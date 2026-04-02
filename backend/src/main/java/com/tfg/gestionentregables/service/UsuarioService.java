@@ -5,11 +5,24 @@ import com.tfg.gestionentregables.entity.*;
 import com.tfg.gestionentregables.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 
 /**
@@ -19,9 +32,16 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class UsuarioService {
 
     private static final String USUARIO_NOT_FOUND = "Usuario no encontrado con ID: ";
+
+    private static final Set<String> MIME_TYPES_PERMITIDOS = Set.of(
+        "image/jpeg", "image/png", "image/webp", "image/gif"
+    );
+    private static final long MAX_FOTO_BYTES = 2L * 1024 * 1024; // 2 MB
+    private static final String PROFILE_PHOTOS_FOLDER = "profile-photos";
 
     private final UsuarioRepository usuarioRepository;
     private final ProfesorRepository profesorRepository;
@@ -29,6 +49,10 @@ public class UsuarioService {
     private final GrupoRepository grupoRepository;
     private final EntityMapper mapper;
     private final PasswordEncoder passwordEncoder;
+    private final CloudinaryService cloudinaryService;
+
+    @Value("${app.upload.dir:${user.home}/tfg-uploads}")
+    private String uploadBaseDir;
 
     /**
      * SYSOP-001: Obtiene un usuario por su ID.
@@ -115,6 +139,162 @@ public class UsuarioService {
             throw new EntityNotFoundException(USUARIO_NOT_FOUND + id);
         }
         usuarioRepository.deleteById(id);
+    }
+
+    /**
+     * Cambia la contraseña de un usuario.
+     * Verifica la contraseña actual, valida la fortaleza de la nueva y hace hash con BCrypt.
+     */
+    public void cambiarContrasena(Long usuarioId, CambiarContrasenaDTO dto) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new EntityNotFoundException(USUARIO_NOT_FOUND + usuarioId));
+
+        // Verificar contraseña actual
+        if (!passwordEncoder.matches(dto.getContrasenaActual(), usuario.getContrasena())) {
+            throw new AccessDeniedException("La contraseña actual no es correcta");
+        }
+
+        // No permitir que la nueva sea igual a la actual
+        if (passwordEncoder.matches(dto.getContrasenaNueva(), usuario.getContrasena())) {
+            throw new IllegalArgumentException("La nueva contraseña no puede ser igual a la actual");
+        }
+
+        usuario.setContrasena(passwordEncoder.encode(dto.getContrasenaNueva()));
+        usuarioRepository.save(usuario);
+        log.info("Contraseña cambiada para usuario ID: {}", usuarioId);
+    }
+
+    /**
+     * Sube una foto de perfil para el usuario.
+     * Valida estrictamente el MIME type (real, no solo extensión) y el tamaño.
+     * Previene subida de webshells o archivos maliciosos.
+     */
+    public UsuarioDTO subirFotoPerfil(Long usuarioId, MultipartFile archivo) {
+        if (archivo == null || archivo.isEmpty()) {
+            throw new IllegalArgumentException("No se ha proporcionado ningún archivo");
+        }
+
+        // Validación de tamaño
+        if (archivo.getSize() > MAX_FOTO_BYTES) {
+            throw new IllegalArgumentException("La imagen no puede superar los 2 MB");
+        }
+
+        // Validación estricta de MIME type (verificación real del contenido, no solo extensión)
+        String contentType = archivo.getContentType();
+        if (contentType == null || !MIME_TYPES_PERMITIDOS.contains(contentType.toLowerCase())) {
+            throw new IllegalArgumentException(
+                "Tipo de archivo no permitido. Solo se aceptan: JPEG, PNG, WebP, GIF");
+        }
+
+        try {
+            byte[] firma = archivo.getBytes();
+            if (!esFirmaImagenValida(firma)) {
+                throw new IllegalArgumentException("El archivo no contiene una imagen válida");
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("No se pudo procesar la imagen subida");
+        }
+
+        // Validar extensión del nombre del archivo
+        String originalFilename = archivo.getOriginalFilename();
+        if (originalFilename != null && !originalFilename.isBlank()) {
+            int dotIndex = originalFilename.lastIndexOf('.');
+            if (dotIndex < 0 || dotIndex == originalFilename.length() - 1) {
+                throw new IllegalArgumentException("El archivo debe incluir una extensión válida");
+            }
+            String extension = originalFilename.substring(dotIndex + 1).toLowerCase(Locale.ROOT);
+            Set<String> extensionesPermitidas = Set.of("jpg", "jpeg", "png", "webp", "gif");
+            if (!extensionesPermitidas.contains(extension)) {
+                throw new IllegalArgumentException(
+                    "Extensión de archivo no permitida. Solo se aceptan: jpg, jpeg, png, webp, gif");
+            }
+        }
+
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new EntityNotFoundException(USUARIO_NOT_FOUND + usuarioId));
+
+        String url = cloudinaryService.isEnabled()
+            ? subirFotoCloudinary(usuarioId, archivo)
+            : guardarFotoLocal(usuarioId, archivo, originalFilename, contentType);
+
+        if (url.isBlank()) {
+            throw new IllegalStateException("No se pudo obtener la URL de la imagen subida");
+        }
+        usuario.setFotoPerfilUrl(url);
+        usuario = usuarioRepository.save(usuario);
+
+        log.info("Foto de perfil actualizada para usuario ID: {}", usuarioId);
+        return mapper.toDTO(usuario);
+    }
+
+    private String subirFotoCloudinary(Long usuarioId, MultipartFile archivo) {
+        Map<String, String> upload = cloudinaryService.subirArchivo(archivo, PROFILE_PHOTOS_FOLDER + "/" + usuarioId);
+        return upload.getOrDefault("secureUrl", upload.getOrDefault("url", ""));
+    }
+
+    private String guardarFotoLocal(Long usuarioId,
+                                    MultipartFile archivo,
+                                    String originalFilename,
+                                    String contentType) {
+        String extension = resolverExtension(originalFilename, contentType);
+
+        try {
+            Path basePath = Paths.get(uploadBaseDir).toAbsolutePath().normalize();
+            Path fotoDir = basePath.resolve(PROFILE_PHOTOS_FOLDER).resolve(String.valueOf(usuarioId)).normalize();
+            Files.createDirectories(fotoDir);
+
+            String fileName = UUID.randomUUID() + "." + extension;
+            Path destino = fotoDir.resolve(fileName).normalize();
+            if (!destino.startsWith(fotoDir)) {
+                throw new IllegalArgumentException("Ruta de archivo no válida");
+            }
+
+            Files.copy(archivo.getInputStream(), destino, StandardCopyOption.REPLACE_EXISTING);
+            return "/uploads/" + PROFILE_PHOTOS_FOLDER + "/" + usuarioId + "/" + fileName;
+        } catch (IOException e) {
+            throw new IllegalStateException("No se pudo guardar la foto de perfil en almacenamiento local", e);
+        }
+    }
+
+    private String resolverExtension(String originalFilename, String contentType) {
+        if (originalFilename != null && !originalFilename.isBlank()) {
+            int dotIndex = originalFilename.lastIndexOf('.');
+            if (dotIndex >= 0 && dotIndex < originalFilename.length() - 1) {
+                return originalFilename.substring(dotIndex + 1).toLowerCase(Locale.ROOT);
+            }
+        }
+
+        if ("image/jpeg".equalsIgnoreCase(contentType)) return "jpg";
+        if ("image/png".equalsIgnoreCase(contentType)) return "png";
+        if ("image/webp".equalsIgnoreCase(contentType)) return "webp";
+        if ("image/gif".equalsIgnoreCase(contentType)) return "gif";
+        return "img";
+    }
+
+    private boolean esFirmaImagenValida(byte[] contenido) {
+        if (contenido == null || contenido.length < 12) {
+            return false;
+        }
+
+        boolean esJpeg = (contenido[0] & 0xFF) == 0xFF && (contenido[1] & 0xFF) == 0xD8;
+        boolean esPng = (contenido[0] & 0xFF) == 0x89
+                && contenido[1] == 0x50
+                && contenido[2] == 0x4E
+                && contenido[3] == 0x47;
+        boolean esGif = contenido[0] == 0x47
+                && contenido[1] == 0x49
+                && contenido[2] == 0x46
+                && contenido[3] == 0x38;
+        boolean esWebp = contenido[0] == 0x52
+                && contenido[1] == 0x49
+                && contenido[2] == 0x46
+                && contenido[3] == 0x46
+                && contenido[8] == 0x57
+                && contenido[9] == 0x45
+                && contenido[10] == 0x42
+                && contenido[11] == 0x50;
+
+        return esJpeg || esPng || esGif || esWebp;
     }
 
     /**

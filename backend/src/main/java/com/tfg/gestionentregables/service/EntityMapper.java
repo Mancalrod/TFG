@@ -21,6 +21,20 @@ public class EntityMapper {
                 .telefono(usuario.getTelefono())
                 .correoElectronico(usuario.getCorreoElectronico())
                 .esAdmin(usuario.getEsAdmin())
+                .fotoPerfilUrl(usuario.getFotoPerfilUrl())
+                .build();
+    }
+
+    public NotificacionDTO toDTO(Notificacion notificacion) {
+        if (notificacion == null) return null;
+        return NotificacionDTO.builder()
+                .id(notificacion.getId())
+                .tipo(notificacion.getTipo().name())
+                .titulo(notificacion.getTitulo())
+                .mensaje(notificacion.getMensaje())
+                .leida(notificacion.getLeida())
+                .cursoId(notificacion.getCursoId())
+                .fechaCreacion(notificacion.getFechaCreacion())
                 .build();
     }
 

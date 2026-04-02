@@ -57,6 +57,11 @@ class EntregaControllerTest {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
+                when(securityContextUserService.getCurrentUserId(any())).thenReturn(1L);
+                when(securityContextUserService.hasRole(any(), eq("ADMIN"))).thenReturn(true);
+                when(securityContextUserService.hasRole(any(), eq("PROFESOR"))).thenReturn(true);
+                when(securityContextUserService.hasRole(any(), eq("ESTUDIANTE"))).thenReturn(false);
+
         entregaDTO = EntregaDTO.builder()
                 .id(1L).nombre("Mi entrega").version(1)
                 .fechaEntrega(LocalDateTime.now())
@@ -384,7 +389,7 @@ class EntregaControllerTest {
                 }
 
                 @Test
-                @DisplayName("404 - Sin fallback local disponible")
+                @DisplayName("503 - Sin fallback local disponible")
                 void descargar_notFound() throws Exception {
                         Material material = Material.builder()
                                         .id(3L).nombre("missing.bin").ruta(null).tipoMaterial(TipoMaterial.OTRO).build();
@@ -393,7 +398,7 @@ class EntregaControllerTest {
                         when(entregaService.descargarContenidoArchivo(3L)).thenThrow(new RuntimeException("Falla"));
 
                         mockMvc.perform(get("/api/entregas/archivo/3"))
-                                        .andExpect(status().isNotFound());
+                                        .andExpect(status().isServiceUnavailable());
                 }
         }
 

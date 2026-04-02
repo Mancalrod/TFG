@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { cursoService, oneDriveService } from '../../services';
-import { CursoDTO } from '../../types';
+import { cursoService, entregaService, oneDriveService } from '../../services';
+import { CursoDTO, EntregaPendienteDTO } from '../../types';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
@@ -13,6 +13,7 @@ const Dashboard: React.FC = () => {
   const [cursos, setCursos] = useState<CursoDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [pendientes, setPendientes] = useState<EntregaPendienteDTO[]>([]);
 
   // ── OneDrive ──
   const [oneDriveConnected, setOneDriveConnected] = useState(false);
@@ -74,6 +75,22 @@ const Dashboard: React.FC = () => {
     };
     cargarCursos();
   }, [usuario, esEstudiante, esAdmin]);
+
+  useEffect(() => {
+    const cargarPendientes = async () => {
+      if (!usuario || !esEstudiante) {
+        setPendientes([]);
+        return;
+      }
+      try {
+        const data = await entregaService.listarPendientesEstudiante(usuario.id);
+        setPendientes(data);
+      } catch {
+        setPendientes([]);
+      }
+    };
+    cargarPendientes();
+  }, [usuario, esEstudiante]);
 
   // Filtrado por nombre en el buscador
   const cursosFiltrados = useMemo(() => {
@@ -192,6 +209,39 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
+        {esEstudiante && (
+          <section className="pending-widget">
+            <div className="pending-widget-header">
+              <h3>Entregas pendientes</h3>
+              <span>{pendientes.length}</span>
+            </div>
+            {pendientes.length === 0 ? (
+              <p className="pending-empty">No tienes entregables pendientes.</p>
+            ) : (
+              <ul className="pending-list">
+                {pendientes.slice(0, 6).map((p) => (
+                  <li key={p.entregableId}>
+                    <button
+                      type="button"
+                      className="pending-item"
+                      onClick={() => navigate(`/entregables/${p.entregableId}`)}
+                    >
+                    <div>
+                      <strong>{p.entregableTitulo}</strong>
+                      <span>{p.cursoTitulo} • {p.actividadTitulo}</span>
+                    </div>
+                    <div className="pending-deadline">
+                      <span>{p.fechaLimite ? new Date(p.fechaLimite).toLocaleString() : 'Sin fecha límite'}</span>
+                      <small>{p.tiempoRestante}</small>
+                    </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
+
         {/* Estados de carga y error */}
         {loading && (
           <div className="dashboard-status">
@@ -219,7 +269,8 @@ const Dashboard: React.FC = () => {
             ) : (
               <div className="courses-grid">
                 {cursosFiltrados.map((curso) => (
-                  <div
+                  <button
+                    type="button"
                     key={curso.id}
                     className="course-card"
                     onClick={() => navigate(`/cursos/${curso.id}`)}
@@ -260,7 +311,7 @@ const Dashboard: React.FC = () => {
                         </span>
                       </div>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             )}

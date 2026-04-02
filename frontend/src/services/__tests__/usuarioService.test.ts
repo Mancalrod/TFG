@@ -77,4 +77,31 @@ describe('usuarioService', () => {
     expect(mockDelete).toHaveBeenNthCalledWith(3, '/api/usuarios/9/estudiante');
     expect(mockDelete).toHaveBeenNthCalledWith(4, '/api/usuarios/9/estudiante/4');
   });
+
+  it('perfil: cambia contrasena y sube foto', async () => {
+    mockPut.mockResolvedValue({});
+    mockPost.mockResolvedValue({ data: { id: 1, fotoPerfilUrl: 'https://img.test/avatar.png' } });
+
+    await usuarioService.cambiarContrasena(7, {
+      contrasenaActual: 'Actual123!',
+      contrasenaNueva: 'Nueva123!',
+    });
+
+    const file = new File(['abc'], 'avatar.png', { type: 'image/png' });
+    await usuarioService.subirFotoPerfil(7, file);
+
+    expect(mockPut).toHaveBeenCalledWith('/api/usuarios/7/contrasena', {
+      contrasenaActual: 'Actual123!',
+      contrasenaNueva: 'Nueva123!',
+    });
+    expect(mockPost).toHaveBeenCalledWith(
+      '/api/usuarios/7/foto-perfil',
+      expect.any(FormData),
+      expect.objectContaining({
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+    );
+  });
 });

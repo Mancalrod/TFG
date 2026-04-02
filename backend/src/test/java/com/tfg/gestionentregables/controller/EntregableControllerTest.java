@@ -48,6 +48,10 @@ class EntregableControllerTest {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
+        when(securityContextUserService.getCurrentUserId(any())).thenReturn(1L);
+        when(securityContextUserService.hasRole(any(), eq("ADMIN"))).thenReturn(true);
+        when(securityContextUserService.hasRole(any(), eq("ESTUDIANTE"))).thenReturn(false);
+
         entregableDTO = EntregableDTO.builder()
                 .id(1L).titulo("Entregable 1").descripcion("Desc")
                 .tipoArchivoEsperado(TipoMaterial.PDF)
@@ -95,7 +99,7 @@ class EntregableControllerTest {
         @Test
         @DisplayName("201 - Crea entregable")
         void crear_ok() throws Exception {
-            when(entregableService.crearEntregable(any(), eq(1L))).thenReturn(entregableDTO);
+            when(entregableService.crearEntregable(any(), eq(1L), anyLong(), anyBoolean())).thenReturn(entregableDTO);
 
             mockMvc.perform(post("/api/entregables/actividad/1")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -142,7 +146,7 @@ class EntregableControllerTest {
         @Test
         @DisplayName("200 - Actualiza entregable")
         void actualizar_ok() throws Exception {
-            when(entregableService.actualizarEntregable(eq(1L), any())).thenReturn(entregableDTO);
+            when(entregableService.actualizarEntregable(eq(1L), any(), anyLong(), anyBoolean())).thenReturn(entregableDTO);
 
             mockMvc.perform(put("/api/entregables/1")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -158,7 +162,8 @@ class EntregableControllerTest {
         @Test
         @DisplayName("200 - Cambia visibilidad")
         void cambiar_ok() throws Exception {
-            when(entregableService.cambiarVisibilidad(1L, Visibilidad.OCULTO)).thenReturn(entregableDTO);
+            when(entregableService.cambiarVisibilidad(eq(1L), eq(Visibilidad.OCULTO), anyLong(), anyBoolean()))
+                    .thenReturn(entregableDTO);
 
             mockMvc.perform(patch("/api/entregables/1/visibilidad")
                             .param("visibilidad", "OCULTO"))
@@ -173,7 +178,7 @@ class EntregableControllerTest {
         @Test
         @DisplayName("204 - Elimina entregable")
         void eliminar_ok() throws Exception {
-            doNothing().when(entregableService).eliminarEntregable(1L);
+            doNothing().when(entregableService).eliminarEntregable(eq(1L), anyLong(), anyBoolean());
 
             mockMvc.perform(delete("/api/entregables/1"))
                     .andExpect(status().isNoContent());
@@ -183,7 +188,7 @@ class EntregableControllerTest {
         @DisplayName("404 - No encontrado")
         void eliminar_notFound() throws Exception {
             doThrow(new EntityNotFoundException("No encontrado"))
-                    .when(entregableService).eliminarEntregable(99L);
+                    .when(entregableService).eliminarEntregable(eq(99L), anyLong(), anyBoolean());
 
             mockMvc.perform(delete("/api/entregables/99"))
                     .andExpect(status().isNotFound());

@@ -1,5 +1,5 @@
 import api from './api';
-import { UsuarioDTO, CrearUsuarioDTO } from '../types';
+import { CambiarContrasenaDTO, CrearUsuarioDTO, UsuarioDTO } from '../types';
 
 const BASE_URL = '/api/usuarios';
 
@@ -70,6 +70,21 @@ export const usuarioService = {
 
   obtenerProfesorId: async (usuarioId: number): Promise<number> => {
     const response = await api.get<number>(`${BASE_URL}/${usuarioId}/profesor-id`);
+    return response.data;
+  },
+
+  cambiarContrasena: async (usuarioId: number, payload: CambiarContrasenaDTO): Promise<void> => {
+    await api.put(`${BASE_URL}/${usuarioId}/contrasena`, payload);
+  },
+
+  subirFotoPerfil: async (usuarioId: number, archivo: File): Promise<UsuarioDTO> => {
+    const formData = new FormData();
+    formData.append('archivo', archivo);
+    const response = await api.post<UsuarioDTO>(`${BASE_URL}/${usuarioId}/foto-perfil`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   }
 };

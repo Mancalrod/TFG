@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { AuthResponseDTO, LoginRequestDTO } from '../types';
 import { authService } from '../services';
 
@@ -7,6 +7,7 @@ interface AuthUser {
   nombre: string;
   correoElectronico: string;
   roles: string[];
+  fotoPerfilUrl?: string;
 }
 
 interface AuthContextType {
@@ -18,6 +19,7 @@ interface AuthContextType {
   login: (credentials: LoginRequestDTO) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  actualizarFotoPerfil: (url: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -40,6 +42,7 @@ const mapResponseToUser = (data: AuthResponseDTO): AuthUser => ({
   nombre: data.nombre,
   correoElectronico: data.correoElectronico,
   roles: data.roles,
+  fotoPerfilUrl: data.fotoPerfilUrl,
 });
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
@@ -96,17 +99,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUsuario(null);
   }, []);
 
+  const actualizarFotoPerfil = useCallback((url: string) => {
+    setUsuario(prev => prev ? { ...prev, fotoPerfilUrl: url } : null);
+  }, []);
+
+  const contextValue = useMemo(() => ({
+    usuario,
+    loading,
+    esProfesor,
+    esEstudiante,
+    esAdmin,
+    login,
+    logout,
+    isAuthenticated,
+    actualizarFotoPerfil,
+  }), [
+    usuario,
+    loading,
+    esProfesor,
+    esEstudiante,
+    esAdmin,
+    login,
+    logout,
+    isAuthenticated,
+    actualizarFotoPerfil,
+  ]);
+
   return (
-    <AuthContext.Provider value={{
-      usuario,
-      loading,
-      esProfesor,
-      esEstudiante,
-      esAdmin,
-      login,
-      logout,
-      isAuthenticated,
-    }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

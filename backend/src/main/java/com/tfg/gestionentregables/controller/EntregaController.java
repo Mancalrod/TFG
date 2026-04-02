@@ -33,6 +33,9 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:3000")
 public class EntregaController {
 
+    private static final String ADMIN_ROLE = "ADMIN";
+    private static final String CONTENT_DISPOSITION_ATTACHMENT = "attachment; filename=\"";
+
     private final EntregaService entregaService;
     private final com.tfg.gestionentregables.service.EntregableService entregableService;
     private final com.tfg.gestionentregables.service.ActividadService actividadService;
@@ -60,7 +63,7 @@ public class EntregaController {
             @RequestParam(required = false) List<MultipartFile> archivos,
             Authentication authentication) {
         Long actorId = securityContextUserService.getCurrentUserId(authentication);
-        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, ADMIN_ROLE);
         if (!actorEsAdmin && actorId != null && !actorId.equals(usuarioId)) {
             throw new AccessDeniedException("No puedes realizar entregas en nombre de otro usuario");
         }
@@ -86,7 +89,7 @@ public class EntregaController {
             @PathVariable Long usuarioId,
             Authentication authentication) {
         Long actorId = securityContextUserService.getCurrentUserId(authentication);
-        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, ADMIN_ROLE);
         if (!actorEsAdmin && actorId != null && !actorId.equals(usuarioId)) {
             throw new AccessDeniedException("No puedes consultar entregas de otro usuario");
         }
@@ -104,7 +107,7 @@ public class EntregaController {
             @Valid @RequestBody CalificacionDTO calificacion,
             Authentication authentication) {
         Long actorId = securityContextUserService.getCurrentUserId(authentication);
-        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, ADMIN_ROLE);
         boolean actorEsProfesor = securityContextUserService.hasRole(authentication, "PROFESOR");
         if (!actorEsAdmin && !actorEsProfesor) {
             throw new AccessDeniedException("Solo profesores o administradores pueden calificar entregas");
@@ -129,7 +132,7 @@ public class EntregaController {
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .header(HttpHeaders.CONTENT_DISPOSITION, 
-                            "attachment; filename=\"" + material.getNombre() + "\"")
+                            CONTENT_DISPOSITION_ATTACHMENT + material.getNombre() + "\"")
                     .body(contenido);
         } catch (Exception e) {
             // Fallback: intentar servir desde ruta local (compatibilidad)
@@ -139,17 +142,17 @@ public class EntregaController {
                     Resource resource = new UrlResource(filePath.toUri());
                     
                     if (resource.exists() && resource.isReadable()) {
-                        return ResponseEntity.ok()
+                        return ResponseEntity.status(HttpStatus.OK)
                                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                                 .header(HttpHeaders.CONTENT_DISPOSITION, 
-                                        "attachment; filename=\"" + material.getNombre() + "\"")
+                                CONTENT_DISPOSITION_ATTACHMENT + material.getNombre() + "\"")
                                 .body(resource.getContentAsByteArray());
                     }
                 } catch (IOException ex) {
                     // ignorar
                 }
             }
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
         }
     }
 
@@ -186,7 +189,7 @@ public class EntregaController {
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType("application/zip"))
                     .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=\"" + filename + "\"")
+                            CONTENT_DISPOSITION_ATTACHMENT + filename + "\"")
                     .body(zipBytes);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
@@ -205,7 +208,7 @@ public class EntregaController {
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType("application/zip"))
                     .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=\"" + filename + "\"")
+                            CONTENT_DISPOSITION_ATTACHMENT + filename + "\"")
                     .body(zipBytes);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
@@ -230,11 +233,23 @@ public class EntregaController {
             @PathVariable Long estudianteId,
             Authentication authentication) {
         Long actorId = securityContextUserService.getCurrentUserId(authentication);
-        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, ADMIN_ROLE);
         if (!actorEsAdmin && actorId != null && !actorId.equals(estudianteId)) {
             throw new AccessDeniedException("No puedes consultar entregas de otro estudiante");
         }
         return ResponseEntity.ok(entregaService.listarTodasEntregasEstudiante(estudianteId));
+    }
+
+    @GetMapping("/estudiante/{usuarioId}/pendientes")
+    public ResponseEntity<List<EntregaPendienteDTO>> listarEntregasPendientesEstudiante(
+            @PathVariable Long usuarioId,
+            Authentication authentication) {
+        Long actorId = securityContextUserService.getCurrentUserId(authentication);
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, ADMIN_ROLE);
+        if (!actorEsAdmin && actorId != null && !actorId.equals(usuarioId)) {
+            throw new AccessDeniedException("No puedes consultar pendientes de otro estudiante");
+        }
+        return ResponseEntity.ok(entregaService.listarPendientesEstudiante(usuarioId));
     }
 
     @GetMapping("/profesor/{profesorId}/pendientes")
@@ -242,7 +257,7 @@ public class EntregaController {
             @PathVariable Long profesorId,
             Authentication authentication) {
         Long actorId = securityContextUserService.getCurrentUserId(authentication);
-        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, "ADMIN");
+        boolean actorEsAdmin = securityContextUserService.hasRole(authentication, ADMIN_ROLE);
         if (!actorEsAdmin && actorId != null && !actorId.equals(profesorId)) {
             throw new AccessDeniedException("No puedes consultar pendientes de otro profesor");
         }

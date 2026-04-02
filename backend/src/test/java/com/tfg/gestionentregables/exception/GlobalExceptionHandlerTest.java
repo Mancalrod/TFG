@@ -118,7 +118,6 @@ class GlobalExceptionHandlerTest {
         }
     }
 
-    @SuppressWarnings("unused")
     void dummyMethod(String param) {
         // metodo auxiliar para MethodParameter
     }
@@ -201,7 +200,7 @@ class GlobalExceptionHandlerTest {
             assertThat(response.getStatusCode().value()).isEqualTo(500);
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody().getStatus()).isEqualTo(500);
-            assertThat(response.getBody().getMessage()).contains("Algo salio mal");
+            assertThat(response.getBody().getMessage()).isEqualTo("Error interno del servidor");
         }
     }
 
@@ -218,8 +217,7 @@ class GlobalExceptionHandlerTest {
             GlobalExceptionHandler.ErrorResponse r2 =
                     new GlobalExceptionHandler.ErrorResponse(400, "msg", now);
 
-            assertThat(r1).isEqualTo(r2);
-            assertThat(r1.hashCode()).isEqualTo(r2.hashCode());
+            assertThat(r1).isEqualTo(r2).hasSameHashCodeAs(r2);
             assertThat(r1.toString()).contains("status=400");
 
             r1.setStatus(409);
@@ -242,8 +240,7 @@ class GlobalExceptionHandlerTest {
             GlobalExceptionHandler.ValidationErrorResponse r2 =
                     new GlobalExceptionHandler.ValidationErrorResponse(400, "validacion", now, errors);
 
-            assertThat(r1).isEqualTo(r2);
-            assertThat(r1.hashCode()).isEqualTo(r2.hashCode());
+            assertThat(r1).isEqualTo(r2).hasSameHashCodeAs(r2);
             assertThat(r1.toString()).contains("validacion");
 
             r1.setStatus(422);

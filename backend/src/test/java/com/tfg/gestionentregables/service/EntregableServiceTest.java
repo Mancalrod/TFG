@@ -27,7 +27,9 @@ class EntregableServiceTest {
 
     @Mock private EntregableRepository entregableRepository;
     @Mock private ActividadRepository actividadRepository;
+    @Mock private ProfesorRepository profesorRepository;
     @Mock private EntityMapper mapper;
+    @Mock private NotificacionService notificacionService;
 
     @InjectMocks
     private EntregableService entregableService;
@@ -80,13 +82,14 @@ class EntregableServiceTest {
         @DisplayName("Crea entregable correctamente")
         void crear_ok() {
             when(actividadRepository.findById(1L)).thenReturn(Optional.of(actividad));
-            when(entregableRepository.save(any(Entregable.class))).thenReturn(entregable);
+            when(entregableRepository.save(any(Entregable.class))).thenAnswer(inv -> inv.getArgument(0));
             when(mapper.toDTO(any(Entregable.class))).thenReturn(entregableDTO);
 
             EntregableDTO result = entregableService.crearEntregable(crearEntregableDTO, 1L);
 
             assertThat(result.getTitulo()).isEqualTo("Entregable 1");
             verify(entregableRepository).save(any(Entregable.class));
+            verify(notificacionService).notificarNuevoEntregable(any(Entregable.class));
         }
 
         @Test
@@ -106,12 +109,13 @@ class EntregableServiceTest {
                     .visibilidad(null).build();
 
             when(actividadRepository.findById(1L)).thenReturn(Optional.of(actividad));
-            when(entregableRepository.save(any(Entregable.class))).thenReturn(entregable);
+            when(entregableRepository.save(any(Entregable.class))).thenAnswer(inv -> inv.getArgument(0));
             when(mapper.toDTO(any(Entregable.class))).thenReturn(entregableDTO);
 
             entregableService.crearEntregable(dtoSinVis, 1L);
 
             verify(entregableRepository).save(argThat(e -> e.getVisibilidad() == Visibilidad.OCULTO));
+            verify(notificacionService, never()).notificarNuevoEntregable(any(Entregable.class));
         }
     }
 

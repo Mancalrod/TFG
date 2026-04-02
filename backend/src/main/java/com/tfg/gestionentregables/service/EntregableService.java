@@ -28,6 +28,7 @@ public class EntregableService {
     private final ActividadRepository actividadRepository;
     private final ProfesorRepository profesorRepository;
     private final EntityMapper mapper;
+    private final NotificacionService notificacionService;
 
     /**
      * SYSOP-010: Crea un nuevo entregable en una actividad.
@@ -51,14 +52,17 @@ public class EntregableService {
                 .tipoArchivoEsperado(dto.getTipoArchivoEsperado())
                 .tamanoMaximoBytes(dto.getTamanoMaximoBytes())
                 .visibilidad(dto.getVisibilidad() != null ? dto.getVisibilidad() : Visibilidad.OCULTO)
-                .permiteReenvio(dto.getPermiteReenvio() == null || dto.getPermiteReenvio())
+                .permiteReenvio(!Boolean.FALSE.equals(dto.getPermiteReenvio()))
                 .estructuraZip(dto.getEstructuraZip())
-                .validacionZipEstricta(dto.getValidacionZipEstricta() != null ? dto.getValidacionZipEstricta() : false)
+                .validacionZipEstricta(Boolean.TRUE.equals(dto.getValidacionZipEstricta()))
                 .nombreZipEsperado(dto.getNombreZipEsperado())
                 .actividad(actividad)
                 .build();
 
         entregable = entregableRepository.save(entregable);
+        if (entregable.getVisibilidad() == Visibilidad.VISIBLE) {
+            notificacionService.notificarNuevoEntregable(entregable);
+        }
         return mapper.toDTO(entregable);
     }
 

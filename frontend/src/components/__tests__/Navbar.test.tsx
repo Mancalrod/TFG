@@ -11,6 +11,9 @@ const mockLogout = vi.fn();
 const mockToggleTheme = vi.fn();
 const mockListarPorProfesor = vi.fn();
 const mockListarPorEstudiante = vi.fn();
+const mockNotiContar = vi.fn();
+const mockNotiListar = vi.fn();
+const mockNotiMarcar = vi.fn();
 
 vi.mock('../../context/AuthContext', () => ({
   useAuth: () => mockUseAuth(),
@@ -24,6 +27,14 @@ vi.mock('../../services/cursoService', () => ({
   cursoService: {
     listarPorProfesor: (...args: unknown[]) => mockListarPorProfesor(...args),
     listarPorEstudiante: (...args: unknown[]) => mockListarPorEstudiante(...args),
+  },
+}));
+
+vi.mock('../../services/notificacionService', () => ({
+  notificacionService: {
+    contarNoLeidas: (...args: unknown[]) => mockNotiContar(...args),
+    listar: (...args: unknown[]) => mockNotiListar(...args),
+    marcarComoLeida: (...args: unknown[]) => mockNotiMarcar(...args),
   },
 }));
 
@@ -51,6 +62,9 @@ describe('Navbar', () => {
     mockUseTheme.mockReturnValue({ isDark: true, toggleTheme: mockToggleTheme });
     mockListarPorProfesor.mockResolvedValue([]);
     mockListarPorEstudiante.mockResolvedValue([]);
+    mockNotiContar.mockResolvedValue(0);
+    mockNotiListar.mockResolvedValue([]);
+    mockNotiMarcar.mockResolvedValue(undefined);
   });
 
   it('muestra login cuando no hay usuario', () => {
@@ -211,5 +225,45 @@ describe('Navbar', () => {
     renderNavbarAt('/dashboard');
 
     expect(screen.getByRole('button', { name: 'Cambiar a modo oscuro' })).toBeInTheDocument();
+  });
+
+  it('muestra avatar de perfil cuando usuario tiene foto', () => {
+    mockUseAuth.mockReturnValue({
+      usuario: { id: 14, nombre: 'Avatar', fotoPerfilUrl: 'https://img.test/avatar.png' },
+      esProfesor: false,
+      esEstudiante: false,
+      esAdmin: false,
+      logout: mockLogout,
+    });
+
+    renderNavbarAt('/dashboard');
+
+    const avatar = screen.getByAltText('Foto de perfil');
+    expect(avatar).toBeInTheDocument();
+    expect(avatar).toHaveAttribute('src', expect.stringContaining('https://img.test/avatar.png'));
+  });
+
+  it('muestra panel de notificaciones con contador y lista', async () => {
+    const user = userEvent.setup();
+    mockUseAuth.mockReturnValue({
+      usuario: { id: 15, nombre: 'Noti User' },
+      esProfesor: false,
+      esEstudiante: true,
+      esAdmin: false,
+      logout: mockLogout,
+    });
+    mockNotiContar.mockResolvedValue(2);
+    mockNotiListar.mockResolvedValue([
+      { id: 101, titulo: 'Nuevo entregable', mensaje: 'Hay una nueva tarea', leida: false, tipo: 'NUEVO_ENTREGABLE', fechaCreacion: '2026-03-26T18:00:00' },
+    ]);
+
+    renderNavbarAt('/dashboard');
+
+    expect(await screen.findByText('2')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Abrir notificaciones' }));
+
+    expect(await screen.findByText('Notificaciones')).toBeInTheDocument();
+    expect(await screen.findByText('Nuevo entregable')).toBeInTheDocument();
+    expect(await screen.findByText('Hay una nueva tarea')).toBeInTheDocument();
   });
 });

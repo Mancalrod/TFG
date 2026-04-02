@@ -653,7 +653,7 @@ class EntregaServiceIntegrationTest {
             // Verificar estructura del ZIP
             Map<String, byte[]> entries = extractZipEntries(zipBytes);
             assertThat(entries).hasSize(1);
-            String expectedEntry = "Alumno Test/tarea.pdf";
+            String expectedEntry = "Alumno Test/tarea.pdf"; // Original entry
             assertThat(entries).containsKey(expectedEntry);
             assertThat(new String(entries.get(expectedEntry))).isEqualTo("contenido-tarea");
         }
@@ -693,9 +693,7 @@ class EntregaServiceIntegrationTest {
             byte[] zipBytes = entregaService.descargarTodoComoZip(1L);
 
             Map<String, byte[]> entries = extractZipEntries(zipBytes);
-            assertThat(entries).hasSize(2);
-            assertThat(entries).containsKey("Alumno Test/a1.txt");
-            assertThat(entries).containsKey("Estudiante 2/a2.txt");
+            assertThat(entries).hasSize(2).containsKeys("Alumno Test/a1.txt", "Estudiante 2/a2.txt");
         }
 
         @Test
@@ -770,9 +768,8 @@ class EntregaServiceIntegrationTest {
             byte[] zipBytes = entregaService.descargarTodoActividadComoZip(1L);
 
             Map<String, byte[]> entries = extractZipEntries(zipBytes);
-            assertThat(entries).hasSize(2);
-            assertThat(entries).containsKey("Entregable 1/Alumno Test/e1.txt");
-            assertThat(entries).containsKey("Entregable 2/Alumno Test/e2.txt");
+            assertThat(entries).hasSize(2)
+                    .containsKeys("Entregable 1/Alumno Test/e1.txt", "Entregable 2/Alumno Test/e2.txt");
         }
 
         @Test
@@ -801,8 +798,7 @@ class EntregaServiceIntegrationTest {
             byte[] zipBytes = entregaService.descargarTodoComoZip(1L);
 
             // Al menos el ZIP se genera (el archivo que falló se omite con warning)
-            assertThat(zipBytes).isNotNull();
-            assertThat(zipBytes.length).isGreaterThan(0);
+            assertThat(zipBytes).isNotNull().hasSizeGreaterThan(0);
         }
 
         @Test
@@ -870,11 +866,9 @@ class EntregaServiceIntegrationTest {
 
             List<Map<String, Object>> result = entregaService.listarContenidoZip(1L);
 
-            assertThat(result).hasSize(2);
-            assertThat(result).anyMatch(m ->
-                    "carpeta/".equals(m.get("nombre")) && Boolean.TRUE.equals(m.get("esCarpeta")));
-            assertThat(result).anyMatch(m ->
-                    "carpeta/archivo.java".equals(m.get("nombre")) && Boolean.FALSE.equals(m.get("esCarpeta")));
+            assertThat(result).hasSize(2)
+                    .anyMatch(m -> "carpeta/".equals(m.get("nombre")) && Boolean.TRUE.equals(m.get("esCarpeta")))
+                    .anyMatch(m -> "carpeta/archivo.java".equals(m.get("nombre")) && Boolean.FALSE.equals(m.get("esCarpeta")));
         }
 
         @Test

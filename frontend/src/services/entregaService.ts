@@ -1,6 +1,7 @@
 import api from './api';
 import { 
   EntregaDTO, 
+  EntregaPendienteDTO,
   EntregaResumenDTO, 
   CalificacionDTO, 
   EntregaEstadisticasDTO 
@@ -21,9 +22,10 @@ export const entregaService = {
     archivos?: File[]
   ): Promise<EntregaDTO> => {
     const formData = new FormData();
+    const comentarioNormalizado = comentario?.trim();
 
-    if (comentario && comentario.trim()) {
-      formData.append('comentario', comentario.trim());
+    if (comentarioNormalizado) {
+      formData.append('comentario', comentarioNormalizado);
     }
 
     if (archivos && archivos.length > 0) {
@@ -112,6 +114,13 @@ export const entregaService = {
   listarPendientesCalificar: async (profesorId: number): Promise<EntregaResumenDTO[]> => {
     const response = await api.get<EntregaResumenDTO[]>(
       `${BASE_URL}/profesor/${profesorId}/pendientes`
+    );
+    return response.data;
+  },
+
+  listarPendientesEstudiante: async (usuarioId: number): Promise<EntregaPendienteDTO[]> => {
+    const response = await api.get<EntregaPendienteDTO[]>(
+      `${BASE_URL}/estudiante/${usuarioId}/pendientes`
     );
     return response.data;
   },

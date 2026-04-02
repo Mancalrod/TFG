@@ -317,3 +317,75 @@
   color: var(--error-color);
   border-color: rgba(239, 68, 68, 0.3);
 }
+
+.pending-widget {
+  border: 1px solid var(--border-secondary);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  background: var(--bg-card);
+}
+
+.pending-widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.pending-widget-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.pending-widget-header span {
+  font-weight: 700;
+  color: var(--accent-blue);
+}
+
+.pending-empty {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.pending-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.pending-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border-secondary);
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.pending-item:hover {
+  border-color: var(--accent-blue);
+}
+
+.pending-item div {
+  display: grid;
+  gap: 3px;
+}
+
+.pending-item span {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.pending-deadline {
+  text-align: right;
+}
+
+.pending-deadline small {
+  color: var(--warning-color);
+  font-weight: 600;
+}

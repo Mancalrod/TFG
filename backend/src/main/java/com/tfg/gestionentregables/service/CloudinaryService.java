@@ -78,7 +78,7 @@ public class CloudinaryService {
                     "secureUrl", secureUrl != null ? secureUrl : ""
             );
         } catch (IOException e) {
-            throw new RuntimeException("Error al subir archivo a Cloudinary: " + e.getMessage(), e);
+            throw new IllegalStateException("Error al subir archivo a Cloudinary: " + e.getMessage(), e);
         }
     }
 
@@ -103,10 +103,10 @@ public class CloudinaryService {
             if (response.statusCode() == 200) {
                 return response.body();
             }
-            throw new RuntimeException("Error al descargar de Cloudinary. Status: " + response.statusCode());
+            throw new IllegalStateException("Error al descargar de Cloudinary. Status: " + response.statusCode());
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException("Error al descargar archivo de Cloudinary: " + e.getMessage(), e);
+            throw new IllegalStateException("Error al descargar archivo de Cloudinary: " + e.getMessage(), e);
         }
     }
 

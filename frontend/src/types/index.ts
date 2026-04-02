@@ -40,6 +40,7 @@ export interface UsuarioDTO {
   telefono?: string;
   correoElectronico: string;
   esAdmin: boolean;
+  fotoPerfilUrl?: string;
 }
 
 export interface CrearUsuarioDTO {
@@ -236,6 +237,36 @@ export interface EntregaEstadisticasDTO {
   promedioCalificacion?: number;
 }
 
+export interface EntregaPendienteDTO {
+  entregableId: number;
+  entregableTitulo: string;
+  actividadId: number;
+  actividadTitulo: string;
+  cursoId: number;
+  cursoTitulo: string;
+  fechaLimite?: string | null;
+  tiempoRestante: string;
+}
+
+export interface CambiarContrasenaDTO {
+  contrasenaActual: string;
+  contrasenaNueva: string;
+}
+
+export interface NotificacionDTO {
+  id: number;
+  tipo: 'NUEVO_ENTREGABLE' | 'DEADLINE_CERCANO';
+  titulo: string;
+  mensaje?: string;
+  leida: boolean;
+  cursoId?: number;
+  fechaCreacion: string;
+}
+
+export interface PreferenciaNotificacionDTO {
+  canal: 'APP' | 'EMAIL' | 'AMBOS';
+}
+
 // Auth DTOs
 export interface LoginRequestDTO {
   correoElectronico: string;
@@ -250,6 +281,7 @@ export interface AuthResponseDTO {
   nombre: string;
   correoElectronico: string;
   roles: string[];
+  fotoPerfilUrl?: string;
 }
 
 export interface RefreshTokenRequestDTO {

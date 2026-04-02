@@ -27,5 +27,6 @@ public class CrearUsuarioDTO {
     @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String contrasena;
     
+    @Builder.Default
     private Boolean esAdmin = false;
 }
