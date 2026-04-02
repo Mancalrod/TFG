@@ -27,7 +27,7 @@ public class EmailService {
     @Value("${spring.profiles.active:local}")
     private String activeProfile;
 
-    @Value("${NODE_ENV:}")
+    @Value("${NODE_ENV:development}")
     private String nodeEnv;
 
     @Value("${SENDGRID_API_KEY:}")
