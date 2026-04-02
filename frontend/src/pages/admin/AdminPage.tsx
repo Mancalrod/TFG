@@ -91,6 +91,7 @@ const UsuariosTab: React.FC<TabProps> = ({ showAlert }) => {
   const [usuarios, setUsuarios] = useState<UsuarioDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [busqueda, setBusqueda] = useState('');
+  const [importandoUsuarios, setImportandoUsuarios] = useState(false);
 
   // Modal create / edit
   const [modalOpen, setModalOpen] = useState(false);
@@ -113,6 +114,206 @@ const UsuariosTab: React.FC<TabProps> = ({ showAlert }) => {
   const getApiErrorMessage = (err: unknown, fallback: string): string => {
     const axErr = err as { response?: { data?: { message?: string } } };
     return axErr?.response?.data?.message || fallback;
+  };
+
+  const normalizarCabecera = (valor: string): string =>
+    valor
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '');
+
+  const detectarSeparador = (linea: string): string => {
+    const candidatos = [';', ',', '\t', '|'];
+    let mejor = ',';
+    let max = -1;
+    for (const candidato of candidatos) {
+      const ocurrencias = linea.split(candidato).length - 1;
+      if (ocurrencias > max) {
+        max = ocurrencias;
+        mejor = candidato;
+      }
+    }
+    return mejor;
+  };
+
+  const esValorVerdadero = (valor: unknown): boolean => {
+    if (typeof valor === 'boolean') return valor;
+    if (typeof valor === 'number') return valor === 1;
+    const texto = String(valor ?? '').trim().toLowerCase();
+    return ['1', 'true', 'si', 'sí', 'yes', 'y', 'admin', 'activo'].includes(texto);
+  };
+
+  const mapearCabeceras = (cabeceras: string[]) => {
+    const indicePorCabecera = new Map<string, number>();
+    cabeceras.forEach((c, i) => indicePorCabecera.set(normalizarCabecera(c), i));
+
+    const buscarIndice = (aliases: string[]): number => {
+      for (const alias of aliases) {
+        const idx = indicePorCabecera.get(alias);
+        if (idx !== undefined) return idx;
+      }
+      return -1;
+    };
+
+    const indices = {
+      nombre: buscarIndice(['nombre', 'name', 'usuario', 'user']),
+      correoElectronico: buscarIndice(['correo', 'correoelectronico', 'email', 'mail', 'correomail']),
+      contrasena: buscarIndice(['contrasena', 'password', 'clave', 'pass']),
+      telefono: buscarIndice(['telefono', 'phone', 'movil', 'tlf']),
+      esAdmin: buscarIndice(['esadmin', 'admin', 'administrador', 'isadmin'])
+    };
+
+    if (indices.nombre < 0 || indices.correoElectronico < 0 || indices.contrasena < 0) {
+      throw new Error('Faltan columnas obligatorias. Requeridas: nombre, correoElectronico (o correo/email) y contrasena (o password).');
+    }
+
+    return indices;
+  };
+
+  const parsearUsuariosDesdeMatriz = (filas: unknown[][]): CrearUsuarioDTO[] => {
+    if (!filas.length) {
+      throw new Error('El archivo está vacío.');
+    }
+
+    const cabeceras = (filas[0] ?? []).map((c) => String(c ?? '').trim());
+    const indices = mapearCabeceras(cabeceras);
+    const usuariosParseados: CrearUsuarioDTO[] = [];
+
+    for (let i = 1; i < filas.length; i += 1) {
+      const fila = filas[i] ?? [];
+      const nombre = String(fila[indices.nombre] ?? '').trim();
+      const correo = String(fila[indices.correoElectronico] ?? '').trim();
+      const contrasena = String(fila[indices.contrasena] ?? '').trim();
+
+      if (!nombre && !correo && !contrasena) {
+        continue;
+      }
+
+      if (!nombre || !correo || !contrasena) {
+        throw new Error(`La fila ${i + 1} no tiene todos los campos obligatorios (nombre, correo, contrasena).`);
+      }
+
+      const telefono = indices.telefono >= 0 ? String(fila[indices.telefono] ?? '').trim() : '';
+      const esAdmin = indices.esAdmin >= 0 ? esValorVerdadero(fila[indices.esAdmin]) : false;
+
+      usuariosParseados.push({
+        nombre,
+        correoElectronico: correo,
+        contrasena,
+        telefono: telefono || undefined,
+        esAdmin
+      });
+    }
+
+    if (!usuariosParseados.length) {
+      throw new Error('No se encontraron filas de usuarios para importar.');
+    }
+
+    return usuariosParseados;
+  };
+
+  const leerArchivoUsuarios = async (file: File): Promise<CrearUsuarioDTO[]> => {
+    const nombre = file.name.toLowerCase();
+
+    if (nombre.endsWith('.xlsx') || nombre.endsWith('.xls')) {
+      const xlsx = await import('xlsx');
+      const data = await file.arrayBuffer();
+      const wb = xlsx.read(data, { type: 'array' });
+      const filas: unknown[][] = [];
+      wb.SheetNames.forEach((sheetName) => {
+        const sheet = wb.Sheets[sheetName];
+        const rows = xlsx.utils.sheet_to_json<unknown[]>(sheet, { header: 1, defval: '' });
+        if (rows.length && !filas.length) {
+          filas.push(...rows);
+        }
+      });
+      return parsearUsuariosDesdeMatriz(filas);
+    }
+
+    if (nombre.endsWith('.txt') || nombre.endsWith('.csv')) {
+      const contenido = await file.text();
+      const lineas = contenido
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .filter((l) => l.length > 0);
+
+      if (!lineas.length) {
+        throw new Error('El archivo está vacío.');
+      }
+
+      const separador = detectarSeparador(lineas[0]);
+      const filas = lineas.map((linea) => linea.split(separador).map((v) => v.trim()));
+      return parsearUsuariosDesdeMatriz(filas);
+    }
+
+    throw new Error('Formato no soportado. Usa TXT, CSV, XLS o XLSX.');
+  };
+
+  const importarUsuariosDesdeArchivo = async (file: File | null) => {
+    if (!file) return;
+
+    setImportandoUsuarios(true);
+    try {
+      const usuariosDesdeArchivo = await leerArchivoUsuarios(file);
+      let creados = 0;
+      const errores: string[] = [];
+
+      for (let i = 0; i < usuariosDesdeArchivo.length; i += 1) {
+        const fila = usuariosDesdeArchivo[i];
+        try {
+          await usuarioService.crear(fila);
+          creados += 1;
+        } catch (err) {
+          const mensaje = getApiErrorMessage(err, 'Error desconocido al crear usuario');
+          errores.push(`Fila ${i + 2} (${fila.correoElectronico}): ${mensaje}`);
+        }
+      }
+
+      if (creados > 0) {
+        await cargar();
+      }
+
+      if (errores.length === 0) {
+        showAlert('success', `Importación completada: ${creados} usuario(s) creados.`);
+        return;
+      }
+
+      const detalleErrores = errores.slice(0, 3).join(' | ');
+      showAlert(
+        creados > 0 ? 'success' : 'error',
+        `Importación parcial: ${creados} creado(s), ${errores.length} con error. ${detalleErrores}`
+      );
+    } catch (err) {
+      showAlert('error', getApiErrorMessage(err, 'No se pudo procesar el archivo de usuarios'));
+    } finally {
+      setImportandoUsuarios(false);
+    }
+  };
+
+  const descargarPlantillaUsuarios = () => {
+    const cabecera = ['nombre', 'correoElectronico', 'contrasena', 'telefono', 'esAdmin'];
+    const ejemplo = ['Usuario Ejemplo', 'usuario@demo.com', 'Password123!', '600123123', 'false'];
+    const csv = `${cabecera.join(';')}\n${ejemplo.join(';')}\n`;
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const enlace = document.createElement('a');
+    enlace.href = url;
+    enlace.download = 'plantilla-usuarios.csv';
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const descargarPlantillaUsuariosXlsx = async () => {
+    const xlsx = await import('xlsx');
+    const cabecera = ['nombre', 'correoElectronico', 'contrasena', 'telefono', 'esAdmin'];
+    const ejemplo = ['Usuario Ejemplo', 'usuario@demo.com', 'Password123!', '600123123', 'false'];
+    const hoja = xlsx.utils.aoa_to_sheet([cabecera, ejemplo]);
+    const libro = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(libro, hoja, 'Usuarios');
+    xlsx.writeFile(libro, 'plantilla-usuarios.xlsx');
   };
 
   const cargar = useCallback(async () => {
@@ -260,9 +461,42 @@ const UsuariosTab: React.FC<TabProps> = ({ showAlert }) => {
             onChange={e => setBusqueda(e.target.value)}
           />
         </div>
-        <button className="admin-btn admin-btn-primary" onClick={openCrear}>
-          + Nuevo Usuario
-        </button>
+        <div className="admin-toolbar-actions">
+          <button
+            type="button"
+            className="admin-btn admin-btn-secondary"
+            onClick={descargarPlantillaUsuarios}
+            disabled={importandoUsuarios}
+          >
+            Plantilla CSV
+          </button>
+          <button
+            type="button"
+            className="admin-btn admin-btn-secondary"
+            onClick={descargarPlantillaUsuariosXlsx}
+            disabled={importandoUsuarios}
+          >
+            Plantilla XLSX
+          </button>
+          <label className="admin-btn admin-btn-secondary" htmlFor="usuarios-import-file">
+            {importandoUsuarios ? 'Importando...' : 'Importar TXT/Excel'}
+          </label>
+          <input
+            id="usuarios-import-file"
+            type="file"
+            accept=".txt,.csv,.xls,.xlsx"
+            style={{ display: 'none' }}
+            onChange={e => {
+              const file = e.target.files?.[0] || null;
+              importarUsuariosDesdeArchivo(file);
+              e.currentTarget.value = '';
+            }}
+            disabled={importandoUsuarios}
+          />
+          <button className="admin-btn admin-btn-primary" onClick={openCrear}>
+            + Nuevo Usuario
+          </button>
+        </div>
       </div>
 
       {loading ? (

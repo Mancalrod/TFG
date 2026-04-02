@@ -131,6 +131,12 @@
   margin-bottom: 1rem;
 }
 
+.admin-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .admin-search {
   flex: 1;
 }
