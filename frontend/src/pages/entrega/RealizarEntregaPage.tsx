@@ -85,6 +85,19 @@ interface BorradorMeta {
   ultimaModificacion: string;
 }
 
+const normalizarExtensionesZip = (extensiones: string[] = []): string[] => {
+  const limpias = extensiones
+    .map(ext => ext.trim().toLowerCase().replace(/^\.+/, ''))
+    .filter(ext => ext.length > 0);
+
+  // Compatibilidad: "*" implica cualquier extensión.
+  if (limpias.includes('*')) {
+    return [];
+  }
+
+  return Array.from(new Set(limpias));
+};
+
 const RealizarEntregaPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -205,6 +218,13 @@ const RealizarEntregaPage: React.FC = () => {
     setError(null);
     try {
       const data = await entregableService.obtener(entregableId);
+
+      if (data.visibilidad !== 'VISIBLE') {
+        setError('Este entregable no está disponible.');
+        setEntregable(null);
+        return;
+      }
+
       setEntregable(data);
     } catch (err) {
       console.error('Error al cargar entregable:', err);
@@ -485,7 +505,7 @@ const RealizarEntregaPage: React.FC = () => {
   // Enviar entrega
   const handleEnviar = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id || !usuario?.id) return;
+    if (!id || !usuario?.id || !entregable) return;
 
     // Validar combinaciones permitidas según el tipo de entregable
     const tieneArchivos = archivos.length > 0;
@@ -514,6 +534,31 @@ const RealizarEntregaPage: React.FC = () => {
     } else if (!tieneArchivos && tieneComentario && !permiteSoloComentario) {
       setErrorEnvio('Para este tipo de entregable debes adjuntar al menos un archivo. El comentario no sustituye al archivo.');
       return;
+    }
+
+    // Revalidación final previa al envío para cubrir borradores recuperados
+    // o cambios de configuración del entregable desde que se adjuntó el archivo.
+    if (tieneArchivos) {
+      if (requiereZipEstructurado) {
+        if (archivos.length !== 1) {
+          setErrorEnvio('Este entregable solo permite adjuntar un único archivo ZIP');
+          return;
+        }
+        if (!archivos[0].nombre.toLowerCase().endsWith('.zip')) {
+          setErrorEnvio(`Este entregable requiere un único archivo ZIP. "${archivos[0].nombre}" no es un .zip`);
+          return;
+        }
+      }
+
+      if (entregable.tamanoMaximoBytes && entregable.tamanoMaximoBytes > 0) {
+        const maxBytes = entregable.tamanoMaximoBytes;
+        const archivoExcedido = archivos.find(a => a.tamano > maxBytes);
+        if (archivoExcedido) {
+          const maxMB = (maxBytes / (1024 * 1024)).toFixed(1);
+          setErrorEnvio(`El archivo "${archivoExcedido.nombre}" excede el tamaño máximo de ${maxMB} MB`);
+          return;
+        }
+      }
     }
 
     setEnviando(true);
@@ -914,7 +959,7 @@ const EstructuraZipReadonly: React.FC<{ nodos: NodoEstructuraZip[]; nivel: numbe
     {nodos.map(nodo => {
       const esCarpeta = nodo.tipo === 'CARPETA';
       const esWild = nodo.nombre === '*';
-      const extensiones = nodo.extensiones || [];
+      const extensiones = normalizarExtensionesZip(nodo.extensiones || []);
       let extDisplay = '';
       if (!esCarpeta) {
         if (extensiones.length === 0) extDisplay = '.*';

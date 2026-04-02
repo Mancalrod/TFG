@@ -140,7 +140,19 @@ public class ActividadService {
                     throw new AccessDeniedException("No tienes acceso a este grupo");
                 }
             } else if (actorEsProfesor) {
-                verificarAccesoProfesorACurso(grupo.getCurso().getId(), actorUsuarioId, false);
+                boolean acceso = false;
+                if (grupo.getCurso() != null && grupo.getCurso().getId() != null) {
+                    acceso = profesorRepository.existsByUsuarioIdAndCursoId(actorUsuarioId, grupo.getCurso().getId());
+                }
+                if (!acceso && grupo.getCursos() != null) {
+                    acceso = grupo.getCursos().stream()
+                            .map(Curso::getId)
+                            .filter(id -> id != null)
+                            .anyMatch(cid -> profesorRepository.existsByUsuarioIdAndCursoId(actorUsuarioId, cid));
+                }
+                if (!acceso) {
+                    throw new AccessDeniedException("No tienes acceso a este grupo");
+                }
             }
         }
 
@@ -287,7 +299,7 @@ public class ActividadService {
         }
 
         boolean hayGrupoDeOtroCurso = grupos.stream()
-                .anyMatch(g -> g.getCurso() == null || !cursoId.equals(g.getCurso().getId()));
+            .anyMatch(g -> !g.estaAsignadoACurso(cursoId));
         if (hayGrupoDeOtroCurso) {
             throw new IllegalArgumentException("Todos los grupos deben pertenecer al mismo curso de la actividad");
         }

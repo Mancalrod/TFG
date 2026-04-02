@@ -34,7 +34,24 @@ public class ZipValidationService {
             List<NodoEstructura> hijos // para carpetas: nodos hijos
     ) {
         public NodoEstructura {
-            if (extensiones == null) extensiones = Collections.emptyList();
+            if (extensiones == null) {
+                extensiones = Collections.emptyList();
+            } else {
+                List<String> normalizadas = extensiones.stream()
+                        .filter(Objects::nonNull)
+                        .map(String::trim)
+                        .map(s -> s.replaceFirst("^\\.+", ""))
+                        .map(String::toLowerCase)
+                        .filter(s -> !s.isBlank())
+                        .toList();
+
+                // Compatibilidad: si llega "*" como extensión, significa cualquier extensión.
+                if (normalizadas.stream().anyMatch("*"::equals)) {
+                    extensiones = Collections.emptyList();
+                } else {
+                    extensiones = normalizadas;
+                }
+            }
             if (hijos == null) hijos = Collections.emptyList();
         }
     }

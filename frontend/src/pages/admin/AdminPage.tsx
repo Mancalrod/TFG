@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { usuarioService, cursoService } from '../../services';
-import { UsuarioDTO, CrearUsuarioDTO, CursoDTO, CrearCursoDTO, GrupoDTO } from '../../types';
+import { UsuarioDTO, CrearUsuarioDTO, CursoDTO, CrearCursoDTO, GrupoDTO, GuardarGrupoDTO } from '../../types';
 import './AdminPage.css';
 
 type Tab = 'usuarios' | 'cursos' | 'grupos';
@@ -445,7 +445,13 @@ const CursosTab: React.FC<TabProps> = ({ showAlert }) => {
   // Profesor assignment
   const [profModal, setProfModal] = useState<CursoDTO | null>(null);
   const [usuarios, setUsuarios] = useState<UsuarioDTO[]>([]);
-  const [profSeleccionado, setProfSeleccionado] = useState<number | ''>('');
+  const [profesSeleccionados, setProfesSeleccionados] = useState<number[]>([]);
+  const [profBusquedaCrear, setProfBusquedaCrear] = useState('');
+  const [profBusquedaEdicion, setProfBusquedaEdicion] = useState('');
+  const [profesSeleccionadosEdicion, setProfesSeleccionadosEdicion] = useState<number[]>([]);
+  const [profesOriginalesEdicion, setProfesOriginalesEdicion] = useState<number[]>([]);
+  const [cargandoProfesCurso, setCargandoProfesCurso] = useState(false);
+  const [guardandoProfesCurso, setGuardandoProfesCurso] = useState(false);
 
   const getApiErrorMessage = (err: unknown, fallback: string): string => {
     const axErr = err as { response?: { data?: { message?: string } } };
@@ -492,22 +498,26 @@ const CursosTab: React.FC<TabProps> = ({ showAlert }) => {
   const [crearConProf, setCrearConProf] = useState(false);
   const handleCrearCurso = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (profSeleccionado === '') {
-      showAlert('error', 'Selecciona un profesor para el curso');
+    if (profesSeleccionados.length === 0) {
+      showAlert('error', 'Selecciona al menos un profesor para el curso');
       return;
     }
     try {
-      // Check the user is a profesor and resolve the entity ID
-      const isProf = await usuarioService.esProfesor(profSeleccionado as number);
-      if (!isProf) {
-        showAlert('error', 'El usuario seleccionado no tiene rol de profesor. Asígnalo primero desde Usuarios → Roles.');
-        return;
+      const usuarioIds = [...new Set(profesSeleccionados)];
+      const [primerUsuarioId, ...restoUsuarios] = usuarioIds;
+
+      // El primer usuario crea el curso y queda asignado como profesor del curso.
+      const cursoCreado = await cursoService.crearPorUsuario(primerUsuarioId, form);
+
+      // Asignar el resto de seleccionados como profesores del curso.
+      for (const usuarioId of restoUsuarios) {
+        await cursoService.agregarProfesorPorUsuario(cursoCreado.id, usuarioId);
       }
-      const profId = await usuarioService.obtenerProfesorId(profSeleccionado as number);
-      await cursoService.crear(profId, form);
+
       showAlert('success', 'Curso creado');
       setModalOpen(false);
       setCrearConProf(false);
+      setProfesSeleccionados([]);
       cargar();
     } catch (err: unknown) {
       const axErr = err as { response?: { data?: { message?: string } } };
@@ -518,7 +528,8 @@ const CursosTab: React.FC<TabProps> = ({ showAlert }) => {
   const openCrearConProf = async () => {
     setEditando(null);
     setForm({ titulo: '', descripcion: '', codigo: '' });
-    setProfSeleccionado('');
+    setProfesSeleccionados([]);
+    setProfBusquedaCrear('');
     try {
       setUsuarios(await usuarioService.listar());
     } catch {
@@ -542,30 +553,104 @@ const CursosTab: React.FC<TabProps> = ({ showAlert }) => {
   // Professor assignment modal
   const openProfModal = async (c: CursoDTO) => {
     setProfModal(c);
-    setProfSeleccionado('');
+    setProfBusquedaEdicion('');
+    setCargandoProfesCurso(true);
     try {
-      setUsuarios(await usuarioService.listar());
+      const users = await usuarioService.listar();
+      setUsuarios(users);
+
+      const candidatos = users.filter(u => !u.esAdmin);
+      const idsProfesCurso = (await Promise.all(
+        candidatos.map(async (u) => {
+          const isProf = await usuarioService.esProfesor(u.id);
+          if (!isProf) return null;
+          const cursosProfesor = await cursoService.listarPorProfesor(u.id);
+          return cursosProfesor.some(cp => cp.id === c.id) ? u.id : null;
+        })
+      )).filter((id): id is number => id !== null);
+
+      setProfesSeleccionadosEdicion(idsProfesCurso);
+      setProfesOriginalesEdicion(idsProfesCurso);
     } catch {
       // Best effort: si falla esta carga, el usuario puede cerrar y reintentar.
+    } finally {
+      setCargandoProfesCurso(false);
     }
   };
 
-  const handleAgregarProf = async () => {
-    if (!profModal || profSeleccionado === '') return;
+  const toggleProfesorEdicion = (usuarioId: number) => {
+    setProfesSeleccionadosEdicion(prev =>
+      prev.includes(usuarioId)
+        ? prev.filter(id => id !== usuarioId)
+        : [...prev, usuarioId]
+    );
+  };
+
+  const revertirSeleccionProfesores = () => {
+    setProfesSeleccionadosEdicion(profesOriginalesEdicion);
+  };
+
+  const guardarCambiosProfesores = async () => {
+    if (!profModal) return;
+    setGuardandoProfesCurso(true);
     try {
-      const isProf = await usuarioService.esProfesor(profSeleccionado as number);
-      if (!isProf) {
-        showAlert('error', 'El usuario no tiene rol de profesor. Asígnalo primero desde la pestaña Usuarios → Roles.');
-        return;
+      const originalSet = new Set(profesOriginalesEdicion);
+      const selectedSet = new Set(profesSeleccionadosEdicion);
+
+      const aAgregar = profesSeleccionadosEdicion.filter(id => !originalSet.has(id));
+      const aQuitar = profesOriginalesEdicion.filter(id => !selectedSet.has(id));
+
+      for (const usuarioId of aAgregar) {
+        await cursoService.agregarProfesorPorUsuario(profModal.id, usuarioId);
       }
-      const profId = await usuarioService.obtenerProfesorId(profSeleccionado as number);
-      await cursoService.agregarProfesor(profModal.id, profId);
-      showAlert('success', 'Profesor asignado al curso');
+
+      for (const usuarioId of aQuitar) {
+        await cursoService.quitarProfesorPorUsuario(profModal.id, usuarioId);
+      }
+
+      setProfesOriginalesEdicion(profesSeleccionadosEdicion);
+      setProfModal({ ...profModal, numeroProfesores: profesSeleccionadosEdicion.length });
+      showAlert('success', 'Profesores del curso actualizados');
+      setProfModal(null);
       cargar();
     } catch (err: unknown) {
-      showAlert('error', getApiErrorMessage(err, 'Error al asignar profesor'));
+      showAlert('error', getApiErrorMessage(err, 'Error al guardar profesores del curso'));
+    } finally {
+      setGuardandoProfesCurso(false);
     }
   };
+
+  const toggleProfesorSeleccionado = (usuarioId: number) => {
+    setProfesSeleccionados(prev =>
+      prev.includes(usuarioId)
+        ? prev.filter(id => id !== usuarioId)
+        : [...prev, usuarioId]
+    );
+  };
+
+  const profesoresDisponiblesCrear = usuarios.filter(u => !u.esAdmin);
+  const profesoresFiltradosCrear = profesoresDisponiblesCrear.filter(u => {
+    const t = profBusquedaCrear.trim().toLowerCase();
+    if (!t) return true;
+    return u.nombre.toLowerCase().includes(t) || u.correoElectronico.toLowerCase().includes(t);
+  });
+
+  const seleccionarTodosFiltrados = () => {
+    const idsFiltrados = profesoresFiltradosCrear.map(u => u.id);
+    setProfesSeleccionados(prev => [...new Set([...prev, ...idsFiltrados])]);
+  };
+
+  const limpiarSeleccionProfes = () => {
+    setProfesSeleccionados([]);
+  };
+
+  const profesoresFiltradosEdicion = usuarios
+    .filter(u => !u.esAdmin)
+    .filter(u => {
+      const t = profBusquedaEdicion.trim().toLowerCase();
+      if (!t) return true;
+      return u.nombre.toLowerCase().includes(t) || u.correoElectronico.toLowerCase().includes(t);
+    });
 
   return (
     <div className="admin-tab-content">
@@ -637,26 +722,86 @@ const CursosTab: React.FC<TabProps> = ({ showAlert }) => {
             <form onSubmit={editando ? handleSubmit : handleCrearCurso} className="admin-form">
               <div className="admin-field">
                 <label>Título *</label>
-                <input type="text" required value={form.titulo}
+                <input className="admin-input-emphasis" type="text" required value={form.titulo}
                   onChange={e => setForm({ ...form, titulo: e.target.value })} />
               </div>
               <div className="admin-field">
                 <label>Código *</label>
-                <input type="text" required value={form.codigo}
+                <input className="admin-input-emphasis" type="text" required value={form.codigo}
                   onChange={e => setForm({ ...form, codigo: e.target.value })} />
               </div>
               <div className="admin-field">
                 <label>Descripción</label>
-                <textarea value={form.descripcion || ''}
+                <textarea className="admin-input-emphasis" value={form.descripcion || ''}
                   onChange={e => setForm({ ...form, descripcion: e.target.value })} rows={3} />
               </div>
               {crearConProf && !editando && (
                 <div className="admin-field">
-                  <label>Profesor responsable *</label>
-                  <select value={profSeleccionado} onChange={e => setProfSeleccionado(Number(e.target.value))}>
-                    <option value="">Selecciona un profesor...</option>
-                    {usuarios.map(u => <option key={u.id} value={u.id}>{u.nombre} ({u.correoElectronico})</option>)}
-                  </select>
+                  <label>Profesores del curso *</label>
+                  <div className="admin-checklist-toolbar">
+                    <input
+                      type="text"
+                      className="admin-checklist-search"
+                      value={profBusquedaCrear}
+                      onChange={e => setProfBusquedaCrear(e.target.value)}
+                      placeholder="Buscar por nombre o correo..."
+                    />
+                    <div className="admin-checklist-actions">
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-secondary"
+                        onClick={seleccionarTodosFiltrados}
+                        disabled={profesoresFiltradosCrear.length === 0}
+                      >
+                        Seleccionar visibles
+                      </button>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-secondary"
+                        onClick={limpiarSeleccionProfes}
+                        disabled={profesSeleccionados.length === 0}
+                      >
+                        Limpiar
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="admin-checklist-summary">
+                    <span className="admin-badge badge-success">
+                      {profesSeleccionados.length} seleccionado(s)
+                    </span>
+                  </div>
+
+                  <div className="admin-checklist">
+                    {profesoresDisponiblesCrear.length === 0 ? (
+                      <p className="admin-checklist-empty">No hay usuarios disponibles para asignar.</p>
+                    ) : profesoresFiltradosCrear.length === 0 ? (
+                      <p className="admin-checklist-empty">No hay coincidencias para la búsqueda actual.</p>
+                    ) : (
+                      profesoresFiltradosCrear.map(u => (
+                          <label key={u.id} className="admin-checklist-item">
+                            <span className="admin-checklist-avatar" aria-hidden="true">
+                              {u.nombre.charAt(0).toUpperCase()}
+                            </span>
+                            <span className="admin-checklist-text">
+                              <strong>{u.nombre}</strong>
+                              <small>{u.correoElectronico}</small>
+                            </span>
+                            <span className="admin-checklist-check">
+                              <input
+                                className="admin-checklist-checkbox"
+                                type="checkbox"
+                                checked={profesSeleccionados.includes(u.id)}
+                                onChange={() => toggleProfesorSeleccionado(u.id)}
+                              />
+                            </span>
+                          </label>
+                      ))
+                    )}
+                  </div>
+                  <small className="admin-checklist-help">
+                    Los usuarios seleccionados quedarán asignados como profesores del curso.
+                  </small>
                 </div>
               )}
               <div className="admin-form-actions">
@@ -683,17 +828,77 @@ const CursosTab: React.FC<TabProps> = ({ showAlert }) => {
               <p className="admin-info-text">
                 El curso tiene <strong>{profModal.numeroProfesores}</strong> profesor(es) asignado(s).
               </p>
-              <div className="admin-role-enroll">
-                <select value={profSeleccionado} onChange={e => setProfSeleccionado(Number(e.target.value))}>
-                  <option value="">Selecciona un usuario...</option>
-                  {usuarios.filter(u => !u.esAdmin).map(u =>
-                    <option key={u.id} value={u.id}>{u.nombre} ({u.correoElectronico})</option>
-                  )}
-                </select>
-                <button className="admin-btn admin-btn-primary" disabled={profSeleccionado === ''} onClick={handleAgregarProf}>
-                  Asignar profesor
-                </button>
-              </div>
+              {cargandoProfesCurso ? (
+                <div className="admin-loading">Cargando profesores del curso...</div>
+              ) : (
+                <>
+                  <div className="admin-checklist-toolbar">
+                    <input
+                      type="text"
+                      className="admin-checklist-search"
+                      value={profBusquedaEdicion}
+                      onChange={e => setProfBusquedaEdicion(e.target.value)}
+                      placeholder="Buscar por nombre o correo..."
+                    />
+                    <div className="admin-checklist-actions">
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-secondary"
+                        onClick={revertirSeleccionProfesores}
+                        disabled={guardandoProfesCurso}
+                      >
+                        Revertir
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="admin-checklist-summary">
+                    <span className="admin-badge badge-success">
+                      {profesSeleccionadosEdicion.length} seleccionado(s)
+                    </span>
+                  </div>
+
+                  <div className="admin-checklist">
+                    {profesoresFiltradosEdicion.length === 0 ? (
+                      <p className="admin-checklist-empty">No hay coincidencias para la búsqueda actual.</p>
+                    ) : (
+                      profesoresFiltradosEdicion.map(u => (
+                        <label key={u.id} className="admin-checklist-item">
+                          <span className="admin-checklist-avatar" aria-hidden="true">
+                            {u.nombre.charAt(0).toUpperCase()}
+                          </span>
+                          <span className="admin-checklist-text">
+                            <strong>{u.nombre}</strong>
+                            <small>{u.correoElectronico}</small>
+                          </span>
+                          <span className="admin-checklist-check">
+                            <input
+                              className="admin-checklist-checkbox"
+                              type="checkbox"
+                              checked={profesSeleccionadosEdicion.includes(u.id)}
+                              onChange={() => toggleProfesorEdicion(u.id)}
+                            />
+                          </span>
+                        </label>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="admin-form-actions">
+                    <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setProfModal(null)}>
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-primary"
+                      onClick={guardarCambiosProfesores}
+                      disabled={guardandoProfesCurso}
+                    >
+                      {guardandoProfesCurso ? 'Guardando...' : 'Guardar cambios'}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -707,73 +912,115 @@ const CursosTab: React.FC<TabProps> = ({ showAlert }) => {
    ════════════════════════════════════════════════════════ */
 const GruposTab: React.FC<TabProps> = ({ showAlert }) => {
   const [cursos, setCursos] = useState<CursoDTO[]>([]);
-  const [cursoSeleccionado, setCursoSeleccionado] = useState<number | ''>('');
   const [grupos, setGrupos] = useState<GrupoDTO[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [busqueda, setBusqueda] = useState('');
 
   // Create / edit grupo
   const [modalOpen, setModalOpen] = useState(false);
   const [editandoGrupo, setEditandoGrupo] = useState<GrupoDTO | null>(null);
   const [tituloGrupo, setTituloGrupo] = useState('');
+  const [cursosSeleccionadosGrupo, setCursosSeleccionadosGrupo] = useState<number[]>([]);
+  const [busquedaCursosGrupo, setBusquedaCursosGrupo] = useState('');
+  const [grupoModalAlert, setGrupoModalAlert] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Estudiantes de un grupo
   const [estModal, setEstModal] = useState<GrupoDTO | null>(null);
-  const [estudiantes, setEstudiantes] = useState<UsuarioDTO[]>([]);
   const [todosUsuarios, setTodosUsuarios] = useState<UsuarioDTO[]>([]);
-  const [estSeleccionado, setEstSeleccionado] = useState<number | ''>('');
+  const [estBusqueda, setEstBusqueda] = useState('');
+  const [estSeleccionados, setEstSeleccionados] = useState<number[]>([]);
+  const [estOriginales, setEstOriginales] = useState<number[]>([]);
+  const [guardandoEstudiantes, setGuardandoEstudiantes] = useState(false);
+  const [estModalAlert, setEstModalAlert] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const getApiErrorMessage = (err: unknown, fallback: string): string => {
     const axErr = err as { response?: { data?: { message?: string } } };
     return axErr?.response?.data?.message || fallback;
   };
 
-  useEffect(() => {
-    cursoService.listarTodos().then(setCursos).catch(() => {});
-  }, []);
-
-  const cargarGrupos = useCallback(async (cursoId: number) => {
+  const cargarTodo = useCallback(async () => {
     setLoading(true);
-    try { setGrupos(await cursoService.listarGrupos(cursoId)); }
-    catch (err: unknown) { showAlert('error', getApiErrorMessage(err, 'Error al cargar grupos')); }
+    try {
+      const [cursosData, gruposData] = await Promise.all([
+        cursoService.listarTodos(),
+        cursoService.listarTodosGrupos()
+      ]);
+      setCursos(cursosData);
+      setGrupos(gruposData);
+    } catch (err: unknown) {
+      showAlert('error', getApiErrorMessage(err, 'Error al cargar grupos'));
+    }
     finally { setLoading(false); }
   }, [showAlert]);
 
-  const handleCursoChange = (cid: number) => {
-    setCursoSeleccionado(cid);
-    cargarGrupos(cid);
+  useEffect(() => { cargarTodo(); }, [cargarTodo]);
+
+  const filtrados = grupos.filter(g => {
+    const t = busqueda.trim().toLowerCase();
+    if (!t) return true;
+    const cursosTexto = (g.cursoTitulos || (g.cursoTitulo ? [g.cursoTitulo] : [])).join(' ').toLowerCase();
+    return g.titulo.toLowerCase().includes(t) || cursosTexto.includes(t);
+  });
+
+  const cursosFiltradosGrupo = cursos.filter(c => {
+    const t = busquedaCursosGrupo.trim().toLowerCase();
+    if (!t) return true;
+    return c.titulo.toLowerCase().includes(t) || c.codigo.toLowerCase().includes(t);
+  });
+
+  const toggleCursoGrupo = (cursoId: number) => {
+    setCursosSeleccionadosGrupo(prev =>
+      prev.includes(cursoId) ? prev.filter(id => id !== cursoId) : [...prev, cursoId]
+    );
   };
 
   const openCrearGrupo = () => {
-    if (cursoSeleccionado === '') {
-      showAlert('error', 'Selecciona un curso primero');
-      return;
-    }
     setEditandoGrupo(null);
     setTituloGrupo('');
+    setCursosSeleccionadosGrupo([]);
+    setBusquedaCursosGrupo('');
+    setGrupoModalAlert(null);
     setModalOpen(true);
   };
 
   const openEditarGrupo = (g: GrupoDTO) => {
     setEditandoGrupo(g);
     setTituloGrupo(g.titulo);
+    const ids = g.cursoIds && g.cursoIds.length > 0
+      ? g.cursoIds
+      : (g.cursoId ? [g.cursoId] : []);
+    setCursosSeleccionadosGrupo(ids);
+    setBusquedaCursosGrupo('');
+    setGrupoModalAlert(null);
     setModalOpen(true);
   };
 
   const handleSubmitGrupo = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (cursosSeleccionadosGrupo.length === 0) {
+      setGrupoModalAlert({ type: 'error', text: 'Selecciona al menos un curso para el grupo' });
+      return;
+    }
+
+    const payload: GuardarGrupoDTO = {
+      titulo: tituloGrupo,
+      cursoIds: cursosSeleccionadosGrupo
+    };
+
     try {
       if (editandoGrupo) {
-        await cursoService.actualizarGrupo(editandoGrupo.id, tituloGrupo);
+        await cursoService.actualizarGrupoConCursos(editandoGrupo.id, payload);
         showAlert('success', 'Grupo actualizado');
       } else {
-        await cursoService.crearGrupo(cursoSeleccionado as number, tituloGrupo);
+        await cursoService.crearGrupoConCursos(payload);
         showAlert('success', 'Grupo creado');
       }
       setModalOpen(false);
-      if (cursoSeleccionado !== '') cargarGrupos(cursoSeleccionado as number);
+      setGrupoModalAlert(null);
+      cargarTodo();
     } catch (err: unknown) {
       const axErr = err as { response?: { data?: { message?: string } } };
-      showAlert('error', axErr?.response?.data?.message || 'Error al guardar grupo');
+      setGrupoModalAlert({ type: 'error', text: axErr?.response?.data?.message || 'Error al guardar grupo' });
     }
   };
 
@@ -782,7 +1029,7 @@ const GruposTab: React.FC<TabProps> = ({ showAlert }) => {
     try {
       await cursoService.eliminarGrupo(gid);
       showAlert('success', 'Grupo eliminado');
-      if (cursoSeleccionado !== '') cargarGrupos(cursoSeleccionado as number);
+      cargarTodo();
     } catch (err: unknown) {
       showAlert('error', getApiErrorMessage(err, 'Error al eliminar grupo'));
     }
@@ -791,67 +1038,151 @@ const GruposTab: React.FC<TabProps> = ({ showAlert }) => {
   // Estudiantes modal
   const openEstModal = async (g: GrupoDTO) => {
     setEstModal(g);
-    setEstSeleccionado('');
+    setEstBusqueda('');
+    setEstModalAlert(null);
     try {
       const [ests, users] = await Promise.all([
         usuarioService.listarEstudiantesDeGrupo(g.id),
         usuarioService.listar()
       ]);
-      setEstudiantes(ests);
       setTodosUsuarios(users);
+      const ids = ests.map(e => e.id);
+      setEstOriginales(ids);
+      setEstSeleccionados(ids);
     } catch (err: unknown) {
-      showAlert('error', getApiErrorMessage(err, 'Error al cargar estudiantes'));
+      setEstModalAlert({ type: 'error', text: getApiErrorMessage(err, 'Error al cargar estudiantes') });
     }
   };
 
-  const handleAgregarEstudiante = async () => {
-    if (!estModal || estSeleccionado === '') return;
+  const toggleEstudianteSeleccionado = (usuarioId: number) => {
+    setEstSeleccionados(prev =>
+      prev.includes(usuarioId) ? prev.filter(id => id !== usuarioId) : [...prev, usuarioId]
+    );
+  };
+
+  const revertirSeleccionEstudiantes = () => {
+    setEstSeleccionados(estOriginales);
+  };
+
+  const guardarCambiosEstudiantes = async () => {
+    if (!estModal) return;
+    setGuardandoEstudiantes(true);
     try {
-      await usuarioService.registrarComoEstudiante(estSeleccionado as number, estModal.id);
-      showAlert('success', 'Estudiante inscrito');
-      // Recargar
-      setEstudiantes(await usuarioService.listarEstudiantesDeGrupo(estModal.id));
-      setEstSeleccionado('');
-      if (cursoSeleccionado !== '') cargarGrupos(cursoSeleccionado as number);
+      const original = new Set(estOriginales);
+      const actual = new Set(estSeleccionados);
+      const aAgregar = estSeleccionados.filter(id => !original.has(id));
+      const aQuitar = estOriginales.filter(id => !actual.has(id));
+
+      for (const userId of aAgregar) {
+        await usuarioService.registrarComoEstudiante(userId, estModal.id);
+      }
+      for (const userId of aQuitar) {
+        await usuarioService.eliminarEstudianteDeGrupo(userId, estModal.id);
+      }
+
+      const recargados = await usuarioService.listarEstudiantesDeGrupo(estModal.id);
+  setEstOriginales(recargados.map(e => e.id));
+  setEstSeleccionados(recargados.map(e => e.id));
+      showAlert('success', 'Estudiantes actualizados');
+      setEstModalAlert(null);
+      setEstModal(null);
+      cargarTodo();
     } catch (err: unknown) {
       const axErr = err as { response?: { data?: { message?: string } } };
-      showAlert('error', axErr?.response?.data?.message || 'Error al inscribir estudiante');
+      setEstModalAlert({ type: 'error', text: axErr?.response?.data?.message || 'Error al actualizar estudiantes' });
+    } finally {
+      setGuardandoEstudiantes(false);
     }
   };
 
-  const handleQuitarEstudiante = async (usuarioId: number) => {
-    if (!estModal) return;
+  const extraerCorreos = (texto: string): string[] => {
+    const regex = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
+    const matches = texto.match(regex) || [];
+    return [...new Set(matches.map(m => m.trim().toLowerCase()))];
+  };
+
+  const handleImportarCorreos = async (file: File | null) => {
+    if (!file) return;
     try {
-      await usuarioService.eliminarEstudianteDeGrupo(usuarioId, estModal.id);
-      showAlert('success', 'Estudiante eliminado del grupo');
-      setEstudiantes(await usuarioService.listarEstudiantesDeGrupo(estModal.id));
-      if (cursoSeleccionado !== '') cargarGrupos(cursoSeleccionado as number);
-    } catch (err: unknown) {
-      showAlert('error', getApiErrorMessage(err, 'Error al quitar estudiante'));
+      let correos: string[] = [];
+      const nombre = file.name.toLowerCase();
+
+      if (nombre.endsWith('.txt') || nombre.endsWith('.csv')) {
+        const contenido = await file.text();
+        correos = extraerCorreos(contenido);
+      } else if (nombre.endsWith('.xlsx') || nombre.endsWith('.xls')) {
+        const xlsx = await import('xlsx');
+        const data = await file.arrayBuffer();
+        const wb = xlsx.read(data, { type: 'array' });
+        const celdas: string[] = [];
+        wb.SheetNames.forEach(sheetName => {
+          const sheet = wb.Sheets[sheetName];
+          const rows = xlsx.utils.sheet_to_json<(string | number | null)[]>(sheet, { header: 1 });
+          rows.forEach(row => row.forEach(cell => celdas.push(String(cell ?? ''))));
+        });
+        correos = extraerCorreos(celdas.join('\n'));
+      } else {
+        setEstModalAlert({ type: 'error', text: 'Formato no soportado. Usa TXT, CSV, XLS o XLSX' });
+        return;
+      }
+
+      if (correos.length === 0) {
+        setEstModalAlert({ type: 'error', text: 'No se encontraron correos válidos en el archivo' });
+        return;
+      }
+
+      const byEmail = new Map(
+        todosUsuarios
+          .filter(u => !u.esAdmin)
+          .map(u => [u.correoElectronico.toLowerCase(), u.id] as const)
+      );
+
+      const idsEncontrados = correos
+        .map(c => byEmail.get(c))
+        .filter((id): id is number => id !== undefined);
+
+      const noEncontrados = correos.filter(c => !byEmail.has(c));
+
+      if (idsEncontrados.length > 0) {
+        setEstSeleccionados(prev => [...new Set([...prev, ...idsEncontrados])]);
+      }
+
+      const resumen = `Importados ${idsEncontrados.length} alumno(s). ${noEncontrados.length} correo(s) sin coincidencia.`;
+      if (idsEncontrados.length > 0) {
+        setEstModalAlert({ type: 'success', text: resumen });
+      } else {
+        setEstModalAlert({ type: 'error', text: resumen });
+      }
+    } catch {
+      setEstModalAlert({ type: 'error', text: 'No se pudo procesar el archivo de correos' });
     }
   };
+
+  const estudiantesFiltrados = todosUsuarios
+    .filter(u => !u.esAdmin)
+    .filter(u => {
+      const t = estBusqueda.trim().toLowerCase();
+      if (!t) return true;
+      return u.nombre.toLowerCase().includes(t) || u.correoElectronico.toLowerCase().includes(t);
+    });
 
   return (
     <div className="admin-tab-content">
       <div className="admin-toolbar">
         <div className="admin-search">
-          <select value={cursoSeleccionado} onChange={e => handleCursoChange(Number(e.target.value))}
-            className="admin-curso-select">
-            <option value="">Selecciona un curso...</option>
-            {cursos.map(c => <option key={c.id} value={c.id}>{c.titulo} ({c.codigo})</option>)}
-          </select>
+          <input
+            type="text"
+            placeholder="Buscar grupo o curso asociado..."
+            value={busqueda}
+            onChange={e => setBusqueda(e.target.value)}
+          />
         </div>
-        <button className="admin-btn admin-btn-primary" onClick={openCrearGrupo}
-          disabled={cursoSeleccionado === ''}>
+        <button className="admin-btn admin-btn-primary" onClick={openCrearGrupo}>
           + Nuevo Grupo
         </button>
       </div>
 
-      {cursoSeleccionado === '' ? (
-        <div className="admin-empty-state">
-          <p>Selecciona un curso para ver sus grupos</p>
-        </div>
-      ) : loading ? (
+      {loading ? (
         <div className="admin-loading">Cargando grupos...</div>
       ) : (
         <div className="admin-table-wrap">
@@ -860,19 +1191,19 @@ const GruposTab: React.FC<TabProps> = ({ showAlert }) => {
               <tr>
                 <th>ID</th>
                 <th>Título</th>
-                <th>Curso</th>
+                <th>Cursos</th>
                 <th>Estudiantes</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {grupos.length === 0 ? (
-                <tr><td colSpan={5} className="admin-empty">No hay grupos en este curso</td></tr>
-              ) : grupos.map(g => (
+              {filtrados.length === 0 ? (
+                <tr><td colSpan={5} className="admin-empty">No hay grupos para los filtros actuales</td></tr>
+              ) : filtrados.map(g => (
                 <tr key={g.id}>
                   <td className="admin-td-id">{g.id}</td>
                   <td>{g.titulo}</td>
-                  <td>{g.cursoTitulo}</td>
+                  <td>{(g.cursoTitulos || (g.cursoTitulo ? [g.cursoTitulo] : [])).join(', ')}</td>
                   <td>{g.numeroEstudiantes}</td>
                   <td className="admin-td-actions">
                     <button className="admin-btn-sm admin-btn-edit" onClick={() => openEditarGrupo(g)} title="Editar">
@@ -901,10 +1232,53 @@ const GruposTab: React.FC<TabProps> = ({ showAlert }) => {
               <button className="admin-modal-close" onClick={() => setModalOpen(false)}>×</button>
             </div>
             <form onSubmit={handleSubmitGrupo} className="admin-form">
+              {grupoModalAlert && (
+                <div className={`admin-inline-alert admin-inline-alert-${grupoModalAlert.type}`}>
+                  {grupoModalAlert.text}
+                </div>
+              )}
               <div className="admin-field">
                 <label>Título del grupo *</label>
                 <input type="text" required value={tituloGrupo}
                   onChange={e => setTituloGrupo(e.target.value)} placeholder="Ej: Grupo A" />
+              </div>
+              <div className="admin-field">
+                <label>Cursos asociados *</label>
+                <div className="admin-checklist-toolbar">
+                  <input
+                    type="text"
+                    className="admin-checklist-search"
+                    value={busquedaCursosGrupo}
+                    onChange={e => setBusquedaCursosGrupo(e.target.value)}
+                    placeholder="Buscar curso por título o código..."
+                  />
+                </div>
+                <div className="admin-checklist-summary">
+                  <span className="admin-badge badge-success">{cursosSeleccionadosGrupo.length} seleccionado(s)</span>
+                </div>
+                <div className="admin-checklist">
+                  {cursosFiltradosGrupo.length === 0 ? (
+                    <p className="admin-checklist-empty">No hay cursos para la búsqueda actual.</p>
+                  ) : (
+                    cursosFiltradosGrupo.map(c => (
+                      <label key={c.id} className="admin-checklist-item">
+                        <span className="admin-checklist-avatar" aria-hidden="true">{c.titulo.charAt(0).toUpperCase()}</span>
+                        <span className="admin-checklist-text">
+                          <strong>{c.titulo}</strong>
+                          <small>{c.codigo}</small>
+                        </span>
+                        <span className="admin-checklist-check">
+                          <input
+                            className="admin-checklist-checkbox"
+                            type="checkbox"
+                            checked={cursosSeleccionadosGrupo.includes(c.id)}
+                            onChange={() => toggleCursoGrupo(c.id)}
+                          />
+                        </span>
+                      </label>
+                    ))
+                  )}
+                </div>
               </div>
               <div className="admin-form-actions">
                 <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setModalOpen(false)}>
@@ -928,48 +1302,86 @@ const GruposTab: React.FC<TabProps> = ({ showAlert }) => {
               <button className="admin-modal-close" onClick={() => setEstModal(null)}>×</button>
             </div>
             <div className="admin-roles-content">
-              {/* Añadir estudiante */}
-              <div className="admin-role-enroll">
-                <select value={estSeleccionado} onChange={e => setEstSeleccionado(Number(e.target.value))}>
-                  <option value="">Selecciona un usuario...</option>
-                  {todosUsuarios
-                    .filter(u => !estudiantes.some(es => es.id === u.id))
-                    .map(u => <option key={u.id} value={u.id}>{u.nombre} ({u.correoElectronico})</option>)
-                  }
-                </select>
-                <button className="admin-btn admin-btn-primary" disabled={estSeleccionado === ''} onClick={handleAgregarEstudiante}>
-                  Inscribir
-                </button>
+              {estModalAlert && (
+                <div className={`admin-inline-alert admin-inline-alert-${estModalAlert.type}`}>
+                  {estModalAlert.text}
+                </div>
+              )}
+              <div className="admin-checklist-toolbar">
+                <input
+                  type="text"
+                  className="admin-checklist-search"
+                  placeholder="Buscar por nombre o correo..."
+                  value={estBusqueda}
+                  onChange={e => setEstBusqueda(e.target.value)}
+                />
+                <div className="admin-checklist-actions">
+                  <label className="admin-btn admin-btn-secondary" htmlFor="estudiantes-import-file">
+                    Importar TXT/Excel
+                  </label>
+                  <input
+                    id="estudiantes-import-file"
+                    type="file"
+                    accept=".txt,.csv,.xls,.xlsx"
+                    style={{ display: 'none' }}
+                    onChange={e => {
+                      const file = e.target.files?.[0] || null;
+                      handleImportarCorreos(file);
+                      e.currentTarget.value = '';
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-secondary"
+                    onClick={revertirSeleccionEstudiantes}
+                    disabled={guardandoEstudiantes}
+                  >
+                    Revertir
+                  </button>
+                </div>
               </div>
 
-              {/* Lista de estudiantes */}
-              {estudiantes.length === 0 ? (
-                <p className="admin-info-text">No hay estudiantes en este grupo.</p>
-              ) : (
-                <table className="admin-table admin-table-inner">
-                  <thead>
-                    <tr>
-                      <th>Nombre</th>
-                      <th>Correo</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {estudiantes.map(est => (
-                      <tr key={est.id}>
-                        <td>{est.nombre}</td>
-                        <td className="admin-td-email">{est.correoElectronico}</td>
-                        <td>
-                          <button className="admin-btn-sm admin-btn-delete"
-                            onClick={() => handleQuitarEstudiante(est.id)} title="Quitar del grupo">
-                            ✕
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
+              <div className="admin-checklist-summary">
+                <span className="admin-badge badge-success">{estSeleccionados.length} seleccionado(s)</span>
+              </div>
+
+              <div className="admin-checklist">
+                {estudiantesFiltrados.length === 0 ? (
+                  <p className="admin-checklist-empty">No hay usuarios para la búsqueda actual.</p>
+                ) : (
+                  estudiantesFiltrados.map(u => (
+                    <label key={u.id} className="admin-checklist-item">
+                      <span className="admin-checklist-avatar" aria-hidden="true">{u.nombre.charAt(0).toUpperCase()}</span>
+                      <span className="admin-checklist-text">
+                        <strong>{u.nombre}</strong>
+                        <small>{u.correoElectronico}</small>
+                      </span>
+                      <span className="admin-checklist-check">
+                        <input
+                          className="admin-checklist-checkbox"
+                          type="checkbox"
+                          checked={estSeleccionados.includes(u.id)}
+                          onChange={() => toggleEstudianteSeleccionado(u.id)}
+                        />
+                      </span>
+                    </label>
+                  ))
+                )}
+              </div>
+
+              <div className="admin-form-actions">
+                <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setEstModal(null)}>
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-primary"
+                  onClick={guardarCambiosEstudiantes}
+                  disabled={guardandoEstudiantes}
+                >
+                  {guardandoEstudiantes ? 'Guardando...' : 'Guardar cambios'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -314,7 +314,7 @@ class UsuarioServiceTest {
         void registrar_ok() {
             when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
             when(grupoRepository.findById(1L)).thenReturn(Optional.of(grupo));
-            when(estudianteRepository.existsByUsuarioId(1L)).thenReturn(false);
+            when(estudianteRepository.existsByUsuarioIdAndGrupoId(1L, 1L)).thenReturn(false);
 
             usuarioService.registrarComoEstudiante(1L, 1L);
 
@@ -322,15 +322,30 @@ class UsuarioServiceTest {
         }
 
         @Test
-        @DisplayName("Bloquea si ya es estudiante")
+        @DisplayName("Bloquea si ya está en el mismo grupo")
         void registrar_yaEsEstudiante() {
             when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
             when(grupoRepository.findById(1L)).thenReturn(Optional.of(grupo));
-            when(estudianteRepository.existsByUsuarioId(1L)).thenReturn(true);
+            when(estudianteRepository.existsByUsuarioIdAndGrupoId(1L, 1L)).thenReturn(true);
 
             assertThatThrownBy(() -> usuarioService.registrarComoEstudiante(1L, 1L))
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("ya está registrado como estudiante");
+                    .hasMessageContaining("ya está registrado como estudiante en este grupo");
+        }
+
+        @Test
+        @DisplayName("Permite registrar en otro grupo")
+        void registrar_otroGrupo() {
+            Curso cursoBase = grupo.getCurso();
+            Grupo otroGrupo = Grupo.builder().id(2L).titulo("G2").curso(cursoBase).build();
+
+            when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+            when(grupoRepository.findById(2L)).thenReturn(Optional.of(otroGrupo));
+            when(estudianteRepository.existsByUsuarioIdAndGrupoId(1L, 2L)).thenReturn(false);
+
+            usuarioService.registrarComoEstudiante(1L, 2L);
+
+            verify(estudianteRepository).save(any(Estudiante.class));
         }
 
         @Test

@@ -820,6 +820,32 @@ class ZipValidationServiceTest {
 
             assertThat(result.valido()).isFalse();
         }
+
+        @Test
+        @DisplayName("Extensión '*' heredada se interpreta como cualquier extensión")
+        void extension_wildcard_heredada() throws IOException {
+            MockMultipartFile zip = crearZip("test.zip", "informe.pdf");
+            String estructura = """
+                [{"id":"1","nombre":"informe","tipo":"ARCHIVO","extensiones":["*"],"hijos":[]}]
+                """;
+
+            ResultadoValidacion result = zipValidationService.validarZip(zip, estructura, false, null);
+
+            assertThat(result.valido()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Normaliza extensiones con punto inicial")
+        void extension_con_punto_inicial() throws IOException {
+            MockMultipartFile zip = crearZip("test.zip", "informe.pdf");
+            String estructura = """
+                [{"id":"1","nombre":"informe","tipo":"ARCHIVO","extensiones":[".pdf"],"hijos":[]}]
+                """;
+
+            ResultadoValidacion result = zipValidationService.validarZip(zip, estructura, false, null);
+
+            assertThat(result.valido()).isTrue();
+        }
     }
 
     // =============================================

@@ -48,6 +48,14 @@ public class CursoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(curso);
     }
 
+    @PostMapping("/usuario/{usuarioId}")
+    public ResponseEntity<CursoDTO> crearCursoPorUsuario(
+            @PathVariable Long usuarioId,
+            @Valid @RequestBody CrearCursoDTO dto) {
+        CursoDTO curso = cursoService.crearCursoPorUsuario(dto, usuarioId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(curso);
+    }
+
     /**
      * SYSOP-003: Listar cursos de un profesor.
      */
@@ -91,11 +99,36 @@ public class CursoController {
         return ResponseEntity.ok(cursoService.quitarProfesor(cursoId, profesorId));
     }
 
+    @PostMapping("/{cursoId}/usuarios/{usuarioId}/profesor")
+    public ResponseEntity<CursoDTO> agregarProfesorPorUsuario(
+            @PathVariable Long cursoId,
+            @PathVariable Long usuarioId) {
+        return ResponseEntity.ok(cursoService.agregarProfesorPorUsuario(cursoId, usuarioId));
+    }
+
+    @DeleteMapping("/{cursoId}/usuarios/{usuarioId}/profesor")
+    public ResponseEntity<CursoDTO> quitarProfesorPorUsuario(
+            @PathVariable Long cursoId,
+            @PathVariable Long usuarioId) {
+        return ResponseEntity.ok(cursoService.quitarProfesorPorUsuario(cursoId, usuarioId));
+    }
+
     @PostMapping("/{cursoId}/grupos")
     public ResponseEntity<GrupoDTO> crearGrupo(
             @PathVariable Long cursoId,
             @RequestParam String titulo) {
         GrupoDTO grupo = cursoService.crearGrupo(cursoId, titulo);
+        return ResponseEntity.status(HttpStatus.CREATED).body(grupo);
+    }
+
+    @GetMapping("/grupos")
+    public ResponseEntity<List<GrupoDTO>> listarTodosGrupos() {
+        return ResponseEntity.ok(cursoService.listarTodosGrupos());
+    }
+
+    @PostMapping("/grupos")
+    public ResponseEntity<GrupoDTO> crearGrupoConCursos(@Valid @RequestBody GuardarGrupoDTO dto) {
+        GrupoDTO grupo = cursoService.crearGrupoConCursos(dto.getTitulo(), dto.getCursoIds());
         return ResponseEntity.status(HttpStatus.CREATED).body(grupo);
     }
 
@@ -109,6 +142,13 @@ public class CursoController {
             @PathVariable Long grupoId,
             @RequestParam String titulo) {
         return ResponseEntity.ok(cursoService.actualizarGrupo(grupoId, titulo));
+    }
+
+    @PutMapping("/grupos/{grupoId}/cursos")
+    public ResponseEntity<GrupoDTO> actualizarGrupoConCursos(
+            @PathVariable Long grupoId,
+            @Valid @RequestBody GuardarGrupoDTO dto) {
+        return ResponseEntity.ok(cursoService.actualizarGrupoConCursos(grupoId, dto.getTitulo(), dto.getCursoIds()));
     }
 
     @DeleteMapping("/grupos/{grupoId}")

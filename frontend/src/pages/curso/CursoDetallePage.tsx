@@ -267,7 +267,9 @@ const CursoDetallePage: React.FC = () => {
       if (act.grupoIds.length === 0) return true; // actividad para todos los grupos
       return grupoPreviewId !== null && act.grupoIds.includes(grupoPreviewId);
     })
-    : actividades;
+    : (rolVistaCurso === 'ESTUDIANTE'
+      ? actividades.filter(act => act.visibilidad === 'VISIBLE')
+      : actividades);
 
   const grupoPreview = curso?.grupos.find(g => g.id === grupoPreviewId);
 

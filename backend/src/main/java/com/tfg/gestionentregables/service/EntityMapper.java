@@ -4,7 +4,11 @@ import com.tfg.gestionentregables.dto.*;
 import com.tfg.gestionentregables.entity.*;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -56,11 +60,31 @@ public class EntityMapper {
 
     public GrupoDTO toDTO(Grupo grupo) {
         if (grupo == null) return null;
+
+                Map<Long, Curso> cursosAsociados = new LinkedHashMap<>();
+                if (grupo.getCurso() != null && grupo.getCurso().getId() != null) {
+                        cursosAsociados.put(grupo.getCurso().getId(), grupo.getCurso());
+                }
+                if (grupo.getCursos() != null) {
+                        for (Curso curso : grupo.getCursos()) {
+                                if (curso != null && curso.getId() != null) {
+                                        cursosAsociados.put(curso.getId(), curso);
+                                }
+                        }
+                }
+
+                List<Long> cursoIds = new ArrayList<>(cursosAsociados.keySet());
+                List<String> cursoTitulos = cursosAsociados.values().stream()
+                                .map(Curso::getTitulo)
+                                .toList();
+
         return GrupoDTO.builder()
                 .id(grupo.getId())
                 .titulo(grupo.getTitulo())
-                .cursoId(grupo.getCurso().getId())
-                .cursoTitulo(grupo.getCurso().getTitulo())
+                                .cursoId(grupo.getCurso() != null ? grupo.getCurso().getId() : null)
+                                .cursoTitulo(grupo.getCurso() != null ? grupo.getCurso().getTitulo() : null)
+                                .cursoIds(cursoIds)
+                                .cursoTitulos(cursoTitulos)
                 .numeroEstudiantes(grupo.getEstudiantes().size())
                 .build();
     }

@@ -34,6 +34,16 @@ public class Grupo {
     @JoinColumn(name = "curso_id", nullable = false)
     private Curso curso;
 
+    // Relación: Un grupo puede estar asociado a varios cursos.
+    @ManyToMany
+    @JoinTable(
+        name = "grupo_cursos",
+        joinColumns = @JoinColumn(name = "grupo_id"),
+        inverseJoinColumns = @JoinColumn(name = "curso_id")
+    )
+    @Builder.Default
+    private Set<Curso> cursos = new HashSet<>();
+
     // Relación: Un grupo tiene varios estudiantes
     @OneToMany(mappedBy = "grupo", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
@@ -43,4 +53,21 @@ public class Grupo {
     @ManyToMany(mappedBy = "grupos")
     @Builder.Default
     private Set<Actividad> actividades = new HashSet<>();
+
+    public boolean estaAsignadoACurso(Long cursoId) {
+        if (cursoId == null) return false;
+        if (curso != null && cursoId.equals(curso.getId())) {
+            return true;
+        }
+        return cursos.stream().anyMatch(c -> cursoId.equals(c.getId()));
+    }
+
+    public void asignarCurso(Curso cursoNuevo) {
+        if (cursoNuevo != null) {
+            cursos.add(cursoNuevo);
+            if (curso == null) {
+                curso = cursoNuevo;
+            }
+        }
+    }
 }

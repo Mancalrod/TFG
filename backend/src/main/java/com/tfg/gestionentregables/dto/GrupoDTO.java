@@ -2,6 +2,8 @@ package com.tfg.gestionentregables.dto;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -12,5 +14,7 @@ public class GrupoDTO {
     private String titulo;
     private Long cursoId;
     private String cursoTitulo;
+    private List<Long> cursoIds;
+    private List<String> cursoTitulos;
     private Integer numeroEstudiantes;
 }

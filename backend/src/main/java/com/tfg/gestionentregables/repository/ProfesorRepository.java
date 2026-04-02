@@ -21,4 +21,8 @@ public interface ProfesorRepository extends JpaRepository<Profesor, Long> {
     boolean existsByUsuarioId(Long usuarioId);
     
     boolean existsByUsuarioIdAndCursoId(Long usuarioId, Long cursoId);
+
+    long countByUsuarioIdAndCursoIsNotNull(Long usuarioId);
+
+    void deleteByUsuarioId(Long usuarioId);
 }

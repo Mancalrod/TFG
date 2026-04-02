@@ -324,8 +324,8 @@ public class UsuarioService {
         Grupo grupo = grupoRepository.findById(grupoId)
                 .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con ID: " + grupoId));
 
-        if (estudianteRepository.existsByUsuarioId(usuarioId)) {
-            throw new IllegalStateException("El usuario ya está registrado como estudiante");
+        if (estudianteRepository.existsByUsuarioIdAndGrupoId(usuarioId, grupoId)) {
+            throw new IllegalStateException("El usuario ya está registrado como estudiante en este grupo");
         }
 
         Estudiante estudiante = Estudiante.builder()
