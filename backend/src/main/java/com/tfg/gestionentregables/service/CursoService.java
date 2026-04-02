@@ -25,6 +25,7 @@ public class CursoService {
 
     private final CursoRepository cursoRepository;
     private final ProfesorRepository profesorRepository;
+    private final EstudianteRepository estudianteRepository;
     private final GrupoRepository grupoRepository;
     private final EntityMapper mapper;
 
@@ -142,6 +143,11 @@ public class CursoService {
                 .orElseThrow(() -> new EntityNotFoundException(CURSO_NOT_FOUND + cursoId));
         Profesor profesor = profesorRepository.findById(profesorId)
                 .orElseThrow(() -> new EntityNotFoundException(PROFESOR_NOT_FOUND + profesorId));
+
+        Long usuarioId = profesor.getUsuario().getId();
+        if (estudianteRepository.existsByUsuarioIdAndGrupoCursoId(usuarioId, cursoId)) {
+            throw new IllegalStateException("Un usuario no puede ser profesor y estudiante del mismo curso");
+        }
 
         curso.addProfesor(profesor);
         curso = cursoRepository.save(curso);

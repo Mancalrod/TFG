@@ -23,4 +23,6 @@ public interface EstudianteRepository extends JpaRepository<Estudiante, Long> {
     boolean existsByUsuarioIdAndGrupoId(Long usuarioId, Long grupoId);
 
     Optional<Estudiante> findFirstByUsuarioIdAndGrupoCursoId(Long usuarioId, Long cursoId);
+
+    boolean existsByUsuarioIdAndGrupoCursoId(Long usuarioId, Long cursoId);
 }

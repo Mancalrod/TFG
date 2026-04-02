@@ -24,6 +24,7 @@ class CursoServiceTest {
 
     @Mock private CursoRepository cursoRepository;
     @Mock private ProfesorRepository profesorRepository;
+    @Mock private EstudianteRepository estudianteRepository;
     @Mock private GrupoRepository grupoRepository;
     @Mock private EntityMapper mapper;
 
@@ -321,6 +322,18 @@ class CursoServiceTest {
 
             assertThatThrownBy(() -> cursoService.agregarProfesor(1L, 99L))
                     .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("Bloquea si el usuario ya es estudiante del mismo curso")
+        void agregar_bloqueaSiEsEstudianteDelMismoCurso() {
+            when(cursoRepository.findById(1L)).thenReturn(Optional.of(curso));
+            when(profesorRepository.findById(1L)).thenReturn(Optional.of(profesor));
+            when(estudianteRepository.existsByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(true);
+
+            assertThatThrownBy(() -> cursoService.agregarProfesor(1L, 1L))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("no puede ser profesor y estudiante del mismo curso");
         }
     }
 
