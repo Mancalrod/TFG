@@ -31,7 +31,7 @@ const authResponse = {
 };
 
 const Consumer = () => {
-  const { usuario, loading, isAuthenticated, esProfesor, login, logout } = useAuth();
+  const { usuario, loading, isAuthenticated, esProfesor, login, logout, actualizarFotoPerfil } = useAuth();
 
   return (
     <>
@@ -45,8 +45,14 @@ const Consumer = () => {
         login
       </button>
       <button onClick={logout}>logout</button>
+      <button onClick={() => actualizarFotoPerfil('https://img.test/nueva-foto.png')}>actualizar-foto</button>
     </>
   );
+};
+
+const ConsumerSoloHook = () => {
+  useAuth();
+  return null;
 };
 
 describe('AuthContext', () => {
@@ -65,6 +71,10 @@ describe('AuthContext', () => {
     await waitFor(() => expect(screen.getByText('ready')).toBeInTheDocument());
     expect(screen.getByText('auth-no')).toBeInTheDocument();
     expect(screen.getByText('sin-usuario')).toBeInTheDocument();
+  });
+
+  it('lanza error si useAuth se usa fuera de AuthProvider', () => {
+    expect(() => render(<ConsumerSoloHook />)).toThrow('useAuth debe usarse dentro de AuthProvider');
   });
 
   it('carga usuario con me cuando hay token valido', async () => {
@@ -130,5 +140,23 @@ describe('AuthContext', () => {
 
     expect(mockLogout).toHaveBeenCalledTimes(1);
     expect(screen.getByText('sin-usuario')).toBeInTheDocument();
+  });
+
+  it('actualiza foto de perfil cuando hay usuario autenticado', async () => {
+    const user = userEvent.setup();
+    mockLogin.mockResolvedValue(authResponse);
+
+    render(
+      <AuthProvider>
+        <Consumer />
+      </AuthProvider>
+    );
+
+    await user.click(screen.getByRole('button', { name: 'login' }));
+    await waitFor(() => expect(screen.getByText('Ana')).toBeInTheDocument());
+
+    await user.click(screen.getByRole('button', { name: 'actualizar-foto' }));
+
+    expect(screen.getByText('Ana')).toBeInTheDocument();
   });
 });

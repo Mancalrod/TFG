@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ActividadDTO, EntregableDTO, Visibilidad } from '../../types';
 import { actividadService, entregableService, entregaService } from '../../services';
@@ -52,13 +52,7 @@ const ActividadPage: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    if (id) {
-      cargarActividad(parseInt(id));
-    }
-  }, [id]);
-
-  const cargarActividad = async (actividadId: number) => {
+  const cargarActividad = useCallback(async (actividadId: number) => {
     setLoading(true);
     setError(null);
     
@@ -87,7 +81,13 @@ const ActividadPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [esProfesor, esAdmin]);
+
+  useEffect(() => {
+    if (id) {
+      cargarActividad(parseInt(id, 10));
+    }
+  }, [id, cargarActividad]);
 
   const formatDate = (dateStr: string | undefined) => {
     if (!dateStr) return 'Sin fecha';

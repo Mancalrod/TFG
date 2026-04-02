@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -139,6 +140,17 @@ class ActividadServiceTest {
                     .hasMessageContaining("Curso no encontrado");
         }
 
+                @Test
+                @DisplayName("Bloquea creación si actor no es profesor del curso")
+                void crearActividad_actorSinPermiso() {
+                    when(cursoRepository.findById(1L)).thenReturn(Optional.of(curso));
+                    when(profesorRepository.existsByUsuarioIdAndCursoId(200L, 1L)).thenReturn(false);
+
+                    assertThatThrownBy(() -> actividadService.crearActividad(crearActividadDTO, 1L, 200L, false))
+                        .isInstanceOf(AccessDeniedException.class)
+                        .hasMessageContaining("No tienes permisos sobre este curso");
+                }
+
         @Test
         @DisplayName("Usa visibilidad OCULTO por defecto si no se especifica")
         void crearActividad_visibilidadPorDefecto() {
@@ -174,6 +186,21 @@ class ActividadServiceTest {
                     a.getModoOneDrive() == ModoOneDrive.ENTREGABLES
                             && a.getCarpetaOneDrive() == null));
         }
+
+            @Test
+            @DisplayName("Falla si se asigna grupo de otro curso")
+            void crearActividad_grupoDeOtroCurso() {
+                Curso otroCurso = Curso.builder().id(99L).titulo("Otro").codigo("OTR-1").build();
+                Grupo grupoAjeno = Grupo.builder().id(2L).titulo("G-ajeno").curso(otroCurso).build();
+                crearActividadDTO.setGrupoIds(List.of(2L));
+
+                when(cursoRepository.findById(1L)).thenReturn(Optional.of(curso));
+                when(grupoRepository.findAllById(List.of(2L))).thenReturn(List.of(grupoAjeno));
+
+                assertThatThrownBy(() -> actividadService.crearActividad(crearActividadDTO, 1L))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Todos los grupos deben pertenecer al mismo curso");
+            }
     }
 
     @Nested
@@ -210,6 +237,35 @@ class ActividadServiceTest {
             List<ActividadDTO> result = actividadService.listarActividadesCurso(1L);
 
             assertThat(result).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Actor estudiante solo ve actividades visibles")
+        void listar_actorEstudianteSoloVisibles() {
+            Estudiante estudiante = Estudiante.builder().id(11L).build();
+
+            when(cursoRepository.existsById(1L)).thenReturn(true);
+            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(50L, 1L)).thenReturn(Optional.of(estudiante));
+            when(actividadRepository.findByCursoIdAndVisibilidad(1L, Visibilidad.VISIBLE)).thenReturn(List.of(actividad));
+            when(mapper.toDTO(actividad)).thenReturn(actividadDTO);
+
+            List<ActividadDTO> result = actividadService.listarActividadesCurso(1L, 50L, false, false, true);
+
+            assertThat(result).hasSize(1);
+            verify(actividadRepository).findByCursoIdAndVisibilidad(1L, Visibilidad.VISIBLE);
+            verify(actividadRepository, never()).findByCursoId(1L);
+        }
+
+        @Test
+        @DisplayName("Actor sin acceso al curso recibe AccessDenied")
+        void listar_actorSinAcceso() {
+            when(cursoRepository.existsById(1L)).thenReturn(true);
+            when(profesorRepository.existsByUsuarioIdAndCursoId(60L, 1L)).thenReturn(false);
+            when(estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(60L, 1L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> actividadService.listarActividadesCurso(1L, 60L, false, true, true))
+                    .isInstanceOf(AccessDeniedException.class)
+                    .hasMessageContaining("No tienes acceso a este curso");
         }
     }
 
@@ -303,6 +359,19 @@ class ActividadServiceTest {
 
             assertThatThrownBy(() -> actividadService.cambiarVisibilidad(99L, Visibilidad.VISIBLE))
                     .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("No envía notificación si ya era visible")
+        void cambiar_visibleAVisible_noNotifica() {
+            actividad.setVisibilidad(Visibilidad.VISIBLE);
+            when(actividadRepository.findById(1L)).thenReturn(Optional.of(actividad));
+            when(actividadRepository.save(any(Actividad.class))).thenReturn(actividad);
+            when(mapper.toDTO(any(Actividad.class))).thenReturn(actividadDTO);
+
+            actividadService.cambiarVisibilidad(1L, Visibilidad.VISIBLE);
+
+            verify(notificacionService, never()).notificarNuevaActividad(any(Actividad.class));
         }
     }
 

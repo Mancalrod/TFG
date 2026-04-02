@@ -38,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
@@ -99,6 +100,35 @@ class NotificacionServiceTest {
 
         verify(notificacionRepository, never()).save(any(Notificacion.class));
         verify(emailService).enviarCorreo(eq("ana@ull.edu.es"), any(), eq("Mensaje"));
+    }
+
+    @Test
+    @DisplayName("Canal AMBOS guarda in-app y envia email con texto sanitizado")
+    void enviarNotificacion_ambos_sanitizaTexto() {
+        when(usuarioRepository.findById(10L)).thenReturn(Optional.of(usuario));
+        when(preferenciaRepository.findByUsuarioId(10L)).thenReturn(Optional.of(
+                PreferenciaNotificacion.builder().usuario(usuario).canal(CanalNotificacion.AMBOS).build()
+        ));
+
+        notificacionService.enviarNotificacion(
+                10L,
+                TipoNotificacion.NUEVO_ENTREGABLE,
+                "  Titulo\u0000 limpio  ",
+                "\u0007Mensaje seguro\t",
+                1L,
+                2L,
+                3L,
+                4L
+        );
+
+        verify(notificacionRepository).save(argThat(n ->
+                "Titulo limpio".equals(n.getTitulo())
+                        && "Mensaje seguro".equals(n.getMensaje())
+                        && Long.valueOf(2L).equals(n.getActividadId())
+                        && Long.valueOf(3L).equals(n.getEntregableId())
+                        && Long.valueOf(4L).equals(n.getEntregaId())
+        ));
+        verify(emailService).enviarCorreo(eq("ana@ull.edu.es"), eq("[TFG Entregables] Titulo limpio"), eq("Mensaje seguro"));
     }
 
     @Test
@@ -250,6 +280,79 @@ class NotificacionServiceTest {
         }
 
         @Test
+        @DisplayName("Notifica nueva actividad usando grupos del curso cuando actividad no trae grupos")
+        void notificarNuevaActividad_usaGruposDelCurso() {
+                Usuario usuarioEst = Usuario.builder().id(25L).correoElectronico("est4@ull.edu.es").build();
+                Estudiante estudiante = Estudiante.builder().id(35L).usuario(usuarioEst).build();
+                Grupo grupoCurso = Grupo.builder().id(45L).estudiantes(Set.of(estudiante)).build();
+                Curso curso = Curso.builder().id(55L).titulo("Curso X").grupos(Set.of(grupoCurso)).build();
+                Actividad actividad = Actividad.builder()
+                                .id(65L)
+                                .titulo("Act X")
+                                .visibilidad(Visibilidad.VISIBLE)
+                                .fechaLimite(LocalDateTime.now().plusDays(2))
+                                .curso(curso)
+                                .grupos(Set.of())
+                                .build();
+
+                NotificacionService spyService = spy(notificacionService);
+                doNothing().when(spyService)
+                                .enviarNotificacion(anyLong(), any(TipoNotificacion.class), any(), any(), anyLong(), any(), any(), any());
+
+                spyService.notificarNuevaActividad(actividad);
+
+                verify(spyService).enviarNotificacion(
+                                eq(25L), eq(TipoNotificacion.NUEVA_ACTIVIDAD), any(), any(), eq(55L), eq(65L), isNull(), isNull());
+        }
+
+        @Test
+        @DisplayName("No notifica nueva actividad si está oculta")
+        void notificarNuevaActividad_oculta() {
+                Actividad actividad = Actividad.builder().id(66L).visibilidad(Visibilidad.OCULTO).build();
+
+                NotificacionService spyService = spy(notificacionService);
+                spyService.notificarNuevaActividad(actividad);
+
+                verify(spyService, never()).enviarNotificacion(anyLong(), any(TipoNotificacion.class), any(), any(), anyLong(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("No notifica nota publicada cuando no es visible")
+        void notificarEntregaEvaluada_notaNoVisible() {
+                Estudiante estudiante = Estudiante.builder().id(44L).usuario(usuario).build();
+                Entrega entrega = Entrega.builder().id(90L).estudiante(estudiante).calificacion(9.5).build();
+
+                NotificacionService spyService = spy(notificacionService);
+                spyService.notificarEntregaEvaluada(entrega, false);
+
+                verify(spyService, never()).enviarNotificacion(anyLong(), any(TipoNotificacion.class), any(), any(), anyLong(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("Notifica nota publicada cuando es visible y calificada")
+        void notificarEntregaEvaluada_ok() {
+                Estudiante estudiante = Estudiante.builder().id(46L).usuario(usuario).build();
+                Curso curso = Curso.builder().id(58L).titulo("Curso Y").build();
+                Actividad actividad = Actividad.builder().id(68L).titulo("Act Y").curso(curso).build();
+                Entregable entregable = Entregable.builder().id(78L).titulo("Ent Y").actividad(actividad).build();
+                Entrega entrega = Entrega.builder()
+                                .id(88L)
+                                .estudiante(estudiante)
+                                .entregable(entregable)
+                                .calificacion(8.75)
+                                .build();
+
+                NotificacionService spyService = spy(notificacionService);
+                doNothing().when(spyService)
+                                .enviarNotificacion(anyLong(), any(TipoNotificacion.class), any(), any(), anyLong(), any(), any(), any());
+
+                spyService.notificarEntregaEvaluada(entrega, true);
+
+                verify(spyService).enviarNotificacion(
+                                eq(10L), eq(TipoNotificacion.NOTA_PUBLICADA), any(), any(), eq(58L), eq(68L), eq(78L), eq(88L));
+        }
+
+        @Test
         @DisplayName("Cron de deadlines notifica solo si no entrego y no estaba notificado")
         void notificarDeadlinesCercanos_notificaPendientes() {
                 Usuario usuarioEst = Usuario.builder().id(21L).correoElectronico("est2@ull.edu.es").build();
@@ -307,5 +410,35 @@ class NotificacionServiceTest {
 
                 verify(spyService, never())
                         .enviarNotificacion(eq(22L), eq(TipoNotificacion.DEADLINE_CERCANO), any(), any(), eq(52L), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("Cron de deadlines no notifica si ya fue notificado en las últimas 24h")
+        void notificarDeadlinesCercanos_noNotificaSiYaNotificado() {
+                Usuario usuarioEst = Usuario.builder().id(23L).correoElectronico("est5@ull.edu.es").build();
+                Estudiante estudiante = Estudiante.builder().id(33L).usuario(usuarioEst).build();
+                Grupo grupo = Grupo.builder().id(43L).estudiantes(Set.of(estudiante)).build();
+                Curso curso = Curso.builder().id(53L).titulo("Curso D").build();
+                Actividad actividad = Actividad.builder().id(63L).titulo("Act D").curso(curso).grupos(Set.of(grupo)).build();
+                Entregable entregable = Entregable.builder()
+                                .id(73L)
+                                .titulo("Entrega 4")
+                                .visibilidad(Visibilidad.VISIBLE)
+                                .fechaLimite(LocalDateTime.now().plusHours(4))
+                                .actividad(actividad)
+                                .entregas(Set.of())
+                                .build();
+
+                when(entregableRepository.findAll()).thenReturn(List.of(entregable));
+                when(notificacionRepository.existsByUsuarioIdAndTipoAndCursoIdAndTituloAndFechaCreacionAfter(
+                                eq(23L), eq(TipoNotificacion.DEADLINE_CERCANO), eq(53L), any(), any(LocalDateTime.class)
+                )).thenReturn(true);
+
+                NotificacionService spyService = spy(notificacionService);
+
+                spyService.notificarDeadlinesCercanos();
+
+                verify(spyService, never())
+                                .enviarNotificacion(eq(23L), eq(TipoNotificacion.DEADLINE_CERCANO), any(), any(), eq(53L), any(), any(), any());
         }
 }
