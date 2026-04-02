@@ -324,13 +324,12 @@ public class UsuarioService {
         Grupo grupo = grupoRepository.findById(grupoId)
                 .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con ID: " + grupoId));
 
-        Long cursoId = grupo.getCurso().getId();
-        if (profesorRepository.existsByUsuarioIdAndCursoId(usuarioId, cursoId)) {
-            throw new IllegalStateException("Un usuario no puede ser profesor y estudiante del mismo curso");
-        }
+                Long cursoId = grupo.getCurso().getId();
+        if (estudianteRepository.existsByUsuarioIdAndGrupoId(usuarioId, grupoId)) {
+            throw new IllegalStateException("El usuario ya está registrado como estudiante en este grupo");
 
-        if (estudianteRepository.existsByUsuarioId(usuarioId)) {
-            throw new IllegalStateException("El usuario ya está registrado como estudiante");
+        } else if (profesorRepository.existsByUsuarioIdAndCursoId(usuarioId, cursoId)) {
+            throw new IllegalStateException("Un usuario no puede ser profesor y estudiante del mismo curso");
         }
 
         Estudiante estudiante = Estudiante.builder()

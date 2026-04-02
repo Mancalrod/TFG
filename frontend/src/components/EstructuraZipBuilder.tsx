@@ -14,6 +14,19 @@ interface EstructuraZipBuilderProps {
 
 const generarId = () => `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 
+const normalizarExtensiones = (extensiones: string[] = []): string[] => {
+  const limpias = extensiones
+    .map(ext => ext.trim().toLowerCase().replace(/^\.+/, ''))
+    .filter(ext => ext.length > 0);
+
+  // Compatibilidad: "*" implica cualquier extensión.
+  if (limpias.includes('*')) {
+    return [];
+  }
+
+  return Array.from(new Set(limpias));
+};
+
 const EXTENSIONES_COMUNES = [
   'java', 'py', 'js', 'ts', 'jsx', 'tsx', 'c', 'cpp', 'h', 'cs',
   'html', 'css', 'scss', 'json', 'xml', 'yaml', 'yml',
@@ -391,7 +404,7 @@ const NodoItem: React.FC<NodoItemProps> = ({
       );
     }
 
-    const extensiones = nodo.extensiones || [];
+    const extensiones = normalizarExtensiones(nodo.extensiones || []);
     let extDisplay: string;
     if (extensiones.length === 0) extDisplay = '.*';
     else if (extensiones.length === 1) extDisplay = `.${extensiones[0]}`;

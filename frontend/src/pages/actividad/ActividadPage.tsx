@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ActividadDTO, EntregableDTO } from '../../types';
+import { ActividadDTO, EntregableDTO, Visibilidad } from '../../types';
 import { actividadService, entregableService, entregaService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
 import './ActividadPage.css';
@@ -10,10 +10,29 @@ const ActividadPage: React.FC = () => {
   const [actividad, setActividad] = useState<ActividadDTO | null>(null);
   const [entregables, setEntregables] = useState<EntregableDTO[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actualizandoVisibilidad, setActualizandoVisibilidad] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { esProfesor, esAdmin } = useAuth();
   const navigate = useNavigate();
   const puedeEditarContenido = esProfesor && !esAdmin;
+
+  const alternarVisibilidadActividad = async () => {
+    if (!id || !actividad || !puedeEditarContenido || actualizandoVisibilidad) return;
+
+    const siguienteVisibilidad = actividad.visibilidad === Visibilidad.VISIBLE
+      ? Visibilidad.OCULTO
+      : Visibilidad.VISIBLE;
+    setActualizandoVisibilidad(true);
+    try {
+      const actualizada = await actividadService.cambiarVisibilidad(actividad.id, siguienteVisibilidad);
+      setActividad(actualizada);
+    } catch (err) {
+      console.error('Error al cambiar visibilidad de actividad:', err);
+      setError('No se pudo cambiar la visibilidad de la actividad');
+    } finally {
+      setActualizandoVisibilidad(false);
+    }
+  };
 
   const handleDescargarTodoActividad = async () => {
     if (!id) return;
@@ -48,8 +67,20 @@ const ActividadPage: React.FC = () => {
         actividadService.obtenerConEntregables(actividadId),
         entregableService.listarPorActividad(actividadId)
       ]);
+
+      if (!esProfesor && !esAdmin && actividadData.visibilidad !== 'VISIBLE') {
+        setError('Esta actividad no está disponible.');
+        setActividad(null);
+        setEntregables([]);
+        return;
+      }
+
+      const entregablesFiltrados = (!esProfesor && !esAdmin)
+        ? entregablesData.filter(e => e.visibilidad === 'VISIBLE')
+        : entregablesData;
+
       setActividad(actividadData);
-      setEntregables(entregablesData);
+      setEntregables(entregablesFiltrados);
     } catch (err) {
       setError('Error al cargar la actividad');
       console.error(err);
@@ -69,6 +100,16 @@ const ActividadPage: React.FC = () => {
     });
   };
 
+  const ahora = new Date();
+  const fechaInicioActividad = actividad?.fechaInicio ? new Date(actividad.fechaInicio) : null;
+  const actividadNoIniciada = !!fechaInicioActividad && ahora < fechaInicioActividad;
+  const estadoActividadTexto = actividadNoIniciada
+    ? 'No iniciada'
+    : (actividad?.enPlazo ? 'En plazo' : 'Fuera de plazo');
+  const estadoActividadClase = actividadNoIniciada
+    ? 'no-iniciada'
+    : (actividad?.enPlazo ? 'en-plazo' : 'vencido');
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -82,8 +123,8 @@ const ActividadPage: React.FC = () => {
     return (
       <div className="error-container">
         <p className="error-message">{error || 'Actividad no encontrada'}</p>
-        <button onClick={() => navigate('/cursos')} className="btn-secondary">
-          Volver a Cursos
+        <button onClick={() => navigate('/dashboard')} className="btn-secondary">
+          Volver al Dashboard
         </button>
       </div>
     );
@@ -92,7 +133,7 @@ const ActividadPage: React.FC = () => {
   return (
     <div className="actividad-page">
       <div className="actividad-header">
-        <button onClick={() => navigate(-1)} className="btn-back">
+        <button onClick={() => navigate(`/cursos/${actividad.cursoId}`)} className="btn-back">
           &larr; Volver
         </button>
         
@@ -103,14 +144,25 @@ const ActividadPage: React.FC = () => {
             <span className={`tipo-badge ${actividad.tipoActividad.toLowerCase()}`}>
               {actividad.tipoActividad}
             </span>
-            <span className={`estado-badge ${actividad.enPlazo ? 'en-plazo' : 'vencido'}`}>
-              {actividad.enPlazo ? 'En plazo' : 'Fuera de plazo'}
+            <span className={`estado-badge ${estadoActividadClase}`}>
+              {estadoActividadTexto}
             </span>
           </div>
         </div>
 
         {esProfesor && (
           <div className="actividad-actions">
+            {puedeEditarContenido && (
+              <button
+                className="btn-secondary"
+                onClick={alternarVisibilidadActividad}
+                disabled={actualizandoVisibilidad}
+              >
+                {actualizandoVisibilidad
+                  ? 'Actualizando...'
+                  : (actividad.visibilidad === 'VISIBLE' ? 'Ocultar actividad' : 'Hacer visible actividad')}
+              </button>
+            )}
             {puedeEditarContenido && (
               <button 
                 className="btn-secondary"

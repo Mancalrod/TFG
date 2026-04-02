@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { EntregableDTO, EntregaDTO, EntregaResumenDTO, EntregaEstadisticasDTO, NodoEstructuraZip } from '../../types';
+import { EntregableDTO, EntregaDTO, EntregaResumenDTO, EntregaEstadisticasDTO, NodoEstructuraZip, Visibilidad } from '../../types';
 import { entregableService, entregaService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
 import './EntregablePage.css';
@@ -29,15 +29,39 @@ const EntregablePage: React.FC = () => {
   const [misEntregas, setMisEntregas] = useState<EntregaDTO[]>([]);
   const [estadisticas, setEstadisticas] = useState<EntregaEstadisticasDTO | null>(null);
   const [loading, setLoading] = useState(true);
+  const [actualizandoVisibilidad, setActualizandoVisibilidad] = useState(false);
   const [actualizandoVisibilidadNotas, setActualizandoVisibilidadNotas] = useState(false);
   const { esProfesor, esAdmin, usuario } = useAuth();
   const navigate = useNavigate();
   const puedeEditarEntregable = esProfesor && !esAdmin;
 
+  const alternarVisibilidadEntregable = async () => {
+    if (!id || !entregable || !puedeEditarEntregable || actualizandoVisibilidad) return;
+
+    const siguienteVisibilidad = entregable.visibilidad === Visibilidad.VISIBLE
+      ? Visibilidad.OCULTO
+      : Visibilidad.VISIBLE;
+    setActualizandoVisibilidad(true);
+    try {
+      const actualizado = await entregableService.cambiarVisibilidad(entregable.id, siguienteVisibilidad);
+      setEntregable(actualizado);
+    } catch (err) {
+      console.error('Error al cambiar visibilidad del entregable:', err);
+    } finally {
+      setActualizandoVisibilidad(false);
+    }
+  };
+
   const cargarEntregable = useCallback(async (entregableId: number) => {
     setLoading(true);
     try {
       const entregableData = await entregableService.obtener(entregableId);
+
+      if (!esProfesor && !esAdmin && entregableData.visibilidad !== 'VISIBLE') {
+        setEntregable(null);
+        return;
+      }
+
       setEntregable(entregableData);
 
       if (esProfesor) {
@@ -57,7 +81,7 @@ const EntregablePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [esProfesor, usuario?.id]);
+  }, [esProfesor, esAdmin, usuario?.id]);
 
   useEffect(() => {
     if (id) {
@@ -190,7 +214,7 @@ const EntregablePage: React.FC = () => {
   return (
     <div className="entregable-page">
       <div className="entregable-header">
-        <button onClick={() => navigate(-1)} className="btn-back">
+        <button onClick={() => navigate(`/actividades/${entregable.actividadId}`)} className="btn-back">
           &larr; Volver
         </button>
         
@@ -213,12 +237,23 @@ const EntregablePage: React.FC = () => {
         </div>
 
         {puedeEditarEntregable && (
-          <button 
-            className="btn-secondary"
-            onClick={() => navigate(`/entregables/${id}/editar`)}
-          >
-            Editar
-          </button>
+          <>
+            <button
+              className="btn-secondary"
+              onClick={alternarVisibilidadEntregable}
+              disabled={actualizandoVisibilidad}
+            >
+              {actualizandoVisibilidad
+                ? 'Actualizando...'
+                : (entregable.visibilidad === 'VISIBLE' ? 'Ocultar entregable' : 'Hacer visible entregable')}
+            </button>
+            <button
+              className="btn-secondary"
+              onClick={() => navigate(`/entregables/${id}/editar`)}
+            >
+              Editar
+            </button>
+          </>
         )}
 
         {!esProfesor && entregable.enPlazo && (

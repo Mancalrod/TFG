@@ -10,7 +10,7 @@ const CursosPage: React.FC = () => {
   const [actividadesPorCurso, setActividadesPorCurso] = useState<Record<number, ActividadDTO[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { usuario, esProfesor } = useAuth();
+  const { usuario, esProfesor, esAdmin } = useAuth();
   const navigate = useNavigate();
 
   const getApiErrorMessage = (err: unknown, fallback: string): string => {
@@ -33,7 +33,9 @@ const CursosPage: React.FC = () => {
       const actividadesMap: Record<number, ActividadDTO[]> = {};
       for (const curso of data) {
         const actividades = await actividadService.listarPorCurso(curso.id);
-        actividadesMap[curso.id] = actividades;
+        actividadesMap[curso.id] = (!esProfesor && !esAdmin)
+          ? actividades.filter(a => a.visibilidad === 'VISIBLE')
+          : actividades;
       }
       setActividadesPorCurso(actividadesMap);
     } catch (err: unknown) {
@@ -42,7 +44,7 @@ const CursosPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [usuario]);
+  }, [usuario, esProfesor, esAdmin]);
 
   useEffect(() => {
     cargarCursos();

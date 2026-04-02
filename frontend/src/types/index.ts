@@ -56,7 +56,14 @@ export interface GrupoDTO {
   titulo: string;
   cursoId?: number;
   cursoTitulo?: string;
+  cursoIds?: number[];
+  cursoTitulos?: string[];
   numeroEstudiantes: number;
+}
+
+export interface GuardarGrupoDTO {
+  titulo: string;
+  cursoIds: number[];
 }
 
 export interface CursoDTO {

@@ -76,8 +76,16 @@ const ActividadesPorCursoPage: React.FC = () => {
 
     try {
       const actividades = await actividadService.listarPorCurso(cursoId);
+      const actividadesFiltradasPorVisibilidad = (!esProfesor && !esAdmin)
+        ? actividades.filter(a => a.visibilidad === 'VISIBLE')
+        : actividades;
       setCursosData(prev =>
-        prev.map(c => c.curso.id === cursoId ? { ...c, actividades, loading: false, loaded: true } : c)
+        prev.map(c => c.curso.id === cursoId ? {
+          ...c,
+          actividades: actividadesFiltradasPorVisibilidad,
+          loading: false,
+          loaded: true,
+        } : c)
       );
     } catch (err: unknown) {
       setCursosData(prev =>

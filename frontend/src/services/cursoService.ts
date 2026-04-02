@@ -1,5 +1,5 @@
 import api from './api';
-import { CursoDTO, CrearCursoDTO, GrupoDTO } from '../types';
+import { CursoDTO, CrearCursoDTO, GrupoDTO, GuardarGrupoDTO } from '../types';
 
 const BASE_URL = '/api/cursos';
 
@@ -21,6 +21,11 @@ export const cursoService = {
 
   crear: async (profesorId: number, curso: CrearCursoDTO): Promise<CursoDTO> => {
     const response = await api.post<CursoDTO>(`${BASE_URL}/profesor/${profesorId}`, curso);
+    return response.data;
+  },
+
+  crearPorUsuario: async (usuarioId: number, curso: CrearCursoDTO): Promise<CursoDTO> => {
+    const response = await api.post<CursoDTO>(`${BASE_URL}/usuario/${usuarioId}`, curso);
     return response.data;
   },
 
@@ -53,6 +58,16 @@ export const cursoService = {
     return response.data;
   },
 
+  agregarProfesorPorUsuario: async (cursoId: number, usuarioId: number): Promise<CursoDTO> => {
+    const response = await api.post<CursoDTO>(`${BASE_URL}/${cursoId}/usuarios/${usuarioId}/profesor`);
+    return response.data;
+  },
+
+  quitarProfesorPorUsuario: async (cursoId: number, usuarioId: number): Promise<CursoDTO> => {
+    const response = await api.delete<CursoDTO>(`${BASE_URL}/${cursoId}/usuarios/${usuarioId}/profesor`);
+    return response.data;
+  },
+
   crearGrupo: async (cursoId: number, titulo: string): Promise<GrupoDTO> => {
     const response = await api.post<GrupoDTO>(`${BASE_URL}/${cursoId}/grupos`, null, {
       params: { titulo }
@@ -65,10 +80,25 @@ export const cursoService = {
     return response.data;
   },
 
+  listarTodosGrupos: async (): Promise<GrupoDTO[]> => {
+    const response = await api.get<GrupoDTO[]>(`${BASE_URL}/grupos`);
+    return response.data;
+  },
+
   actualizarGrupo: async (grupoId: number, titulo: string): Promise<GrupoDTO> => {
     const response = await api.put<GrupoDTO>(`${BASE_URL}/grupos/${grupoId}`, null, {
       params: { titulo }
     });
+    return response.data;
+  },
+
+  crearGrupoConCursos: async (payload: GuardarGrupoDTO): Promise<GrupoDTO> => {
+    const response = await api.post<GrupoDTO>(`${BASE_URL}/grupos`, payload);
+    return response.data;
+  },
+
+  actualizarGrupoConCursos: async (grupoId: number, payload: GuardarGrupoDTO): Promise<GrupoDTO> => {
+    const response = await api.put<GrupoDTO>(`${BASE_URL}/grupos/${grupoId}/cursos`, payload);
     return response.data;
   },
 
