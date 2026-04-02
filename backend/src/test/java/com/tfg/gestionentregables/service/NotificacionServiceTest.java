@@ -152,7 +152,9 @@ class NotificacionServiceTest {
                         && Long.valueOf(3L).equals(n.getEntregableId())
                         && Long.valueOf(4L).equals(n.getEntregaId())
         ));
-        verify(emailService).enviarCorreo(eq("ana@ull.edu.es"), eq("[TFG Entregables] Titulo limpio"), eq("Mensaje seguro"));
+        verify(emailService).enviarCorreo(eq("ana@ull.edu.es"), eq("[TFG Entregables] Titulo limpio"), argThat(m ->
+                m.startsWith("Mensaje seguro") && m.contains("/entregas/4")
+        ));
     }
 
     @Test
