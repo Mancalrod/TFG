@@ -112,7 +112,7 @@ class GlobalExceptionHandlerTest {
             assertThat(response.getStatusCode().value()).isEqualTo(400);
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody().getStatus()).isEqualTo(400);
-            assertThat(response.getBody().getMessage()).contains("Error de valid");
+            assertThat(response.getBody().getMessage()).isEqualTo("El titulo es obligatorio");
             assertThat(response.getBody().getErrors()).containsEntry("titulo", "El titulo es obligatorio");
             assertThat(response.getBody().getErrors()).containsEntry("email", "El email no es valido");
         }

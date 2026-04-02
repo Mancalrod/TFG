@@ -39,6 +39,13 @@ export const entregableService = {
     return response.data;
   },
 
+  cambiarVisibilidadNotas: async (id: number, visible: boolean): Promise<EntregableDTO> => {
+    const response = await api.patch<EntregableDTO>(`${BASE_URL}/${id}/notas-visibles`, null, {
+      params: { visible }
+    });
+    return response.data;
+  },
+
   eliminar: async (id: number): Promise<void> => {
     await api.delete(`${BASE_URL}/${id}`);
   },

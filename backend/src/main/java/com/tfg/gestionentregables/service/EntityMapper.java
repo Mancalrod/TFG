@@ -38,6 +38,9 @@ public class EntityMapper {
                 .mensaje(notificacion.getMensaje())
                 .leida(notificacion.getLeida())
                 .cursoId(notificacion.getCursoId())
+                .actividadId(notificacion.getActividadId())
+                .entregableId(notificacion.getEntregableId())
+                .entregaId(notificacion.getEntregaId())
                 .fechaCreacion(notificacion.getFechaCreacion())
                 .build();
     }
@@ -148,6 +151,7 @@ public class EntityMapper {
                 .estructuraZip(entregable.getEstructuraZip())
                 .validacionZipEstricta(entregable.getValidacionZipEstricta())
                 .nombreZipEsperado(entregable.getNombreZipEsperado())
+                .notasVisiblesEstudiante(entregable.getNotasVisiblesEstudiante())
                 .actividadId(entregable.getActividad().getId())
                 .actividadTitulo(entregable.getActividad().getTitulo())
                 .numeroEntregas((long) entregable.getEntregas().size())
@@ -169,6 +173,8 @@ public class EntityMapper {
                 .esVersionActiva(entrega.getEsVersionActiva())
                 .entregableId(entrega.getEntregable().getId())
                 .entregableTitulo(entrega.getEntregable().getTitulo())
+                .notaMaximaEntregable(entrega.getEntregable().getNotaMaxima())
+                .notasVisiblesEstudiante(entrega.getEntregable().getNotasVisiblesEstudiante())
                 .estudianteId(entrega.getEstudiante().getId())
                 .estudianteNombre(entrega.getEstudiante().getUsuario().getNombre())
                 .fueATiempo(entrega.fueATiempo())

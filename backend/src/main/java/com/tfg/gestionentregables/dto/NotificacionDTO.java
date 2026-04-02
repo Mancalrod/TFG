@@ -22,5 +22,8 @@ public class NotificacionDTO {
     private String mensaje;
     private Boolean leida;
     private Long cursoId;
+    private Long actividadId;
+    private Long entregableId;
+    private Long entregaId;
     private LocalDateTime fechaCreacion;
 }

@@ -39,6 +39,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -239,11 +240,13 @@ class NotificacionServiceTest {
                                 .build();
 
                 NotificacionService spyService = spy(notificacionService);
-                doNothing().when(spyService).enviarNotificacion(anyLong(), any(TipoNotificacion.class), any(), any(), anyLong());
+                doNothing().when(spyService)
+                        .enviarNotificacion(anyLong(), any(TipoNotificacion.class), any(), any(), anyLong(), any(), any(), any());
 
                 spyService.notificarNuevoEntregable(entregable);
 
-                verify(spyService).enviarNotificacion(eq(20L), eq(TipoNotificacion.NUEVO_ENTREGABLE), any(), any(), eq(50L));
+                verify(spyService).enviarNotificacion(
+                        eq(20L), eq(TipoNotificacion.NUEVO_ENTREGABLE), any(), any(), eq(50L), eq(60L), eq(70L), isNull());
         }
 
         @Test
@@ -269,11 +272,13 @@ class NotificacionServiceTest {
                 )).thenReturn(false);
 
                 NotificacionService spyService = spy(notificacionService);
-                doNothing().when(spyService).enviarNotificacion(anyLong(), any(TipoNotificacion.class), any(), any(), anyLong());
+                doNothing().when(spyService)
+                        .enviarNotificacion(anyLong(), any(TipoNotificacion.class), any(), any(), anyLong(), any(), any(), any());
 
                 spyService.notificarDeadlinesCercanos();
 
-                verify(spyService).enviarNotificacion(eq(21L), eq(TipoNotificacion.DEADLINE_CERCANO), any(), any(), eq(51L));
+                verify(spyService).enviarNotificacion(
+                        eq(21L), eq(TipoNotificacion.DEADLINE_CERCANO), any(), any(), eq(51L), eq(61L), eq(71L), isNull());
         }
 
         @Test
@@ -301,6 +306,6 @@ class NotificacionServiceTest {
                 spyService.notificarDeadlinesCercanos();
 
                 verify(spyService, never())
-                        .enviarNotificacion(eq(22L), eq(TipoNotificacion.DEADLINE_CERCANO), any(), any(), eq(52L));
+                        .enviarNotificacion(eq(22L), eq(TipoNotificacion.DEADLINE_CERCANO), any(), any(), eq(52L), any(), any(), any());
         }
 }

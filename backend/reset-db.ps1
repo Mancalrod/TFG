@@ -1,80 +1,153 @@
 <#
 .SYNOPSIS
-    Reinicia las tablas H2 del proyecto TFG Gestión de Entregables.
+    Resetea la base de datos del proyecto (PostgreSQL por defecto, H2 opcional).
 
 .DESCRIPTION
-    Dos modos de ejecución:
-      -Mode full   → Borra los ficheros de la base de datos H2. Hibernate los
-                      recreará al arrancar con ddl-auto=update.  (por defecto)
-      -Mode truncate → Conecta a la BD H2 por JDBC y ejecuta TRUNCATE TABLE
-                        en todas las tablas, manteniendo el esquema.
+    Modos soportados:
+      -Mode postgres     -> Resetea PostgreSQL (por defecto) borrando/recreando schema public.
+      -Mode h2-full      -> Borra ficheros H2 locales.
+      -Mode h2-truncate  -> Vacía tablas H2 manteniendo esquema.
+      -Mode both         -> Ejecuta reset de PostgreSQL y H2 full.
 
-    También limpia la carpeta de entregas (uploads/entregas) si existe.
+    Compatibilidad hacia atrás:
+      -Mode full      == h2-full
+      -Mode truncate  == h2-truncate
+
+    También limpia la carpeta uploads/entregas para dejar el entorno limpio.
 
 .PARAMETER Mode
-    "full" (por defecto) o "truncate".
+    postgres (por defecto), h2-full, h2-truncate, both, full, truncate.
+
+.PARAMETER DatabaseUrl
+    URL JDBC de PostgreSQL. Si no se indica, usa DATABASE_URL o
+    jdbc:postgresql://localhost:5432/tfgdb.
+
+.PARAMETER PgUser
+    Usuario PostgreSQL (default DATABASE_USER o tfg).
+
+.PARAMETER PgPassword
+    Password PostgreSQL (default DATABASE_PASSWORD o tfg1234).
 
 .EXAMPLE
-    .\reset-db.ps1                  # Reset completo (borra ficheros DB)
-    .\reset-db.ps1 -Mode truncate   # Solo vacía los datos, mantiene esquema
+    .\reset-db.ps1
+    .\reset-db.ps1 -Mode postgres
+    .\reset-db.ps1 -Mode both
+    .\reset-db.ps1 -Mode postgres -DatabaseUrl "jdbc:postgresql://localhost:5432/tfgdb" -PgUser tfg -PgPassword tfg1234
 #>
 param(
-    [ValidateSet("full", "truncate")]
-    [string]$Mode = "full"
+    [ValidateSet("postgres", "h2-full", "h2-truncate", "both", "full", "truncate")]
+    [string]$Mode = "postgres",
+
+    [string]$DatabaseUrl = $env:DATABASE_URL,
+    [string]$PgUser = $env:DATABASE_USER,
+    [string]$PgPassword = $env:DATABASE_PASSWORD
 )
 
 $ErrorActionPreference = "Stop"
 
-$backendDir  = Split-Path -Parent $MyInvocation.MyCommand.Path
-$dataDir     = Join-Path $backendDir "data"
-$dbFile      = Join-Path $dataDir "tfgdb.mv.db"
-$uploadsDir  = Join-Path (Join-Path $backendDir "uploads") "entregas"
+$backendDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$dataDir = Join-Path $backendDir "data"
+$dbFile = Join-Path $dataDir "tfgdb.mv.db"
+$uploadsDir = Join-Path (Join-Path $backendDir "uploads") "entregas"
 
-# ─── Comprobar si el servidor está usando el puerto 8080 ───
-$portInUse = Get-NetTCPConnection -LocalPort 8080 -ErrorAction SilentlyContinue
-if ($portInUse) {
-    Write-Host "[!] El puerto 8080 esta en uso. Deteniendo el proceso..." -ForegroundColor Yellow
-    $portInUse | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
-    Start-Sleep -Seconds 2
-    Write-Host "[OK] Proceso detenido." -ForegroundColor Green
+if ([string]::IsNullOrWhiteSpace($DatabaseUrl)) {
+    $DatabaseUrl = "jdbc:postgresql://localhost:5432/tfgdb"
+}
+if ([string]::IsNullOrWhiteSpace($PgUser)) {
+    $PgUser = "tfg"
+}
+if ([string]::IsNullOrWhiteSpace($PgPassword)) {
+    $PgPassword = "tfg1234"
 }
 
-# ─── Modo FULL: borrar ficheros de la BD ───
-if ($Mode -eq "full") {
-    Write-Host "`n=== RESET COMPLETO (borrar ficheros H2) ===" -ForegroundColor Cyan
+function Resolve-EffectiveMode {
+    param([string]$InputMode)
+    switch ($InputMode) {
+        "full" { return "h2-full" }
+        "truncate" { return "h2-truncate" }
+        default { return $InputMode }
+    }
+}
 
+function Parse-PostgresJdbcUrl {
+    param([string]$JdbcUrl)
+
+    $pattern = '^jdbc:postgresql://(?<host>[^:/?#]+)(?::(?<port>\d+))?/(?<db>[^?]+)'
+    $match = [regex]::Match($JdbcUrl, $pattern)
+    if (-not $match.Success) {
+        throw "DATABASE_URL no tiene formato JDBC PostgreSQL valido: $JdbcUrl"
+    }
+
+    $portValue = 5432
+    if ($match.Groups["port"].Success) {
+        $portValue = [int]$match.Groups["port"].Value
+    }
+
+    return [pscustomobject]@{
+        Host = $match.Groups["host"].Value
+        Port = $portValue
+        Database = $match.Groups["db"].Value
+    }
+}
+
+function Find-PsqlExecutable {
+    $fromPath = (Get-Command psql -ErrorAction SilentlyContinue)
+    if ($fromPath) {
+        return $fromPath.Source
+    }
+
+    $candidates = @(
+        "C:\Program Files\PostgreSQL\18\bin\psql.exe",
+        "C:\Program Files\PostgreSQL\17\bin\psql.exe",
+        "C:\Program Files\PostgreSQL\16\bin\psql.exe"
+    )
+
+    foreach ($candidate in $candidates) {
+        if (Test-Path $candidate) {
+            return $candidate
+        }
+    }
+
+    return $null
+}
+
+function Stop-BackendIfRunning {
+    $portInUse = Get-NetTCPConnection -LocalPort 8080 -ErrorAction SilentlyContinue
+    if ($portInUse) {
+        Write-Host "[!] El puerto 8080 esta en uso. Deteniendo proceso..." -ForegroundColor Yellow
+        $portInUse | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
+        Start-Sleep -Seconds 2
+        Write-Host "[OK] Proceso detenido." -ForegroundColor Green
+    }
+}
+
+function Reset-H2Full {
+    Write-Host "`n=== RESET H2 FULL (borrar ficheros) ===" -ForegroundColor Cyan
     if (Test-Path $dbFile) {
         Remove-Item "$dataDir\tfgdb*" -Force
-        Write-Host "[OK] Ficheros de base de datos eliminados." -ForegroundColor Green
-    } else {
-        Write-Host "[i] No se encontraron ficheros de base de datos." -ForegroundColor Gray
+        Write-Host "[OK] Ficheros H2 eliminados." -ForegroundColor Green
+    }
+    else {
+        Write-Host "[i] No se encontraron ficheros H2 en $dataDir." -ForegroundColor Gray
     }
 }
 
-# ─── Modo TRUNCATE: vaciar tablas via SQL ───
-if ($Mode -eq "truncate") {
-    Write-Host "`n=== TRUNCATE (vaciar datos, mantener esquema) ===" -ForegroundColor Cyan
+function Reset-H2Truncate {
+    Write-Host "`n=== RESET H2 TRUNCATE (vaciar datos, mantener esquema) ===" -ForegroundColor Cyan
 
     if (-not (Test-Path $dbFile)) {
-        Write-Host "[!] No existe la base de datos en: $dbFile" -ForegroundColor Red
-        exit 1
+        throw "No existe la base H2 en: $dbFile"
     }
 
-    # Buscar el JAR de H2 en el repositorio Maven local
     $h2Jar = Get-ChildItem "$env:USERPROFILE\.m2\repository\com\h2database\h2" -Recurse -Filter "h2-*.jar" |
-             Where-Object { $_.Name -notmatch "sources|javadoc" } |
-             Sort-Object LastWriteTime -Descending |
-             Select-Object -First 1
+        Where-Object { $_.Name -notmatch "sources|javadoc" } |
+        Sort-Object LastWriteTime -Descending |
+        Select-Object -First 1
 
     if (-not $h2Jar) {
-        Write-Host "[!] No se encontro el JAR de H2. Ejecuta 'mvnw compile' primero." -ForegroundColor Red
-        exit 1
+        throw "No se encontro el JAR de H2. Ejecuta .\mvnw.cmd compile primero."
     }
 
-    Write-Host "[i] Usando H2 JAR: $($h2Jar.FullName)" -ForegroundColor Gray
-
-    # Tablas en orden seguro (primero las que no tienen dependencias entrantes,
-    # respetando claves foráneas)
     $tables = @(
         "onedrive_tokens",
         "microsoft_tokens",
@@ -82,7 +155,9 @@ if ($Mode -eq "truncate") {
         "materiales",
         "entregas",
         "entregables",
-        "actividades_grupos",     # tabla join ManyToMany
+        "notificaciones",
+        "preferencias_notificacion",
+        "actividades_grupos",
         "actividades",
         "estudiantes",
         "grupos",
@@ -101,26 +176,142 @@ if ($Mode -eq "truncate") {
     $sql | Out-File -FilePath $sqlFile -Encoding utf8
 
     $jdbcUrl = "jdbc:h2:file:$dataDir/tfgdb"
-
     try {
-        java -cp $h2Jar.FullName org.h2.tools.RunScript `
-            -url $jdbcUrl -user sa -password "" -script $sqlFile
-        Write-Host "[OK] Todas las tablas han sido vaciadas." -ForegroundColor Green
-    }
-    catch {
-        Write-Host "[!] Error al ejecutar SQL: $_" -ForegroundColor Red
+        java -cp $h2Jar.FullName org.h2.tools.RunScript -url $jdbcUrl -user sa -password "" -script $sqlFile
+        Write-Host "[OK] Tablas H2 vaciadas." -ForegroundColor Green
     }
     finally {
         Remove-Item $sqlFile -Force -ErrorAction SilentlyContinue
     }
 }
 
-# ─── Limpiar carpeta de entregas ───
-if (Test-Path $uploadsDir) {
-    Remove-Item "$uploadsDir\*" -Recurse -Force -ErrorAction SilentlyContinue
-    Write-Host "[OK] Carpeta de entregas limpiada." -ForegroundColor Green
-} else {
-    Write-Host "[i] No existe carpeta de entregas." -ForegroundColor Gray
+function Reset-PostgresWithPsql {
+    param(
+        [string]$PsqlExe,
+        [string]$PgHost,
+        [int]$Port,
+        [string]$Database,
+        [string]$User,
+        [string]$Password
+    )
+
+    $sql = @"
+DROP SCHEMA IF EXISTS public CASCADE;
+CREATE SCHEMA public AUTHORIZATION CURRENT_USER;
+GRANT ALL ON SCHEMA public TO CURRENT_USER;
+"@
+
+    $env:PGPASSWORD = $Password
+    try {
+        & $PsqlExe -h $PgHost -p $Port -U $User -d $Database -v ON_ERROR_STOP=1 -c $sql
+        if ($LASTEXITCODE -ne 0) {
+            throw "psql termino con codigo $LASTEXITCODE"
+        }
+    }
+    finally {
+        Remove-Item Env:\PGPASSWORD -ErrorAction SilentlyContinue
+    }
 }
 
-Write-Host "`n[DONE] Reset completado. Arranca el servidor con: .\mvnw.cmd spring-boot:run" -ForegroundColor Cyan
+function Reset-PostgresWithDocker {
+    param(
+        [string]$PgHost,
+        [int]$Port,
+        [string]$Database,
+        [string]$User,
+        [string]$Password
+    )
+
+    $docker = Get-Command docker -ErrorAction SilentlyContinue
+    if (-not $docker) {
+        return $false
+    }
+
+    $runningNames = & docker ps --format "{{.Names}}" 2>$null
+    if ($LASTEXITCODE -ne 0 -or -not $runningNames) {
+        return $false
+    }
+
+    $container = $null
+    if ($runningNames -contains "tfg-postgres") {
+        $container = "tfg-postgres"
+    }
+    else {
+        $container = $runningNames | Where-Object { $_ -match "postgres" } | Select-Object -First 1
+    }
+
+    if (-not $container) {
+        return $false
+    }
+
+    $sql = "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public AUTHORIZATION CURRENT_USER; GRANT ALL ON SCHEMA public TO CURRENT_USER;"
+
+    & docker exec -e "PGPASSWORD=$Password" $container psql -h $PgHost -p $Port -U $User -d $Database -v ON_ERROR_STOP=1 -c $sql
+    if ($LASTEXITCODE -ne 0) {
+        throw "docker exec psql termino con codigo $LASTEXITCODE"
+    }
+
+    Write-Host "[OK] Reset PostgreSQL aplicado via contenedor '$container'." -ForegroundColor Green
+    return $true
+}
+
+function Reset-Postgres {
+    Write-Host "`n=== RESET POSTGRESQL (schema public) ===" -ForegroundColor Cyan
+
+    $conn = Parse-PostgresJdbcUrl -JdbcUrl $DatabaseUrl
+    $psqlExe = Find-PsqlExecutable
+
+    if ($psqlExe) {
+        Write-Host "[i] Usando psql local: $psqlExe" -ForegroundColor Gray
+        Reset-PostgresWithPsql -PsqlExe $psqlExe -PgHost $conn.Host -Port $conn.Port -Database $conn.Database -User $PgUser -Password $PgPassword
+        Write-Host "[OK] Reset PostgreSQL completado en $($conn.Host):$($conn.Port)/$($conn.Database)." -ForegroundColor Green
+        return
+    }
+
+    Write-Host "[i] psql local no encontrado, intentando via Docker..." -ForegroundColor Gray
+    $doneViaDocker = Reset-PostgresWithDocker -PgHost $conn.Host -Port $conn.Port -Database $conn.Database -User $PgUser -Password $PgPassword
+    if (-not $doneViaDocker) {
+        throw "No se encontro psql local ni contenedor PostgreSQL en ejecucion para resetear la BD."
+    }
+}
+
+function Clean-Uploads {
+    if (Test-Path $uploadsDir) {
+        Remove-Item "$uploadsDir\*" -Recurse -Force -ErrorAction SilentlyContinue
+        Write-Host "[OK] Carpeta de entregas limpiada." -ForegroundColor Green
+    }
+    else {
+        Write-Host "[i] No existe carpeta de entregas." -ForegroundColor Gray
+    }
+}
+
+$effectiveMode = Resolve-EffectiveMode -InputMode $Mode
+
+Write-Host "[INFO] Modo seleccionado: $effectiveMode" -ForegroundColor Yellow
+Write-Host "[INFO] DATABASE_URL: $DatabaseUrl" -ForegroundColor Yellow
+
+Stop-BackendIfRunning
+
+switch ($effectiveMode) {
+    "postgres" {
+        Reset-Postgres
+    }
+    "h2-full" {
+        Reset-H2Full
+    }
+    "h2-truncate" {
+        Reset-H2Truncate
+    }
+    "both" {
+        Reset-Postgres
+        Reset-H2Full
+    }
+    default {
+        throw "Modo no soportado: $effectiveMode"
+    }
+}
+
+Clean-Uploads
+
+Write-Host "`n[DONE] Reset completado. Arranca el backend con: .\mvnw.cmd spring-boot:run" -ForegroundColor Cyan
+Write-Host "[DONE] Si la BD quedo vacia, DataSeeder volvera a poblarla al arrancar." -ForegroundColor Cyan

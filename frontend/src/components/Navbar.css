@@ -89,7 +89,17 @@
   color: var(--text-primary);
 }
 
-.navbar-option-emoji {
+.btn-notifications:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-notifications:disabled:hover {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.navbar-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;

@@ -134,6 +134,7 @@ export interface EntregableDTO {
   estructuraZip?: string;
   validacionZipEstricta?: boolean;
   nombreZipEsperado?: string;
+  notasVisiblesEstudiante?: boolean;
   actividadId: number;
   actividadTitulo: string;
   numeroEntregas: number;
@@ -203,6 +204,8 @@ export interface EntregaDTO {
   esVersionActiva: boolean;
   entregableId: number;
   entregableTitulo: string;
+  notaMaximaEntregable?: number;
+  notasVisiblesEstudiante?: boolean;
   estudianteId: number;
   estudianteNombre: string;
   fueATiempo: boolean;
@@ -262,11 +265,14 @@ export interface CambiarContrasenaDTO {
 
 export interface NotificacionDTO {
   id: number;
-  tipo: 'NUEVO_ENTREGABLE' | 'DEADLINE_CERCANO';
+  tipo: 'NUEVA_ACTIVIDAD' | 'NUEVO_ENTREGABLE' | 'DEADLINE_CERCANO' | 'ENTREGA_EVALUADA' | 'NOTA_PUBLICADA';
   titulo: string;
   mensaje?: string;
   leida: boolean;
   cursoId?: number;
+  actividadId?: number;
+  entregableId?: number;
+  entregaId?: number;
   fechaCreacion: string;
 }
 

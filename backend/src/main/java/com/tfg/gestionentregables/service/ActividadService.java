@@ -33,6 +33,7 @@ public class ActividadService {
     private final ProfesorRepository profesorRepository;
     private final EstudianteRepository estudianteRepository;
     private final EntityMapper mapper;
+    private final NotificacionService notificacionService;
 
     /**
      * SYSOP-005: Crea una nueva actividad en un curso.
@@ -71,14 +72,12 @@ public class ActividadService {
                 .curso(curso)
                 .build();
 
-        // Asignar grupos si se especifican
-        if (dto.getGrupoIds() != null && !dto.getGrupoIds().isEmpty()) {
-            List<Grupo> grupos = grupoRepository.findAllById(dto.getGrupoIds());
-            validarGruposDelCurso(dto.getGrupoIds(), grupos, cursoId);
-            actividad.setGrupos(new HashSet<>(grupos));
-        }
+        actividad.setGrupos(resolverGruposAsignados(dto.getGrupoIds(), cursoId));
 
         actividad = actividadRepository.save(actividad);
+        if (actividad.getVisibilidad() == Visibilidad.VISIBLE) {
+            notificacionService.notificarNuevaActividad(actividad);
+        }
         return mapper.toDTO(actividad);
     }
 
@@ -100,18 +99,26 @@ public class ActividadService {
             throw new EntityNotFoundException("Curso no encontrado con ID: " + cursoId);
         }
 
-        if (!actorEsAdmin) {
+        boolean accesoComoProfesor = false;
+        boolean accesoComoEstudiante = false;
+
+        if (!actorEsAdmin && actorUsuarioId != null) {
             if (actorEsProfesor) {
-                verificarAccesoProfesorACurso(cursoId, actorUsuarioId, false);
-            } else if (actorEsEstudiante) {
-                boolean inscrito = estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(actorUsuarioId, cursoId).isPresent();
-                if (!inscrito) {
-                    throw new AccessDeniedException("No tienes acceso a este curso");
-                }
+                accesoComoProfesor = profesorRepository.existsByUsuarioIdAndCursoId(actorUsuarioId, cursoId);
+            }
+            if (actorEsEstudiante) {
+                accesoComoEstudiante = estudianteRepository.findFirstByUsuarioIdAndGrupoCursoId(actorUsuarioId, cursoId).isPresent();
+            }
+            if (!accesoComoProfesor && !accesoComoEstudiante) {
+                throw new AccessDeniedException("No tienes acceso a este curso");
             }
         }
 
-        return actividadRepository.findByCursoId(cursoId).stream()
+        List<Actividad> actividades = (actorUsuarioId != null && !actorEsAdmin && !accesoComoProfesor && accesoComoEstudiante)
+            ? actividadRepository.findByCursoIdAndVisibilidad(cursoId, Visibilidad.VISIBLE)
+            : actividadRepository.findByCursoId(cursoId);
+
+        return actividades.stream()
                 .map(mapper::toDTO)
                 .toList();
     }
@@ -184,8 +191,12 @@ public class ActividadService {
 
         verificarAccesoProfesorACurso(actividad.getCurso().getId(), actorUsuarioId, actorEsAdmin);
 
+        Visibilidad visibilidadAnterior = actividad.getVisibilidad();
         actividad.setVisibilidad(visibilidad);
         actividad = actividadRepository.save(actividad);
+        if (visibilidadAnterior != Visibilidad.VISIBLE && visibilidad == Visibilidad.VISIBLE) {
+            notificacionService.notificarNuevaActividad(actividad);
+        }
         return mapper.toDTO(actividad);
     }
 
@@ -211,6 +222,8 @@ public class ActividadService {
                 .orElseThrow(() -> new EntityNotFoundException("Actividad no encontrada con ID: " + id));
 
         verificarAccesoProfesorACurso(actividad.getCurso().getId(), actorUsuarioId, actorEsAdmin);
+
+        Visibilidad visibilidadAnterior = actividad.getVisibilidad();
 
         actividad.setTitulo(dto.getTitulo());
         actividad.setDescripcion(dto.getDescripcion());
@@ -238,13 +251,23 @@ public class ActividadService {
 
         // Actualizar grupos si se especifican
         if (dto.getGrupoIds() != null) {
-            List<Grupo> grupos = grupoRepository.findAllById(dto.getGrupoIds());
-            validarGruposDelCurso(dto.getGrupoIds(), grupos, actividad.getCurso().getId());
-            actividad.setGrupos(new HashSet<>(grupos));
+            actividad.setGrupos(resolverGruposAsignados(dto.getGrupoIds(), actividad.getCurso().getId()));
         }
 
         actividad = actividadRepository.save(actividad);
+        if (visibilidadAnterior != Visibilidad.VISIBLE && actividad.getVisibilidad() == Visibilidad.VISIBLE) {
+            notificacionService.notificarNuevaActividad(actividad);
+        }
         return mapper.toDTO(actividad);
+    }
+
+    private Set<Grupo> resolverGruposAsignados(List<Long> grupoIds, Long cursoId) {
+        if (grupoIds == null || grupoIds.isEmpty()) {
+            return new HashSet<>(grupoRepository.findByCursoId(cursoId));
+        }
+        List<Grupo> grupos = grupoRepository.findAllById(grupoIds);
+        validarGruposDelCurso(grupoIds, grupos, cursoId);
+        return new HashSet<>(grupos);
     }
 
     /**

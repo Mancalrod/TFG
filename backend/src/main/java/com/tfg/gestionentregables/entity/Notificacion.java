@@ -50,6 +50,15 @@ public class Notificacion {
     @Column(name = "curso_id")
     private Long cursoId;
 
+    @Column(name = "actividad_id")
+    private Long actividadId;
+
+    @Column(name = "entregable_id")
+    private Long entregableId;
+
+    @Column(name = "entrega_id")
+    private Long entregaId;
+
     @Column(name = "fecha_creacion", nullable = false)
     @Builder.Default
     private LocalDateTime fechaCreacion = LocalDateTime.now();

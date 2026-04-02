@@ -58,17 +58,17 @@ describe('PerfilPage', () => {
     expect(nuevaInput).toHaveAttribute('type', 'password');
     expect(confirmInput).toHaveAttribute('type', 'password');
 
-    await user.click(screen.getByRole('button', { name: 'Mostrar valor campo 1' }));
+    await user.click(screen.getByRole('button', { name: 'Mostrar contraseña actual' }));
     expect(actualInput).toHaveAttribute('type', 'text');
     expect(nuevaInput).toHaveAttribute('type', 'password');
 
-    await user.click(screen.getByRole('button', { name: 'Mostrar valor campo 2' }));
+    await user.click(screen.getByRole('button', { name: 'Mostrar nueva contraseña' }));
     expect(nuevaInput).toHaveAttribute('type', 'text');
 
-    await user.click(screen.getByRole('button', { name: 'Mostrar valor campo 3' }));
+    await user.click(screen.getByRole('button', { name: 'Mostrar confirmación de contraseña' }));
     expect(confirmInput).toHaveAttribute('type', 'text');
 
-    await user.click(screen.getByRole('button', { name: 'Ocultar valor campo 1' }));
+    await user.click(screen.getByRole('button', { name: 'Ocultar contraseña actual' }));
     expect(actualInput).toHaveAttribute('type', 'password');
   });
 

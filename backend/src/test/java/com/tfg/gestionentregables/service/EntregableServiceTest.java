@@ -27,6 +27,7 @@ class EntregableServiceTest {
 
     @Mock private EntregableRepository entregableRepository;
     @Mock private ActividadRepository actividadRepository;
+    @Mock private EntregaRepository entregaRepository;
     @Mock private ProfesorRepository profesorRepository;
     @Mock private EntityMapper mapper;
     @Mock private NotificacionService notificacionService;

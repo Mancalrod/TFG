@@ -139,10 +139,28 @@ const Navbar: React.FC = () => {
 
   const abrirNotificacion = (notificacion: NotificacionDTO) => {
     handleMarcarLeida(notificacion);
+    setOpenNotificaciones(false);
+    if (notificacion.entregaId) {
+      navigate(`/entregas/${notificacion.entregaId}`);
+      return;
+    }
+    if (notificacion.entregableId) {
+      navigate(`/entregables/${notificacion.entregableId}`);
+      return;
+    }
+    if (notificacion.actividadId) {
+      navigate(`/actividades/${notificacion.actividadId}`);
+      return;
+    }
     if (notificacion.cursoId) {
-      setOpenNotificaciones(false);
       navigate(`/cursos/${notificacion.cursoId}`);
     }
+  };
+
+  const decodeHtmlEntities = (value: string): string => {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = value;
+    return textarea.value;
   };
 
   const renderNotificacionesContenido = () => {
@@ -162,8 +180,8 @@ const Navbar: React.FC = () => {
               className={`notification-item ${n.leida ? 'read' : 'unread'}`}
               onClick={() => abrirNotificacion(n)}
             >
-              <span className="notification-title">{n.titulo}</span>
-              <span className="notification-message">{n.mensaje ?? 'Sin detalle'}</span>
+              <span className="notification-title">{decodeHtmlEntities(n.titulo)}</span>
+              <span className="notification-message">{decodeHtmlEntities(n.mensaje ?? 'Sin detalle')}</span>
             </button>
           </li>
         ))}
@@ -227,27 +245,27 @@ const Navbar: React.FC = () => {
 
       {/* Lado derecho: Theme Toggle, Perfil y Acciones */}
       <div className="navbar-actions">
-        {usuario && (
-          <div className="navbar-notifications">
-            <button
-              type="button"
-              className="btn-notifications"
-              onClick={toggleNotificaciones}
-              aria-label="Abrir notificaciones"
-            >
-              <span className="navbar-option-emoji" aria-hidden="true">🔔</span>
-              {unreadCount > 0 && <span className="notifications-badge">{unreadCount}</span>}
-            </button>
-            {openNotificaciones && (
-              <div className="notifications-panel" aria-label="Panel de notificaciones">
-                <div className="notifications-header">
-                  <strong>Notificaciones</strong>
-                </div>
-                {renderNotificacionesContenido()}
+        <div className="navbar-notifications">
+          <button
+            type="button"
+            className="btn-notifications"
+            onClick={usuario ? toggleNotificaciones : undefined}
+            aria-label={usuario ? 'Abrir notificaciones' : 'Notificaciones (inicia sesion)'}
+            title={usuario ? 'Notificaciones' : 'Inicia sesion para ver notificaciones'}
+            disabled={!usuario}
+          >
+            <span className="navbar-icon" aria-hidden="true">🔔</span>
+            {usuario && unreadCount > 0 && <span className="notifications-badge">{unreadCount}</span>}
+          </button>
+          {usuario && openNotificaciones && (
+            <div className="notifications-panel" aria-label="Panel de notificaciones">
+              <div className="notifications-header">
+                <strong>Notificaciones</strong>
               </div>
-            )}
-          </div>
-        )}
+              {renderNotificacionesContenido()}
+            </div>
+          )}
+        </div>
 
         <button
           onClick={toggleTheme}
@@ -255,7 +273,7 @@ const Navbar: React.FC = () => {
           title={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
           aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
         >
-          <span className="navbar-option-emoji" aria-hidden="true">{isDark ? '🌙' : '☀️'}</span>
+          <span className="navbar-icon" aria-hidden="true">{isDark ? '🌙' : '☀️'}</span>
         </button>
 
         {usuario ? (

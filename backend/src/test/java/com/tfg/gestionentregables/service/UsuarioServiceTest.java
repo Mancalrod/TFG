@@ -366,6 +366,18 @@ class UsuarioServiceTest {
             assertThatThrownBy(() -> usuarioService.registrarComoEstudiante(1L, 99L))
                     .isInstanceOf(EntityNotFoundException.class);
         }
+
+        @Test
+        @DisplayName("Bloquea si el usuario es profesor del mismo curso")
+        void registrar_bloqueaSiEsProfesorDelMismoCurso() {
+            when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+            when(grupoRepository.findById(1L)).thenReturn(Optional.of(grupo));
+            when(profesorRepository.existsByUsuarioIdAndCursoId(1L, 1L)).thenReturn(true);
+
+            assertThatThrownBy(() -> usuarioService.registrarComoEstudiante(1L, 1L))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("no puede ser profesor y estudiante del mismo curso");
+        }
     }
 
     @Nested
