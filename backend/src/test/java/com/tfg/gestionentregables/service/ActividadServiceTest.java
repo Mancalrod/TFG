@@ -29,6 +29,7 @@ class ActividadServiceTest {
     @Mock private CursoRepository cursoRepository;
     @Mock private GrupoRepository grupoRepository;
     @Mock private ProfesorRepository profesorRepository;
+    @Mock private EstudianteRepository estudianteRepository;
     @Mock private EntityMapper mapper;
 
     @InjectMocks

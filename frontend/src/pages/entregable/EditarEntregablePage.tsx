@@ -17,7 +17,7 @@ const labelTipoMaterial = (tipo: TipoMaterial): string => {
 const EditarEntregablePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { esProfesor, usuario } = useAuth();
+  const { esProfesor, esAdmin, usuario } = useAuth();
 
   const [entregable, setEntregable] = useState<EntregableDTO | null>(null);
   const [actividad, setActividad] = useState<ActividadDTO | null>(null);
@@ -124,10 +124,10 @@ const EditarEntregablePage: React.FC = () => {
   }, [id, cargarEntregable]);
 
   useEffect(() => {
-    if (!loading && !esProfesor) {
+    if (!loading && (!esProfesor || esAdmin)) {
       navigate(-1);
     }
-  }, [loading, esProfesor, navigate]);
+  }, [loading, esProfesor, esAdmin, navigate]);
 
   const toDatetimeLocal = (iso: string): string => {
     const date = new Date(iso);

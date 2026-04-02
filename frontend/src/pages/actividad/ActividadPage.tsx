@@ -11,8 +11,9 @@ const ActividadPage: React.FC = () => {
   const [entregables, setEntregables] = useState<EntregableDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { esProfesor } = useAuth();
+  const { esProfesor, esAdmin } = useAuth();
   const navigate = useNavigate();
+  const puedeEditarContenido = esProfesor && !esAdmin;
 
   const handleDescargarTodoActividad = async () => {
     if (!id) return;
@@ -110,12 +111,14 @@ const ActividadPage: React.FC = () => {
 
         {esProfesor && (
           <div className="actividad-actions">
-            <button 
-              className="btn-secondary"
-              onClick={() => navigate(`/actividades/${id}/editar`)}
-            >
-              Editar
-            </button>
+            {puedeEditarContenido && (
+              <button 
+                className="btn-secondary"
+                onClick={() => navigate(`/actividades/${id}/editar`)}
+              >
+                Editar
+              </button>
+            )}
             {entregables.length > 0 && (
               <button
                 className="btn-secondary btn-descargar-actividad"
@@ -124,12 +127,14 @@ const ActividadPage: React.FC = () => {
                 ⬇ Descargar Todo
               </button>
             )}
-            <button 
-              className="btn-primary"
-              onClick={() => navigate(`/actividades/${id}/entregables/nuevo`)}
-            >
-              + Nuevo Entregable
-            </button>
+            {puedeEditarContenido && (
+              <button 
+                className="btn-primary"
+                onClick={() => navigate(`/actividades/${id}/entregables/nuevo`)}
+              >
+                + Nuevo Entregable
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -163,7 +168,7 @@ const ActividadPage: React.FC = () => {
           {entregables.length === 0 ? (
             <div className="empty-entregables">
               <p>No hay entregables en esta actividad</p>
-              {esProfesor && (
+              {puedeEditarContenido && (
                 <button 
                   className="btn-primary"
                   onClick={() => navigate(`/actividades/${id}/entregables/nuevo`)}

@@ -17,7 +17,7 @@ const labelTipoMaterial = (tipo: TipoMaterial): string => {
 const CrearEntregablePage: React.FC = () => {
   const { actividadId } = useParams<{ actividadId: string }>();
   const navigate = useNavigate();
-  const { esProfesor, usuario } = useAuth();
+  const { esProfesor, esAdmin, usuario } = useAuth();
 
   const [actividad, setActividad] = useState<ActividadDTO | null>(null);
   const [loadingActividad, setLoadingActividad] = useState(true);
@@ -79,10 +79,10 @@ const CrearEntregablePage: React.FC = () => {
   }, [actividadId, cargarActividad]);
 
   useEffect(() => {
-    if (!loadingActividad && !esProfesor) {
+    if (!loadingActividad && (!esProfesor || esAdmin)) {
       navigate(-1);
     }
-  }, [loadingActividad, esProfesor, navigate]);
+  }, [loadingActividad, esProfesor, esAdmin, navigate]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
