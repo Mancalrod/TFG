@@ -28,6 +28,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -124,6 +125,117 @@ class NotificacionServiceTest {
         );
 
         verify(emailService).enviarCorreo(eq("ana@ull.edu.es"), any(), contains("/entregas/8"));
+    }
+
+    @Test
+    @DisplayName("Canal EMAIL con base URL null usa fallback localhost")
+    void enviarNotificacion_emailBaseUrlNull_usaFallback() {
+        ReflectionTestUtils.setField(notificacionService, "frontendBaseUrl", null);
+        when(usuarioRepository.findById(10L)).thenReturn(Optional.of(usuario));
+        when(preferenciaRepository.findByUsuarioId(10L)).thenReturn(Optional.of(
+                PreferenciaNotificacion.builder().usuario(usuario).canal(CanalNotificacion.EMAIL).build()
+        ));
+
+        notificacionService.enviarNotificacion(10L, TipoNotificacion.DEADLINE_CERCANO,
+                "Recordatorio", "Mensaje", 9L);
+
+        verify(emailService).enviarCorreo(eq("ana@ull.edu.es"), any(), contains("http://localhost:3000/cursos/9"));
+    }
+
+    @Test
+    @DisplayName("Canal EMAIL con base URL vacia usa fallback localhost")
+    void enviarNotificacion_emailBaseUrlVacia_usaFallback() {
+        ReflectionTestUtils.setField(notificacionService, "frontendBaseUrl", "   ");
+        when(usuarioRepository.findById(10L)).thenReturn(Optional.of(usuario));
+        when(preferenciaRepository.findByUsuarioId(10L)).thenReturn(Optional.of(
+                PreferenciaNotificacion.builder().usuario(usuario).canal(CanalNotificacion.EMAIL).build()
+        ));
+
+        notificacionService.enviarNotificacion(10L, TipoNotificacion.DEADLINE_CERCANO,
+                "Recordatorio", "Mensaje", 10L);
+
+        verify(emailService).enviarCorreo(eq("ana@ull.edu.es"), any(), contains("http://localhost:3000/cursos/10"));
+    }
+
+    @Test
+    @DisplayName("Canal EMAIL recorta espacios y barras finales en base URL")
+    void enviarNotificacion_emailBaseUrlConEspaciosYBarras_normaliza() {
+        ReflectionTestUtils.setField(notificacionService, "frontendBaseUrl", "  https://front.test///   ");
+        when(usuarioRepository.findById(10L)).thenReturn(Optional.of(usuario));
+        when(preferenciaRepository.findByUsuarioId(10L)).thenReturn(Optional.of(
+                PreferenciaNotificacion.builder().usuario(usuario).canal(CanalNotificacion.EMAIL).build()
+        ));
+
+        notificacionService.enviarNotificacion(10L, TipoNotificacion.DEADLINE_CERCANO,
+                "Recordatorio", "Mensaje", 11L);
+
+        verify(emailService).enviarCorreo(eq("ana@ull.edu.es"), any(), contains("https://front.test/cursos/11"));
+    }
+
+    @Test
+    @DisplayName("Canal EMAIL usa ruta de entregable cuando no hay entrega")
+    void enviarNotificacion_emailIncluyeLinkEntregable() {
+        when(usuarioRepository.findById(10L)).thenReturn(Optional.of(usuario));
+        when(preferenciaRepository.findByUsuarioId(10L)).thenReturn(Optional.of(
+                PreferenciaNotificacion.builder().usuario(usuario).canal(CanalNotificacion.EMAIL).build()
+        ));
+
+        notificacionService.enviarNotificacion(
+                10L,
+                TipoNotificacion.NOTA_PUBLICADA,
+                "Nota",
+                "Mensaje",
+                5L,
+                null,
+                7L,
+                null
+        );
+
+        verify(emailService).enviarCorreo(eq("ana@ull.edu.es"), any(), contains("/entregables/7"));
+    }
+
+    @Test
+    @DisplayName("Canal EMAIL usa ruta de actividad cuando no hay entrega ni entregable")
+    void enviarNotificacion_emailIncluyeLinkActividad() {
+        when(usuarioRepository.findById(10L)).thenReturn(Optional.of(usuario));
+        when(preferenciaRepository.findByUsuarioId(10L)).thenReturn(Optional.of(
+                PreferenciaNotificacion.builder().usuario(usuario).canal(CanalNotificacion.EMAIL).build()
+        ));
+
+        notificacionService.enviarNotificacion(
+                10L,
+                TipoNotificacion.NOTA_PUBLICADA,
+                "Nota",
+                "Mensaje",
+                null,
+                6L,
+                null,
+                null
+        );
+
+        verify(emailService).enviarCorreo(eq("ana@ull.edu.es"), any(), contains("/actividades/6"));
+    }
+
+    @Test
+    @DisplayName("Canal EMAIL sin IDs envia solo mensaje sin deep-link")
+    void enviarNotificacion_emailSinIds_noIncluyeDeepLink() {
+        when(usuarioRepository.findById(10L)).thenReturn(Optional.of(usuario));
+        when(preferenciaRepository.findByUsuarioId(10L)).thenReturn(Optional.of(
+                PreferenciaNotificacion.builder().usuario(usuario).canal(CanalNotificacion.EMAIL).build()
+        ));
+
+        notificacionService.enviarNotificacion(
+                10L,
+                TipoNotificacion.NOTA_PUBLICADA,
+                "Nota",
+                "Mensaje plano",
+                null,
+                null,
+                null,
+                null
+        );
+
+        verify(emailService).enviarCorreo(eq("ana@ull.edu.es"), any(), eq("Mensaje plano"));
     }
 
     @Test
