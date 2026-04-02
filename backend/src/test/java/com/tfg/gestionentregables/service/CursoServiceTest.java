@@ -24,6 +24,7 @@ class CursoServiceTest {
 
     @Mock private CursoRepository cursoRepository;
     @Mock private ProfesorRepository profesorRepository;
+    @Mock private UsuarioRepository usuarioRepository;
     @Mock private EstudianteRepository estudianteRepository;
     @Mock private GrupoRepository grupoRepository;
     @Mock private EntityMapper mapper;
@@ -88,6 +89,38 @@ class CursoServiceTest {
             assertThatThrownBy(() -> cursoService.crearCurso(crearCursoDTO, 1L))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Ya existe un curso con ese código");
+        }
+    }
+
+    @Nested
+    @DisplayName("crearCursoPorUsuario")
+    class CrearCursoPorUsuario {
+
+        @Test
+        @DisplayName("Crea curso y profesor asociados al usuario")
+        void crearPorUsuario_ok() {
+            Curso cursoPersistido = Curso.builder().id(55L).titulo("IS").descripcion("Desc").codigo("IS-001").build();
+
+            when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+            when(cursoRepository.existsByCodigo("IS-001")).thenReturn(false);
+            when(cursoRepository.save(any(Curso.class))).thenReturn(cursoPersistido);
+            when(cursoRepository.findById(55L)).thenReturn(Optional.of(curso));
+            when(mapper.toDTO(curso)).thenReturn(cursoDTO);
+
+            CursoDTO result = cursoService.crearCursoPorUsuario(crearCursoDTO, 1L);
+
+            assertThat(result).isNotNull();
+            verify(profesorRepository).save(any(Profesor.class));
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si usuario no existe")
+        void crearPorUsuario_usuarioNoExiste() {
+            when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> cursoService.crearCursoPorUsuario(crearCursoDTO, 99L))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Usuario no encontrado");
         }
     }
 
@@ -414,12 +447,29 @@ class CursoServiceTest {
             GrupoDTO grupoDTO = GrupoDTO.builder().id(1L).titulo("G1").build();
 
             when(cursoRepository.existsById(1L)).thenReturn(true);
+            when(grupoRepository.findByCursoRelacionadoId(1L)).thenReturn(List.of());
             when(grupoRepository.findByCursoId(1L)).thenReturn(List.of(grupo));
             when(mapper.toDTO(grupo)).thenReturn(grupoDTO);
 
             List<GrupoDTO> result = cursoService.listarGrupos(1L);
 
             assertThat(result).hasSize(1);
+        }
+
+        @Test
+        @DisplayName("Usa resultados de relación curso-grupo cuando existen")
+        void listar_priorizaCursoRelacionado() {
+            Grupo grupo = Grupo.builder().id(2L).titulo("Relacionado").curso(curso).build();
+            GrupoDTO grupoDTO = GrupoDTO.builder().id(2L).titulo("Relacionado").build();
+
+            when(cursoRepository.existsById(1L)).thenReturn(true);
+            when(grupoRepository.findByCursoRelacionadoId(1L)).thenReturn(List.of(grupo));
+            when(mapper.toDTO(grupo)).thenReturn(grupoDTO);
+
+            List<GrupoDTO> result = cursoService.listarGrupos(1L);
+
+            assertThat(result).hasSize(1);
+            verify(grupoRepository, never()).findByCursoId(1L);
         }
 
         @Test
@@ -485,6 +535,70 @@ class CursoServiceTest {
             assertThatThrownBy(() -> cursoService.eliminarGrupo(99L))
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasMessageContaining("Grupo no encontrado");
+        }
+    }
+
+    @Nested
+    @DisplayName("agregarProfesorPorUsuario")
+    class AgregarProfesorPorUsuario {
+
+        @Test
+        @DisplayName("Agrega profesor por usuario cuando no existe relación")
+        void agregarPorUsuario_ok() {
+            when(cursoRepository.findById(1L)).thenReturn(Optional.of(curso));
+            when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+            when(profesorRepository.existsByUsuarioIdAndCursoId(1L, 1L)).thenReturn(false);
+            when(cursoRepository.findById(1L)).thenReturn(Optional.of(curso));
+            when(mapper.toDTO(curso)).thenReturn(cursoDTO);
+
+            CursoDTO result = cursoService.agregarProfesorPorUsuario(1L, 1L);
+
+            assertThat(result).isNotNull();
+            verify(profesorRepository).save(any(Profesor.class));
+        }
+
+        @Test
+        @DisplayName("Falla si usuario ya es profesor en ese curso")
+        void agregarPorUsuario_duplicado() {
+            when(cursoRepository.findById(1L)).thenReturn(Optional.of(curso));
+            when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+            when(profesorRepository.existsByUsuarioIdAndCursoId(1L, 1L)).thenReturn(true);
+
+            assertThatThrownBy(() -> cursoService.agregarProfesorPorUsuario(1L, 1L))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("ya está asignado como profesor");
+        }
+    }
+
+    @Nested
+    @DisplayName("quitarProfesorPorUsuario")
+    class QuitarProfesorPorUsuario {
+
+        @Test
+        @DisplayName("Elimina relación y limpia filas residuales cuando aplica")
+        void quitarPorUsuario_okYLimpiaResiduales() {
+            when(cursoRepository.findById(1L)).thenReturn(Optional.of(curso));
+            when(profesorRepository.findByUsuarioIdAndCursoId(1L, 1L)).thenReturn(Optional.of(profesor));
+            when(profesorRepository.countByUsuarioIdAndCursoIsNotNull(1L)).thenReturn(0L);
+            when(cursoRepository.findById(1L)).thenReturn(Optional.of(curso));
+            when(mapper.toDTO(curso)).thenReturn(cursoDTO);
+
+            CursoDTO result = cursoService.quitarProfesorPorUsuario(1L, 1L);
+
+            assertThat(result).isNotNull();
+            verify(profesorRepository).delete(profesor);
+            verify(profesorRepository).deleteByUsuarioId(1L);
+        }
+
+        @Test
+        @DisplayName("Falla si no existe relación profesor-usuario en curso")
+        void quitarPorUsuario_noExisteRelacion() {
+            when(cursoRepository.findById(1L)).thenReturn(Optional.of(curso));
+            when(profesorRepository.findByUsuarioIdAndCursoId(1L, 1L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> cursoService.quitarProfesorPorUsuario(1L, 1L))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("no está asignado como profesor");
         }
     }
 }

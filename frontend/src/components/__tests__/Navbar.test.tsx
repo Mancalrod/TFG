@@ -244,6 +244,20 @@ describe('Navbar', () => {
     expect(avatar).toHaveAttribute('src', expect.stringContaining('https://img.test/avatar.png'));
   });
 
+  it('muestra inicial en avatar fallback cuando no hay foto', () => {
+    mockUseAuth.mockReturnValue({
+      usuario: { id: 141, nombre: 'beatriz' },
+      esProfesor: false,
+      esEstudiante: false,
+      esAdmin: false,
+      logout: mockLogout,
+    });
+
+    renderNavbarAt('/dashboard');
+
+    expect(screen.getByLabelText('Avatar por defecto')).toHaveTextContent('B');
+  });
+
   it('muestra panel de notificaciones con contador y lista', async () => {
     const user = userEvent.setup();
     mockUseAuth.mockReturnValue({
@@ -380,5 +394,34 @@ describe('Navbar', () => {
     await user.click(await screen.findByRole('button', { name: /Entrega evaluada/i }));
 
     expect(mockNavigate).toHaveBeenCalledWith('/entregas/88');
+  });
+
+  it('navega a entregable cuando la notificacion contiene entregableId', async () => {
+    const user = userEvent.setup();
+    mockUseAuth.mockReturnValue({
+      usuario: { id: 20, nombre: 'Entregable User' },
+      esProfesor: false,
+      esEstudiante: true,
+      esAdmin: false,
+      logout: mockLogout,
+    });
+    mockNotiListar.mockResolvedValue([
+      {
+        id: 505,
+        titulo: 'Entregable nuevo',
+        mensaje: 'Se publico un nuevo entregable',
+        leida: false,
+        tipo: 'NUEVO_ENTREGABLE',
+        fechaCreacion: '2026-04-02T12:08:00',
+        entregableId: 444,
+      },
+    ]);
+
+    renderNavbarAt('/dashboard');
+
+    await user.click(screen.getByRole('button', { name: 'Abrir notificaciones' }));
+    await user.click(await screen.findByRole('button', { name: /Entregable nuevo/i }));
+
+    expect(mockNavigate).toHaveBeenCalledWith('/entregables/444');
   });
 });
