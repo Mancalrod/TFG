@@ -294,6 +294,15 @@ export interface RefreshTokenRequestDTO {
   refreshToken: string;
 }
 
+export interface ForgotPasswordRequestDTO {
+  correoElectronico: string;
+}
+
+export interface ResetPasswordRequestDTO {
+  token: string;
+  contrasenaNueva: string;
+}
+
 // Error response
 export interface ErrorResponse {
   status: number;

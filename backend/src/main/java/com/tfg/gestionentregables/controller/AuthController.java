@@ -4,6 +4,7 @@ import com.tfg.gestionentregables.dto.*;
 import com.tfg.gestionentregables.entity.Usuario;
 import com.tfg.gestionentregables.repository.UsuarioRepository;
 import com.tfg.gestionentregables.security.jwt.JwtTokenProvider;
+import com.tfg.gestionentregables.service.PasswordResetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,7 @@ public class AuthController {
     private final UserDetailsService userDetailsService;
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+        private final PasswordResetService passwordResetService;
 
         private UserDetails cargarUserDetails(String email) {
                 try {
@@ -98,10 +100,10 @@ public class AuthController {
 
         usuario = usuarioRepository.save(usuario);
 
-                UserDetails userDetails = cargarUserDetails(usuario.getCorreoElectronico());
-                if (userDetails == null) {
-                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-                }
+        UserDetails userDetails = cargarUserDetails(usuario.getCorreoElectronico());
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         String accessToken = jwtTokenProvider.generateToken(userDetails);
         String refreshToken = jwtTokenProvider.generateRefreshToken(userDetails);
 
@@ -188,4 +190,16 @@ public class AuthController {
 
         return ResponseEntity.ok(response);
     }
+
+        @PostMapping("/forgot-password")
+        public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDTO request) {
+                passwordResetService.solicitarRecuperacion(request.getCorreoElectronico());
+                return ResponseEntity.ok().build();
+        }
+
+        @PostMapping("/reset-password")
+        public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequestDTO request) {
+                passwordResetService.resetearContrasena(request.getToken(), request.getContrasenaNueva());
+                return ResponseEntity.noContent().build();
+        }
 }

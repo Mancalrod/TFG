@@ -1,5 +1,11 @@
 import api from './api';
-import { AuthResponseDTO, LoginRequestDTO, CrearUsuarioDTO } from '../types';
+import {
+  AuthResponseDTO,
+  LoginRequestDTO,
+  CrearUsuarioDTO,
+  ForgotPasswordRequestDTO,
+  ResetPasswordRequestDTO,
+} from '../types';
 
 const TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
@@ -30,6 +36,14 @@ export const authService = {
   me: async (): Promise<AuthResponseDTO> => {
     const response = await api.get<AuthResponseDTO>('/api/auth/me');
     return response.data;
+  },
+
+  forgotPassword: async (payload: ForgotPasswordRequestDTO): Promise<void> => {
+    await api.post('/api/auth/forgot-password', payload);
+  },
+
+  resetPassword: async (payload: ResetPasswordRequestDTO): Promise<void> => {
+    await api.post('/api/auth/reset-password', payload);
   },
 
   logout: (): void => {

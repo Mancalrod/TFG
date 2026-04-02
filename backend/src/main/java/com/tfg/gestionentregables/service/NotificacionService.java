@@ -14,9 +14,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -29,12 +32,18 @@ import java.util.Set;
 @Slf4j
 public class NotificacionService {
 
+    private static final Locale LOCALE_ES = Locale.forLanguageTag("es-ES");
+    private static final DateTimeFormatter FECHA_HUMANA = DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy 'a las' HH:mm", LOCALE_ES);
+
     private final NotificacionRepository notificacionRepository;
     private final PreferenciaNotificacionRepository preferenciaRepository;
     private final UsuarioRepository usuarioRepository;
     private final EntregableRepository entregableRepository;
     private final EntityMapper mapper;
     private final EmailService emailService;
+
+    @Value("${app.frontend.base-url:http://localhost:3000}")
+    private String frontendBaseUrl = "http://localhost:3000";
 
     /**
      * Envía una notificación respetando las preferencias del usuario.
@@ -72,10 +81,11 @@ public class NotificacionService {
 
         // Notificación por email (si canal es EMAIL o AMBOS)
         if (canal == CanalNotificacion.EMAIL || canal == CanalNotificacion.AMBOS) {
+            String urlDestino = construirUrlDestino(actividadId, entregableId, entregaId, cursoId);
             emailService.enviarCorreo(
                 usuario.getCorreoElectronico(),
                 "[TFG Entregables] " + tituloSeguro,
-                mensajeSeguro
+                construirCuerpoEmail(mensajeSeguro, urlDestino)
             );
         }
     }
@@ -170,7 +180,7 @@ public class NotificacionService {
             entregable.getTitulo(),
             actividad.getTitulo(),
             curso.getTitulo(),
-            entregable.getFechaLimite()
+            formatearFechaHumana(entregable.getFechaLimite())
         );
 
         // Notificar a todos los estudiantes de los grupos asignados
@@ -212,7 +222,7 @@ public class NotificacionService {
             "Se ha publicado la actividad '%s' en el curso '%s'. Fecha límite: %s",
             actividad.getTitulo(),
             curso.getTitulo(),
-            actividad.getFechaLimite()
+            formatearFechaHumana(actividad.getFechaLimite())
         );
 
         for (Grupo grupo : grupos) {
@@ -250,9 +260,10 @@ public class NotificacionService {
 
         String titulo = "Nota publicada: " + entregable.getTitulo();
         String mensaje = String.format(
-            "Tu entrega de '%s' ya tiene nota publicada: %.2f",
+            "Tu entrega de '%s' ya tiene nota publicada: %.2f (publicada el %s)",
             entregable.getTitulo(),
-            entrega.getCalificacion()
+            entrega.getCalificacion(),
+            formatearFechaHumana(LocalDateTime.now())
         );
         enviarNotificacion(
             usuarioId,
@@ -290,7 +301,7 @@ public class NotificacionService {
                 entregable.getTitulo(),
                 actividad.getTitulo(),
                 curso.getTitulo(),
-                entregable.getFechaLimite()
+                formatearFechaHumana(entregable.getFechaLimite())
             );
 
             // Notificar solo a estudiantes que NO han entregado
@@ -344,5 +355,36 @@ public class NotificacionService {
         return value
             .replaceAll("[\\p{Cntrl}&&[^\\r\\n\\t]]", "")
             .trim();
+    }
+
+    private String formatearFechaHumana(LocalDateTime fecha) {
+        if (fecha == null) {
+            return "fecha no disponible";
+        }
+        return fecha.format(FECHA_HUMANA);
+    }
+
+    private String construirCuerpoEmail(String mensaje, String urlDestino) {
+        if (urlDestino == null || urlDestino.isBlank()) {
+            return mensaje;
+        }
+        return mensaje + "\n\nAbrir en plataforma: " + urlDestino;
+    }
+
+    private String construirUrlDestino(Long actividadId, Long entregableId, Long entregaId, Long cursoId) {
+        String base = frontendBaseUrl != null ? frontendBaseUrl.replaceAll("/+$", "") : "http://localhost:3000";
+        if (entregaId != null) {
+            return base + "/entregas/" + entregaId;
+        }
+        if (entregableId != null) {
+            return base + "/entregables/" + entregableId;
+        }
+        if (actividadId != null) {
+            return base + "/actividades/" + actividadId;
+        }
+        if (cursoId != null) {
+            return base + "/cursos/" + cursoId;
+        }
+        return null;
     }
 }

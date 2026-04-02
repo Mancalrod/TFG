@@ -38,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
@@ -98,7 +99,30 @@ class NotificacionServiceTest {
                 "Recordatorio", "Mensaje", 1L);
 
         verify(notificacionRepository, never()).save(any(Notificacion.class));
-        verify(emailService).enviarCorreo(eq("ana@ull.edu.es"), any(), eq("Mensaje"));
+        verify(emailService).enviarCorreo(eq("ana@ull.edu.es"), any(), contains("Mensaje"));
+        verify(emailService).enviarCorreo(eq("ana@ull.edu.es"), any(), contains("/cursos/1"));
+    }
+
+    @Test
+    @DisplayName("Incluye deep-link a entrega en correo cuando entregaId está disponible")
+    void enviarNotificacion_emailIncluyeLinkEntrega() {
+        when(usuarioRepository.findById(10L)).thenReturn(Optional.of(usuario));
+        when(preferenciaRepository.findByUsuarioId(10L)).thenReturn(Optional.of(
+                PreferenciaNotificacion.builder().usuario(usuario).canal(CanalNotificacion.EMAIL).build()
+        ));
+
+        notificacionService.enviarNotificacion(
+                10L,
+                TipoNotificacion.NOTA_PUBLICADA,
+                "Nota publicada",
+                "Tu nota está lista",
+                5L,
+                6L,
+                7L,
+                8L
+        );
+
+        verify(emailService).enviarCorreo(eq("ana@ull.edu.es"), any(), contains("/entregas/8"));
     }
 
     @Test

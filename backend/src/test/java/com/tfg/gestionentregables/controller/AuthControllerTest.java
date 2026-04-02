@@ -5,6 +5,7 @@ import com.tfg.gestionentregables.dto.*;
 import com.tfg.gestionentregables.entity.Usuario;
 import com.tfg.gestionentregables.repository.UsuarioRepository;
 import com.tfg.gestionentregables.security.jwt.JwtTokenProvider;
+import com.tfg.gestionentregables.service.PasswordResetService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -45,6 +46,7 @@ class AuthControllerTest {
     @MockitoBean private UserDetailsService userDetailsService;
     @MockitoBean private UsuarioRepository usuarioRepository;
     @MockitoBean private PasswordEncoder passwordEncoder;
+        @MockitoBean private PasswordResetService passwordResetService;
 
     private ObjectMapper objectMapper;
     private Usuario usuario;
@@ -161,7 +163,7 @@ class AuthControllerTest {
             RefreshTokenRequestDTO req = RefreshTokenRequestDTO.builder()
                     .refreshToken("old-refresh").build();
 
-                        when(jwtTokenProvider.isRefreshToken("old-refresh")).thenReturn(true);
+            when(jwtTokenProvider.isRefreshToken("old-refresh")).thenReturn(true);
             when(jwtTokenProvider.extractUsername("old-refresh")).thenReturn("juan@test.com");
             when(userDetailsService.loadUserByUsername("juan@test.com")).thenReturn(userDetails);
             when(jwtTokenProvider.isTokenValid("old-refresh", userDetails)).thenReturn(true);
@@ -183,7 +185,7 @@ class AuthControllerTest {
             RefreshTokenRequestDTO req = RefreshTokenRequestDTO.builder()
                     .refreshToken("invalid").build();
 
-                        when(jwtTokenProvider.isRefreshToken("invalid")).thenReturn(true);
+            when(jwtTokenProvider.isRefreshToken("invalid")).thenReturn(true);
             when(jwtTokenProvider.extractUsername("invalid")).thenReturn("juan@test.com");
             when(userDetailsService.loadUserByUsername("juan@test.com")).thenReturn(userDetails);
             when(jwtTokenProvider.isTokenValid("invalid", userDetails)).thenReturn(false);
@@ -238,6 +240,78 @@ class AuthControllerTest {
         void me_sinAuth() throws Exception {
             mockMvc.perform(get("/api/auth/me"))
                     .andExpect(status().isUnauthorized());
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/auth/forgot-password")
+    class ForgotPassword {
+
+        @Test
+        @DisplayName("200 - Solicitud aceptada")
+        void forgotPassword_ok() throws Exception {
+            ForgotPasswordRequestDTO req = ForgotPasswordRequestDTO.builder()
+                    .correoElectronico("juan@test.com")
+                    .build();
+
+            mockMvc.perform(post("/api/auth/forgot-password")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(req)))
+                    .andExpect(status().isOk());
+
+            verify(passwordResetService).solicitarRecuperacion("juan@test.com");
+        }
+
+        @Test
+        @DisplayName("400 - Correo inválido")
+        void forgotPassword_badRequest() throws Exception {
+            ForgotPasswordRequestDTO req = ForgotPasswordRequestDTO.builder()
+                    .correoElectronico("correo-invalido")
+                    .build();
+
+            mockMvc.perform(post("/api/auth/forgot-password")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(req)))
+                    .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(passwordResetService);
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/auth/reset-password")
+    class ResetPassword {
+
+        @Test
+        @DisplayName("204 - Restablecimiento exitoso")
+        void resetPassword_ok() throws Exception {
+            ResetPasswordRequestDTO req = ResetPasswordRequestDTO.builder()
+                    .token("token-seguro")
+                    .contrasenaNueva("NuevaPass1!")
+                    .build();
+
+            mockMvc.perform(post("/api/auth/reset-password")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(req)))
+                    .andExpect(status().isNoContent());
+
+            verify(passwordResetService).resetearContrasena("token-seguro", "NuevaPass1!");
+        }
+
+        @Test
+        @DisplayName("400 - Payload inválido")
+        void resetPassword_badRequest() throws Exception {
+            ResetPasswordRequestDTO req = ResetPasswordRequestDTO.builder()
+                    .token("token-seguro")
+                    .contrasenaNueva("123")
+                    .build();
+
+            mockMvc.perform(post("/api/auth/reset-password")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(req)))
+                    .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(passwordResetService);
         }
     }
 }

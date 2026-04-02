@@ -117,6 +117,30 @@ describe('authService', () => {
     expect(me.usuarioId).toBe(1);
   });
 
+  it('forgotPassword llama al endpoint de recuperacion', async () => {
+    mockPost.mockResolvedValue({ data: {} });
+
+    await authService.forgotPassword({ correoElectronico: 'demo@test.com' });
+
+    expect(mockPost).toHaveBeenCalledWith('/api/auth/forgot-password', {
+      correoElectronico: 'demo@test.com',
+    });
+  });
+
+  it('resetPassword llama al endpoint de reseteo', async () => {
+    mockPost.mockResolvedValue({ data: {} });
+
+    await authService.resetPassword({
+      token: 'reset-token',
+      contrasenaNueva: 'NuevaPass1!',
+    });
+
+    expect(mockPost).toHaveBeenCalledWith('/api/auth/reset-password', {
+      token: 'reset-token',
+      contrasenaNueva: 'NuevaPass1!',
+    });
+  });
+
   it('logout elimina tokens', () => {
     localStorage.setItem('accessToken', 'a');
     localStorage.setItem('refreshToken', 'b');

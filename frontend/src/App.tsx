@@ -11,6 +11,8 @@ import Navbar from './components/Navbar'
 // Pages
 import HomePage from './pages/home/HomePage'
 import LoginPage from './pages/login/LoginPage'
+import ForgotPasswordPage from './pages/login/ForgotPasswordPage'
+import ResetPasswordPage from './pages/login/ResetPasswordPage'
 import DashboardPage from './pages/dashboard/DashboardPage'
 import CursosPage from './pages/curso/CursosPage'
 import CursoDetallePage from './pages/curso/CursoDetallePage'
@@ -76,6 +78,8 @@ function App() {
             {/* Rutas públicas */}
             <Route path="/" element={<HomeOrDashboard />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             
             {/* Rutas protegidas */}
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />

@@ -163,6 +163,38 @@ const Navbar: React.FC = () => {
     return textarea.value;
   };
 
+  const formatNotificacionDate = (value: string): string => {
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return value;
+    }
+
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfDate = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+    const msDay = 24 * 60 * 60 * 1000;
+    const dayDiff = Math.floor((startOfToday.getTime() - startOfDate.getTime()) / msDay);
+    const timeText = parsed.toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    if (dayDiff === 0) {
+      return `Hoy a las ${timeText}`;
+    }
+    if (dayDiff === 1) {
+      return `Ayer a las ${timeText}`;
+    }
+
+    return parsed.toLocaleString('es-ES', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
   const renderNotificacionesContenido = () => {
     if (loadingNotificaciones) {
       return <p className="notifications-empty">Cargando...</p>;
@@ -182,6 +214,7 @@ const Navbar: React.FC = () => {
             >
               <span className="notification-title">{decodeHtmlEntities(n.titulo)}</span>
               <span className="notification-message">{decodeHtmlEntities(n.mensaje ?? 'Sin detalle')}</span>
+              <span className="notification-date">{formatNotificacionDate(n.fechaCreacion)}</span>
             </button>
           </li>
         ))}

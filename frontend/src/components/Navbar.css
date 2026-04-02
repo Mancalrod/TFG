@@ -191,6 +191,11 @@
   color: var(--text-secondary);
 }
 
+.notification-date {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
 .navbar-user {
   display: flex;
   align-items: center;

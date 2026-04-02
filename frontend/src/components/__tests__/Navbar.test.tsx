@@ -266,6 +266,7 @@ describe('Navbar', () => {
     expect(await screen.findByText('Notificaciones')).toBeInTheDocument();
     expect(await screen.findByText('Nuevo entregable')).toBeInTheDocument();
     expect(await screen.findByText('Hay una nueva tarea')).toBeInTheDocument();
+    expect(document.querySelector('.notification-date')).not.toBeNull();
   });
 
   it('muestra estado vacio si falla carga de notificaciones', async () => {

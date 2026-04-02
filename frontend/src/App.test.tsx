@@ -20,6 +20,8 @@ vi.mock('./components/Navbar', () => ({
 
 vi.mock('./pages/home/HomePage', () => ({ default: () => <div>HomePage</div> }));
 vi.mock('./pages/login/LoginPage', () => ({ default: () => <div>LoginPage</div> }));
+vi.mock('./pages/login/ForgotPasswordPage', () => ({ default: () => <div>ForgotPasswordPage</div> }));
+vi.mock('./pages/login/ResetPasswordPage', () => ({ default: () => <div>ResetPasswordPage</div> }));
 vi.mock('./pages/dashboard/DashboardPage', () => ({ default: () => <div>DashboardPage</div> }));
 vi.mock('./pages/curso/CursosPage', () => ({ default: () => <div>CursosPage</div> }));
 vi.mock('./pages/curso/CursoDetallePage', () => ({ default: () => <div>CursoDetallePage</div> }));
@@ -59,6 +61,22 @@ describe('App routes', () => {
     renderAt('/');
 
     expect(screen.getByText('HomePage')).toBeInTheDocument();
+  });
+
+  it('muestra ForgotPasswordPage como ruta publica', () => {
+    mockUseAuth.mockReturnValue({ isAuthenticated: false, loading: false });
+
+    renderAt('/forgot-password');
+
+    expect(screen.getByText('ForgotPasswordPage')).toBeInTheDocument();
+  });
+
+  it('muestra ResetPasswordPage como ruta publica', () => {
+    mockUseAuth.mockReturnValue({ isAuthenticated: false, loading: false });
+
+    renderAt('/reset-password?token=abc');
+
+    expect(screen.getByText('ResetPasswordPage')).toBeInTheDocument();
   });
 
   it('muestra loading mientras se resuelve auth en ruta protegida', () => {
