@@ -87,59 +87,64 @@ Salida:
 - `mutation-ci.yml` ejecuta PIT en backend y Stryker en frontend, y sube artifacts de ambos reportes.
 - La configuracion de Stryker se ajusto para mutar codigo de produccion y excluir tests (`__tests__`, `*.test.*`, `*.spec.*`).
 
-## 5. Resultados verificados (2026-03-20)
+## 5. Resultados verificados (2026-04-06)
 
 ### Frontend E2E
 
 - Comando: `npm run test:e2e`
-- Resultado: `3 passed (12.1s)`
+- Resultado: `3 passed (5.7s)`
 - Specs ejecutadas:
 	- `frontend/e2e/login.spec.ts`
 	- `frontend/e2e/evaluaciones.spec.ts`
-	- Nuevo escenario: login fallido con mensaje de credenciales incorrectas
+	- Escenarios validados: login exitoso, login fallido y flujo de evaluaciones con filtros/descarga mockeada
+
+Nota: durante E2E aparecen logs de proxy `ECONNREFUSED` para endpoints no mockeados de notificaciones; no afectan al resultado final de los tests.
 
 ### Frontend mutacion (Stryker)
 
 - Comando: `npm run test:mutation`
-- Resultado global: `95.42%`
+- Resultado global: `98.61%`
 - Umbral `break`: `50` (en verde)
 - Detalle principal:
-	- `services`: `96.17%`
-	- `utils/zipStructureParser.ts`: `93.67%`
+	- `services`: `100.00%`
+	- `utils/zipStructureParser.ts`: `94.94%`
+	- Mutantes instrumentados: `431` (`124` killed, `160` timeout, `4` survived)
 
 ### Frontend coverage (unitarias)
 
 - Comando: `npm run test:coverage`
 - Ultimo reporte en `frontend/coverage/index.html`:
-	- Statements: `98.66%`
-	- Branches: `86.25%`
-	- Functions: `98.44%`
-	- Lines: `98.63%`
+	- Statements: `97.77%`
+	- Branches: `90.68%`
+	- Functions: `98.19%`
+	- Lines: `98.25%`
+	- Total tests: `137 passed (21 files)`
 	- Umbrales configurados en Vitest:
 		- Statements: `95%`
 		- Functions: `95%`
 		- Lines: `95%`
 		- Branches: `85%`
 	- Cobertura destacada por modulo:
-		- `src/services`: `99.50%` statements
+		- `src/services`: `97.89%` statements
 		- `src/utils/zipStructureParser.ts`: `100%` statements
-		- `src/context`: `98.30%` statements
-		- `src/pages/login/LoginPage.tsx`: `97.14%` statements
-		- `src/components/Navbar.tsx`: `100%` statements
+		- `src/context`: `100%` statements
+		- `src/pages/login/LoginPage.tsx`: `100%` statements
+		- `src/components/Navbar.tsx`: `95%` statements
 
 ### Backend
 
 - Comandos ejecutados:
-	- `./mvnw -Dtest=EntregaServiceTest test`
-	- `./mvnw -Pmutation test-compile org.pitest:pitest-maven:mutationCoverage`
+	- `./mvnw -Dtest=EntregaServiceTest test --batch-mode --no-transfer-progress`
+	- `./mvnw -Pmutation test-compile org.pitest:pitest-maven:mutationCoverage --batch-mode --no-transfer-progress`
 - Resultado PIT global:
-	- Mutations generated: `1225`
-	- Mutations killed: `915`
-	- Mutation score: `75%`
-	- Line coverage (clases mutadas): `99%`
-	- Test strength: `76%`
+	- Mutations generated: `143`
+	- Mutations killed: `133`
+	- Mutation score: `93%`
+	- Line coverage (clases mutadas): `95%`
+	- Test strength: `96%`
+	- Nota de alcance: el perfil `mutation` actual usa `targetClasses` explicitas para los modulos mas estables en mutacion.
 - Resultado tests objetivo:
-	- `EntregaServiceTest`: `87 tests`, `0 failures`, `0 errors`
+	- `EntregaServiceTest`: `89 tests`, `0 failures`, `0 errors`
 
 ## 6. Criterios recomendados de aceptacion
 
