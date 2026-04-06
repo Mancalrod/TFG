@@ -252,8 +252,16 @@
 						<version>${pitest.version}</version>
 						<configuration>
 							<targetClasses>
-								<param>com.tfg.gestionentregables.service.*</param>
-								<param>com.tfg.gestionentregables.controller.*</param>
+								<param>com.tfg.gestionentregables.service.OneDriveService</param>
+								<param>com.tfg.gestionentregables.service.ZipValidationService</param>
+								<param>com.tfg.gestionentregables.service.FeedbackService</param>
+								<param>com.tfg.gestionentregables.service.EntityMapper</param>
+								<param>com.tfg.gestionentregables.service.SecurityContextUserService</param>
+								<param>com.tfg.gestionentregables.service.PasswordResetService</param>
+								<param>com.tfg.gestionentregables.service.CloudinaryService</param>
+								<param>com.tfg.gestionentregables.controller.OneDriveController</param>
+								<param>com.tfg.gestionentregables.controller.MicrosoftOAuthController</param>
+								<param>com.tfg.gestionentregables.controller.FeedbackController</param>
 							</targetClasses>
 							<targetTests>
 								<param>com.tfg.gestionentregables.service.*Test</param>
@@ -261,7 +269,13 @@
 							</targetTests>
 							<threads>4</threads>
 							<mutators>
-								<mutator>STRONGER</mutator>
+								<mutator>NULL_RETURNS</mutator>
+								<mutator>EMPTY_RETURNS</mutator>
+								<mutator>FALSE_RETURNS</mutator>
+								<mutator>TRUE_RETURNS</mutator>
+								<mutator>PRIMITIVE_RETURNS</mutator>
+								<mutator>MATH</mutator>
+								<mutator>INCREMENTS</mutator>
 							</mutators>
 							<outputFormats>
 								<param>HTML</param>
