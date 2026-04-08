@@ -1,2 +1,348 @@
-\chapter{Manual}\label{manual}
+﻿\chapter{Manual de usuario}\label{manual}
+
+\section{Introducci\'on}
+
+Este cap\'itulo describe el uso operativo del sistema desde la perspectiva de sus
+usuarios finales. El objetivo no es detallar la implementaci\'on interna,
+sino proporcionar una gu\'ia clara para ejecutar las tareas m\'as frecuentes
+de forma correcta y segura.
+
+El sistema dispone de tres perfiles principales:
+\textbf{administrador}, \textbf{profesor} y \textbf{estudiante}.
+Cada perfil accede a vistas y operaciones diferentes seg\'un permisos.
+
+\section{Acceso al sistema}
+
+\subsection{Requisitos previos de uso}
+
+Antes de operar con normalidad en la plataforma,
+se recomienda verificar las siguientes condiciones:
+
+\begin{itemize}
+	\item disponer de navegador actualizado en versi\'on estable;
+	\item comprobar conectividad de red durante subida de archivos de gran tama\~no;
+	\item utilizar credenciales personales y no compartidas;
+	\item validar que el perfil asignado (administrador/profesor/estudiante) coincide con el rol esperado.
+\end{itemize}
+
+Estas precondiciones reducen incidencias de sesi\'on,
+errores de permisos y fallos de subida de materiales.
+
+\subsection{Pantallas de acceso}
+
+El acceso se realiza desde la pantalla de inicio de sesi\'on.
+Las rutas funcionales principales son:
+
+\begin{itemize}
+	\item \texttt{/login}: inicio de sesi\'on.
+	\item \texttt{/forgot-password}: solicitud de recuperaci\'on de contrase\~na.
+	\item \texttt{/reset-password}: establecimiento de nueva contrase\~na mediante token.
+\end{itemize}
+
+Tras autenticarse correctamente, el usuario es redirigido al panel principal
+(\texttt{/dashboard}). Si el usuario ya tiene sesi\'on activa, la ruta de inicio
+redirige autom\'aticamente al panel.
+
+\subsection{Ciclo de sesi\'on}
+
+La sesi\'on se basa en token de acceso y token de refresco.
+Cuando el token de acceso expira, el cliente intenta renovarlo autom\'aticamente.
+Si la renovaci\'on falla, la sesi\'on se cierra y el usuario debe autenticarse de nuevo.
+
+\subsection{Recuperaci\'on de contrase\~na}
+
+El flujo de recuperaci\'on es el siguiente:
+
+\begin{enumerate}
+	\item El usuario solicita recuperaci\'on indicando su correo.
+	\item El sistema emite un token temporal y env\'ia instrucciones de restablecimiento.
+	\item El usuario accede al formulario de nueva contrase\~na e introduce token y clave nueva.
+\end{enumerate}
+
+\section{Perfiles y permisos}
+
+La Tabla~\ref{tab:manual-perfiles} resume capacidades por perfil.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{|P{2.6cm}|P{9.3cm}|}
+\hline
+\textbf{Perfil} & \textbf{Operaciones principales} \\
+\hline
+Administrador & Gestionar usuarios, cursos y grupos; asignar o retirar roles; mantener estructura acad\'emica. \\
+\hline
+Profesor & Crear/editar actividades; crear/editar entregables; revisar entregas; calificar; publicar/ocultar notas. \\
+\hline
+Estudiante & Consultar cursos y actividades visibles; realizar entregas; consultar historial, feedback y calificaciones seg\'un visibilidad. \\
+\hline
+\end{tabular}
+\caption{Capacidades por perfil de usuario}
+\label{tab:manual-perfiles}
+\end{table}
+
+\section{Gu\'ia de uso para profesorado}
+
+\subsection{Crear y configurar una actividad}
+
+Flujo recomendado:
+
+\begin{enumerate}
+	\item Acceder a \texttt{/cursos} y seleccionar un curso.
+	\item Crear actividad desde el detalle del curso.
+	\item Definir t\'itulo, descripci\'on, fechas y visibilidad.
+	\item Asignar grupos destinatarios cuando aplique.
+\end{enumerate}
+
+Validaciones clave:
+
+\begin{itemize}
+	\item El t\'itulo es obligatorio.
+	\item La fecha de inicio no puede ser posterior a la fecha l\'imite.
+	\item La visibilidad condiciona si el alumnado puede ver la actividad.
+\end{itemize}
+
+\subsection{Crear y editar entregables}
+
+Desde la actividad, el profesor puede crear entregables
+desde la vista de alta de entregables del detalle de actividad.
+
+Par\'ametros relevantes de configuraci\'on:
+
+\begin{itemize}
+	\item T\'itulo, descripci\'on y fecha l\'imite.
+	\item Tipo de archivo esperado (PDF, DOCX, ZIP, imagen, video, texto, enlace, etc.).
+	\item Tama\~no m\'aximo permitido.
+	\item Permitir o no reenv\'io.
+	\item Visibilidad de notas para estudiantes.
+\end{itemize}
+
+Cuando el tipo esperado es ZIP, puede definirse estructura esperada
+y validaci\'on estricta, lo que obliga a que la entrega siga el formato indicado.
+
+\subsection{Revisar entregas y evaluar}
+
+Las entregas pueden revisarse desde:
+
+\begin{itemize}
+	\item \texttt{/entregables/:id} (listado por entregable),
+	\item \texttt{/evaluaciones} (bandeja de pendientes de calificaci\'on).
+\end{itemize}
+
+Acciones habituales:
+
+\begin{enumerate}
+	\item Filtrar por curso, actividad, entregable y estado temporal.
+	\item Abrir detalle de entrega (\texttt{/entregas/:id}).
+	\item Revisar archivos, comentario y metadatos.
+	\item Registrar nota y feedback.
+	\item Publicar/ocultar visibilidad de nota al estudiante.
+\end{enumerate}
+
+El sistema permite descargar entregas de forma agregada en ZIP,
+tanto a nivel de entregable como de actividad completa.
+
+\subsection{Flujo docente recomendado de extremo a extremo}
+
+Para maximizar consistencia y reducir retrabajo,
+se propone la siguiente secuencia de trabajo docente:
+
+\begin{enumerate}
+	\item crear actividad con fechas y grupos correctamente delimitados;
+	\item publicar entregables con requisitos de formato y tama\~no expl\'icitos;
+	\item revisar peri\'odicamente estado de entregas pendientes;
+	\item corregir por lotes homog\'eneos (por grupo o por entregable);
+	\item registrar feedback accionable y criterio de nota transparente;
+	\item publicar calificaciones cuando el bloque de correcci\'on est\'e validado.
+\end{enumerate}
+
+Este flujo mejora la trazabilidad y evita inconsistencias
+entre estado de evaluaci\'on y comunicaci\'on al alumnado.
+
+\section{Gu\'ia de uso para estudiantes}
+
+\subsection{Consultar actividades y entregables}
+
+Flujo recomendado:
+
+\begin{enumerate}
+	\item Acceder al panel y entrar en \texttt{/cursos}.
+	\item Seleccionar curso y revisar actividades visibles.
+	\item Entrar en el detalle de actividad y localizar entregables disponibles.
+\end{enumerate}
+
+La visibilidad de actividad/entregable depende de la configuraci\'on docente
+y de la pertenencia del estudiante a grupos autorizados.
+
+\subsection{Realizar una entrega}
+
+La subida se realiza en \texttt{/entregables/:id/entregar}.
+El formulario adapta su comportamiento al tipo de entrega:
+
+\begin{itemize}
+	\item \textbf{SOLO\_TEXTO}: no admite archivos; requiere comentario.
+	\item \textbf{ENLACE}: no admite archivos; el contenido debe ir en comentario.
+	\item \textbf{ZIP}: exige archivo ZIP y puede validar estructura.
+	\item \textbf{Otros tipos}: valida extensi\'on y tama\~no m\'aximo seg\'un configuraci\'on.
+\end{itemize}
+
+Adem\'as, el formulario incluye guardado temporal en local
+(borrador), lo que reduce riesgo de p\'erdida de trabajo
+si se interrumpe la sesi\'on o falla la conexi\'on.
+
+\subsection{Recomendaciones para entregas sin incidencias}
+
+Para minimizar errores de validaci\'on,
+se recomienda al estudiante:
+
+\begin{itemize}
+	\item revisar el tipo de entrega requerido antes de preparar el material;
+	\item verificar nombre y extensi\'on de archivos antes de subir;
+	\item evitar subir archivos en el \`ultimo minuto para mitigar riesgos de red;
+	\item confirmar en la vista de detalle que la versi\'on final ha quedado registrada.
+\end{itemize}
+
+En entregas de tipo ZIP,
+si existe estructura obligatoria,
+conviene validar localmente el contenido antes de la subida.
+
+\subsection{Consultar historial y feedback}
+
+En el detalle de entrega (\texttt{/entregas/:id}) el estudiante puede:
+
+\begin{itemize}
+	\item revisar versiones entregadas,
+	\item descargar/previsualizar materiales,
+	\item consultar feedback y nota cuando est\'en publicadas.
+\end{itemize}
+
+Si la nota no es visible, la entrega aparece sin calificaci\'on p\'ublica,
+aunque internamente ya haya sido evaluada por el profesor.
+
+\section{Gu\'ia de uso para administraci\'on}
+
+\subsection{Panel de administraci\'on}
+
+El panel \texttt{/admin} est\'a organizado en tres pesta\~nas principales:
+
+\begin{itemize}
+	\item \textbf{Usuarios}: alta, edici\'on, eliminaci\'on y asignaci\'on de roles.
+	\item \textbf{Cursos}: creaci\'on y mantenimiento de cursos.
+	\item \textbf{Grupos}: creaci\'on y gesti\'on de grupos asociados a cursos.
+\end{itemize}
+
+\subsection{Operaciones destacadas}
+
+El perfil administrador puede:
+
+\begin{enumerate}
+	\item Crear usuarios individualmente o por importaci\'on de archivo.
+	\item Asignar rol de profesor o estudiante (con grupo en el caso de estudiante).
+	\item Crear cursos y vincular profesorado.
+	\item Estructurar grupos y reasignar alumnado.
+\end{enumerate}
+
+Este perfil concentra operaciones de gobierno funcional,
+por lo que se recomienda limitar su uso a personal autorizado.
+
+\subsection{Pol\'iticas recomendadas de gobierno de usuarios}
+
+Para mantener orden operativo y seguridad,
+se recomienda aplicar las siguientes pol\'iticas de administraci\'on:
+
+\begin{itemize}
+	\item principio de m\'inimo privilegio en asignaci\'on de roles;
+	\item revisi\'on peri\'odica de cuentas inactivas o duplicadas;
+	\item separaci\'on de cuentas de administraci\'on y cuentas de uso docente;
+	\item registro de cambios sensibles en altas, bajas y cambios de rol.
+\end{itemize}
+
+\section{Mensajes de error y resoluci\'on de incidencias}
+
+Las incidencias m\'as frecuentes y su acci\'on recomendada son:
+
+\begin{itemize}
+	\item \textbf{Credenciales inv\'alidas}: verificar correo y contrase\~na.
+	\item \textbf{Sesi\'on expirada}: iniciar sesi\'on de nuevo.
+	\item \textbf{Archivo no permitido}: revisar tipo/extensi\'on/tama\~no del entregable.
+	\item \textbf{Sin permisos}: comprobar rol y pertenencia a curso/grupo.
+	\item \textbf{Error al enviar entrega}: reintentar y comprobar conexi\'on.
+\end{itemize}
+
+Como recomendaci\'on general, ante errores persistentes debe registrarse
+la hora, operaci\'on realizada y mensaje mostrado para facilitar diagn\'ostico.
+
+\subsection{Matriz de incidencias operativas}
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{|P{3.2cm}|P{4.4cm}|P{3.8cm}|}
+\hline
+\textbf{Incidencia} & \textbf{Causa habitual} & \textbf{Acci\'on recomendada} \\
+\hline
+No se puede iniciar sesi\'on & Credenciales incorrectas o sesi\'on expirada & Reintentar autenticaci\'on y, si procede, usar recuperaci\'on de contrase\~na \\
+\hline
+Entrega rechazada & Tipo de archivo o tama\~no no permitido & Revisar configuraci\'on del entregable y ajustar archivo \\
+\hline
+No aparece actividad/entregable & Visibilidad desactivada o grupo no asignado & Verificar configuraci\'on por parte del profesorado \\
+\hline
+No se puede calificar & Falta de permisos por rol/contexto & Confirmar vinculaci\'on docente con curso/grupo \\
+\hline
+Error en descarga ZIP & Interrupci\'on de red o contenido no disponible & Reintentar descarga y revisar estado de materiales \\
+\hline
+\end{tabular}
+\caption{Matriz de incidencias frecuentes y resoluci\'on recomendada}
+\label{tab:manual-incidencias}
+\end{table}
+
+\section{Seguridad y protecci\'on de la informaci\'on en el uso diario}
+
+La seguridad operativa depende tanto de mecanismos t\'ecnicos
+como de buenas pr\'acticas de uso.
+Para preservar confidencialidad e integridad de datos acad\'emicos,
+se recomienda:
+
+\begin{itemize}
+	\item no compartir contrase\~nas ni tokens de sesi\'on;
+	\item cerrar sesi\'on en dispositivos compartidos;
+	\item evitar cargas de archivos desde equipos no confiables;
+	\item revisar peri\'odicamente permisos y visibilidad de notas.
+\end{itemize}
+
+Estas medidas reducen riesgos de acceso no autorizado
+y publicaci\'on accidental de informaci\'on acad\'emica sensible.
+
+\section{Checklist operativo por perfil}
+
+Como apoyo de uso r\'apido,
+se incluye un checklist resumido para cada rol:
+
+\begin{itemize}
+	\item \textbf{Administrador}: alta de usuarios, asignaci\'on de roles, revisi\'on de estructura de cursos/grupos.
+	\item \textbf{Profesor}: configuraci\'on de actividad, publicaci\'on de entregable, correcci\'on y publicaci\'on de nota.
+	\item \textbf{Estudiante}: revisi\'on de actividad visible, entrega en plazo, verificaci\'on de estado y feedback.
+\end{itemize}
+
+El uso sistem\'atico de este checklist disminuye errores de operaci\'on
+y mejora la consistencia del proceso acad\'emico.
+
+\section{Buenas pr\'acticas de uso}
+
+Para minimizar incidencias operativas:
+
+\begin{itemize}
+	\item comprobar siempre fecha l\'imite y tipo de entrega antes de enviar,
+	\item revisar la vista de detalle tras cada acci\'on cr\'itica,
+	\item mantener actualizado el perfil de usuario,
+	\item evitar compartir credenciales,
+	\item cerrar sesi\'on en equipos compartidos.
+\end{itemize}
+
+\section{Conclusiones del cap\'itulo}
+
+El manual de usuario consolida el uso operativo del sistema y garantiza
+que los tres perfiles principales disponen de un procedimiento claro,
+coherente con las reglas de negocio y alineado con los requisitos definidos.
+
+Su existencia facilita adopci\'on, reduce errores de uso y mejora la calidad
+del servicio acad\'emico prestado por la plataforma.
 

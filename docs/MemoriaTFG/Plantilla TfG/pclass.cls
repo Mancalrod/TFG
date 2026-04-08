@@ -46,6 +46,12 @@
 \usepackage{boxedminipage}%para hacer cuadros vac{\'\i}os
 \usepackage{multicol}%insertar tablas
 \usepackage{color}%definir colores
+\usepackage{array}
+\usepackage{ragged2e}
+
+% Columna de tabla para texto en bloque sin justificado forzado,
+% evitando Underfull \hbox en celdas estrechas.
+\newcolumntype{P}[1]{>{\RaggedRight\arraybackslash}p{#1}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%para c{\'o}digo fuente%%%%%%%%%%%%%%%%%%%%%
 \usepackage{listings}

@@ -1,6 +1,925 @@
-\chapter{An\'alisis de requisitos, dise\~no e implementaci\'on}\label{requisitos}
+﻿\chapter{An\'alisis de requisitos, dise\~no e implementaci\'on}\label{requisitos}
 
+\section{Introducci\'on}
 
+Este cap\'itulo integra tres perspectivas que en un desarrollo profesional no deben
+tratarse de forma aislada: la especificaci\'on de requisitos, el dise\~no t\'ecnico y la
+implementaci\'on efectiva del sistema.
 
+El objetivo es demostrar trazabilidad de extremo a extremo: desde la necesidad
+identificada en el an\'alisis inicial hasta su materializaci\'on en componentes software,
+persistencia, seguridad, pruebas y despliegue.
 
-\section{Dise\~no e implementaci\'on}
+\section{An\'alisis de requisitos}
+
+\subsection{Fuentes de requisitos}
+
+La definici\'on del cat\'alogo de requisitos se ha construido a partir de las siguientes
+fuentes:
+
+\begin{itemize}
+	\item Documento ERS (Especificaci\'on de Requisitos del Sistema).
+	\item Documento DAS (Documento de An\'alisis del Sistema).
+	\item Modelado estructurado y versionado en Proteus.
+	\item Product Backlog y Sprint Backlog utilizados en la ejecuci\'on iterativa.
+	\item Evidencia emp\'irica obtenida durante pruebas funcionales y de integraci\'on.
+\end{itemize}
+
+Este planteamiento evita una especificaci\'on est\'atica: los requisitos se formalizan,
+se priorizan, se implementan por incrementos y se vuelven a validar con el producto
+funcionando.
+
+\subsection{Estructura del cat\'alogo}
+
+El cat\'alogo se organiza en cuatro bloques complementarios:
+
+\begin{itemize}
+	\item Requisitos funcionales de informaci\'on y operaci\'on.
+	\item Reglas de negocio que acotan el comportamiento permitido.
+	\item Requisitos no funcionales de calidad del sistema.
+	\item Restricciones e integraciones t\'ecnicas por entorno.
+\end{itemize}
+
+En Proteus se distinguen expl\'icitamente requisitos funcionales (por ejemplo,
+\texttt{RQF-001}), reglas de negocio (\texttt{REGN-001}) y no funcionales
+(\texttt{RQNF-001} a \texttt{RQNF-011}), lo que facilita su seguimiento
+durante la implementaci\'on.
+
+\subsection{Requisitos funcionales}
+
+El ERS define un abanico funcional amplio, del que se ha priorizado el n\'ucleo
+necesario para el MVP. A nivel de dominio, la funcionalidad se agrupa en:
+
+\begin{enumerate}
+	\item \textbf{Identidad y acceso}: autenticaci\'on de usuarios y control por rol.
+	\item \textbf{Estructura acad\'emica}: cursos, grupos, actividades y vinculaciones.
+	\item \textbf{Gesti\'on de entregables}: configuraci\'on de fechas, visibilidad,
+	reenv\'ios y estructura esperada.
+	\item \textbf{Gesti\'on de entregas}: subida, historial, descarga y trazabilidad.
+	\item \textbf{Evaluaci\'on y feedback}: calificaci\'on, comentarios y publicaci\'on de notas.
+\end{enumerate}
+
+Como ejemplos representativos:
+
+\begin{itemize}
+	\item \textbf{RQF-001}: creaci\'on de usuarios por administrador.
+	\item \textbf{RQF-014--RQF-017}: operaciones de entrega y versionado.
+	\item \textbf{RQF-018--RQF-025}: evaluaci\'on, visibilidad e integraciones.
+\end{itemize}
+
+\subsection{Reglas de negocio}
+
+Las reglas de negocio restringen de forma expl\'icita qu\'e acciones son admisibles.
+Una regla clave es \textbf{REGN-001}, que establece que solo el profesor
+autorizado puede asignar una calificaci\'on.
+
+Esta norma se implementa en validaciones de servicio y controlador,
+evitando tanto la elevaci\'on de privilegios como la evaluaci\'on fuera de contexto
+(p. ej., docente no vinculado al grupo o actividad).
+
+\subsection{Requisitos no funcionales}
+
+Los requisitos no funcionales aportan condiciones de calidad del producto.
+La Tabla~\ref{tab:rqnf-resumen} resume los m\'as relevantes para el alcance actual.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{|P{2.1cm}|P{3.5cm}|P{6.4cm}|}
+\hline
+\textbf{C\'odigo} & \textbf{Categor\'ia} & \textbf{Aplicaci\'on en el sistema} \\
+\hline
+RQNF-001 & Fiabilidad & Mitigar p\'erdida de datos en operaciones cr\'iticas de entrega/evaluaci\'on. \\
+\hline
+RQNF-002 & Usabilidad & Flujos entendibles para usuarios no t\'ecnicos, con navegaci\'on guiada por rol. \\
+\hline
+RQNF-004 & Mantenibilidad & Bajo acoplamiento entre capas y separaci\'on estricta de responsabilidades. \\
+\hline
+RQNF-006 & Eficiencia & Respuesta \`agil en consultas frecuentes de panel, actividad y entregables. \\
+\hline
+RQNF-008 & Portabilidad & Compatibilidad web en navegadores modernos de uso general. \\
+\hline
+RQNF-009 & Seguridad & Exposici\'on de datos condicionada por autenticaci\'on y autorizaci\'on. \\
+\hline
+\end{tabular}
+\caption{Requisitos no funcionales representativos}
+\label{tab:rqnf-resumen}
+\end{table}
+
+\subsection{Priorizaci\'on y alcance}
+
+La priorizaci\'on se realiz\'o con criterio MoSCoW y validaci\'on continua con el backlog.
+El foco del MVP se situ\'o en los procesos con mayor impacto docente:
+
+\begin{itemize}
+	\item gesti\'on de actividades y entregables,
+	\item flujo completo de entrega y evaluaci\'on,
+	\item seguridad por rol,
+	\item persistencia y trazabilidad de cambios.
+\end{itemize}
+
+Funcionalidades avanzadas (integraciones extendidas, autenticaci\'on federada completa,
+observabilidad m\'as profunda) se mantienen en backlog de evoluci\'on y no comprometen
+la viabilidad del alcance de TFG.
+
+\subsection{Trazabilidad requisito-backlog-c\'odigo}
+
+La trazabilidad se gestiona en tres niveles:
+
+\begin{itemize}
+	\item \textbf{Nivel de an\'alisis}: identificador en ERS/Proteus.
+	\item \textbf{Nivel de planificaci\'on}: PBI y sprint asociado.
+	\item \textbf{Nivel de ejecuci\'on}: m\'odulo software y prueba que lo valida.
+\end{itemize}
+
+La Tabla~\ref{tab:trazabilidad-requisitos} muestra ejemplos representativos.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{|P{2.2cm}|P{3.2cm}|P{4.0cm}|P{2.6cm}|}
+\hline
+\textbf{Req.} & \textbf{PBI / Sprint} & \textbf{Implementaci\'on principal} & \textbf{Validaci\'on} \\
+\hline
+RQF-001 & Usuarios y roles / S1-S2 & AuthController, UsuarioService, seguridad por rol & Tests auth + integraci\'on \\
+\hline
+RQF-018 & Crear entregable / S3-S4 & EntregableController, EntregableService, Entregable & Unit + API tests \\
+\hline
+RQF-023 & Subir entrega / S4-S5 & EntregaController, EntregaService, MaterialService & Integraci\'on + E2E \\
+\hline
+REGN-001 & Evaluaci\'on docente / S5 & Validaciones en servicio de entregas y evaluaci\'on & Pruebas de autorizaci\'on \\
+\hline
+RQNF-009 & Seguridad global / transversal & SecurityConfig, JwtAuthenticationFilter, RateLimitFilter & Tests de seguridad \\
+\hline
+\end{tabular}
+\caption{Ejemplo de trazabilidad entre requisitos, backlog e implementaci\'on}
+\label{tab:trazabilidad-requisitos}
+\end{table}
+
+\subsection{Contexto documental de partida (ERS y DAS)}
+
+La especificaci\'on documental de este TFG no se apoya en descripciones ad hoc,
+sino en dos artefactos de an\'alisis formal mantenidos en Proteus:
+
+\begin{itemize}
+	\item \textbf{ERS (Especificaci\'on de Requisitos del Sistema)}:
+	define situaci\'on actual, necesidades de negocio, subsistemas y cat\'alogo
+	de requisitos (generales, de informaci\'on, funcionales, no funcionales y
+	reglas de negocio).
+	\item \textbf{DAS (Documento de An\'alisis del Sistema)}:
+	define arquitectura l\'ogica, modelo de clases, diagramas de estado,
+	diagramas de secuencia, navegabilidad e inventario de mockups de interfaz.
+\end{itemize}
+
+La reutilizaci\'on de ambos documentos en esta memoria persigue dos objetivos:
+primero, preservar trazabilidad respecto al trabajo original de Ingenier\'ia
+de Requisitos; segundo, demostrar que las decisiones de dise\~no e implementaci\'on
+adoptadas durante el TFG responden a una base de especificaci\'on expl\'icita.
+
+\subsection{Situaci\'on actual y necesidades de negocio (ERS)}
+
+El ERS identifica un escenario de partida con fricci\'on operativa notable:
+creaci\'on de actividades y recogida de entregas con alto componente manual,
+dificultad para mantener trazabilidad uniforme y baja capacidad de evoluci\'on
+cuando se pretende introducir reglas de negocio m\'as finas.
+
+Sobre ese diagn\'ostico, las necesidades de negocio priorizadas fueron:
+
+\begin{itemize}
+	\item reducir carga administrativa en procesos docentes recurrentes,
+	\item dar al estudiante un flujo de entrega m\'as guiado y transparente,
+	\item centralizar evaluaci\'on y feedback con reglas de autorizaci\'on claras,
+	\item mejorar mantenibilidad del sistema y su capacidad de evoluci\'on.
+\end{itemize}
+
+Estas necesidades se conectan con el resto de la memoria en tres planos:
+arquitectura (separaci\'on de capas), implementaci\'on (m\'odulos especializados)
+y verificaci\'on (pruebas por flujo cr\'itico y por requisito).
+
+\subsection{Descomposici\'on en subsistemas (ERS)}
+
+El ERS descompone el sistema en cinco subsistemas. Esta descomposici\'on
+ha sido reutilizada como gu\'ia de dise\~no modular durante el desarrollo.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{|P{2.0cm}|P{3.9cm}|P{5.9cm}|}
+\hline
+\textbf{C\'odigo} & \textbf{Subsistema} & \textbf{Responsabilidad principal} \\
+\hline
+SUBS-001 & SIU (Interacci\'on con el Usuario) & Portal web y vistas por rol para alumno, profesor y administrador. \\
+\hline
+SUBS-002 & SGUS (Usuarios y Seguridad) & Autenticaci\'on, autorizaci\'on por rol y control de acceso contextual. \\
+\hline
+SUBS-003 & SGA (Gesti\'on Acad\'emica) & Cursos, actividades, entregables, evaluaci\'on y feedback. \\
+\hline
+SUBS-004 & SPA (Procesamiento de Archivos) & Validaci\'on t\'ecnica de ficheros, organizaci\'on y versionado de entregas. \\
+\hline
+SUBS-005 & SPD (Persistencia de Datos) & Persistencia relacional y repositorio de archivos con trazabilidad. \\
+\hline
+\end{tabular}
+\normalsize
+\caption{Subsistemas definidos en ERS y reutilizados en el dise\~no del TFG}
+\label{tab:subsistemas-ers}
+\end{table}
+
+\subsection{Cat\'alogo exhaustivo de requisitos del ERS}
+
+Con objeto de incorporar de forma completa el contenido de ERS, se documenta
+el inventario de requisitos por tipolog\'ia y su interpretaci\'on en el alcance
+real del TFG.
+
+\subsubsection*{Requisitos generales (RQG)}
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{|P{1.4cm}|P{3.2cm}|P{7.2cm}|}
+\hline
+\textbf{C\'odigo} & \textbf{Nombre} & \textbf{Descripci\'on sint\'etica} \\
+\hline
+RQG-001 & Gesti\'on de usuarios y roles & Alta de usuarios con rol (administrador, profesor, alumno) y permisos diferenciados por perfil. \\
+\hline
+RQG-002 & Gesti\'on de actividades y entregables & Modelado de actividades evaluables/no evaluables y entregables con reglas propias. \\
+\hline
+RQG-003 & Acceso de alumnos a entregables & Acceso de estudiante a entregables visibles y registro temporal de acciones. \\
+\hline
+RQG-004 & Gesti\'on de versiones y reenv\'ios & Control de versiones de entrega y soporte de reenv\'io cuando el docente lo habilita. \\
+\hline
+RQG-005 & Configuraci\'on de actividades y entregables & Definici\'on de fechas, formatos y condiciones de publicaci\'on por contexto acad\'emico. \\
+\hline
+RQG-006 & Comunicaci\'on y feedback & Canal de comunicaci\'on docente-estudiante vinculado a la evaluaci\'on de entregas. \\
+\hline
+RQG-007 & Seguridad y control de acceso & Restricci\'on de visibilidad/operaci\'on por identidad, rol y pertenencia a curso-grupo. \\
+\hline
+\end{tabular}
+\normalsize
+\caption{Inventario de requisitos generales (RQG) en ERS}
+\label{tab:rqg-inventario}
+\end{table}
+
+\subsubsection*{Requisitos de informaci\'on (RQI)}
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{|P{1.4cm}|P{3.2cm}|P{7.2cm}|}
+\hline
+\textbf{C\'odigo} & \textbf{Nombre} & \textbf{Descripci\'on sint\'etica} \\
+\hline
+RQI-001 & Informaci\'on sobre actividades & Persistencia de metadatos de actividades creadas por profesorado. \\
+\hline
+RQI-002 & Informaci\'on sobre entregables & Persistencia de configuraci\'on de cada entregable y su vinculaci\'on con actividad. \\
+\hline
+RQI-003 & Informaci\'on de usuarios & Registro de identidad, rol y datos de operaci\'on por tipo de usuario. \\
+\hline
+RQI-004 & Informaci\'on de cursos & Persistencia de estructura acad\'emica (curso/grupo y relaciones). \\
+\hline
+RQI-005 & Informaci\'on de feedback & Persistencia de calificaciones, comentarios y estado de publicaci\'on. \\
+\hline
+\end{tabular}
+\normalsize
+\caption{Inventario de requisitos de informaci\'on (RQI) en ERS}
+\label{tab:rqi-inventario}
+\end{table}
+
+\subsubsection*{Requisitos funcionales (RQF)}
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{|P{1.4cm}|P{3.3cm}|P{7.1cm}|}
+\hline
+\textbf{C\'odigo} & \textbf{Nombre} & \textbf{Descripci\'on sint\'etica} \\
+\hline
+RQF-001 & Crear usuarios & Alta de usuarios por administrador con asignaci\'on de rol. \\
+\hline
+RQF-002 & Iniciar sesi\'on & Autenticaci\'on de usuarios en la plataforma. \\
+\hline
+RQF-003 & Editar usuarios & Modificaci\'on de datos de usuario seg\'un permisos. \\
+\hline
+RQF-004 & Eliminar usuarios & Baja de usuarios por perfil administrador. \\
+\hline
+RQF-005 & Crear actividades & Creaci\'on de actividad acad\'emica por docente. \\
+\hline
+RQF-006 & Visibilizar actividades & Publicaci\'on/ocultaci\'on de actividades para estudiantes. \\
+\hline
+RQF-007 & Proporcionar adjuntos & Asociaci\'on de material de apoyo a actividad/entregable. \\
+\hline
+RQF-008 & Modificar actividades & Edici\'on de configuraci\'on de actividad por docente propietario. \\
+\hline
+RQF-009 & Eliminar actividades & Eliminaci\'on de actividad seg\'un reglas de propiedad. \\
+\hline
+RQF-010 & Ver actividades & Consulta de actividades por rol y contexto acad\'emico. \\
+\hline
+RQF-011 & Crear entregables & Alta de entregables dentro de actividad. \\
+\hline
+RQF-012 & Modificar entregables & Edici\'on de entregable por docente autorizado. \\
+\hline
+\end{tabular}
+\normalsize
+\caption{Inventario de requisitos funcionales (RQF-001 a RQF-012)}
+\label{tab:rqf-inventario-1}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{|P{1.4cm}|P{3.3cm}|P{7.1cm}|}
+\hline
+\textbf{C\'odigo} & \textbf{Nombre} & \textbf{Descripci\'on sint\'etica} \\
+\hline
+RQF-013 & Eliminar entregable & Baja de entregable por docente autorizado. \\
+\hline
+RQF-014 & Realizar entrega & Subida de archivo por estudiante para un entregable habilitado. \\
+\hline
+RQF-015 & Enviar actividad & Confirmaci\'on de env\'io de actividad completa. \\
+\hline
+RQF-016 & Versionar entregables & Mantenimiento de historial de versiones por entregable. \\
+\hline
+RQF-017 & Versionar actividades & Mantenimiento de versiones de resoluci\'on de actividad. \\
+\hline
+RQF-018 & Dar feedback & Publicaci\'on de comentarios docentes sobre entrega/actividad. \\
+\hline
+RQF-019 & Realizar calificaci\'on & Asignaci\'on de nota por profesor autorizado. \\
+\hline
+RQF-020 & Ver entregables & Consulta de entregas y versiones por rol permitido. \\
+\hline
+RQF-021 & Crear curso & Alta de curso/asignatura por administraci\'on. \\
+\hline
+RQF-022 & Modificar curso & Edici\'on de datos de curso por administraci\'on. \\
+\hline
+RQF-023 & Vista de estudiante & Visualizaci\'on por profesor de la experiencia de alumno. \\
+\hline
+RQF-024 & Visibilizar entregable & Publicaci\'on/ocultaci\'on de entregables concretos. \\
+\hline
+RQF-025 & Integraci\'on cloud & Uso de almacenamiento en nube seg\'un configuraci\'on de entorno. \\
+\hline
+\end{tabular}
+\normalsize
+\caption{Inventario de requisitos funcionales (RQF-013 a RQF-025)}
+\label{tab:rqf-inventario-2}
+\end{table}
+
+\subsubsection*{Reglas de negocio (REGN)}
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{|P{1.6cm}|P{3.5cm}|P{6.6cm}|}
+\hline
+\textbf{C\'odigo} & \textbf{Nombre} & \textbf{Regla de negocio} \\
+\hline
+REGN-001 & Correcci\'on de entregables & Solo el profesor asignado al entregable puede emitir nota. \\
+\hline
+REGN-002 & Visibilidad de entregables & El alumno solo accede a sus propias entregas/versiones. \\
+\hline
+REGN-003 & Correcci\'on de actividades & Solo el profesor asignado a la actividad puede calificar. \\
+\hline
+REGN-004 & Visibilidad de actividades & El alumno solo visualiza sus propias resoluciones de actividad. \\
+\hline
+REGN-005 & Fecha l\'imite de entrega & No se admiten env\'ios fuera de plazo salvo configuraci\'on expl\'icita. \\
+\hline
+REGN-006 & Recursos no visibles & Se deniega interacci\'on del alumno con elementos ocultos. \\
+\hline
+REGN-007 & Creaci\'on de recursos & Solo profesorado crea actividades y entregables. \\
+\hline
+REGN-008 & Emisi\'on de feedback & Solo el docente autorizado publica feedback evaluativo. \\
+\hline
+\end{tabular}
+\normalsize
+\caption{Inventario de reglas de negocio (REGN) en ERS}
+\label{tab:regn-inventario}
+\end{table}
+
+\subsubsection*{Requisitos no funcionales (RQNF)}
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{|P{1.6cm}|P{3.2cm}|P{6.9cm}|}
+\hline
+\textbf{C\'odigo} & \textbf{Nombre} & \textbf{Condici\'on de calidad} \\
+\hline
+RQNF-001 & Tolerancia a fallos & Persistencia local temporal ante fallos de conectividad para evitar p\'erdida de datos. \\
+\hline
+RQNF-002 & Intuitividad & Interfaz comprensible para nuevos usuarios con patrones de uso habituales. \\
+\hline
+RQNF-003 & Uniformidad & Coherencia visual y de estilo con directrices de marca institucional. \\
+\hline
+RQNF-004 & Acoplamiento bajo & Separaci\'on de responsabilidades con dependencias estrictamente necesarias. \\
+\hline
+RQNF-005 & Cohesi\'on alta & Organizaci\'on interna de m\'odulos orientada a mantenimiento evolutivo. \\
+\hline
+RQNF-006 & Tiempo de carga & Tiempo de transici\'on objetivo inferior a 2 segundos en condiciones \`optimas. \\
+\hline
+RQNF-007 & Tiempo de b\'usqueda & Respuesta r\'apida en consultas frecuentes y minimizaci\'on de b\'usquedas redundantes. \\
+\hline
+RQNF-008 & Compatibilidad de navegadores & Soporte para navegadores modernos de uso com\'un. \\
+\hline
+RQNF-009 & Exposici\'on de informaci\'on & Visualizaci\'on de datos restringida a usuarios autenticados y autorizados. \\
+\hline
+RQNF-010 & Encriptaci\'on & Protecci\'on criptogr\'afica de informaci\'on personal/sensible. \\
+\hline
+RQNF-011 & Portabilidad web & Compatibilidad expl\'icita con Chrome, Firefox y Edge en escritorio/m\'ovil. \\
+\hline
+\end{tabular}
+\normalsize
+\caption{Inventario de requisitos no funcionales (RQNF) en ERS}
+\label{tab:rqnf-inventario-completo}
+\end{table}
+
+\subsection{Reutilizaci\'on de diagramas y mockups del DAS}
+
+El DAS aporta una base visual amplia (diagramas t\'ecnicos, secuencias,
+navegabilidad y mockups) que se reutiliza en esta memoria para explicar
+de forma verificable cada decisi\'on de dise\~no e implementaci\'on.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{|P{3.5cm}|P{5.5cm}|P{2.8cm}|}
+\hline
+\textbf{Artefacto DAS} & \textbf{Archivo original en TFGProteus/assets} & \textbf{Uso en memoria} \\
+\hline
+Arquitectura l\'ogica & ArquitecturaTFG.drawio.png & Dise\~no global \\
+\hline
+Diagrama de clases & Diagrama de clases.png & Modelo de dominio \\
+\hline
+Diagrama de estado & Diagrama de estado.png & Ciclo de vida \\
+\hline
+Navegabilidad & Diagrama de navegabilidad (1).png & Flujo de interfaz \\
+\hline
+Secuencia autenticaci\'on & Autenticacion y Acceso.png & Flujo de acceso \\
+\hline
+Secuencia crear actividad & Backend Activity Creation-2026-03-18-161459.png & Flujo docente \\
+\hline
+Secuencia realizar entrega & Realizar Entrega.png & Flujo estudiante \\
+\hline
+Secuencia evaluaci\'on & Evaluacion y Feedback.png & Flujo de correcci\'on \\
+\hline
+\end{tabular}
+\normalsize
+\caption{Diagramas principales reutilizados desde DAS}
+\label{tab:das-diagramas-principales}
+\end{table}
+
+\figura{0.90}{\detokenize{../../TFGProteus/assets/ArquitecturaTFG.drawio.png}}{Arquitectura l\'ogica del sistema (DAS)}{fig:das-arquitectura}{}
+
+\figura{0.85}{\detokenize{../../TFGProteus/assets/Diagrama de clases.png}}{Modelo de clases del sistema (DAS)}{fig:das-clases}{}
+
+\figura{0.55}{\detokenize{../../TFGProteus/assets/Diagrama de estado.png}}{Diagrama de estado de actividades (DAS)}{fig:das-estado}{}
+
+\figura{0.85}{\detokenize{../../TFGProteus/assets/Diagrama de navegabilidad (1).png}}{Navegabilidad principal de la interfaz (DAS)}{fig:das-navegabilidad}{}
+
+\figura{0.88}{\detokenize{../../TFGProteus/assets/Autenticacion y Acceso.png}}{Secuencia de autenticaci\'on y acceso (DAS)}{fig:das-seq-auth}{}
+
+\figura{0.88}{\detokenize{../../TFGProteus/assets/Realizar Entrega.png}}{Secuencia de realizaci\'on de entrega (DAS)}{fig:das-seq-entrega}{}
+
+\figura{0.75}{\detokenize{../../TFGProteus/assets/InterfazDeUsuarioTFG-LogueadoComoEstudiante.png}}{Mockup de panel principal de estudiante (DAS)}{fig:das-mock-estudiante}{}
+
+\figura{0.75}{\detokenize{../../TFGProteus/assets/LogueadoComoProfesor.png}}{Mockup de panel principal de profesor (DAS)}{fig:das-mock-profesor}{}
+
+Adicionalmente, el DAS incluye un inventario de diecis\'eis mockups que cubre
+las operaciones esenciales por rol. Para mantener equilibrio entre exhaustividad
+y legibilidad, su trazado completo se resume en la Tabla~\ref{tab:das-mockups}.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{|P{4.9cm}|P{6.8cm}|}
+\hline
+\textbf{Archivo de mockup} & \textbf{Escenario principal representado} \\
+\hline
+InterfazDeUsuarioTFG-InicioDeSesi\'on.drawio.png & Inicio de sesi\'on y entrada al sistema. \\
+\hline
+InterfazDeUsuarioTFG-Registrarse.drawio.png & Registro o alta inicial de usuario. \\
+\hline
+InterfazDeUsuarioTFG-LogueadoComoEstudiante.png & Panel inicial de estudiante autenticado. \\
+\hline
+VistaEstudianteDentroDeUnaAsignatura.png & Vista de asignatura desde rol estudiante. \\
+\hline
+LogueadoComoEstudianteSeleccionandoCheckbox.png & Selecci\'on de entregables por estudiante. \\
+\hline
+LogueadoComoEstudianteEnCalificaci\'ones.png & Consulta de calificaciones y feedback. \\
+\hline
+LogueadoComoProfesor.png & Panel inicial de profesor autenticado. \\
+\hline
+VistaProfesorEnAsignatura.png & Vista de asignatura desde rol profesor. \\
+\hline
+Creacion de actividad.png & Creaci\'on de actividad acad\'emica. \\
+\hline
+Edici\'on de actividad.png & Edici\'on de actividad existente. \\
+\hline
+Realizar calificaciones.png & Proceso de calificaci\'on por docente. \\
+\hline
+DentroDeCalificacionComoProfesor.png & Vista detallada de correcci\'on. \\
+\hline
+EntregaSinNadaPuesto.png & Estado inicial de entrega sin adjuntos. \\
+\hline
+EntregaConAlgoPuesto.png & Estado de entrega con archivo adjunto. \\
+\hline
+PonerComentarios.png & Edici\'on de comentarios de evaluaci\'on. \\
+\hline
+PaginaEstudiantesProfesores.png & Consulta de estudiantes y trazabilidad docente. \\
+\hline
+\end{tabular}
+\normalsize
+\caption{Inventario de mockups de interfaz reutilizados desde DAS}
+\label{tab:das-mockups}
+\end{table}
+
+\subsection{Lectura t\'ecnica de los diagramas estructurales del DAS}
+
+La reutilizaci\'on de las Figuras~\ref{fig:das-arquitectura},
+\ref{fig:das-clases}, \ref{fig:das-estado} y \ref{fig:das-navegabilidad}
+no se limita a un uso ilustrativo, sino que establece una l\'inea de dise\~no
+que condiciona decisiones de implementaci\'on en backend, frontend y datos.
+
+En particular, la arquitectura l\'ogica permite justificar la separaci\'on entre
+interacci\'on con usuario, seguridad, gesti\'on acad\'emica, procesamiento de
+archivos y persistencia. Este reparto reduce acoplamiento transversal,
+facilita pruebas por componente y mejora mantenibilidad evolutiva.
+
+El modelo de clases se emplea como referencia para mantener coherencia entre
+entidades persistentes, DTOs y contratos de API. Del mismo modo, el diagrama
+de estado de actividades se refleja en validaciones de servicio que evitan
+transiciones no permitidas (por ejemplo, publicar, ocultar o cerrar fuera de
+las reglas definidas).
+
+Por \`ultimo, el diagrama de navegabilidad refuerza la consistencia entre
+estructura funcional y experiencia de usuario por rol, evitando rutas
+incoherentes con las restricciones de autorizaci\'on descritas en ERS.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{|P{2.5cm}|P{3.6cm}|P{3.8cm}|P{2.4cm}|}
+\hline
+\textbf{Artefacto DAS} & \textbf{Decisi\'on de dise\~no derivada} & \textbf{Materializaci\'on t\'ecnica} & \textbf{Requisitos ERS reforzados} \\
+\hline
+Arquitectura l\'ogica & Separaci\'on funcional en subsistemas & Frontend SPA + API REST + servicios por dominio + repositorios & SUBS-001 a SUBS-005, RQNF-004 \\
+\hline
+Diagrama de clases & Normalizaci\'on del dominio acad\'emico & Entidades \texttt{Usuario}, \texttt{Curso}, \texttt{Actividad}, \texttt{Entregable}, \texttt{Entrega} y \texttt{Feedback} & RQI-001 a RQI-005, RQF-005 a RQF-020 \\
+\hline
+Diagrama de estado & Control expl\'icito del ciclo de vida & Validaciones de transici\'on y reglas temporales en servicios & REGN-005, REGN-006, RQF-006, RQF-024 \\
+\hline
+Navegabilidad & Flujos de interfaz por rol y contexto & Rutas protegidas, vistas diferenciadas y control de visibilidad & RQG-001, RQG-007, RQNF-002, RQNF-009 \\
+\hline
+\end{tabular}
+\normalsize
+\caption{Interpretaci\'on t\'ecnica de los diagramas estructurales del DAS}
+\label{tab:das-lectura-estructural}
+\end{table}
+
+\subsection{Flujos operativos del DAS y su encaje en la soluci\'on}
+
+Adem\'as de los diagramas estructurales, el DAS aporta una visi\'on de
+comportamiento detallada mediante secuencias y mockups operativos. Esta capa
+es especialmente relevante para documentar el recorrido completo de profesor y
+estudiante en los procesos cr\'iticos del MVP.
+
+El flujo de creaci\'on de actividad docente se explicita en la
+Figura~\ref{fig:das-seq-crear-actividad}. En ella se observa la
+coordinaci\'on entre interfaz, validaciones de negocio y persistencia,
+alineada con RQF-005, RQF-008 y RQF-011.
+
+\figura{0.88}{\detokenize{../../TFGProteus/assets/Backend Activity Creation-2026-03-18-161459.png}}{Secuencia de creaci\'on de actividad en backend (DAS)}{fig:das-seq-crear-actividad}{}
+
+El ciclo de evaluaci\'on y retroalimentaci\'on queda recogido en la
+Figura~\ref{fig:das-seq-evaluacion}, que sirve de base para justificar la
+integraci\'on entre calificaci\'on, comentarios y publicaci\'on de resultados,
+en coherencia con RQF-018, RQF-019 y REGN-001/REGN-008.
+
+\figura{0.88}{\detokenize{../../TFGProteus/assets/Evaluacion y Feedback.png}}{Secuencia de evaluaci\'on y feedback (DAS)}{fig:das-seq-evaluacion}{}
+
+En la dimensi\'on de interfaz, los mockups de trabajo muestran c\'omo se
+materializa la navegaci\'on por rol en escenarios reales de uso. Las
+Figuras~\ref{fig:das-mock-estudiante-asignatura} y
+\ref{fig:das-mock-calificacion-profesor} capturan dos momentos clave del
+producto: seguimiento de actividad por el estudiante y correcci\'on detallada
+por el profesorado.
+
+\figura{0.78}{\detokenize{../../TFGProteus/assets/VistaEstudianteDentroDeUnaAsignatura.png}}{Mockup operativo: estudiante dentro de una asignatura (DAS)}{fig:das-mock-estudiante-asignatura}{}
+
+\figura{0.78}{\detokenize{../../TFGProteus/assets/DentroDeCalificacionComoProfesor.png}}{Mockup operativo: detalle de calificaci\'on como profesor (DAS)}{fig:das-mock-calificacion-profesor}{}
+
+Como apoyo adicional, la Figura~\ref{fig:das-mock-entrega-con-archivo}
+ilustra el estado de entrega con contenido adjunto, \`util para justificar
+la trazabilidad de versiones y el control de evidencias de env\'io.
+
+\figura{0.70}{\detokenize{../../TFGProteus/assets/EntregaConAlgoPuesto.png}}{Mockup de entrega con archivo adjunto (DAS)}{fig:das-mock-entrega-con-archivo}{}
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{|P{2.1cm}|P{3.4cm}|P{4.0cm}|P{2.8cm}|}
+\hline
+\textbf{Actor} & \textbf{Operaci\'on central} & \textbf{Evidencia DAS reutilizada} & \textbf{Requisitos ERS asociados} \\
+\hline
+Administrador & Alta y administraci\'on de identidades/cursos & Mockups \texttt{CrearUsuario.png}, \texttt{CrearCurso.png} & RQF-001 a RQF-004, RQF-021, RQF-022 \\
+\hline
+Profesor & Dise\~no y publicaci\'on de actividad/entregable & Fig. \ref{fig:das-seq-crear-actividad}, \texttt{Creacion de actividad.png} & RQF-005 a RQF-013, REGN-007 \\
+\hline
+Estudiante & Entrega y seguimiento de estado & Fig. \ref{fig:das-seq-entrega}, Fig. \ref{fig:das-mock-entrega-con-archivo} & RQF-014 a RQF-017, REGN-005 \\
+\hline
+Profesor evaluador & Correcci\'on y feedback & Fig. \ref{fig:das-seq-evaluacion}, Fig. \ref{fig:das-mock-calificacion-profesor} & RQF-018, RQF-019, REGN-001, REGN-008 \\
+\hline
+Profesor/Estudiante & Consulta y trazabilidad de resultados & \texttt{PonerComentarios.png}, \texttt{PaginaEstudiantesProfesores.png} & RQF-020, RQI-005, RQNF-009 \\
+\hline
+\end{tabular}
+\normalsize
+\caption{Cobertura operativa por rol con evidencia de DAS y requisitos de ERS}
+\label{tab:das-cobertura-rol}
+\end{table}
+
+\subsection{Cat\'alogo operativo de casos de uso y cobertura funcional}
+
+El modelo de casos de uso del DAS se estructura como un conjunto amplio de
+operaciones del sistema que cubren autenticaci\'on, gesti\'on acad\'emica,
+entregas, evaluaci\'on y supervisi\'on docente. Esta descomposici\'on se
+reutiliza en la memoria para demostrar que la implementaci\'on del MVP no es
+una selecci\'on arbitraria de pantallas, sino la materializaci\'on de un
+modelo operativo previo.
+
+Como representaci\'on visual de dicha cobertura, se incluyen cuatro diagramas
+de casos de uso de referencia (Figuras~\ref{fig:das-cu-1} a
+\ref{fig:das-cu-4}), suficientes para documentar el enlace entre el
+cat\'alogo funcional y los flujos reales desarrollados.
+
+\figura{0.82}{\detokenize{../../TFGProteus/assets/CU-1.drawio.png}}{Caso de uso representativo CU-1 (DAS)}{fig:das-cu-1}{}
+
+\figura{0.82}{\detokenize{../../TFGProteus/assets/CU-2.drawio.png}}{Caso de uso representativo CU-2 (DAS)}{fig:das-cu-2}{}
+
+\figura{0.82}{\detokenize{../../TFGProteus/assets/CU-3.drawio.png}}{Caso de uso representativo CU-3 (DAS)}{fig:das-cu-3}{}
+
+\figura{0.82}{\detokenize{../../TFGProteus/assets/CU-4.drawio.png}}{Caso de uso representativo CU-4 (DAS)}{fig:das-cu-4}{}
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{|P{3.0cm}|P{4.0cm}|P{2.7cm}|P{2.5cm}|}
+\hline
+\textbf{Familia operativa} & \textbf{Alcance funcional en DAS/ERS} & \textbf{Actor dominante} & \textbf{Cobertura en MVP} \\
+\hline
+Acceso y sesi\'on & Inicio de sesi\'on, control de identidad, continuidad de sesi\'on & Todos los roles & Completa \\
+\hline
+Administraci\'on acad\'emica base & Alta/modificaci\'on de cursos, usuarios y contexto de trabajo & Administrador & Completa \\
+\hline
+Dise\~no docente de actividades & Creaci\'on, edici\'on, visibilidad y configuraci\'on de entregables & Profesor & Completa \\
+\hline
+Gesti\'on de entregas & Publicaci\'on de trabajo, versionado y consulta de historial & Estudiante & Completa \\
+\hline
+Evaluaci\'on y feedback & Calificaci\'on, comentarios y visibilidad de resultados & Profesor/Estudiante & Completa \\
+\hline
+Supervisi\'on y trazabilidad & Vistas cruzadas profesor-estudiante y revisi\'on del estado de entregas & Profesor & Parcial avanzada \\
+\hline
+\end{tabular}
+\normalsize
+\caption{Cobertura por familias de casos de uso del DAS dentro del alcance del MVP}
+\label{tab:das-familias-casos-uso}
+\end{table}
+
+\subsection{Matriz ampliada de trazabilidad ERS-DAS-implementaci\'on}
+
+Para reforzar la coherencia documental, la Tabla~\ref{tab:trazabilidad-ampliada}
+integra tres niveles de evidencia: requisito formal en ERS, artefacto de
+dise\~no en DAS y materializaci\'on en componentes software y pruebas del
+proyecto.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{|P{2.5cm}|P{3.5cm}|P{3.0cm}|P{2.9cm}|}
+\hline
+\textbf{Bloque ERS} & \textbf{Artefacto DAS reutilizado} & \textbf{Implementaci\'on principal} & \textbf{Evidencia de verificaci\'on} \\
+\hline
+RQG-001, RQG-007 & Arquitectura + navegabilidad + mockups de sesi\'on & Configuraci\'on de seguridad, filtros JWT, control de rutas & Tests de autenticaci\'on/autorizaci\'on \\
+\hline
+RQI-001 a RQI-005 & Diagrama de clases + vistas por rol & Entidades JPA, DTOs y contratos API & Pruebas de persistencia e integraci\'on \\
+\hline
+RQF-005 a RQF-013 & Secuencia de creaci\'on docente + mockups de actividad & Servicios de actividad/entregable y controladores asociados & Unit tests y API tests de gesti\'on docente \\
+\hline
+RQF-014 a RQF-017 & Secuencia de entrega + estados de mockup & \texttt{EntregaService}, validaciones y versionado & Integraci\'on de entregas y E2E de alumno \\
+\hline
+RQF-018, RQF-019 & Secuencia de evaluaci\'on + detalle de calificaci\'on & Flujo de feedback/calificaci\'on en backend y frontend & Pruebas funcionales de evaluaci\'on \\
+\hline
+REGN-001 a REGN-008 & Casos de uso por rol + navegabilidad & Validaciones contextuales en servicios y filtros & Pruebas de reglas de negocio \\
+\hline
+RQNF-002, RQNF-003 & Inventario de mockups y patrones de interfaz & Dise\~no de pantallas y mensajes de estado & E2E sobre flujos completos \\
+\hline
+RQNF-004, RQNF-005, RQNF-009 & Arquitectura de subsistemas + separaci\'on de capas & Estructura modular backend/frontend + control de acceso & CI/CD, test suites y auditor\'ia t\'ecnica \\
+\hline
+\end{tabular}
+\normalsize
+\caption{Trazabilidad ampliada entre ERS, DAS e implementaci\'on efectiva}
+\label{tab:trazabilidad-ampliada}
+\end{table}
+
+\subsection{Cobertura documental alcanzada}
+
+Con la incorporaci\'on anterior, este cap\'itulo integra de forma expl\'icita:
+
+\begin{itemize}
+	\item los cinco bloques completos del cat\'alogo ERS (RQG, RQI, RQF, REGN y RQNF),
+	\item la descomposici\'on en subsistemas usada durante dise\~no e implementaci\'on,
+	\item los diagramas estructurales y de comportamiento del DAS,
+	\item el cat\'alogo operativo de casos de uso y familias funcionales del sistema,
+	\item el conjunto de mockups de interfaz como evidencia de dise\~no funcional,
+	\item y una matriz ampliada de trazabilidad entre especificaci\'on, dise\~no,
+	implementaci\'on y verificaci\'on.
+\end{itemize}
+
+De esta forma, la memoria no solo resume resultados: tambi\'en preserva la
+trazabilidad documental completa entre especificaci\'on inicial, dise\~no t\'ecnico
+y comportamiento implementado.
+
+\section{Dise\~no del sistema}
+
+\subsection{Arquitectura de alto nivel}
+
+La arquitectura adoptada es cliente-servidor desacoplada:
+
+\begin{itemize}
+	\item \textbf{Frontend SPA} en React + TypeScript (presentaci\'on y experiencia de usuario).
+	\item \textbf{Backend REST} en Spring Boot (l\'ogica de negocio y seguridad).
+	\item \textbf{Persistencia relacional} con JPA/Hibernate y migraciones Flyway.
+\end{itemize}
+
+En backend se aplica dise\~no por capas
+(controller, service, repository y entity),
+que mejora mantenibilidad, testabilidad y capacidad de evoluci\'on.
+
+\subsection{Dise\~no de dominio y datos}
+
+El dominio se modela alrededor de la relaci\'on docente-estudiante-actividad:
+
+\begin{itemize}
+	\item \texttt{Usuario} como identidad base.
+	\item \texttt{Profesor} y \texttt{Estudiante} como especializaciones operativas.
+	\item \texttt{Curso}, \texttt{Grupo} y \texttt{Actividad} para contexto acad\'emico.
+	\item \texttt{Entregable} y \texttt{Entrega} para el ciclo de entrega.
+	\item \texttt{Feedback}, \texttt{Material} y entidades de soporte (tokens, notificaciones).
+\end{itemize}
+
+La persistencia evoluciona de forma versionada mediante migraciones,
+lo que permite incorporar nuevas capacidades sin perder consistencia hist\'orica.
+
+\subsection{Dise\~no de API}
+
+La API sigue orientaci\'on REST y separa contratos mediante DTOs.
+Se definen m\'odulos de endpoint coherentes por contexto de negocio:
+
+\begin{itemize}
+	\item \texttt{/api/auth}: login, refresh, recuperaci\'on de contrase\~na.
+	\item \texttt{/api/actividades}: gesti\'on de actividades y consulta por usuario.
+	\item \texttt{/api/entregables}: administraci\'on de entregables.
+	\item \texttt{/api/entregas}: subida, revisi\'on, evaluaci\'on y descarga de entregas.
+\end{itemize}
+
+El uso de DTOs evita exponer directamente entidades de persistencia,
+reduce acoplamiento y simplifica evoluciones de contrato.
+
+\subsection{Dise\~no de seguridad}
+
+El dise\~no de seguridad incorpora mecanismos complementarios:
+
+\begin{itemize}
+	\item autenticaci\'on basada en JWT (token de acceso + refresh token),
+	\item filtros de validaci\'on en la cadena de seguridad,
+	\item autorizaci\'on por rol y contexto acad\'emico,
+	\item cifrado de contrase\~nas con BCrypt,
+	\item limitaci\'on de tasa en operaciones sensibles de autenticaci\'on.
+\end{itemize}
+
+Se configura CORS de forma expl\'icita y se diferencia entre rutas p\'ublicas y protegidas,
+minimizando superficie de ataque sin comprometer usabilidad.
+
+\subsection{Dise\~no del frontend}
+
+El frontend se organiza en m\'odulos \texttt{pages}, \texttt{components}, \texttt{context}
+y \texttt{services}, con los siguientes objetivos:
+
+\begin{itemize}
+	\item experiencia coherente para profesor y estudiante,
+	\item protecci\'on de rutas seg\'un sesi\'on y rol,
+	\item gesti\'on centralizada de autenticaci\'on,
+	\item manejo uniforme de errores y estados de carga.
+\end{itemize}
+
+La capa de red encapsula llamadas HTTP y gesti\'on de tokens,
+incluyendo renovaci\'on autom\'atica de sesi\'on al expirar el token de acceso.
+
+\section{Implementaci\'on}
+
+\subsection{Implementaci\'on backend}
+
+La implementaci\'on backend se estructura en el paquete principal de la aplicaci\'on,
+donde destacan:
+
+\begin{itemize}
+	\item \textbf{Controladores}: entrada HTTP y validaci\'on de contratos.
+	\item \textbf{Servicios}: l\'ogica de negocio y reglas del dominio.
+	\item \textbf{Repositorios}: acceso a datos con Spring Data JPA.
+	\item \textbf{Seguridad}: configuraci\'on central y filtros especializados.
+\end{itemize}
+
+Un punto clave es \texttt{EntregaService}, que centraliza validaciones de entrega,
+control de versiones, restricciones temporales y operativa de evaluaci\'on,
+con apoyo de servicios auxiliares para materiales y notificaciones.
+
+\subsection{Implementaci\'on de flujos cr\'iticos}
+
+Los flujos con mayor impacto funcional son:
+
+\begin{enumerate}
+	\item \textbf{Autenticaci\'on y sesi\'on}:
+	login, emisi\'on de tokens, refresco y cierre seguro de sesi\'on.
+	\item \textbf{Publicaci\'on de entregables}:
+	creaci\'on por docente, configuraci\'on de fechas y condiciones de entrega.
+	\item \textbf{Entrega de material}:
+	subida de ficheros, verificaciones, versionado y almacenamiento de metadatos.
+	\item \textbf{Evaluaci\'on}:
+	correcci\'on por profesor autorizado, feedback y visibilidad de nota.
+\end{enumerate}
+
+Cada flujo incorpora validaciones de entrada, control de errores y verificaci\'on de permisos,
+asegurando consistencia en escenarios concurrentes y previniendo acciones fuera de alcance.
+
+\subsection{Implementaci\'on frontend}
+
+La implementaci\'on del cliente cubre pantallas y operaciones necesarias para el MVP:
+
+\begin{itemize}
+	\item acceso y gesti\'on de sesi\'on,
+	\item paneles de actividades y entregables,
+	\item formularios de entrega y seguimiento,
+	\item vista de evaluaciones y retroalimentaci\'on.
+\end{itemize}
+
+Se han introducido medidas pr\'acticas para mejorar usabilidad:
+mensajes de validaci\'on temprana, estados visuales de proceso,
+y comportamiento resiliente ante errores de red.
+
+\subsection{Persistencia, migraciones e integraciones}
+
+Se utiliza PostgreSQL en escenarios de despliegue y un perfil de desarrollo
+local para iteraci\'on r\'apida. Flyway gestiona la evoluci\'on del esquema,
+incluyendo ampliaciones como:
+
+\begin{itemize}
+	\item atributos para validaci\'on estructural de entregas ZIP,
+	\item campos para integraci\'on cloud (OneDrive/Cloudinary),
+	\item tablas y preferencias de notificaci\'on,
+	\item tokens de recuperaci\'on de contrase\~na.
+\end{itemize}
+
+Las integraciones externas se dise\~nan por configuraci\'on,
+de modo que el sistema puede operar en local sin dependencia obligatoria
+de servicios de terceros.
+
+\subsection{Verificaci\'on de implementaci\'on}
+
+La verificaci\'on se realiza en capas (unitaria, integraci\'on, E2E y mutaci\'on),
+apoyada por pipelines CI/CD y controles de seguridad en preproducci\'on.
+Este enfoque proporciona evidencia objetiva de robustez y reduce el riesgo de regresiones.
+
+\section{Discusi\'on t\'ecnica}
+
+\subsection{Decisiones y compromisos}
+
+Las decisiones principales del dise\~no implican compensaciones expl\'icitas:
+
+\begin{itemize}
+	\item \textbf{Separaci\'on SPA + API}: mejora mantenibilidad y escalado,
+	con mayor esfuerzo de orquestaci\'on y pruebas de integraci\'on.
+	\item \textbf{JWT con refresh token}: simplifica backend stateless,
+	pero exige controles cuidadosos de expiraci\'on y renovaci\'on.
+	\item \textbf{DTOs y capas}: reducen acoplamiento,
+	a costa de mayor c\'odigo estructural.
+	\item \textbf{Migraciones versionadas}: aportan trazabilidad de datos,
+	requiriendo disciplina de despliegue entre entornos.
+\end{itemize}
+
+\subsection{Limitaciones y trabajo futuro}
+
+Aunque el n\'ucleo funcional est\'a cubierto, se identifican l\'ineas de evoluci\'on:
+
+\begin{itemize}
+	\item ampliaci\'on de autenticaci\'on avanzada (p. ej., 2FA completa),
+	\item observabilidad m\'as profunda con m\'etricas operativas,
+	\item cierre progresivo de requisitos \emph{Should/Could} pendientes.
+\end{itemize}
+
+Estas mejoras no condicionan la validez del TFG,
+sino que delimitan una hoja de ruta t\'ecnica razonable para continuidad del proyecto.
+
+\section{Conclusiones del cap\'itulo}
+
+El an\'alisis realizado demuestra coherencia entre lo especificado y lo implementado.
+Los requisitos funcionales priorizados se traducen en flujos operativos reales,
+los no funcionales se abordan mediante decisiones t\'ecnicas concretas,
+y el dise\~no modular facilita mantenimiento, verificaci\'on y evoluci\'on.
+
+Por tanto, el resultado no es solo una implementaci\'on funcional,
+sino una soluci\'on con fundamento de ingenier\'ia de software,
+alineada con los objetivos acad\'emicos y profesionales del TFG.

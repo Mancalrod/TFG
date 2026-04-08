@@ -7,17 +7,18 @@
 %DIFERENTES TIPOS DE LETRA
 %\usepackage{palatino}
 \usepackage{times}   
+\setlength{\headheight}{14.5pt}
+\setlength{\emergencystretch}{2em}
 
 
 \begin{document}
 \tipo{Grado}   % Grado o M\'aster
-\titulopro{Especificaciones de formato}
-\tutor{Junta de Centro}
-\departamento{Comisi\'on de Trabajos fin de Grado de la E.T.S.I.I.}
-%\autores{Nombre 1}{Nombre 2}  % Dos autores
-\autores{(ponente): Jos\'e Ra. Portillo Fernández}{{\ }}   % Un autor
-\dia{1 de marzo de 2017 (v.0.91)}
-\titulacion{GIC, GIS y GITI}
+\titulopro{Sistema de Gesti\'on de Entregables Acad\'emicos}
+\tutor{Antonio Manuel Guti\'errez Fern\'andez}
+\departamento{Escuela T\'ecnica Superior de Ingenier\'ia Inform\'atica}
+\autores{Manuel Mar\'ia Calder\'on Rodr\'iguez}{Jos\'e Manuel M\'arquez Guti\'errez}
+\dia{Abril de 2026}
+\titulacion{Grado en Ingenier\'ia Inform\'atica --- Ingenier\'ia del Software}
 
 \hacerportada
 
@@ -34,19 +35,21 @@
 
  \mainmatter  
     
-     \input{Capitulos/capitulo1}
-     \input{Capitulos/capitulo2}
-%     \input{Capitulos/defobjetivos}
-%     \input{Capitulos/requisitos}
-%     \input{Capitulos/analanteced}
-%     \input{Capitulos/analtemporal}
-%     \input{Capitulos/alternativas}
-%     \input{Capitulos/pruebas}
-%     \input{Capitulos/manual}
+	\input{Capitulos/defobjetivos}
+	\input{Capitulos/requisitos}
+	\input{Capitulos/analanteced}
+	\input{Capitulos/analtemporal}
+	\input{Capitulos/alternativas}
+	\input{Capitulos/justificacion}
+	\input{Capitulos/pruebas}
+	\input{Capitulos/manual}
+	\input{Capitulos/conclusiones}
+
+\appendix
+	\input{Capitulos/apendices}
 
 \backmatter
 
-% \input{Capitulos/apendices}
 %\bibliographystyle{sousa5}
 
 \bibliographystyle{apacite}

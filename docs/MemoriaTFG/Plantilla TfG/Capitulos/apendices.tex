@@ -1,1 +1,122 @@
-\chapter{Apéndices}\label{apendices}
+\chapter{Ap\'endices}\label{apendices}
+
+\section{Introducci\'on}
+
+Este bloque recoge informaci\'on complementaria de car\'acter operativo
+que no forma parte del hilo principal de dise\~no e implementaci\'on,
+pero facilita reproducci\'on, mantenimiento y auditor\'ia del proyecto.
+
+\section{Anexo A. Gu\'ia de puesta en marcha}
+
+\subsection{Requisitos m\'inimos}
+
+Para ejecutar la soluci\'on en entorno local se requiere:
+
+\begin{itemize}
+	\item JDK 21 y Maven 3.9+ para backend.
+	\item Node.js 20+ y npm para frontend.
+	\item PostgreSQL disponible en local o contenedor.
+\end{itemize}
+
+\subsection{Arranque local recomendado}
+
+El flujo recomendado de ejecuci\'on es:
+
+\begin{enumerate}
+	\item iniciar base de datos PostgreSQL,
+	\item arrancar backend con perfil local,
+	\item arrancar frontend en modo desarrollo.
+\end{enumerate}
+
+En el repositorio se incluyen scripts de soporte para simplificar
+la inicializaci\'on de base de datos y el arranque de servicios.
+
+\subsection{Ejecuci\'on con contenedores}
+
+Como alternativa reproducible, la soluci\'on puede ejecutarse con
+\texttt{docker-compose}, levantando base de datos y backend con healthchecks.
+Esta opci\'on reduce diferencias entre m\'aquinas de desarrollo.
+
+\section{Anexo B. Configuraci\'on por entornos}
+
+\subsection{Variables cr\'iticas de backend}
+
+Las variables m\'inimas para funcionamiento seguro en entornos no locales son:
+
+\begin{itemize}
+	\item \texttt{DATABASE\_URL}, \texttt{DATABASE\_USER}, \texttt{DATABASE\_PASSWORD},
+	\item \texttt{JWT\_SECRET},
+	\item \texttt{SPRING\_PROFILES\_ACTIVE}.
+\end{itemize}
+
+En producci\'on se habilitan adem\'as variables para servicios externos
+como almacenamiento cloud y correo transaccional.
+
+\subsection{Variables cr\'iticas de frontend}
+
+La variable principal de configuraci\'on de cliente es
+\texttt{VITE\_API\_BASE\_URL}, que define el endpoint de API consumido.
+
+\section{Anexo C. Operaci\'on y verificaci\'on}
+
+\subsection{Comprobaciones de salud}
+
+El sistema expone endpoints de salud para diferenciaci\'on operativa:
+
+\begin{itemize}
+	\item liveness: valida disponibilidad del proceso,
+	\item readiness: valida disponibilidad real de dependencias (base de datos).
+\end{itemize}
+
+Esta separaci\'on permite detectar de forma temprana incidencias de conectividad
+y reducir falsos positivos en monitorizaci\'on.
+
+\subsection{Validaci\'on post-despliegue}
+
+Tras cada despliegue se recomienda ejecutar al menos:
+
+\begin{enumerate}
+	\item comprobaci\'on de endpoints de salud,
+	\item login con usuario de prueba,
+	\item operaci\'on de lectura y escritura en flujo acad\'emico,
+	\item verificaci\'on de subida/descarga de material.
+\end{enumerate}
+
+\section{Anexo D. Declaraci\'on de uso de IA generativa}
+
+En este TFG se ha utilizado IA generativa como herramienta de apoyo
+en tareas acotadas de redacci\'on preliminar, revisi\'on de estructura y
+aceleraci\'on de operaciones repetitivas de documentaci\'on.
+
+Se establecen las siguientes consideraciones:
+
+\begin{itemize}
+	\item la IA no se ha utilizado como sustituto del criterio t\'ecnico del autor,
+	\item toda propuesta asistida ha sido revisada, corregida y validada manualmente,
+	\item las decisiones de dise\~no, implementaci\'on y justificaci\'on final
+	corresponden al autor del trabajo,
+	\item no se han introducido resultados autom\'aticos sin contrastarlos
+	con evidencias del proyecto (c\'odigo, pruebas y documentaci\'on t\'ecnica).
+\end{itemize}
+
+Este anexo se incluye para garantizar transparencia metodol\'ogica
+y trazabilidad del proceso de elaboraci\'on de la memoria.
+
+\section{Anexo E. Documentaci\'on complementaria disponible}
+
+Como soporte adicional al contenido principal de la memoria,
+el repositorio incorpora documentos t\'ecnicos de operaci\'on,
+seguridad, testing y despliegue que permiten ampliar detalle en revisiones futuras.
+
+\section{Anexo F. Referencias t\'ecnicas de apoyo}
+
+Para el dise\~no, implementaci\'on y validaci\'on de la soluci\'on
+se han utilizado como apoyo las gu\'ias oficiales de los principales
+frameworks y herramientas del proyecto,
+incluyendo Spring Boot, React, Flyway, Vitest, Playwright y OWASP.
+
+\section{Cierre de ap\'endices}
+
+Los anexos anteriores consolidan la dimensi\'on operativa y metodol\'ogica del TFG,
+aportando una base pr\'actica para reproducibilidad y continuidad del proyecto
+m\'as all\'a del alcance temporal de la convocatoria.

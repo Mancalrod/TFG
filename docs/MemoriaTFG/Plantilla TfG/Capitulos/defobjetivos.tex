@@ -1,2 +1,241 @@
-\chapter{Definici\'on de objetivos}\label{defobjetivos}
+﻿\chapter{Definici\'on de objetivos}\label{defobjetivos}
+
+\section{Contexto y motivaci\'on}
+
+El presente Trabajo Fin de Grado se desarrolla en el \`ambito de la gesti\'on acad\'emica universitaria,
+centrado en el ciclo de vida completo de las actividades evaluables:
+definici\'on de actividades, publicaci\'on de entregables, realizaci\'on de entregas,
+evaluaci\'on y retroalimentaci\'on.
+
+La motivaci\'on principal se fundamenta en una realidad operativa detectada en el an\'alisis previo:
+en muchos contextos docentes, el flujo de entrega y correcci\'on combina una plataforma institucional
+de prop\'osito general con tareas manuales de clasificaci\'on, validaci\'on y descarga de archivos.
+Esa combinaci\'on introduce ineficiencias en tres dimensiones cr\'iticas:
+
+\begin{itemize}
+	\item \textbf{Esfuerzo docente}: se consume tiempo en operaciones administrativas de bajo valor.
+	\item \textbf{Experiencia del estudiante}: la entrega puede resultar poco guiada y con validaci\'on tard\'ia.
+	\item \textbf{Trazabilidad de evaluaci\'on}: la relaci\'on entrega-version-feedback no siempre queda consolidada en un mismo flujo.
+\end{itemize}
+
+Por tanto, el proyecto no persigue replicar una plataforma LMS generalista,
+sino resolver de forma especializada el problema operativo de la gesti\'on de entregables,
+apoy\'andose en los artefactos de requisitos y an\'alisis del sistema (ERS y DAS),
+y en la planificaci\'on ejecutiva definida en backlog y plan de sprints.
+
+\section{Problema de ingenier\'ia a resolver}
+
+Desde una perspectiva de ingenier\'ia del software,
+el problema se formula como la necesidad de dise\~nar un sistema que,
+con recursos acotados de tiempo y equipo,
+maximice simult\'aneamente:
+
+\begin{enumerate}
+	\item cobertura funcional del ciclo de entregables,
+	\item robustez t\'ecnica y seguridad por rol,
+	\item capacidad de evoluci\'on sin deuda estructural excesiva.
+\end{enumerate}
+
+Este problema impone una restricci\'on de dise\~no clave:
+no basta con construir funcionalidades aisladas,
+sino que es necesario garantizar coherencia extremo a extremo
+entre requisitos, arquitectura, implementaci\'on, pruebas y despliegue.
+
+\section{Objetivo general}
+
+Dise\~nar, implementar y validar un sistema web para la gesti\'on integral de entregables acad\'emicos,
+que permita a profesores y estudiantes operar de forma centralizada, segura y trazable,
+reduciendo tareas manuales y mejorando la eficiencia del proceso de evaluaci\'on continua.
+
+\section{Metodolog\'ia para definir los objetivos}
+
+La definici\'on de objetivos no se ha realizado de forma declarativa aislada,
+sino mediante un proceso iterativo de convergencia entre:
+
+\begin{itemize}
+	\item objetivos de negocio (OBJN) definidos en el an\'alisis inicial,
+	\item requisitos funcionales y no funcionales del ERS,
+	\item decisiones arquitect\'onicas del DAS,
+	\item prioridades MoSCoW del Product Backlog,
+	\item capacidad temporal real (600 horas en 5 iteraciones).
+\end{itemize}
+
+Este enfoque permite que cada objetivo sea evaluable,
+relacionable con entregables t\'ecnicos concretos
+y verificable mediante evidencia objetiva de implementaci\'on y pruebas.
+
+\section{Objetivos espec\'ificos}
+
+Para alcanzar el objetivo general se establecen los siguientes objetivos espec\'ificos,
+ordenados por su contribuci\'on al MVP:
+
+\begin{enumerate}
+	\item \textbf{Centralizar la estructura acad\'emica del sistema.}
+	Modelar cursos, grupos, actividades, entregables y entregas de forma coherente
+	con la organizaci\'on docente real.
+
+	\item \textbf{Proporcionar flexibilidad en la configuraci\'on de actividades y entregables.}
+	Permitir al profesorado definir condiciones de entrega (fechas, visibilidad,
+	reenv\'io, tipo de material y par\'ametros de evaluaci\'on).
+
+	\item \textbf{Optimizar el proceso de entrega para el alumnado.}
+	Implementar flujos de subida y consulta de historial de versiones,
+	con validaciones y mensajes de estado claros.
+
+	\item \textbf{Mejorar la evaluaci\'on y la retroalimentaci\'on.}
+	Facilitar la revisi\'on de entregas por parte del profesorado,
+	incorporando calificaci\'on y feedback en el mismo flujo de trabajo.
+
+	\item \textbf{Garantizar seguridad y control de acceso por roles y contexto.}
+	Aplicar autenticaci\'on y autorizaci\'on de forma consistente,
+	diferenciando permisos de administrador, profesor y estudiante.
+
+	\item \textbf{Dise\~nar una arquitectura modular e interoperable.}
+	Mantener separaci\'on clara entre frontend y backend mediante API REST,
+	facilitando integraciones y evoluci\'on por componentes.
+
+	\item \textbf{Asegurar calidad t\'ecnica mediante validaci\'on automatizada.}
+	Verificar el comportamiento funcional y la robustez del sistema
+	con pruebas unitarias, de integraci\'on, E2E y de mutaci\'on.
+
+	\item \textbf{Establecer un despliegue reproducible y mantenible.}
+	Integrar pr\'acticas de CI/CD y contenedorizaci\'on para sostener
+	entregas frecuentes, trazables y auditables.
+\end{enumerate}
+
+\section{Priorizaci\'on de objetivos (criterio MoSCoW)}
+
+Para alinear expectativas y alcance,
+los objetivos se priorizan con criterio MoSCoW,
+consistente con el backlog del proyecto.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{|P{2.2cm}|P{4.8cm}|P{5.4cm}|}
+\hline
+\textbf{Prioridad} & \textbf{Objetivos asociados} & \textbf{Justificaci\'on} \\
+\hline
+Must Have & O1, O2, O3, O4, O5 & Sin estos objetivos no existe flujo acad\'emico completo de entrega y evaluaci\'on. \\
+\hline
+Should Have & O6, O7 & Aumentan mantenibilidad y calidad, y reducen riesgo de regresi\'on. \\
+\hline
+Could Have & Extensiones anal\'iticas y observabilidad avanzada & Aportan valor, pero no condicionan la validez del MVP. \\
+\hline
+Won't Have (MVP) & OAuth completo, 2FA integral, notificaciones avanzadas & Se reservan para evoluci\'on por coste de implementaci\'on y validaci\'on. \\
+\hline
+\end{tabular}
+\caption{Priorizaci\'on de objetivos conforme a estrategia MoSCoW}
+\label{tab:priorizacion-objetivos}
+\end{table}
+
+\section{Alcance funcional del trabajo}
+
+El alcance funcional cubierto en este TFG incluye:
+
+\begin{itemize}
+	\item gesti\'on de usuarios y control de acceso por rol;
+	\item gesti\'on de cursos, grupos y actividades acad\'emicas;
+	\item gesti\'on de entregables con configuraci\'on de plazos y visibilidad;
+	\item realizaci\'on de entregas, historial de versiones y descarga;
+	\item evaluaci\'on y retroalimentaci\'on docente;
+	\item automatizaci\'on de validaci\'on y despliegue en entorno CI/CD.
+\end{itemize}
+
+\section{Delimitaci\'on expl\'icita del alcance}
+
+Para mantener viabilidad temporal y calidad de salida,
+se delimita de forma expl\'icita lo que queda fuera del MVP,
+aunque exista su consideraci\'on en el an\'alisis inicial:
+
+\begin{itemize}
+	\item autenticaci\'on federada completa (OAuth institucional extensivo),
+	\item doble factor de autenticaci\'on integral (2FA),
+	\item notificaciones avanzadas desacopladas,
+	\item funcionalidades avanzadas de anal\'itica y monitorizaci\'on.
+\end{itemize}
+
+Esta delimitaci\'on no representa una carencia metodol\'ogica,
+sino una decisi\'on de ingenier\'ia para proteger el objetivo principal:
+entregar un sistema funcional, verificable y defendible en plazo.
+
+\section{Criterios de cumplimiento y evidencia de logro}
+
+El cumplimiento de objetivos se eval\'ua mediante evidencia verificable,
+evitando formulaciones subjetivas.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{|P{2cm}|P{3.4cm}|P{3.3cm}|P{3.7cm}|}
+\hline
+\textbf{Obj.} & \textbf{Indicador principal} & \textbf{Meta de cumplimiento} & \textbf{Evidencia} \\
+\hline
+O1--O4 & Cobertura del flujo funcional extremo a extremo & Flujo completo operativo por rol & Endpoints y pantallas de curso/actividad/entrega/evaluaci\'on \\
+\hline
+O5 & Restricciones de acceso aplicadas & Operaciones protegidas por rol/contexto & Configuraci\'on de seguridad, filtros y tests de autorizaci\'on \\
+\hline
+O6 & Separaci\'on modular de componentes & Bajo acoplamiento entre capas & Arquitectura frontend-backend + DTOs + servicios \\
+\hline
+O7 & Calidad t\'ecnica cuantificable & Suites en verde y m\'etricas altas & Cobertura, E2E y mutaci\'on reportadas \\
+\hline
+O8 & Reproducibilidad de entrega & Pipeline estable para build/test/deploy & Workflows CI/CD y despliegue trazable \\
+\hline
+\end{tabular}
+\caption{Criterios de evaluaci\'on del cumplimiento de objetivos}
+\label{tab:criterios-cumplimiento-objetivos}
+\end{table}
+
+\section{Trazabilidad objetivos-requisitos-entregables}
+
+La trazabilidad constituye un criterio central de rigor acad\'emico.
+Cada objetivo se conecta con requisitos del ERS
+y con entregables t\'ecnicos ejecutados durante los sprints.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{|P{1.9cm}|P{3.2cm}|P{3.6cm}|P{3.7cm}|}
+\hline
+\textbf{Objetivo} & \textbf{Requisitos relacionados} & \textbf{Backlog/Sprint} & \textbf{Entregable t\'ecnico} \\
+\hline
+O1 & RQF-005 a RQF-017 & EP-04, EP-05 (S1) & M\'odulos de cursos, grupos y actividades \\
+\hline
+O2--O3 & RQF-018 a RQF-026 & EP-06, EP-07 (S1-S2) & M\'odulos de entregables y entregas \\
+\hline
+O4 & RQF-027 a RQF-029 & EP-09 (S1-S3) & M\'odulo de evaluaci\'on y feedback \\
+\hline
+O5 & RQNF-009, REGN-001 & EP-12 (S1) & JWT, control de roles y validaci\'on contextual \\
+\hline
+O7 & RQNF-001, RQNF-004 & EP-13 (S1-S4) & Testing en capas + mutaci\'on \\
+\hline
+O8 & RQNF-008, RQNF-004 & EP-14 (S1) & CI/CD y despliegue automatizado \\
+\hline
+\end{tabular}
+\caption{Trazabilidad entre objetivos, requisitos y resultados t\'ecnicos}
+\label{tab:trazabilidad-objetivos}
+\end{table}
+
+\section{Riesgos estrat\'egicos asociados a los objetivos}
+
+Al definir objetivos de forma ambiciosa,
+es necesario explicitar riesgos y medidas de mitigaci\'on.
+
+\begin{itemize}
+	\item \textbf{Riesgo de sobrealcance funcional}: incorporar m\'as funcionalidades de las asumibles en 600 horas.
+	\textbf{Mitigaci\'on}: priorizaci\'on MoSCoW y control por hitos.
+
+	\item \textbf{Riesgo de deuda de calidad}: posponer testing para la fase final.
+	\textbf{Mitigaci\'on}: estrategia de pruebas integrada en cada sprint.
+
+	\item \textbf{Riesgo de incoherencia documental}: divergencia entre memoria y estado real del producto.
+	\textbf{Mitigaci\'on}: redacci\'on iterativa con trazabilidad objetiva.
+\end{itemize}
+
+\section{Conclusiones del cap\'itulo}
+
+La definici\'on de objetivos presentada no se limita a una enumeraci\'on formal,
+sino que establece un marco de ejecuci\'on y validaci\'on completo.
+
+En consecuencia, este cap\'itulo fija la base de todo el desarrollo posterior:
+qu\'e se pretende conseguir, por qu\'e se prioriza de ese modo,
+qu\'e evidencia demostrar\'a su cumplimiento
+y cu\'ales son los l\'imites deliberados del alcance en el contexto del TFG.
 	

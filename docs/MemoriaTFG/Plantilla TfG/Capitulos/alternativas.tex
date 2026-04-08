@@ -1,28 +1,272 @@
-\chapter{Comparación con otras alternativas}\label{alternativas}
+﻿\chapter{Comparaci\'on con otras alternativas}\label{alternativas}
 
+\section{Introducci\'on}
 
+Este cap\'itulo compara la soluci\'on implementada frente a alternativas t\'ecnicas
+realistas para el mismo problema.
+El objetivo no es defender una \''unica tecnolog\'ia\'', sino justificar por qu\'e,
+en el contexto de este TFG (alcance, tiempo, equipo y restricciones de despliegue),
+las decisiones adoptadas resultan las m\'as equilibradas.
 
+\section{Criterios de comparaci\'on}
 
+Se han utilizado los siguientes criterios para evaluar opciones:
 
+\begin{itemize}
+	\item \textbf{Adecuaci\'on funcional}: capacidad para cubrir requisitos del dominio acad\'emico.
+	\item \textbf{Tiempo de implementaci\'on}: esfuerzo necesario para llegar a MVP estable.
+	\item \textbf{Mantenibilidad}: claridad estructural y facilidad de evoluci\'on.
+	\item \textbf{Coste operativo}: viabilidad en entornos gratuitos o de bajo coste.
+	\item \textbf{Seguridad y robustez}: soporte para control de acceso y endurecimiento.
+	\item \textbf{Integraci\'on y despliegue}: facilidad de automatizaci\'on CI/CD y despliegue.
+\end{itemize}
 
+\section{Alternativas de arquitectura y stack}
 
+\subsection{Arquitectura de aplicaci\'on}
 
+Se valoraron dos enfoques principales:
 
+\begin{itemize}
+	\item \textbf{A1 - SPA + API desacoplada} (opci\'on elegida).
+	\item \textbf{A2 - Aplicaci\'on monol\'itica server-side renderizada}.
+\end{itemize}
 
+\textbf{A1} permite separar claramente la capa de experiencia de usuario
+de la l\'ogica de negocio y persistencia, facilitando pruebas independientes,
+despliegues diferenciados y evoluci\'on incremental.
 
+\textbf{A2} reduce complejidad inicial de infraestructura,
+pero limita flexibilidad de frontend y complica evoluci\'on de UX avanzada
+en escenarios con roles y paneles diferenciados.
 
+\subsection{Backend framework}
 
-	
+Se compararon principalmente:
 
+\begin{itemize}
+	\item \textbf{B1 - Spring Boot (Java)} (elegida).
+	\item \textbf{B2 - Node.js (Express/Nest)}.
+	\item \textbf{B3 - Django (Python)}.
+\end{itemize}
 
+La elecci\'on de \textbf{Spring Boot} se justifica por:
 
+\begin{itemize}
+	\item ecosistema maduro para seguridad, JPA, validaci\'on y testing,
+	\item integraci\'on natural con migraciones Flyway,
+	\item buen soporte para arquitectura por capas y control transaccional.
+\end{itemize}
 
+Node.js y Django son opciones v\'alidas,
+pero para este proyecto requer\'ian m\'as decisiones de ensamblaje
+en piezas de seguridad/persistencia para alcanzar un nivel equivalente
+en el tiempo disponible.
 
+\subsection{Frontend framework}
 
+Alternativas consideradas:
 
+\begin{itemize}
+	\item \textbf{F1 - React + TypeScript + Vite} (elegida).
+	\item \textbf{F2 - Angular}.
+	\item \textbf{F3 - Vue}.
+\end{itemize}
 
+React con TypeScript y Vite ofrece buen equilibrio entre velocidad de desarrollo,
+ecosistema y control de complejidad para una SPA de tama\~no medio.
+Angular aporta una estructura m\'as opinionada,
+pero con curva de entrada superior para el alcance temporal del TFG.
+Vue mantiene una DX excelente, aunque en este caso la experiencia previa del equipo
+y la alineaci\'on con librer\'ias de testing/CI favorecieron React.
+
+\section{Alternativas de persistencia y almacenamiento}
+
+\subsection{Base de datos relacional}
+
+Opciones comparadas:
+
+\begin{itemize}
+	\item \textbf{D1 - PostgreSQL gestionado} (elegida en producci\'on).
+	\item \textbf{D2 - MySQL gestionado}.
+	\item \textbf{D3 - H2 embebida} (solo desarrollo/pruebas locales).
+\end{itemize}
+
+PostgreSQL se mantuvo como opci\'on principal por estabilidad, compatibilidad
+con el stack y buen comportamiento en entornos PaaS.
+H2 se reserva para contextos de desarrollo y pruebas, no para producci\'on.
+
+Adem\'as, se produjo una migraci\'on de proveedor de Postgres (Neon a Render Postgres)
+sin cambios de c\'odigo de dominio,
+apoy\'andose en variables de entorno y configuraci\'on portable del datasource,
+lo que confirma bajo acoplamiento a proveedor concreto.
+
+\subsection{Estrategia de esquema}
+
+Se compararon:
+
+\begin{itemize}
+	\item \textbf{E1 - Flyway como autoridad de esquema} (elegida).
+	\item \textbf{E2 - Hibernate \texttt{ddl-auto=update} en producci\'on}.
+\end{itemize}
+
+Se adopta \textbf{E1} por trazabilidad y control expl\'icito de cambios,
+reduciendo riesgo de divergencias de esquema entre entornos.
+
+\subsection{Almacenamiento de archivos}
+
+Alternativas evaluadas:
+
+\begin{itemize}
+	\item \textbf{S1 - Almacenamiento local en servidor}.
+	\item \textbf{S2 - Cloudinary} (elegida para producci\'on persistente).
+	\item \textbf{S3 - OneDrive/Microsoft Graph} (integraci\'on opcional por contexto acad\'emico).
+\end{itemize}
+
+La opci\'on local es simple y adecuada en desarrollo,
+pero en plataformas con sistema de archivos ef\'imero (como despliegues free)
+puede provocar p\'erdida de datos tras reinicio.
+Por ello se adopta \textbf{Cloudinary} en producci\'on.
+
+La integraci\'on \textbf{OneDrive} aporta valor en casos docentes
+que requieren sincronizaci\'on con ecosistemas Microsoft,
+pero se mantiene como capacidad configurable y no obligatoria del n\'ucleo.
+
+\section{Alternativas de seguridad y sesi\'on}
+
+\subsection{Modelo de autenticaci\'on}
+
+Se compararon dos enfoques principales:
+
+\begin{itemize}
+	\item \textbf{A1 - JWT (access + refresh)} (elegido).
+	\item \textbf{A2 - Sesi\'on server-side tradicional}.
+\end{itemize}
+
+En una SPA desacoplada, JWT con refresh ofrece una experiencia m\'as natural
+para cliente API-first y facilita escalado stateless del backend.
+La sesi\'on server-side reduce cierta complejidad de token,
+pero exige estrategia adicional de estado distribuido en despliegues horizontales.
+
+\subsection{Extensiones de seguridad}
+
+Se han considerado funcionalidades avanzadas (OAuth2 federado y 2FA)
+como l\'inea de evoluci\'on.
+La decisi\'on de no imponerlas en el MVP responde al criterio
+de maximizar cobertura funcional core sin comprometer plazos.
+
+\section{Alternativas de despliegue y operaci\'on}
+
+\subsection{Estrategia de despliegue}
+
+Opciones principales:
+
+\begin{itemize}
+	\item \textbf{P1 - PaaS con automatizaci\'on GitHub Actions + Render} (elegida).
+	\item \textbf{P2 - VPS autogestionado con pipeline manual o Jenkins}.
+	\item \textbf{P3 - Orquestaci\'on completa en Kubernetes}.
+\end{itemize}
+
+\textbf{P1} reduce carga operativa,
+permite despliegue r\'apido y mantiene un coste ajustado para contexto acad\'emico.
+\textbf{P2} y \textbf{P3} ofrecen m\'as control,
+pero su complejidad no aporta retorno proporcional dentro del alcance del TFG.
+
+\subsection{CI/CD y calidad}
+
+Se compararon:
+
+\begin{itemize}
+	\item \textbf{C1 - CI/CD integrada en GitHub Actions} (elegida).
+	\item \textbf{C2 - CI externa (GitLab CI/Jenkins) con mayor administraci\'on}.
+\end{itemize}
+
+La alternativa elegida integra lint, tests, build, an\'alisis de seguridad,
+mutaci\'on y publicaci\'on de artefactos en un flujo unificado y reproducible.
+
+\section{Comparativa multicriterio}
+
+La Tabla~\ref{tab:comparativa-global} sintetiza la comparaci\'on global
+entre enfoques de soluci\'on.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{|P{3.9cm}|c|c|c|}
+\hline
+\textbf{Criterio} & \textbf{Soluci\'on elegida} & \textbf{Alternativa intermedia} & \textbf{Alternativa avanzada} \\
+\hline
+Tiempo de entrega MVP & 5 & 3 & 2 \\
+\hline
+Mantenibilidad & 4 & 3 & 4 \\
+\hline
+Coste operativo & 5 & 3 & 2 \\
+\hline
+Escalabilidad potencial & 4 & 3 & 5 \\
+\hline
+Complejidad de operaci\'on & 4 & 3 & 1 \\
+\hline
+Adecuaci\'on al TFG & 5 & 3 & 2 \\
+\hline
+\end{tabular}
+\caption{Comparativa global (escala 1-5, mayor es mejor)}
+\label{tab:comparativa-global}
+\end{table}
+
+Interpretaci\'on:
+la alternativa seleccionada no maximiza todos los ejes te\'oricos,
+pero s\'i ofrece el mejor equilibrio entre valor entregado,
+riesgo t\'ecnico y viabilidad temporal del proyecto.
+
+\section{Decisiones adoptadas y justificaci\'on final}
+
+Las decisiones finales que mejor explican el resultado del proyecto son:
+
+\begin{itemize}
+	\item arquitectura SPA + API desacoplada para separar responsabilidades;
+	\item backend Spring Boot con persistencia relacional y migraciones Flyway;
+	\item frontend React + TypeScript para productividad con control tipado;
+	\item almacenamiento cloud persistente en producci\'on y local en desarrollo;
+	\item despliegue en PaaS con CI/CD automatizada y verificaciones de calidad.
+\end{itemize}
+
+Esta combinaci\'on ha permitido llegar a un sistema funcional,
+con cobertura de pruebas alta y capacidad de evoluci\'on,
+sin sobredimensionar infraestructura ni desviarse del objetivo acad\'emico.
+
+\section{Conclusiones del cap\'itulo}
+
+La comparaci\'on confirma que la soluci\'on implementada no responde a una selecci\'on
+arbitraria de herramientas,
+sino a una evaluaci\'on razonada frente a alternativas reales.
+
+El enfoque adoptado prioriza equilibrio entre robustez, coste y mantenibilidad,
+lo que lo hace especialmente adecuado para un TFG de perfil profesional
+con restricciones de tiempo y recursos.
 	
 	 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

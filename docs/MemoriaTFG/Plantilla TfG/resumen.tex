@@ -1,29 +1,55 @@
 \cdpchapter{Resumen}
 
-El resumen del Trabajo fin de Grado consiste, como su propio nombre indica, es un resumen de la memoria en formato apropiado 
-para ser indexado en las bases de datos bibliotecarias. No debe ocupar m\'as de una carilla de texto
-y en ella hay que exponer en pocas palabras la finalidad y objetivos del trabajo, 
-as{\'\i} como las aportaciones realizadas. En general,
-no incluir\'a figuras, cuadros ni referencias bibliogr\'aficas.
+Este Trabajo Fin de Grado presenta el dise\~no, implementaci\'on y validaci\'on
+de un sistema web para la gesti\'on de entregables acad\'emicos,
+orientado a mejorar la operativa diaria de profesorado y alumnado.
+La soluci\'on cubre el ciclo completo de trabajo:
+gesti\'on de cursos y actividades, configuraci\'on de entregables,
+realizaci\'on de entregas por parte del estudiante,
+evaluaci\'on docente con feedback y control de visibilidad de notas.
 
-El resumen es obligatorio en espa{\~n}ol para todos los TfG. Es opcional incluir un \emph{Abstract} (resumen en ingl\'es)
-en una hoja separada. Debe ser traducci\'on dle correspodiente resumen en español. En los TfG presentados en ingl\'es,
-la inclusi\'on del \emph{abstract} es tmabi\'en obligatoria, as{\'\i} como en los TfG correspondientes a la titulaci\'on
-de Ingenier{\'\i}a de la Salud.
+Desde el punto de vista t\'ecnico, la plataforma se implementa con
+arquitectura cliente-servidor desacoplada,
+empleando frontend en React + TypeScript y backend en Spring Boot sobre Java 21,
+con persistencia relacional y migraciones versionadas mediante Flyway.
+La seguridad se basa en autenticaci\'on JWT con renovaci\'on de sesi\'on,
+autorizaci\'on por rol y validaciones por contexto acad\'emico.
 
-El resumen de este documento es el siguiente:
+El proyecto integra adem\'as una estrategia de calidad en capas
+(pruebas unitarias, integraci\'on, E2E y mutaci\'on),
+junto con automatizaci\'on CI/CD y despliegue en entorno cloud,
+lo que permite reducir regresiones y mejorar trazabilidad de cambios.
 
-Este trabajo pretende ser una gu{\'\i}a para uniformar los formatos de las memorias de los Trabajos fin de Grado de las titulaciones: 
-\begin{itemize}
-\item Grado en Ingenier{\'\i}a Inform\'atica --- Ingenier{\'\i}a de Computadores
-\item Grado en Ingenier{\'\i}a Inform\'atica --- Ingenier{\'\i}a del Software
-\item Grado en Ingenier{\'\i}a Inform\'atica --- Tecnolog{\'\i}as Inform\'aticas
-\end{itemize}
+Como resultado, se obtiene una base funcional y mantenible,
+alineada con los requisitos identificados en el an\'alisis inicial
+y con capacidad real de evoluci\'on hacia funcionalidades avanzadas
+de seguridad, observabilidad e interoperabilidad.
 
-de la Escuela T\'ecnica Superior de Ingenier{\'\i}a Inform\'atica de la Universidad de Sevilla.
+\cdpchapter{Abstract}
 
-Al mismo tiempo, se pretende que el documento sea un ejemplo de la realizaci\'on de un memoria de Trabajo fin de Grado. 
-Debido a ello, hemos estructurado el documento en cap{\'\i}tulos e incluido diversos {\'\i}ndices y bibliograf{\'\i}a,
-aunque obviamente no hubiera sido necesario.
+This Bachelor's Thesis presents the design, implementation, and validation
+of a web-based academic assignment management platform
+aimed at improving the day-to-day workflow of both lecturers and students.
+The system supports the full process:
+course and activity management, assignment configuration,
+student submissions, lecturer grading with feedback,
+and controlled grade visibility.
+
+From a technical perspective, the platform follows a decoupled
+client-server architecture,
+using a React + TypeScript frontend and a Java 21 Spring Boot backend,
+with relational persistence and versioned schema migrations via Flyway.
+Security is implemented through JWT-based authentication,
+session refresh, role-based authorization, and context-aware access checks.
+
+The project also incorporates a layered quality strategy
+(unit, integration, end-to-end, and mutation testing),
+together with CI/CD automation and cloud deployment,
+thus reducing regression risk and improving traceability.
+
+The outcome is a functional and maintainable solution,
+aligned with the initial requirements and ready to evolve
+towards more advanced capabilities in security, observability,
+and institutional interoperability.
 
 

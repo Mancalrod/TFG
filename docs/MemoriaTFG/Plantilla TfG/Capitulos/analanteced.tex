@@ -1,2 +1,250 @@
-\chapter{An\'alisis de antecedentes y aportaci\'on realizada}\label{analanteced}
- 
+﻿\chapter{An\'alisis de antecedentes y aportaci\'on realizada}\label{analanteced}
+
+\section{Introducci\'on}
+
+Este cap\'itulo analiza la situaci\'on de partida del dominio de gesti\'on de entregables acad\'emicos
+y describe con detalle la aportaci\'on concreta del proyecto sobre dicho contexto.
+El an\'alisis se sustenta en los artefactos de requisitos y dise\~no (ERS y DAS),
+y se contrasta con el estado real de implementaci\'on reflejado en el backlog,
+el plan de sprints y la estrategia de pruebas.
+
+El objetivo de esta secci\'on no es solo comparar un ``antes'' y un ``despu\'es'',
+sino explicar por qu\'e el problema exist\'ia,
+qu\'e brechas de ingenier\'ia lo sosten\'ian,
+y c\'omo la soluci\'on propuesta aporta una mejora estructural defendible.
+
+\section{Metodolog\'ia de an\'alisis de antecedentes}
+
+Se adopta un enfoque en tres pasos:
+
+\begin{enumerate}
+	\item caracterizaci\'on del escenario \emph{as-is} (actores, procesos, fortalezas y debilidades),
+	\item identificaci\'on de brechas operativas y tecnol\'ogicas,
+	\item definici\'on del escenario \emph{to-be} con mapeo expl\'icito de aportaciones.
+\end{enumerate}
+
+Este m\'etodo evita descripciones gen\'ericas y permite mantener trazabilidad
+entre problema detectado, decisi\'on de dise\~no e impacto obtenido.
+
+\section{Situaci\'on actual (escenario \emph{as-is})}
+
+\subsection{Actores y procesos principales}
+
+En la situaci\'on de partida intervienen tres actores de negocio:
+\begin{itemize}
+	\item \textbf{Profesor}: crea actividades y gestiona la recogida/correcci\'on de entregas.
+	\item \textbf{Estudiante}: realiza la entrega de ficheros en la plataforma docente.
+	\item \textbf{Administrador de plataforma}: mantiene servicios base e infraestructura institucional.
+\end{itemize}
+
+Los procesos de referencia en ese escenario son:
+\begin{itemize}
+	\item \textbf{PRON-001}: creaci\'on y publicaci\'on de tareas.
+	\item \textbf{PRON-002}: entrega de pr\'acticas por el alumnado.
+	\item \textbf{PRON-003}: descarga masiva y organizaci\'on manual de entregas por el profesorado.
+\end{itemize}
+
+\subsection{Fortalezas del entorno de partida}
+
+El an\'alisis del contexto inicial evidencia fortalezas relevantes:
+\begin{itemize}
+	\item \textbf{FOR-001}: centralizaci\'on de usuarios mediante identidad institucional.
+	\item \textbf{FOR-002}: disponibilidad generalizada y acceso web estandarizado.
+	\item \textbf{FOR-003}: marco de uso conocido por estudiantes y docentes.
+\end{itemize}
+
+Estas fortalezas justifican que la propuesta no persiga sustituir por completo
+el ecosistema acad\'emico existente,
+sino complementarlo en el punto donde se concentra la fricci\'on operativa.
+
+\subsection{Debilidades estructurales detectadas}
+
+Junto a las fortalezas, se detectan debilidades que afectan al rendimiento del proceso:
+\begin{itemize}
+	\item \textbf{DEB-001}: rigidez en la gesti\'on de archivos (clasificaci\'on manual reiterada).
+	\item \textbf{DEB-002}: limitaciones para evoluci\'on funcional sobre arquitecturas cerradas.
+	\item \textbf{DEB-003}: baja flexibilidad en el flujo de entrega para el estudiante.
+	\item \textbf{DEB-004}: integraci\'on no nativa con almacenamiento cloud moderno.
+\end{itemize}
+
+\subsection{An\'alisis de causas ra\'iz}
+
+Las debilidades anteriores no se explican por errores puntuales,
+sino por causas sist\'emicas:
+
+\begin{itemize}
+	\item \textbf{Causa de proceso}: predominio de tareas manuales en fases cr\'iticas de correcci\'on.
+	\item \textbf{Causa de producto}: ausencia de especializaci\'on para el ciclo completo de entregables.
+	\item \textbf{Causa t\'ecnica}: acoplamiento entre flujo acad\'emico y herramientas de prop\'osito general.
+	\item \textbf{Causa de calidad}: escasa trazabilidad integrada entre entrega, versi\'on, evaluaci\'on y feedback.
+\end{itemize}
+
+\section{Brechas entre escenario actual y necesidades objetivo}
+
+Para justificar la intervenci\'on,
+se identifican brechas concretas entre la situaci\'on \emph{as-is}
+y el resultado esperado en t\'erminos de ingenier\'ia.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{|P{3.2cm}|P{4.4cm}|P{4.9cm}|}
+\hline
+\textbf{Brecha} & \textbf{Situaci\'on inicial} & \textbf{Necesidad objetivo} \\
+\hline
+Operativa docente & Descarga y organizaci\'on manual recurrente & Flujo integrado de correcci\'on con menor carga administrativa \\
+\hline
+Experiencia de entrega & Interacci\'on poco guiada seg\'un contexto & Flujo orientado por rol y estado de entregable \\
+\hline
+Trazabilidad acad\'emica & Datos dispersos entre herramientas y estados & Cadena unificada entrega-version-evaluaci\'on-feedback \\
+\hline
+Evoluci\'on funcional & Alta dependencia de plataforma generalista & Arquitectura modular y extensible por componentes \\
+\hline
+Calidad y despliegue & Validaci\'on heterog\'enea por tarea & Verificaci\'on automatizada y entrega continua \\
+\hline
+\end{tabular}
+\caption{Brechas identificadas entre el escenario de partida y el objetivo}
+\label{tab:brechas-antecedentes}
+\end{table}
+
+\section{Entorno tecnol\'ogico de partida}
+
+El contexto previo se caracteriza por:
+\begin{itemize}
+	\item plataforma institucional LMS con autenticaci\'on centralizada,
+	\item acceso multiplataforma desde navegador,
+	\item dependencia de herramientas locales para tratamiento de paquetes de entrega.
+\end{itemize}
+
+La consecuencia directa es que parte del trabajo cr\'itico de evaluaci\'on
+se desplaza al puesto local del docente,
+con impacto en tiempo de correcci\'on,
+estandarizaci\'on de criterios
+y riesgo de inconsistencias en trazabilidad.
+
+\section{Aportaci\'on realizada (escenario \emph{to-be})}
+
+La propuesta implementada aporta una mejora estructural,
+orientada a reducir fricci\'on operativa,
+aumentar trazabilidad y consolidar calidad de producto.
+
+\subsection{Aportaci\'on funcional}
+
+La aportaci\'on funcional incluye:
+\begin{itemize}
+	\item gesti\'on de cursos, grupos, actividades y entregables en una interfaz unificada,
+	\item flujo de entrega con validaciones y control de versiones,
+	\item evaluaci\'on y retroalimentaci\'on integradas en el ciclo operativo,
+	\item control de acceso por rol (administrador, profesor, estudiante).
+\end{itemize}
+
+Estas capacidades se alinean con los procesos objetivo del an\'alisis:
+\textbf{PRON-004} (creaci\'on/publicaci\'on de actividad),
+\textbf{PRON-005} (realizaci\'on de entrega con validaci\'on)
+y \textbf{PRON-006} (evaluaci\'on y feedback).
+
+\subsection{Aportaci\'on arquitect\'onica y tecnol\'ogica}
+
+Desde la perspectiva t\'ecnica, la contribuci\'on principal se concreta en:
+\begin{itemize}
+	\item separaci\'on frontend-backend mediante API REST,
+	\item arquitectura por capas en backend para aislar responsabilidades,
+	\item uso de DTOs para desacoplar contratos de API del modelo de persistencia,
+	\item evoluci\'on de esquema controlada por migraciones versionadas.
+\end{itemize}
+
+Este dise\~no reduce acoplamiento,
+facilita mantenimiento
+y habilita evoluci\'on incremental sin ruptura del n\'ucleo funcional.
+
+\subsection{Aportaci\'on en calidad y operaci\'on}
+
+Adem\'as de funcionalidad,
+el proyecto incorpora capacidades de calidad y operaci\'on:
+\begin{itemize}
+	\item estrategia de testing en capas (unitarias, integraci\'on, E2E y mutaci\'on),
+	\item pipelines CI/CD para validaci\'on continua,
+	\item despliegue reproducible en entorno PaaS con configuraci\'on por entorno.
+\end{itemize}
+
+La aportaci\'on, por tanto, no se limita a ``que funcione'',
+sino a que el sistema sea verificable, mantenible y operable.
+
+\section{Matriz de mapeo debilidades-aportaciones}
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{|P{2.5cm}|P{4.5cm}|P{4.9cm}|}
+\hline
+\textbf{Debilidad} & \textbf{Impacto inicial} & \textbf{Aportaci\'on aplicada} \\
+\hline
+DEB-001 & Sobrecarga manual en correcci\'on y organizaci\'on de ficheros & Flujo estructurado de entregas y consultas por contexto \\
+\hline
+DEB-002 & Dificultad de evoluci\'on sobre stack no modular & Arquitectura desacoplada con API y capas de servicio \\
+\hline
+DEB-003 & Fricci\'on para el estudiante durante la entrega & Formularios guiados, validaciones y seguimiento de estado \\
+\hline
+DEB-004 & Dependencia de almacenamiento local/heterog\'eneo & Integraciones configurables y estrategia de almacenamiento por entorno \\
+\hline
+\end{tabular}
+\caption{Relaci\'on entre debilidades detectadas y aportaci\'on implementada}
+\label{tab:mapeo-debilidades-aportacion}
+\end{table}
+
+\section{Comparativa sint\'etica}
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{|P{3.0cm}|P{5.3cm}|P{5.3cm}|}
+\hline
+\textbf{Aspecto} & \textbf{Situaci\'on inicial} & \textbf{Aportaci\'on del TFG} \\
+\hline
+Gesti\'on de entregas & Descarga masiva y organizaci\'on manual en local & Flujo de entrega estructurado con trazabilidad \\
+\hline
+Evaluaci\'on & Proceso parcialmente desacoplado de la entrega & Evaluaci\'on y feedback integrados en el mismo ciclo \\
+\hline
+Evoluci\'on t\'ecnica & Dependencia de stack monol\'itico/generalista & Arquitectura modular con API REST \\
+\hline
+Control de acceso & Autenticaci\'on institucional de base & Modelo de roles y validaci\'on contextual por operaci\'on \\
+\hline
+Calidad del desarrollo & Validaci\'on heterog\'enea seg\'un tarea & Estrategia de testing y automatizaci\'on CI/CD \\
+\hline
+\end{tabular}
+\caption{Comparativa entre escenario de partida y propuesta desarrollada}
+\label{tab:comparativa-antecedentes}
+\end{table}
+
+\section{Alineaci\'on con objetivos de negocio}
+
+La aportaci\'on realizada responde de forma directa a los objetivos de negocio
+definidos en la fase de an\'alisis:
+\begin{itemize}
+	\item \textbf{OBJN-001}: agilizar la gesti\'on docente reduciendo tareas manuales de bajo valor.
+	\item \textbf{OBJN-002}: mejorar accesibilidad y usabilidad del proceso de entrega.
+	\item \textbf{OBJN-003}: centralizar la evaluaci\'on y la retroalimentaci\'on con trazabilidad.
+	\item \textbf{OBJN-004}: estructurar informaci\'on para facilitar evoluci\'on e integraciones.
+\end{itemize}
+
+\section{Limitaciones residuales y continuidad}
+
+Aun cuando la mejora es significativa,
+se mantienen l\'ineas de continuidad planificadas:
+\begin{itemize}
+	\item ampliaci\'on de funcionalidades avanzadas fuera del MVP,
+	\item extensi\'on de integraciones externas seg\'un contexto institucional,
+	\item refuerzo de observabilidad y m\'etricas operativas de producci\'on.
+\end{itemize}
+
+Estas limitaciones no invalidan la aportaci\'on obtenida,
+sino que delimitan una hoja de ruta realista para evoluci\'on posterior.
+
+\section{Conclusiones del cap\'itulo}
+
+El an\'alisis de antecedentes confirma que el principal problema del dominio
+no era la ausencia de plataformas docentes,
+sino la falta de especializaci\'on en el flujo operativo de entregables.
+
+La aportaci\'on de este TFG se sit\'ua precisamente en ese hueco:
+transformar un proceso manual y costoso en un proceso digital trazable,
+modular y orientado a evaluaci\'on continua,
+con una base t\'ecnica preparada para evolucionar con menor riesgo de deuda estructural.
