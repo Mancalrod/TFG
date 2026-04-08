@@ -1,0 +1,21 @@
+# LaTeX / latexmk build artifacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lol
+*.lot
+*.out
+*.synctex.gz
+*.toc
+*.dvi
+*.ps
+
+# Main compiled output for this project
+proyect.pdf
