@@ -244,7 +244,7 @@
 \newcommand{\figura}[5]{
   \begin{figure}[hbtp]
     \begin{center}
-    \includegraphics[width=#1\textwidth,#5]{#2}%
+    \includegraphics[width=#1\textwidth,#5]{#2}
     \caption{#3}
     \label{#4}
     \end{center}

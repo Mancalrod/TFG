@@ -1,55 +1,73 @@
 \cdpchapter{Resumen}
 
-Este Trabajo Fin de Grado presenta el dise\~no, implementaci\'on y validaci\'on
-de un sistema web para la gesti\'on de entregables acad\'emicos,
-orientado a mejorar la operativa diaria de profesorado y alumnado.
-La soluci\'on cubre el ciclo completo de trabajo:
-gesti\'on de cursos y actividades, configuraci\'on de entregables,
-realizaci\'on de entregas por parte del estudiante,
-evaluaci\'on docente con feedback y control de visibilidad de notas.
+\textbf{Contexto y problema:}
+en la operativa acad\'emica habitual, la gesti\'on de entregables suele fragmentarse
+entre herramientas generales, con fricciones en trazabilidad,
+seguimiento de versiones y evaluaci\'on docente.
+Este TFG aborda el problema de disponer de un flujo integral,
+desde la definici\'on del entregable hasta la publicaci\'on de feedback y notas,
+adaptado a perfiles de administraci\'on, profesorado y alumnado.
 
-Desde el punto de vista t\'ecnico, la plataforma se implementa con
-arquitectura cliente-servidor desacoplada,
-empleando frontend en React + TypeScript y backend en Spring Boot sobre Java 21,
-con persistencia relacional y migraciones versionadas mediante Flyway.
-La seguridad se basa en autenticaci\'on JWT con renovaci\'on de sesi\'on,
+\textbf{Relevancia:}
+la necesidad es especialmente significativa por su impacto directo en
+tiempo de correcci\'on, coherencia de criterios de evaluaci\'on,
+calidad de experiencia del estudiante y sostenibilidad del sistema
+cuando aumenta la carga docente o el n\'umero de grupos.
+
+\textbf{Soluci\'on propuesta y m\'etodo:}
+se dise\~na e implementa una plataforma web con arquitectura
+cliente-servidor desacoplada,
+frontend en React + TypeScript y backend en Spring Boot sobre Java 21,
+persistencia relacional y migraciones versionadas con Flyway.
+La seguridad combina autenticaci\'on JWT con renovaci\'on de sesi\'on,
 autorizaci\'on por rol y validaciones por contexto acad\'emico.
+El desarrollo se ejecuta por iteraciones,
+con trazabilidad entre requisitos, backlog, implementaci\'on y pruebas.
 
-El proyecto integra adem\'as una estrategia de calidad en capas
+\textbf{Resultados y por qu\'e la soluci\'on es adecuada:}
+el sistema cubre el ciclo funcional completo
+(cursos, actividades, entregables, entregas, evaluaci\'on y feedback),
+con una estrategia de calidad en capas
 (pruebas unitarias, integraci\'on, E2E y mutaci\'on),
-junto con automatizaci\'on CI/CD y despliegue en entorno cloud,
-lo que permite reducir regresiones y mejorar trazabilidad de cambios.
+automatizaci\'on CI/CD y despliegue cloud reproducible.
+El resultado es una base funcional, mantenible y escalable,
+con menor riesgo de regresiones y mayor trazabilidad t\'ecnica,
+alineada con los objetivos definidos para el TFG.
 
-Como resultado, se obtiene una base funcional y mantenible,
-alineada con los requisitos identificados en el an\'alisis inicial
-y con capacidad real de evoluci\'on hacia funcionalidades avanzadas
-de seguridad, observabilidad e interoperabilidad.
+\cdpchapter{Resumen complementario}
 
-\cdpchapter{Abstract}
+\textbf{Contexto y problema:}
+los flujos de trabajo de entregas acad\'emicas suelen estar fragmentados entre
+herramientas de prop\'osito general,
+lo que genera fricciones en trazabilidad,
+control de versiones de entregas y consistencia de calificaciones.
+Esta memoria aborda la necesidad de un flujo integral de extremo a extremo,
+desde la definici\'on del entregable hasta la publicaci\'on de retroalimentaci\'on
+y calificaciones,
+adaptado a administradores, docentes y estudiantes.
 
-This Bachelor's Thesis presents the design, implementation, and validation
-of a web-based academic assignment management platform
-aimed at improving the day-to-day workflow of both lecturers and students.
-The system supports the full process:
-course and activity management, assignment configuration,
-student submissions, lecturer grading with feedback,
-and controlled grade visibility.
+\textbf{Relevancia:}
+el problema tiene impacto directo en la carga de trabajo docente,
+la experiencia del estudiante
+y la mantenibilidad a largo plazo a medida que aumenta el n\'umero de cursos y grupos.
 
-From a technical perspective, the platform follows a decoupled
-client-server architecture,
-using a React + TypeScript frontend and a Java 21 Spring Boot backend,
-with relational persistence and versioned schema migrations via Flyway.
-Security is implemented through JWT-based authentication,
-session refresh, role-based authorization, and context-aware access checks.
+\textbf{Soluci\'on propuesta y m\'etodo:}
+el proyecto dise\~na e implementa una plataforma web desacoplada,
+con frontend en React + TypeScript y backend en Spring Boot sobre Java 21,
+persistencia relacional y migraciones de esquema versionadas con Flyway.
+La seguridad se basa en autenticaci\'on JWT con renovaci\'on de sesi\'on,
+autorizaci\'on por rol
+y validaci\'on de acceso contextualizada.
+El desarrollo sigue incrementos iterativos con trazabilidad expl\'icita
+entre requisitos, backlog, implementaci\'on y pruebas.
 
-The project also incorporates a layered quality strategy
-(unit, integration, end-to-end, and mutation testing),
-together with CI/CD automation and cloud deployment,
-thus reducing regression risk and improving traceability.
-
-The outcome is a functional and maintainable solution,
-aligned with the initial requirements and ready to evolve
-towards more advanced capabilities in security, observability,
-and institutional interoperability.
+\textbf{Resultados y adecuaci\'on:}
+la plataforma resultante cubre el ciclo funcional completo
+(cursos, actividades, entregables, entregas, calificaci\'on y retroalimentaci\'on),
+y aplica una estrategia de calidad en capas
+(pruebas unitarias, de integraci\'on, de extremo a extremo y de mutaci\'on),
+adem\'as de automatizaci\'on CI/CD y despliegue en cloud.
+El resultado es una soluci\'on funcional, mantenible y evolutiva,
+con menor riesgo de regresiones y mayor trazabilidad t\'ecnica.
 
 

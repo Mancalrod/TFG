@@ -10,6 +10,56 @@ El objetivo es demostrar trazabilidad de extremo a extremo: desde la necesidad
 identificada en el an\'alisis inicial hasta su materializaci\'on en componentes software,
 persistencia, seguridad, pruebas y despliegue.
 
+\section{Ecosistema de desarrollo y operaci\'on}
+
+\subsection{Lenguajes y herramientas utilizadas}
+
+El ecosistema t\'ecnico del proyecto se ha definido para garantizar
+coherencia entre desarrollo, validaci\'on y despliegue:
+
+\begin{itemize}
+\item \textbf{Implementaci\'on backend}: Java 21, Spring Boot, Spring Security,
+JPA/Hibernate, Maven y Flyway.
+\item \textbf{Implementaci\'on frontend}: React, TypeScript, Vite, React Router y Axios.
+\item \textbf{Documentaci\'on}: memoria en \LaTeX{} y documentaci\'on t\'ecnica auxiliar en Markdown.
+\item \textbf{Gesti\'on de proyecto}: backlog y planificaci\'on iterativa
+versionados en el propio repositorio.
+\end{itemize}
+
+\subsection{Pol\'itica de gesti\'on del c\'odigo fuente}
+
+La gesti\'on del c\'odigo se realiza en repositorio Git con enfoque de ramas tem\'aticas,
+integraci\'on mediante \emph{pull requests} y validaciones autom\'aticas previas a fusi\'on.
+Esta pol\'itica reduce riesgo de regresi\'on,
+mejora trazabilidad de cambios y permite relacionar requisitos con commits,
+pruebas y despliegues.
+
+\subsection{Estrategia de integraci\'on continua y despliegue}
+
+La estrategia CI/CD se apoya en workflows de GitHub Actions,
+con etapas separadas para backend, frontend y validaci\'on conjunta:
+
+\begin{itemize}
+\item ejecuci\'on de compilaci\'on, pruebas y lint en cada cambio relevante,
+\item an\'alisis de calidad y seguridad sobre artefactos de c\'odigo,
+\item construcci\'on de im\'agenes Docker y publicaci\'on automatizada,
+\item despliegue en PaaS con configuraci\'on por entorno.
+\end{itemize}
+
+El objetivo operativo es que cada versi\'on candidata sea reproducible,
+auditable y desplegable con esfuerzo m\'inimo,
+manteniendo una l\'inea de entrega continua compatible con el calendario del TFG.
+
+\subsection{Uso de asistentes de Inteligencia Artificial}
+
+El proyecto adopta un uso \textbf{limitado, transparente y verificable}
+de herramientas de IA generativa,
+siempre como apoyo a tareas de redacci\'on preliminar,
+revisi\'on o aceleraci\'on operativa,
+nunca como sustituto del criterio de ingenier\'ia del autor.
+El alcance y las salvaguardas aplicadas se detallan en el
+Anexo D de esta memoria.
+
 \section{An\'alisis de requisitos}
 
 \subsection{Fuentes de requisitos}
@@ -439,7 +489,7 @@ de forma verificable cada decisi\'on de dise\~no e implementaci\'on.
 \small
 \begin{tabular}{|P{3.5cm}|P{5.5cm}|P{2.8cm}|}
 \hline
-\textbf{Artefacto DAS} & \textbf{Archivo original en TFGProteus/assets} & \textbf{Uso en memoria} \\
+\textbf{Artefacto DAS} & \textbf{Archivo original en assets} & \textbf{Uso en memoria} \\
 \hline
 Arquitectura l\'ogica & ArquitecturaTFG.drawio.png & Dise\~no global \\
 \hline
@@ -463,21 +513,21 @@ Secuencia evaluaci\'on & Evaluacion y Feedback.png & Flujo de correcci\'on \\
 \label{tab:das-diagramas-principales}
 \end{table}
 
-\figura{0.90}{\detokenize{../../TFGProteus/assets/ArquitecturaTFG.drawio.png}}{Arquitectura l\'ogica del sistema (DAS)}{fig:das-arquitectura}{}
+\figura{0.90}{\detokenize{../assets/ArquitecturaTFG.drawio.png}}{Arquitectura l\'ogica del sistema (DAS)}{fig:das-arquitectura}{}
 
-\figura{0.85}{\detokenize{../../TFGProteus/assets/Diagrama de clases.png}}{Modelo de clases del sistema (DAS)}{fig:das-clases}{}
+\figura{0.85}{\detokenize{../assets/Diagrama de clases.png}}{Modelo de clases del sistema (DAS)}{fig:das-clases}{}
 
-\figura{0.55}{\detokenize{../../TFGProteus/assets/Diagrama de estado.png}}{Diagrama de estado de actividades (DAS)}{fig:das-estado}{}
+\figura{0.55}{\detokenize{../assets/Diagrama de estado.png}}{Diagrama de estado de actividades (DAS)}{fig:das-estado}{}
 
-\figura{0.85}{\detokenize{../../TFGProteus/assets/Diagrama de navegabilidad (1).png}}{Navegabilidad principal de la interfaz (DAS)}{fig:das-navegabilidad}{}
+\figura{0.85}{\detokenize{../assets/Diagrama de navegabilidad (1).png}}{Navegabilidad principal de la interfaz (DAS)}{fig:das-navegabilidad}{}
 
-\figura{0.88}{\detokenize{../../TFGProteus/assets/Autenticacion y Acceso.png}}{Secuencia de autenticaci\'on y acceso (DAS)}{fig:das-seq-auth}{}
+\figura{0.88}{\detokenize{../assets/Autenticacion y Acceso.png}}{Secuencia de autenticaci\'on y acceso (DAS)}{fig:das-seq-auth}{}
 
-\figura{0.88}{\detokenize{../../TFGProteus/assets/Realizar Entrega.png}}{Secuencia de realizaci\'on de entrega (DAS)}{fig:das-seq-entrega}{}
+\figura{0.88}{\detokenize{../assets/Realizar Entrega.png}}{Secuencia de realizaci\'on de entrega (DAS)}{fig:das-seq-entrega}{}
 
-\figura{0.75}{\detokenize{../../TFGProteus/assets/InterfazDeUsuarioTFG-LogueadoComoEstudiante.png}}{Mockup de panel principal de estudiante (DAS)}{fig:das-mock-estudiante}{}
+\figura{0.75}{\detokenize{../assets/InterfazDeUsuarioTFG-LogueadoComoEstudiante.png}}{Mockup de panel principal de estudiante (DAS)}{fig:das-mock-estudiante}{}
 
-\figura{0.75}{\detokenize{../../TFGProteus/assets/LogueadoComoProfesor.png}}{Mockup de panel principal de profesor (DAS)}{fig:das-mock-profesor}{}
+\figura{0.75}{\detokenize{../assets/LogueadoComoProfesor.png}}{Mockup de panel principal de profesor (DAS)}{fig:das-mock-profesor}{}
 
 Adicionalmente, el DAS incluye un inventario de diecis\'eis mockups que cubre
 las operaciones esenciales por rol. Para mantener equilibrio entre exhaustividad
@@ -496,11 +546,11 @@ InterfazDeUsuarioTFG-Registrarse.drawio.png & Registro o alta inicial de usuario
 \hline
 InterfazDeUsuarioTFG-LogueadoComoEstudiante.png & Panel inicial de estudiante autenticado. \\
 \hline
-VistaEstudianteDentroDeUnaAsignatura.png & Vista de asignatura desde rol estudiante. \\
+VistaEstudianteDentroDeUna\-Asignatura.png & Vista de asignatura desde rol estudiante. \\
 \hline
-LogueadoComoEstudianteSeleccionandoCheckbox.png & Selecci\'on de entregables por estudiante. \\
+LogueadoComoEstudiante\-Seleccionando\-Checkbox.png & Selecci\'on de entregables por estudiante. \\
 \hline
-LogueadoComoEstudianteEnCalificaci\'ones.png & Consulta de calificaciones y feedback. \\
+LogueadoComoEstudianteEn\-Calificaciones.png & Consulta de calificaciones y feedback. \\
 \hline
 LogueadoComoProfesor.png & Panel inicial de profesor autenticado. \\
 \hline
@@ -512,7 +562,7 @@ Edici\'on de actividad.png & Edici\'on de actividad existente. \\
 \hline
 Realizar calificaciones.png & Proceso de calificaci\'on por docente. \\
 \hline
-DentroDeCalificacionComoProfesor.png & Vista detallada de correcci\'on. \\
+DentroDeCalificacionComo\-Profesor.png & Vista detallada de correcci\'on. \\
 \hline
 EntregaSinNadaPuesto.png & Estado inicial de entrega sin adjuntos. \\
 \hline
@@ -583,14 +633,14 @@ Figura~\ref{fig:das-seq-crear-actividad}. En ella se observa la
 coordinaci\'on entre interfaz, validaciones de negocio y persistencia,
 alineada con RQF-005, RQF-008 y RQF-011.
 
-\figura{0.88}{\detokenize{../../TFGProteus/assets/Backend Activity Creation-2026-03-18-161459.png}}{Secuencia de creaci\'on de actividad en backend (DAS)}{fig:das-seq-crear-actividad}{}
+\figura{0.88}{\detokenize{../assets/Backend Activity Creation-2026-03-18-161459.png}}{Secuencia de creaci\'on de actividad en backend (DAS)}{fig:das-seq-crear-actividad}{}
 
 El ciclo de evaluaci\'on y retroalimentaci\'on queda recogido en la
 Figura~\ref{fig:das-seq-evaluacion}, que sirve de base para justificar la
 integraci\'on entre calificaci\'on, comentarios y publicaci\'on de resultados,
 en coherencia con RQF-018, RQF-019 y REGN-001/REGN-008.
 
-\figura{0.88}{\detokenize{../../TFGProteus/assets/Evaluacion y Feedback.png}}{Secuencia de evaluaci\'on y feedback (DAS)}{fig:das-seq-evaluacion}{}
+\figura{0.88}{\detokenize{../assets/Evaluacion y Feedback.png}}{Secuencia de evaluaci\'on y feedback (DAS)}{fig:das-seq-evaluacion}{}
 
 En la dimensi\'on de interfaz, los mockups de trabajo muestran c\'omo se
 materializa la navegaci\'on por rol en escenarios reales de uso. Las
@@ -599,15 +649,15 @@ Figuras~\ref{fig:das-mock-estudiante-asignatura} y
 producto: seguimiento de actividad por el estudiante y correcci\'on detallada
 por el profesorado.
 
-\figura{0.78}{\detokenize{../../TFGProteus/assets/VistaEstudianteDentroDeUnaAsignatura.png}}{Mockup operativo: estudiante dentro de una asignatura (DAS)}{fig:das-mock-estudiante-asignatura}{}
+\figura{0.78}{\detokenize{../assets/VistaEstudianteDentroDeUnaAsignatura.png}}{Mockup operativo: estudiante dentro de una asignatura (DAS)}{fig:das-mock-estudiante-asignatura}{}
 
-\figura{0.78}{\detokenize{../../TFGProteus/assets/DentroDeCalificacionComoProfesor.png}}{Mockup operativo: detalle de calificaci\'on como profesor (DAS)}{fig:das-mock-calificacion-profesor}{}
+\figura{0.78}{\detokenize{../assets/DentroDeCalificacionComoProfesor.png}}{Mockup operativo: detalle de calificaci\'on como profesor (DAS)}{fig:das-mock-calificacion-profesor}{}
 
 Como apoyo adicional, la Figura~\ref{fig:das-mock-entrega-con-archivo}
 ilustra el estado de entrega con contenido adjunto, \`util para justificar
 la trazabilidad de versiones y el control de evidencias de env\'io.
 
-\figura{0.70}{\detokenize{../../TFGProteus/assets/EntregaConAlgoPuesto.png}}{Mockup de entrega con archivo adjunto (DAS)}{fig:das-mock-entrega-con-archivo}{}
+\figura{0.70}{\detokenize{../assets/EntregaConAlgoPuesto.png}}{Mockup de entrega con archivo adjunto (DAS)}{fig:das-mock-entrega-con-archivo}{}
 
 \begin{table}[ht]
 \centering
@@ -616,15 +666,15 @@ la trazabilidad de versiones y el control de evidencias de env\'io.
 \hline
 \textbf{Actor} & \textbf{Operaci\'on central} & \textbf{Evidencia DAS reutilizada} & \textbf{Requisitos ERS asociados} \\
 \hline
-Administrador & Alta y administraci\'on de identidades/cursos & Mockups \texttt{CrearUsuario.png}, \texttt{CrearCurso.png} & RQF-001 a RQF-004, RQF-021, RQF-022 \\
+Administrador & Alta y administraci\'on de identidades/cursos & Mockups de alta de usuario y creaci\'on de curso & RQF-001 a RQF-004, RQF-021, RQF-022 \\
 \hline
-Profesor & Dise\~no y publicaci\'on de actividad/entregable & Fig. \ref{fig:das-seq-crear-actividad}, \texttt{Creacion de actividad.png} & RQF-005 a RQF-013, REGN-007 \\
+Profesor & Dise\~no y publicaci\'on de actividad/entregable & Fig. \ref{fig:das-seq-crear-actividad} y mockup de creaci\'on de actividad & RQF-005 a RQF-013, REGN-007 \\
 \hline
 Estudiante & Entrega y seguimiento de estado & Fig. \ref{fig:das-seq-entrega}, Fig. \ref{fig:das-mock-entrega-con-archivo} & RQF-014 a RQF-017, REGN-005 \\
 \hline
 Profesor evaluador & Correcci\'on y feedback & Fig. \ref{fig:das-seq-evaluacion}, Fig. \ref{fig:das-mock-calificacion-profesor} & RQF-018, RQF-019, REGN-001, REGN-008 \\
 \hline
-Profesor/Estudiante & Consulta y trazabilidad de resultados & \texttt{PonerComentarios.png}, \texttt{PaginaEstudiantesProfesores.png} & RQF-020, RQI-005, RQNF-009 \\
+Profesor y estudiante & Consulta y trazabilidad de resultados & Mockups de comentarios y vista cruzada docente-estudiante & RQF-020, RQI-005, RQNF-009 \\
 \hline
 \end{tabular}
 \normalsize
@@ -646,13 +696,13 @@ de casos de uso de referencia (Figuras~\ref{fig:das-cu-1} a
 \ref{fig:das-cu-4}), suficientes para documentar el enlace entre el
 cat\'alogo funcional y los flujos reales desarrollados.
 
-\figura{0.82}{\detokenize{../../TFGProteus/assets/CU-1.drawio.png}}{Caso de uso representativo CU-1 (DAS)}{fig:das-cu-1}{}
+\figura{0.82}{\detokenize{../assets/CU-1.drawio.png}}{Caso de uso representativo CU-1 (DAS)}{fig:das-cu-1}{}
 
-\figura{0.82}{\detokenize{../../TFGProteus/assets/CU-2.drawio.png}}{Caso de uso representativo CU-2 (DAS)}{fig:das-cu-2}{}
+\figura{0.82}{\detokenize{../assets/CU-2.drawio.png}}{Caso de uso representativo CU-2 (DAS)}{fig:das-cu-2}{}
 
-\figura{0.82}{\detokenize{../../TFGProteus/assets/CU-3.drawio.png}}{Caso de uso representativo CU-3 (DAS)}{fig:das-cu-3}{}
+\figura{0.82}{\detokenize{../assets/CU-3.drawio.png}}{Caso de uso representativo CU-3 (DAS)}{fig:das-cu-3}{}
 
-\figura{0.82}{\detokenize{../../TFGProteus/assets/CU-4.drawio.png}}{Caso de uso representativo CU-4 (DAS)}{fig:das-cu-4}{}
+\figura{0.82}{\detokenize{../assets/CU-4.drawio.png}}{Caso de uso representativo CU-4 (DAS)}{fig:das-cu-4}{}
 
 \begin{table}[ht]
 \centering
@@ -669,7 +719,7 @@ Dise\~no docente de actividades & Creaci\'on, edici\'on, visibilidad y configura
 \hline
 Gesti\'on de entregas & Publicaci\'on de trabajo, versionado y consulta de historial & Estudiante & Completa \\
 \hline
-Evaluaci\'on y feedback & Calificaci\'on, comentarios y visibilidad de resultados & Profesor/Estudiante & Completa \\
+Evaluaci\'on y feedback & Calificaci\'on, comentarios y visibilidad de resultados & Mixto & Completa \\
 \hline
 Supervisi\'on y trazabilidad & Vistas cruzadas profesor-estudiante y revisi\'on del estado de entregas & Profesor & Parcial avanzada \\
 \hline
@@ -699,7 +749,7 @@ RQI-001 a RQI-005 & Diagrama de clases + vistas por rol & Entidades JPA, DTOs y 
 \hline
 RQF-005 a RQF-013 & Secuencia de creaci\'on docente + mockups de actividad & Servicios de actividad/entregable y controladores asociados & Unit tests y API tests de gesti\'on docente \\
 \hline
-RQF-014 a RQF-017 & Secuencia de entrega + estados de mockup & \texttt{EntregaService}, validaciones y versionado & Integraci\'on de entregas y E2E de alumno \\
+RQF-014 a RQF-017 & Secuencia de entrega + estados de mockup & Servicio de entregas, validaciones y versionado & Integraci\'on de entregas y E2E de alumno \\
 \hline
 RQF-018, RQF-019 & Secuencia de evaluaci\'on + detalle de calificaci\'on & Flujo de feedback/calificaci\'on en backend y frontend & Pruebas funcionales de evaluaci\'on \\
 \hline
@@ -748,6 +798,41 @@ La arquitectura adoptada es cliente-servidor desacoplada:
 En backend se aplica dise\~no por capas
 (controller, service, repository y entity),
 que mejora mantenibilidad, testabilidad y capacidad de evoluci\'on.
+
+\subsection{Vista de despliegue}
+
+La vista de despliegue se organiza en cuatro bloques principales:
+
+\begin{itemize}
+\item \textbf{Cliente web}: navegador del usuario final (profesor, estudiante o administrador).
+\item \textbf{Frontend}: SPA est\'atica servida desde plataforma PaaS.
+\item \textbf{Backend}: API REST desplegada como servicio web independiente.
+\item \textbf{Datos}: base de datos PostgreSQL gestionada y accesible solo desde backend.
+\end{itemize}
+
+La separaci\'on de componentes permite escalar y evolucionar cada capa
+sin romper el resto del sistema,
+manteniendo adem\'as una frontera de seguridad clara entre cliente,
+l\'ogica de negocio y persistencia.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{|P{2.9cm}|P{3.1cm}|P{5.6cm}|}
+\hline
+\textbf{Nodo} & \textbf{Tecnolog\'ia} & \textbf{Responsabilidad principal} \\
+\hline
+Cliente & Navegador moderno & Interacci\'on de usuario y consumo de API sobre HTTPS. \\
+\hline
+Frontend & React + Vite en PaaS & Renderizado de interfaz, estado de sesi\'on y experiencia por rol. \\
+\hline
+Backend & Spring Boot (Java 21) en PaaS & Exposici\'on de endpoints, reglas de negocio, seguridad y orquestaci\'on de persistencia. \\
+\hline
+Persistencia & PostgreSQL gestionado & Almacenamiento transaccional y trazabilidad de datos acad\'emicos. \\
+\hline
+\end{tabular}
+\caption{Vista de despliegue simplificada del sistema}
+\label{tab:vista-despliegue}
+\end{table}
 
 \subsection{Dise\~no de dominio y datos}
 
