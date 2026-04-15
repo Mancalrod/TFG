@@ -42,10 +42,24 @@ export const OneDriveFolderBrowser: React.FC<Props> = ({ usuarioId, selectedPath
   };
 
   return (
-    <div className="onedrive-browser" style={{ border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden', backgroundColor: 'white' }}>
+    <div className="onedrive-browser" style={{ border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden', backgroundColor: 'white', maxWidth: '100%' }}>
       {/* Cabecera / Breadcrumbs */}
       <div className="ob-header" style={{ padding: '0.75rem', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-        <div className="ob-breadcrumbs" style={{ flex: 1, display: 'flex', gap: '5px', fontSize: '0.9rem', alignItems: 'center' }}>
+        <div
+          className="ob-breadcrumbs"
+          style={{
+            flex: 1,
+            minWidth: 0,
+            display: 'flex',
+            gap: '5px',
+            fontSize: '0.9rem',
+            alignItems: 'center',
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            whiteSpace: 'nowrap',
+            paddingBottom: '2px'
+          }}
+        >
           {breadcrumbs.map((bc, idx) => (
             <React.Fragment key={bc.id}>
               {idx > 0 && <span style={{ color: '#94a3b8' }}>/</span>}
@@ -58,7 +72,8 @@ export const OneDriveFolderBrowser: React.FC<Props> = ({ usuarioId, selectedPath
                   color: idx === breadcrumbs.length - 1 ? '#334155' : '#3b82f6', 
                   cursor: idx === breadcrumbs.length - 1 ? 'default' : 'pointer', 
                   padding: 0, 
-                  fontWeight: idx === breadcrumbs.length - 1 ? '600' : 'normal' 
+                  fontWeight: idx === breadcrumbs.length - 1 ? '600' : 'normal',
+                  whiteSpace: 'nowrap'
                 }}
               >
                 {bc.name}
@@ -85,7 +100,7 @@ export const OneDriveFolderBrowser: React.FC<Props> = ({ usuarioId, selectedPath
       </div>
 
       {/* Lista de Carpetas */}
-      <div className="ob-content" style={{ maxHeight: '250px', overflowY: 'auto', padding: '0.5rem' }}>
+      <div className="ob-content" style={{ maxHeight: '250px', overflowY: 'auto', overflowX: 'auto', padding: '0.5rem' }}>
         {loading ? (
           <div style={{ padding: '2rem 1rem', textAlign: 'center', color: '#64748b', fontSize: '0.9rem' }}>
             <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⏳</span> Cargando subcarpetas...
@@ -95,7 +110,7 @@ export const OneDriveFolderBrowser: React.FC<Props> = ({ usuarioId, selectedPath
             Esta carpeta está vacía.
           </div>
         ) : (
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0, minWidth: 'max-content' }}>
             {folders.map(folder => (
               <li 
                 key={folder.id} 
@@ -105,7 +120,8 @@ export const OneDriveFolderBrowser: React.FC<Props> = ({ usuarioId, selectedPath
                   alignItems: 'center', 
                   padding: '0.6rem 0.8rem', 
                   borderBottom: '1px solid #f1f5f9',
-                  transition: 'background-color 0.2s ease'
+                  transition: 'background-color 0.2s ease',
+                  minWidth: '100%'
                 }}
                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -115,7 +131,7 @@ export const OneDriveFolderBrowser: React.FC<Props> = ({ usuarioId, selectedPath
                   onClick={() => handleEnterFolder(folder)}
                 >
                   <span style={{ fontSize: '1.3rem' }}>📁</span>
-                  <span style={{ color: '#334155', fontWeight: '500' }}>{folder.name}</span>
+                  <span style={{ color: '#334155', fontWeight: '500', whiteSpace: 'nowrap' }}>{folder.name}</span>
                 </div>
                 <button 
                   type="button" 
@@ -153,11 +169,13 @@ export const OneDriveFolderBrowser: React.FC<Props> = ({ usuarioId, selectedPath
         gap: '0.5rem'
       }}>
         <span style={{ fontSize: '1rem' }}>📌</span>
-        <div>
-          <strong>Ruta seleccionada actualmente:</strong><br/>
-          <span style={{ fontFamily: 'monospace', opacity: 0.9 }}>
-            {selectedPath === '' ? 'Directorio Principal (Predeterminado)' : selectedPath}
-          </span>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <strong>Ruta seleccionada actualmente:</strong>
+          <div style={{ marginTop: '2px', overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap' }}>
+            <span style={{ fontFamily: 'monospace', opacity: 0.9 }}>
+              {selectedPath === '' ? 'Directorio Principal (Predeterminado)' : selectedPath}
+            </span>
+          </div>
         </div>
       </div>
     </div>
