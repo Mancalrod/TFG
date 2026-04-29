@@ -10,7 +10,7 @@
 
 ## Descripcion
 
-Sistema web para la gestion de entregables academicos que permite a profesores crear cursos, actividades y entregables, y a estudiantes realizar entregas con retroalimentacion. Incluye integracion con almacenamiento en la nube (HDVirtual/OneDrive), autenticacion OAuth (Google y ULL) y autenticacion de doble factor (2FA).
+Sistema web para la gestion de entregables academicos que permite a profesores crear cursos, actividades y entregables, y a estudiantes realizar entregas con retroalimentacion. Incluye integracion con almacenamiento en la nube (HDVirtual/OneDrive), conexion a OneDrive mediante OAuth2 y autenticacion de doble factor (2FA).
 
 ## Caracteristicas Principales
 
@@ -20,7 +20,7 @@ Sistema web para la gestion de entregables academicos que permite a profesores c
 - **Sistema de Entregas**: Subida de archivos con historial de versiones
 - **Feedback y Evaluacion**: Calificaciones y comentarios de profesores
 - **Almacenamiento Cloud**: Integracion con HDVirtual de la ULL y OneDrive
-- **Autenticacion Segura**: JWT, OAuth2 (Google/ULL) y 2FA
+- **Autenticacion Segura**: JWT, OAuth2 para OneDrive y 2FA
 - **Dashboard por Rol**: Interfaz adaptada a profesor/estudiante/administrador
 
 ## Stack Tecnologico

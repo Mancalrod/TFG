@@ -121,7 +121,7 @@ Should Have & O6, O7 & Aumentan mantenibilidad y calidad, y reducen riesgo de re
 \hline
 Could Have & Extensiones anal\'iticas y observabilidad avanzada & Aportan valor, pero no condicionan la validez del MVP. \\
 \hline
-Won't Have (MVP) & OAuth completo, 2FA integral, notificaciones avanzadas & Se reservan para evoluci\'on por coste de implementaci\'on y validaci\'on. \\
+Won't Have (MVP) & inicio de sesi\'on federado (OAuth2/OIDC), 2FA integral, notificaciones avanzadas & Se reservan para evoluci\'on por coste de implementaci\'on y validaci\'on. \\
 \hline
 \end{tabular}
 \caption{Priorizaci\'on de objetivos conforme a estrategia MoSCoW}
@@ -148,11 +148,13 @@ se delimita de forma expl\'icita lo que queda fuera del MVP,
 aunque exista su consideraci\'on en el an\'alisis inicial:
 
 \begin{itemize}
-	\item autenticaci\'on federada completa (OAuth institucional extensivo),
+	\item inicio de sesi\'on federado (OAuth2/OIDC institucional),
 	\item doble factor de autenticaci\'on integral (2FA),
 	\item notificaciones avanzadas desacopladas,
 	\item funcionalidades avanzadas de anal\'itica y monitorizaci\'on.
 \end{itemize}
+
+	Estas exclusiones se refieren al inicio de sesi\'on federado; la autorizaci\'on OAuth2 necesaria para conectar OneDrive s\'i est\'a implementada.
 
 Esta delimitaci\'on no representa una carencia metodol\'ogica,
 sino una decisi\'on de ingenier\'ia para proteger el objetivo principal:
