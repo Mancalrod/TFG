@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +46,7 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final ProfesorRepository profesorRepository;
+    private final CursoRepository cursoRepository;
     private final EstudianteRepository estudianteRepository;
     private final GrupoRepository grupoRepository;
     private final EntityMapper mapper;
@@ -299,18 +301,30 @@ public class UsuarioService {
     }
 
     /**
-     * Registra un usuario como profesor.
+     * Registra un usuario como profesor en un curso.
      */
-    public void registrarComoProfesor(Long usuarioId) {
+    public void registrarComoProfesor(Long usuarioId, Long cursoId) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new EntityNotFoundException(USUARIO_NOT_FOUND + usuarioId));
 
-        if (profesorRepository.existsByUsuarioId(usuarioId)) {
-            throw new IllegalStateException("El usuario ya está registrado como profesor");
+        if (Boolean.TRUE.equals(usuario.getEsAdmin())) {
+            throw new IllegalStateException("Un administrador no puede ser profesor");
+        }
+
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new EntityNotFoundException("Curso no encontrado con ID: " + cursoId));
+
+        if (profesorRepository.existsByUsuarioIdAndCursoId(usuarioId, cursoId)) {
+            throw new IllegalStateException("El usuario ya está asignado como profesor en este curso");
+        }
+
+        if (estudianteRepository.existsByUsuarioIdAndGrupoCursoId(usuarioId, cursoId)) {
+            throw new IllegalStateException("Un usuario no puede ser profesor y estudiante del mismo curso");
         }
 
         Profesor profesor = Profesor.builder()
                 .usuario(usuario)
+                .curso(curso)
                 .build();
         profesorRepository.save(profesor);
     }
@@ -322,15 +336,33 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + usuarioId));
 
+        if (Boolean.TRUE.equals(usuario.getEsAdmin())) {
+            throw new IllegalStateException("Un administrador no puede ser estudiante");
+        }
+
         Grupo grupo = grupoRepository.findById(grupoId)
                 .orElseThrow(() -> new EntityNotFoundException("Grupo no encontrado con ID: " + grupoId));
 
-                Long cursoId = grupo.getCurso().getId();
         if (estudianteRepository.existsByUsuarioIdAndGrupoId(usuarioId, grupoId)) {
             throw new IllegalStateException("El usuario ya está registrado como estudiante en este grupo");
+        }
 
-        } else if (profesorRepository.existsByUsuarioIdAndCursoId(usuarioId, cursoId)) {
-            throw new IllegalStateException("Un usuario no puede ser profesor y estudiante del mismo curso");
+        Set<Long> cursoIds = new java.util.LinkedHashSet<>();
+        if (grupo.getCurso() != null && grupo.getCurso().getId() != null) {
+            cursoIds.add(grupo.getCurso().getId());
+        }
+        if (grupo.getCursos() != null) {
+            for (Curso curso : grupo.getCursos()) {
+                if (curso != null && curso.getId() != null) {
+                    cursoIds.add(curso.getId());
+                }
+            }
+        }
+
+        boolean conflictoProfesor = cursoIds.stream()
+                .anyMatch(cursoId -> profesorRepository.existsByUsuarioIdAndCursoId(usuarioId, cursoId));
+        if (conflictoProfesor) {
+            throw new IllegalStateException("Un usuario no puede ser profesor y estudiante en cursos del mismo grupo");
         }
 
         Estudiante estudiante = Estudiante.builder()
@@ -416,5 +448,28 @@ public class UsuarioService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "El usuario " + usuarioId + " no es estudiante del grupo " + grupoId));
         estudianteRepository.delete(estudiante);
+    }
+
+    /**
+     * Lista los grupos en los que un usuario es estudiante.
+     */
+    @Transactional(readOnly = true)
+    public List<GrupoDTO> listarGruposDeEstudiante(Long usuarioId) {
+        if (!usuarioRepository.existsById(usuarioId)) {
+            throw new EntityNotFoundException(USUARIO_NOT_FOUND + usuarioId);
+        }
+
+        List<Estudiante> estudiantes = estudianteRepository.findByUsuarioId(usuarioId);
+        Map<Long, Grupo> grupos = new LinkedHashMap<>();
+        for (Estudiante estudiante : estudiantes) {
+            Grupo grupo = estudiante.getGrupo();
+            if (grupo != null && grupo.getId() != null) {
+                grupos.putIfAbsent(grupo.getId(), grupo);
+            }
+        }
+
+        return grupos.values().stream()
+                .map(mapper::toDTO)
+                .toList();
     }
 }

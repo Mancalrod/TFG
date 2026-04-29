@@ -30,6 +30,7 @@ class UsuarioServiceTest {
 
     @Mock private UsuarioRepository usuarioRepository;
     @Mock private ProfesorRepository profesorRepository;
+    @Mock private CursoRepository cursoRepository;
     @Mock private EstudianteRepository estudianteRepository;
     @Mock private GrupoRepository grupoRepository;
     @Mock private EntityMapper mapper;
@@ -45,6 +46,7 @@ class UsuarioServiceTest {
     private Profesor profesor;
     private Estudiante estudiante;
     private Grupo grupo;
+    private Curso curso;
 
     @BeforeEach
     void setUp() {
@@ -60,7 +62,7 @@ class UsuarioServiceTest {
                 .correoElectronico("juan@test.com")
                 .contrasena("password123").esAdmin(false).build();
 
-        Curso curso = Curso.builder().id(1L).titulo("IS").codigo("IS-001").build();
+        curso = Curso.builder().id(1L).titulo("IS").codigo("IS-001").build();
         grupo = Grupo.builder().id(1L).titulo("G1").curso(curso).estudiantes(new HashSet<>()).build();
         profesor = Profesor.builder().id(1L).usuario(usuario).build();
         estudiante = Estudiante.builder().id(1L).usuario(usuario).grupo(grupo).build();
@@ -277,22 +279,25 @@ class UsuarioServiceTest {
         @DisplayName("Registra como profesor correctamente")
         void registrar_ok() {
             when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
-            when(profesorRepository.existsByUsuarioId(1L)).thenReturn(false);
+            when(cursoRepository.findById(1L)).thenReturn(Optional.of(curso));
+            when(profesorRepository.existsByUsuarioIdAndCursoId(1L, 1L)).thenReturn(false);
+            when(estudianteRepository.existsByUsuarioIdAndGrupoCursoId(1L, 1L)).thenReturn(false);
 
-            usuarioService.registrarComoProfesor(1L);
+            usuarioService.registrarComoProfesor(1L, 1L);
 
             verify(profesorRepository).save(any(Profesor.class));
         }
 
         @Test
-        @DisplayName("Bloquea si ya es profesor")
+        @DisplayName("Bloquea si ya es profesor del curso")
         void registrar_yaEsProfesor() {
             when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
-            when(profesorRepository.existsByUsuarioId(1L)).thenReturn(true);
+            when(cursoRepository.findById(1L)).thenReturn(Optional.of(curso));
+            when(profesorRepository.existsByUsuarioIdAndCursoId(1L, 1L)).thenReturn(true);
 
-            assertThatThrownBy(() -> usuarioService.registrarComoProfesor(1L))
+            assertThatThrownBy(() -> usuarioService.registrarComoProfesor(1L, 1L))
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("ya está registrado como profesor");
+                    .hasMessageContaining("ya está asignado como profesor");
         }
 
         @Test
@@ -300,7 +305,28 @@ class UsuarioServiceTest {
         void registrar_noExiste() {
             when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> usuarioService.registrarComoProfesor(99L))
+            assertThatThrownBy(() -> usuarioService.registrarComoProfesor(99L, 1L))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("Bloquea si es administrador")
+        void registrar_admin() {
+            usuario.setEsAdmin(true);
+            when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+
+            assertThatThrownBy(() -> usuarioService.registrarComoProfesor(1L, 1L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("administrador");
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si curso no existe")
+        void registrar_cursoNoExiste() {
+            when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+            when(cursoRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> usuarioService.registrarComoProfesor(1L, 99L))
                     .isInstanceOf(EntityNotFoundException.class);
         }
     }
@@ -358,6 +384,17 @@ class UsuarioServiceTest {
         }
 
         @Test
+        @DisplayName("Bloquea si es administrador")
+        void registrar_admin() {
+            usuario.setEsAdmin(true);
+            when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+
+            assertThatThrownBy(() -> usuarioService.registrarComoEstudiante(1L, 1L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("administrador");
+        }
+
+        @Test
         @DisplayName("Lanza excepción si grupo no existe")
         void registrar_grupoNoExiste() {
             when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
@@ -376,7 +413,55 @@ class UsuarioServiceTest {
 
             assertThatThrownBy(() -> usuarioService.registrarComoEstudiante(1L, 1L))
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("no puede ser profesor y estudiante del mismo curso");
+                    .hasMessageContaining("no puede ser profesor y estudiante");
+        }
+
+        @Test
+        @DisplayName("Bloquea si es profesor de un curso asociado al grupo")
+        void registrar_bloqueaSiEsProfesorCursoAsociado() {
+            Curso cursoExtra = Curso.builder().id(2L).titulo("BD").codigo("BD-001").build();
+            grupo.getCursos().add(cursoExtra);
+
+            when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+            when(grupoRepository.findById(1L)).thenReturn(Optional.of(grupo));
+            when(profesorRepository.existsByUsuarioIdAndCursoId(1L, 2L)).thenReturn(true);
+
+            assertThatThrownBy(() -> usuarioService.registrarComoEstudiante(1L, 1L))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("no puede ser profesor y estudiante");
+        }
+    }
+
+    @Nested
+    @DisplayName("listarGruposDeEstudiante")
+    class ListarGruposDeEstudiante {
+
+        @Test
+        @DisplayName("Lista grupos del usuario")
+        void listar_ok() {
+            Grupo grupo2 = Grupo.builder().id(2L).titulo("G2").curso(curso).build();
+            Estudiante estudiante1 = Estudiante.builder().usuario(usuario).grupo(grupo).build();
+            Estudiante estudiante2 = Estudiante.builder().usuario(usuario).grupo(grupo2).build();
+
+            when(usuarioRepository.existsById(1L)).thenReturn(true);
+            when(estudianteRepository.findByUsuarioId(1L)).thenReturn(List.of(estudiante1, estudiante2));
+            when(mapper.toDTO(grupo)).thenReturn(GrupoDTO.builder().id(1L).titulo("G1").numeroEstudiantes(1).build());
+            when(mapper.toDTO(grupo2)).thenReturn(GrupoDTO.builder().id(2L).titulo("G2").numeroEstudiantes(1).build());
+
+            List<GrupoDTO> result = usuarioService.listarGruposDeEstudiante(1L);
+
+            assertThat(result).hasSize(2);
+            assertThat(result.get(0).getId()).isEqualTo(1L);
+            assertThat(result.get(1).getId()).isEqualTo(2L);
+        }
+
+        @Test
+        @DisplayName("Lanza excepción si usuario no existe")
+        void listar_usuarioNoExiste() {
+            when(usuarioRepository.existsById(99L)).thenReturn(false);
+
+            assertThatThrownBy(() -> usuarioService.listarGruposDeEstudiante(99L))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
     }
 

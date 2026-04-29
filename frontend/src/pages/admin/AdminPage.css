@@ -701,6 +701,46 @@
   margin: 0 0 1rem;
 }
 
+.admin-role-assigned {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.admin-role-assigned-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-role-assigned-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+}
+
+.admin-role-assigned-title {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.admin-role-assigned-meta {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  text-align: right;
+  max-width: 60%;
+}
+
+.admin-role-group-item {
+  align-items: flex-start;
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
   .admin-page {

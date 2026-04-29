@@ -34,6 +34,7 @@ describe('usuarioService', () => {
     await usuarioService.obtenerPorCorreo('demo@test.com');
     await usuarioService.esProfesor(3);
     await usuarioService.esEstudiante(3);
+    await usuarioService.listarGruposDeEstudiante(3);
     await usuarioService.listarEstudiantesDeGrupo(44);
     await usuarioService.obtenerProfesorId(3);
 
@@ -42,8 +43,9 @@ describe('usuarioService', () => {
     expect(mockGet).toHaveBeenNthCalledWith(3, '/api/usuarios/correo/demo@test.com');
     expect(mockGet).toHaveBeenNthCalledWith(4, '/api/usuarios/3/es-profesor');
     expect(mockGet).toHaveBeenNthCalledWith(5, '/api/usuarios/3/es-estudiante');
-    expect(mockGet).toHaveBeenNthCalledWith(6, '/api/usuarios/grupo/44');
-    expect(mockGet).toHaveBeenNthCalledWith(7, '/api/usuarios/3/profesor-id');
+    expect(mockGet).toHaveBeenNthCalledWith(6, '/api/usuarios/3/grupos');
+    expect(mockGet).toHaveBeenNthCalledWith(7, '/api/usuarios/grupo/44');
+    expect(mockGet).toHaveBeenNthCalledWith(8, '/api/usuarios/3/profesor-id');
   });
 
   it('crear y actualizar usan endpoints esperados', async () => {
@@ -62,14 +64,14 @@ describe('usuarioService', () => {
     mockPost.mockResolvedValue({});
     mockDelete.mockResolvedValue({});
 
-    await usuarioService.registrarComoProfesor(9);
+    await usuarioService.registrarComoProfesor(9, 5);
     await usuarioService.registrarComoEstudiante(9, 4);
     await usuarioService.eliminar(9);
     await usuarioService.eliminarRolProfesor(9);
     await usuarioService.eliminarRolEstudiante(9);
     await usuarioService.eliminarEstudianteDeGrupo(9, 4);
 
-    expect(mockPost).toHaveBeenNthCalledWith(1, '/api/usuarios/9/profesor');
+    expect(mockPost).toHaveBeenNthCalledWith(1, '/api/usuarios/9/profesor', null, { params: { cursoId: 5 } });
     expect(mockPost).toHaveBeenNthCalledWith(2, '/api/usuarios/9/estudiante/4');
 
     expect(mockDelete).toHaveBeenNthCalledWith(1, '/api/usuarios/9');

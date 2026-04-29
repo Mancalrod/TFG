@@ -61,6 +61,10 @@ public class CursoService {
         Usuario usuario = usuarioRepository.findById(usuarioId)
             .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + usuarioId));
 
+        if (Boolean.TRUE.equals(usuario.getEsAdmin())) {
+            throw new IllegalStateException("Un administrador no puede ser profesor");
+        }
+
         if (cursoRepository.existsByCodigo(dto.getCodigo())) {
             throw new IllegalArgumentException("Ya existe un curso con ese código");
         }
@@ -211,6 +215,10 @@ public class CursoService {
             .orElseThrow(() -> new EntityNotFoundException(CURSO_NOT_FOUND + cursoId));
         Usuario usuario = usuarioRepository.findById(usuarioId)
             .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + usuarioId));
+
+        if (Boolean.TRUE.equals(usuario.getEsAdmin())) {
+            throw new IllegalStateException("Un administrador no puede ser profesor");
+        }
 
         if (profesorRepository.existsByUsuarioIdAndCursoId(usuarioId, cursoId)) {
             throw new IllegalStateException("El usuario ya está asignado como profesor en este curso");

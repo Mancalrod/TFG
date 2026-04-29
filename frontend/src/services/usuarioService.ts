@@ -1,5 +1,5 @@
 import api from './api';
-import { CambiarContrasenaDTO, CrearUsuarioDTO, UsuarioDTO } from '../types';
+import { CambiarContrasenaDTO, CrearUsuarioDTO, GrupoDTO, UsuarioDTO } from '../types';
 
 const BASE_URL = '/api/usuarios';
 
@@ -33,8 +33,8 @@ export const usuarioService = {
     await api.delete(`${BASE_URL}/${id}`);
   },
 
-  registrarComoProfesor: async (id: number): Promise<void> => {
-    await api.post(`${BASE_URL}/${id}/profesor`);
+  registrarComoProfesor: async (id: number, cursoId: number): Promise<void> => {
+    await api.post(`${BASE_URL}/${id}/profesor`, null, { params: { cursoId } });
   },
 
   registrarComoEstudiante: async (id: number, grupoId: number): Promise<void> => {
@@ -65,6 +65,11 @@ export const usuarioService = {
 
   listarEstudiantesDeGrupo: async (grupoId: number): Promise<UsuarioDTO[]> => {
     const response = await api.get<UsuarioDTO[]>(`${BASE_URL}/grupo/${grupoId}`);
+    return response.data;
+  },
+
+  listarGruposDeEstudiante: async (usuarioId: number): Promise<GrupoDTO[]> => {
+    const response = await api.get<GrupoDTO[]>(`${BASE_URL}/${usuarioId}/grupos`);
     return response.data;
   },
 

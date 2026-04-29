@@ -107,9 +107,13 @@ const UsuariosTab: React.FC<TabProps> = ({ showAlert }) => {
   const [esProf, setEsProf] = useState(false);
   const [esEst, setEsEst] = useState(false);
   const [cursos, setCursos] = useState<CursoDTO[]>([]);
+  const [cursosProfesor, setCursosProfesor] = useState<CursoDTO[]>([]);
+  const [cargandoCursosProfesor, setCargandoCursosProfesor] = useState(false);
   const [grupos, setGrupos] = useState<GrupoDTO[]>([]);
-  const [cursoSeleccionado, setCursoSeleccionado] = useState<number | ''>('');
+  const [gruposEstudiante, setGruposEstudiante] = useState<GrupoDTO[]>([]);
+  const [cargandoGruposEstudiante, setCargandoGruposEstudiante] = useState(false);
   const [grupoSeleccionado, setGrupoSeleccionado] = useState<number | ''>('');
+  const [cursoProfesorSeleccionado, setCursoProfesorSeleccionado] = useState<number | ''>('');
 
   const getApiErrorMessage = (err: unknown, fallback: string): string => {
     const axErr = err as { response?: { data?: { message?: string } } };
@@ -376,62 +380,113 @@ const UsuariosTab: React.FC<TabProps> = ({ showAlert }) => {
 
   // ── Roles modal ──
   const openRolesModal = async (u: UsuarioDTO) => {
+    if (u.esAdmin) {
+      showAlert('error', 'Los administradores no pueden ser profesor ni estudiante');
+      return;
+    }
     setRolesModal(u);
-    setCursoSeleccionado('');
     setGrupoSeleccionado('');
+    setCursoProfesorSeleccionado('');
+    setCursosProfesor([]);
+    setGrupos([]);
+    setGruposEstudiante([]);
+    setEsProf(false);
+    setEsEst(false);
     try {
-      const [prof, est, cursosData] = await Promise.all([
+      const [prof, cursosData, gruposData] = await Promise.all([
         usuarioService.esProfesor(u.id),
-        usuarioService.esEstudiante(u.id),
-        cursoService.listarTodos()
+        cursoService.listarTodos(),
+        cursoService.listarTodosGrupos()
       ]);
       setEsProf(prof);
-      setEsEst(est);
       setCursos(cursosData);
+      setGrupos(gruposData);
+      if (prof) {
+        await cargarCursosProfesor(u.id);
+      }
+      await cargarGruposEstudiante(u.id);
     } catch (err: unknown) {
       showAlert('error', getApiErrorMessage(err, 'Error al cargar roles'));
     }
   };
 
-  const handleCursoChange = async (cursoId: number) => {
-    setCursoSeleccionado(cursoId);
-    setGrupoSeleccionado('');
+  const cargarCursosProfesor = async (usuarioId: number) => {
+    setCargandoCursosProfesor(true);
     try {
-      setGrupos(await cursoService.listarGrupos(cursoId));
-    } catch (err: unknown) {
-      setGrupos([]);
-      showAlert('error', getApiErrorMessage(err, 'Error al cargar grupos del curso'));
+      const cursosAsignados = await cursoService.listarPorProfesor(usuarioId);
+      setCursosProfesor(cursosAsignados);
+      setEsProf(cursosAsignados.length > 0);
+    } catch (err) {
+      const axErr = err as { response?: { status?: number; data?: { message?: string } } };
+      setCursosProfesor([]);
+      setEsProf(false);
+      if (axErr?.response?.status !== 404) {
+        showAlert('error', getApiErrorMessage(err, 'Error al cargar cursos del profesor'));
+      }
+    } finally {
+      setCargandoCursosProfesor(false);
+    }
+  };
+
+  const cargarGruposEstudiante = async (usuarioId: number) => {
+    setCargandoGruposEstudiante(true);
+    try {
+      const gruposData = await usuarioService.listarGruposDeEstudiante(usuarioId);
+      setGruposEstudiante(gruposData);
+      setEsEst(gruposData.length > 0);
+    } catch (err) {
+      setGruposEstudiante([]);
+      setEsEst(false);
+      showAlert('error', getApiErrorMessage(err, 'Error al cargar grupos del estudiante'));
+    } finally {
+      setCargandoGruposEstudiante(false);
     }
   };
 
   const handleAsignarProfesor = async () => {
-    if (!rolesModal) return;
+    if (!rolesModal || cursoProfesorSeleccionado === '') {
+      showAlert('error', 'Selecciona un curso para asignar como profesor');
+      return;
+    }
     try {
-      await usuarioService.registrarComoProfesor(rolesModal.id);
-      setEsProf(true);
-      showAlert('success', `${rolesModal.nombre} ahora es profesor`);
+      await usuarioService.registrarComoProfesor(rolesModal.id, cursoProfesorSeleccionado as number);
+      await cargarCursosProfesor(rolesModal.id);
+      setCursoProfesorSeleccionado('');
+      showAlert('success', `${rolesModal.nombre} asignado como profesor en el curso`);
     } catch (err: unknown) {
       const axErr = err as { response?: { data?: { message?: string } } };
       showAlert('error', axErr?.response?.data?.message || 'Error al asignar rol');
     }
   };
 
-  const handleQuitarProfesor = async () => {
+  const handleQuitarProfesor = async (cursoId: number) => {
     if (!rolesModal) return;
     try {
-      await usuarioService.eliminarRolProfesor(rolesModal.id);
-      setEsProf(false);
-      showAlert('success', 'Rol de profesor eliminado');
+      await cursoService.quitarProfesorPorUsuario(cursoId, rolesModal.id);
+      await cargarCursosProfesor(rolesModal.id);
+      showAlert('success', 'Rol de profesor eliminado del curso');
     } catch (err: unknown) {
       showAlert('error', getApiErrorMessage(err, 'Error al quitar rol'));
     }
   };
 
   const handleAsignarEstudiante = async () => {
-    if (!rolesModal || grupoSeleccionado === '') return;
+    if (!rolesModal || grupoSeleccionado === '') {
+      showAlert('error', 'Selecciona un grupo para inscribir');
+      return;
+    }
+    const grupoObjetivo = grupos.find(g => g.id === grupoSeleccionado);
+    if (!grupoObjetivo) {
+      showAlert('error', 'Selecciona un grupo válido');
+      return;
+    }
+    if (grupoTieneConflicto(grupoObjetivo)) {
+      showAlert('error', 'No se puede inscribir en un grupo con cursos donde ya es profesor');
+      return;
+    }
     try {
       await usuarioService.registrarComoEstudiante(rolesModal.id, grupoSeleccionado as number);
-      setEsEst(true);
+      await cargarGruposEstudiante(rolesModal.id);
       showAlert('success', `${rolesModal.nombre} inscrito en el grupo`);
     } catch (err: unknown) {
       const axErr = err as { response?: { data?: { message?: string } } };
@@ -444,11 +499,56 @@ const UsuariosTab: React.FC<TabProps> = ({ showAlert }) => {
     try {
       await usuarioService.eliminarRolEstudiante(rolesModal.id);
       setEsEst(false);
+      setGruposEstudiante([]);
       showAlert('success', 'Rol de estudiante eliminado');
     } catch (err: unknown) {
       showAlert('error', getApiErrorMessage(err, 'Error al quitar rol'));
     }
   };
+
+  const cursoIdsProfesor = new Set<number>(cursosProfesor.map(c => c.id));
+  const cursoIdsEstudiante = new Set<number>();
+  gruposEstudiante.forEach(grupo => {
+    if (grupo.cursoIds && grupo.cursoIds.length > 0) {
+      grupo.cursoIds.forEach(id => cursoIdsEstudiante.add(id));
+      return;
+    }
+    if (grupo.cursoId) {
+      cursoIdsEstudiante.add(grupo.cursoId);
+    }
+  });
+
+  const obtenerCursoIdsGrupo = (grupo: GrupoDTO): number[] => {
+    if (grupo.cursoIds && grupo.cursoIds.length > 0) {
+      return grupo.cursoIds;
+    }
+    if (grupo.cursoId) {
+      return [grupo.cursoId];
+    }
+    return [];
+  };
+
+  const obtenerTitulosCursosGrupo = (grupo: GrupoDTO): string => {
+    if (grupo.cursoTitulos && grupo.cursoTitulos.length > 0) {
+      return grupo.cursoTitulos.join(', ');
+    }
+    if (grupo.cursoTitulo) {
+      return grupo.cursoTitulo;
+    }
+    return 'Sin cursos asociados';
+  };
+
+  const grupoTieneConflicto = (grupo: GrupoDTO): boolean =>
+    obtenerCursoIdsGrupo(grupo).some(id => cursoIdsProfesor.has(id));
+
+  const cursosBloqueadosProfesor = cursos.filter(c => cursoIdsEstudiante.has(c.id));
+
+  const cursosDisponiblesProfesor = cursos.filter(
+    c => !cursosProfesor.some(cp => cp.id === c.id) && !cursoIdsEstudiante.has(c.id)
+  );
+
+  const gruposDisponiblesEstudiante = grupos.filter(grupo => !grupoTieneConflicto(grupo));
+  const gruposConConflictoEstudiante = grupos.filter(grupoTieneConflicto);
 
   return (
     <div className="admin-tab-content">
@@ -532,9 +632,11 @@ const UsuariosTab: React.FC<TabProps> = ({ showAlert }) => {
                     <button className="admin-btn-sm admin-btn-edit" onClick={() => openEditar(u)} title="Editar">
                       ✏️
                     </button>
-                    <button className="admin-btn-sm admin-btn-roles" onClick={() => openRolesModal(u)} title="Roles">
-                      🔑
-                    </button>
+                    {!u.esAdmin && (
+                      <button className="admin-btn-sm admin-btn-roles" onClick={() => openRolesModal(u)} title="Roles">
+                        🔑
+                      </button>
+                    )}
                     <button className="admin-btn-sm admin-btn-delete" onClick={() => handleEliminar(u.id)} title="Eliminar">
                       🗑️
                     </button>
@@ -604,59 +706,159 @@ const UsuariosTab: React.FC<TabProps> = ({ showAlert }) => {
               <button className="admin-modal-close" onClick={() => setRolesModal(null)}>×</button>
             </div>
             <div className="admin-roles-content">
-              {/* Profesor */}
-              <div className="admin-role-section">
-                <div className="admin-role-header">
-                  <h3>Profesor</h3>
-                  <span className={`admin-badge ${esProf ? 'badge-success' : 'badge-default'}`}>
-                    {esProf ? 'Activo' : 'No asignado'}
-                  </span>
-                </div>
-                {esProf ? (
-                  <button className="admin-btn admin-btn-danger" onClick={handleQuitarProfesor}>
-                    Quitar rol de profesor
-                  </button>
-                ) : (
-                  <button className="admin-btn admin-btn-primary" onClick={handleAsignarProfesor}>
-                    Asignar como profesor
-                  </button>
-                )}
-              </div>
-
-              {/* Estudiante */}
-              <div className="admin-role-section">
-                <div className="admin-role-header">
-                  <h3>Estudiante</h3>
-                  <span className={`admin-badge ${esEst ? 'badge-success' : 'badge-default'}`}>
-                    {esEst ? 'Activo' : 'No asignado'}
-                  </span>
-                </div>
-                {esEst ? (
-                  <button className="admin-btn admin-btn-danger" onClick={handleQuitarEstudiante}>
-                    Quitar rol de estudiante
-                  </button>
-                ) : (
-                  <div className="admin-role-enroll">
-                    <select value={cursoSeleccionado} onChange={e => handleCursoChange(Number(e.target.value))}>
-                      <option value="">Selecciona un curso...</option>
-                      {cursos.map(c => <option key={c.id} value={c.id}>{c.titulo} ({c.codigo})</option>)}
-                    </select>
-                    {grupos.length > 0 && (
-                      <select value={grupoSeleccionado} onChange={e => setGrupoSeleccionado(Number(e.target.value))}>
-                        <option value="">Selecciona un grupo...</option>
-                        {grupos.map(g => <option key={g.id} value={g.id}>{g.titulo}</option>)}
+              {rolesModal.esAdmin ? (
+                <p className="admin-info-text">
+                  Los administradores no pueden ser profesor ni estudiante.
+                </p>
+              ) : (
+                <>
+                  {/* Profesor */}
+                  <div className="admin-role-section">
+                    <div className="admin-role-header">
+                      <h3>Profesor</h3>
+                      <span className={`admin-badge ${esProf ? 'badge-success' : 'badge-default'}`}>
+                        {esProf ? 'Activo' : 'No asignado'}
+                      </span>
+                    </div>
+                    <div className="admin-role-enroll">
+                      <select
+                        value={cursoProfesorSeleccionado}
+                        onChange={e => {
+                          const value = e.target.value;
+                          setCursoProfesorSeleccionado(value ? Number(value) : '');
+                        }}
+                        disabled={cursosDisponiblesProfesor.length === 0}
+                      >
+                        <option value="">Selecciona un curso...</option>
+                        {cursosDisponiblesProfesor.map(c => (
+                          <option key={c.id} value={c.id}>{c.titulo} ({c.codigo})</option>
+                        ))}
                       </select>
+                      <button
+                        className="admin-btn admin-btn-primary"
+                        disabled={cursoProfesorSeleccionado === ''}
+                        onClick={handleAsignarProfesor}
+                      >
+                        Asignar como profesor
+                      </button>
+                      {cursosDisponiblesProfesor.length === 0 && (
+                        <p className="admin-info-text">No hay cursos disponibles para asignar.</p>
+                      )}
+                    </div>
+                    {cursosBloqueadosProfesor.length > 0 && (
+                      <div className="admin-role-assigned">
+                        <p className="admin-info-text">Cursos no disponibles por ser alumno</p>
+                        <div className="admin-role-assigned-list">
+                          {cursosBloqueadosProfesor.map(curso => (
+                            <div key={curso.id} className="admin-role-assigned-item">
+                              <span className="admin-role-assigned-title">
+                                {curso.titulo} ({curso.codigo})
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     )}
-                    <button
-                      className="admin-btn admin-btn-primary"
-                      disabled={grupoSeleccionado === ''}
-                      onClick={handleAsignarEstudiante}
-                    >
-                      Inscribir en grupo
-                    </button>
+                    <div className="admin-role-assigned">
+                      <p className="admin-info-text">Cursos asignados</p>
+                      {cargandoCursosProfesor ? (
+                        <p className="admin-info-text">Cargando cursos...</p>
+                      ) : cursosProfesor.length === 0 ? (
+                        <p className="admin-info-text">Sin cursos asignados como profesor.</p>
+                      ) : (
+                        <div className="admin-role-assigned-list">
+                          {cursosProfesor.map(curso => (
+                            <div key={curso.id} className="admin-role-assigned-item">
+                              <span className="admin-role-assigned-title">
+                                {curso.titulo} ({curso.codigo})
+                              </span>
+                              <button
+                                className="admin-btn admin-btn-danger"
+                                onClick={() => handleQuitarProfesor(curso.id)}
+                              >
+                                Quitar
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
+
+                  {/* Estudiante */}
+                  <div className="admin-role-section">
+                    <div className="admin-role-header">
+                      <h3>Estudiante</h3>
+                      <span className={`admin-badge ${esEst ? 'badge-success' : 'badge-default'}`}>
+                        {esEst ? 'Activo' : 'No asignado'}
+                      </span>
+                    </div>
+                    <div className="admin-role-assigned">
+                      <p className="admin-info-text">Grupos como alumno</p>
+                      {cargandoGruposEstudiante ? (
+                        <p className="admin-info-text">Cargando grupos...</p>
+                      ) : gruposEstudiante.length === 0 ? (
+                        <p className="admin-info-text">Sin grupos asignados.</p>
+                      ) : (
+                        <div className="admin-role-assigned-list">
+                          {gruposEstudiante.map(grupo => (
+                            <div key={grupo.id} className="admin-role-assigned-item admin-role-group-item">
+                              <span className="admin-role-assigned-title">
+                                {grupo.titulo}
+                              </span>
+                              <span className="admin-role-assigned-meta">
+                                {obtenerTitulosCursosGrupo(grupo)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    {esEst ? (
+                      <button className="admin-btn admin-btn-danger" onClick={handleQuitarEstudiante}>
+                        Quitar rol de estudiante
+                      </button>
+                    ) : (
+                      <div className="admin-role-enroll">
+                        <select
+                          value={grupoSeleccionado}
+                          onChange={e => {
+                            const value = e.target.value;
+                            setGrupoSeleccionado(value ? Number(value) : '');
+                          }}
+                          disabled={gruposDisponiblesEstudiante.length === 0}
+                        >
+                          <option value="">Selecciona un grupo...</option>
+                          {grupos.map(g => {
+                            const conflicto = grupoTieneConflicto(g);
+                            const etiquetaCursos = obtenerTitulosCursosGrupo(g);
+                            return (
+                              <option key={g.id} value={g.id} disabled={conflicto}>
+                                {g.titulo} - {etiquetaCursos}{conflicto ? ' (conflicto)' : ''}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <button
+                          className="admin-btn admin-btn-primary"
+                          disabled={grupoSeleccionado === ''}
+                          onClick={handleAsignarEstudiante}
+                        >
+                          Inscribir en grupo
+                        </button>
+                        {gruposDisponiblesEstudiante.length === 0 && (
+                          <p className="admin-info-text">No hay grupos disponibles.</p>
+                        )}
+                        {gruposConConflictoEstudiante.length > 0 && (
+                          <p className="admin-info-text">
+                            Algunos grupos no estan disponibles porque ya es profesor de cursos asociados.
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -39,6 +39,7 @@ class UsuarioControllerTest {
     private ObjectMapper objectMapper;
     private UsuarioDTO usuarioDTO;
     private CrearUsuarioDTO crearUsuarioDTO;
+    private GrupoDTO grupoDTO;
 
     @BeforeEach
     void setUp() {
@@ -52,6 +53,12 @@ class UsuarioControllerTest {
         crearUsuarioDTO = CrearUsuarioDTO.builder()
                 .nombre("Juan").correoElectronico("juan@test.com")
                 .contrasena("password123").build();
+
+        grupoDTO = GrupoDTO.builder()
+            .id(10L)
+            .titulo("G1")
+            .numeroEstudiantes(5)
+            .build();
     }
 
     @Nested
@@ -176,9 +183,10 @@ class UsuarioControllerTest {
         @Test
         @DisplayName("201 - Registra como profesor")
         void registrar_ok() throws Exception {
-            doNothing().when(usuarioService).registrarComoProfesor(1L);
+            doNothing().when(usuarioService).registrarComoProfesor(1L, 3L);
 
-            mockMvc.perform(post("/api/usuarios/1/profesor"))
+            mockMvc.perform(post("/api/usuarios/1/profesor")
+                    .param("cursoId", "3"))
                     .andExpect(status().isCreated());
         }
 
@@ -186,9 +194,10 @@ class UsuarioControllerTest {
         @DisplayName("409 - Ya es profesor")
         void registrar_yaEsProfesor() throws Exception {
             doThrow(new IllegalStateException("Ya está registrado como profesor"))
-                    .when(usuarioService).registrarComoProfesor(1L);
+                .when(usuarioService).registrarComoProfesor(1L, 3L);
 
-            mockMvc.perform(post("/api/usuarios/1/profesor"))
+            mockMvc.perform(post("/api/usuarios/1/profesor")
+                    .param("cursoId", "3"))
                     .andExpect(status().isConflict());
         }
     }
@@ -312,6 +321,22 @@ class UsuarioControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.length()").value(1))
                     .andExpect(jsonPath("$[0].id").value(1));
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /api/usuarios/{id}/grupos")
+    class ListarGruposDeEstudiante {
+
+        @Test
+        @DisplayName("200 - Lista grupos del estudiante")
+        void listar_ok() throws Exception {
+            when(usuarioService.listarGruposDeEstudiante(1L)).thenReturn(List.of(grupoDTO));
+
+            mockMvc.perform(get("/api/usuarios/1/grupos"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.length()").value(1))
+                    .andExpect(jsonPath("$[0].id").value(10));
         }
     }
 

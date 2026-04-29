@@ -63,8 +63,10 @@ public class UsuarioController {
     }
 
     @PostMapping("/{id}/profesor")
-    public ResponseEntity<Void> registrarComoProfesor(@PathVariable Long id) {
-        usuarioService.registrarComoProfesor(id);
+    public ResponseEntity<Void> registrarComoProfesor(
+            @PathVariable Long id,
+            @RequestParam @Positive Long cursoId) {
+        usuarioService.registrarComoProfesor(id, cursoId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -109,6 +111,11 @@ public class UsuarioController {
     @GetMapping("/grupo/{grupoId}")
     public ResponseEntity<List<UsuarioDTO>> listarEstudiantesDeGrupo(@PathVariable Long grupoId) {
         return ResponseEntity.ok(usuarioService.listarEstudiantesDeGrupo(grupoId));
+    }
+
+    @GetMapping("/{id}/grupos")
+    public ResponseEntity<List<GrupoDTO>> listarGruposDeEstudiante(@PathVariable Long id) {
+        return ResponseEntity.ok(usuarioService.listarGruposDeEstudiante(id));
     }
 
     @GetMapping("/{id}/profesor-id")
