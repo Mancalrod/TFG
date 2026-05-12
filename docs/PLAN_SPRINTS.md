@@ -5,17 +5,17 @@
 | Campo | Valor |
 |-------|-------|
 | **Proyecto** | Sistema de Gestion de Entregables (TFG) |
-| **Horas Totales** | 600 horas |
+| **Horas Totales** | 660 horas |
 | **Equipo** | 2 personas |
 | **Horas por Persona/Semana** | 30 horas |
 | **Horas por Semana (total)** | 60 horas |
-| **Duracion Sprint** | 2 semanas |
-| **Horas por Sprint** | 120 horas (60h/persona) |
-| **Total Sprints** | 4 sprints (+ Sprint 0) |
+| **Duracion Sprint** | 2 semanas (excepto Sprint 5) |
+| **Horas por Sprint** | 120 horas (60h/persona), excepto Sprint 5 (60h total) |
+| **Total Sprints** | 5 sprints (+ Sprint 0) |
 | **Inicio Sprint 0** | Septiembre 2025 |
 | **Fin Sprint 0** | 22 Febrero 2026 |
-| **Inicio Sprints 1-4** | 17 Febrero 2026 |
-| **Fecha Fin Estimada** | 13 Abril 2026 |
+| **Inicio Sprints 1-5** | 17 Febrero 2026 |
+| **Fecha Fin Estimada** | 12 Mayo 2026 |
 
 ---
 
@@ -48,6 +48,7 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
 | Sprint 2 | Tests entregables + entregas (ampliar cobertura backend) |
 | Sprint 3 | Tests feedback + calificacion + integracion |
 | Sprint 4 | Tests E2E frontend + documentacion de pruebas + pruebas finales |
+| Sprint 5 | Revision final, regression, correccion de incidencias y verificacion documental |
 
 ---
 
@@ -60,8 +61,9 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
 | Sprint 2 | 3 Mar - 16 Mar 2026 | 120h | Gestion Entregables + Entregas + Integracion OneDrive | EN CURSO |
 | Sprint 3 | 17 Mar - 30 Mar 2026 | 120h | Panel Evaluacion + Feedback + UX Profesor | PENDIENTE |
 | Sprint 4 | 31 Mar - 13 Abr 2026 | 120h | Memoria TFG + Polish + Presentacion | PENDIENTE |
+| Sprint 5 | 14 Abr - 12 May 2026 | 60h | Revision final + correccion de errores + ajustes de memoria | PENDIENTE |
 
-**Total horas:** 120h (Sprint 0) + 480h (Sprints 1-4) = **600 horas**
+**Total horas:** 120h (Sprint 0) + 480h (Sprints 1-4) + 60h (Sprint 5) = **660 horas**
 
 ---
 
@@ -366,23 +368,52 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
 
 ---
 
+## Sprint 5: Revision final + cierre documental - PENDIENTE
+**Estado:** PENDIENTE
+**Fechas:** 14 Abril - 12 Mayo 2026
+**Horas Planificadas:** 60h (30h/persona)
+
+### Objetivos
+- Revision integral de la aplicacion (flujo completo y regresion)
+- Correccion de errores detectados y ajustes de estabilidad
+- Retoques finales de la memoria TFG y documentacion asociada
+- Verificacion de despliegue y checklist de defensa
+
+### Desglose de Horas (Estimado)
+| Tarea | Manuel Maria Calderon Rodriguez | Jose Manuel Marquez Gutierrez | Total |
+|-------|-----------|-----------|-------|
+| Revision funcional y smoke tests | 6h | 6h | 12h |
+| Correccion de errores detectados | 8h | 8h | 16h |
+| Ajustes de memoria y coherencia documental | 6h | 6h | 12h |
+| Repaso de manuales y anexos | 4h | 4h | 8h |
+| Verificacion de despliegue + checklist defensa | 3h | 3h | 6h |
+| Buffer imprevistos | 3h | 3h | 6h |
+| **Total** | **30h** | **30h** | **60h** |
+
+### Criterios de Aceptacion
+- [ ] Errores criticos corregidos y sin regresiones
+- [ ] Memoria ajustada y coherente con el estado final
+- [ ] Verificacion de despliegue y checklist final completados
+
+---
+
 ## Calendario Visual
 
 ```
 2026
-         FEBRERO                    MARZO                     ABRIL
+         FEBRERO                    MARZO                     ABRIL                     MAYO
     L  M  X  J  V  S  D       L  M  X  J  V  S  D       L  M  X  J  V  S  D
                          1                         1          1  2  3  4  5
-    2  3  4  5  6  7  8       2  3  4  5  6  7  8       6  7  8  9 10 11 12
-    9 10 11 12 13 14 15       9 10 11 12 13 14 15      13 14 15 16 17 18 19
-   16 17 18 19 20 21 22      16 17 18 19 20 21 22      20 21 22 23 24 25 26
-   [Sprint 0 fin: 22]        23 24 25 26 27 28 29      27 28 29 30
+     2  3  4  5  6  7  8       2  3  4  5  6  7  8       6  7  8  9 10 11 12       4  5  6  7  8  9 10
+     9 10 11 12 13 14 15       9 10 11 12 13 14 15      13 14 15 16 17 18 19      11 12 13 14 15 16 17
+   16 17 18 19 20 21 22      16 17 18 19 20 21 22      20 21 22 23 24 25 26      18 19 20 21 22 23 24
+   [Sprint 0 fin: 22]        23 24 25 26 27 28 29      27 28 29 30                25 26 27 28 29 30 31
    [Sprint 1: 17-28 Feb]     30 31
    [Sprint 1: hasta 2 Mar]
                              [Sprint 2: 3-16 Mar]
                              [Sprint 3: 17-30 Mar]
-                                                       [Sprint 4: 31 Mar-13 Abr]
-                                                       [ENTREGA TFG: 13 Abr]
+                                                           [Sprint 4: 31 Mar-13 Abr]
+                                                           [Sprint 5: 14 Abr-12 May]
 ```
 
 ---
@@ -390,21 +421,22 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
 ## Metricas de Seguimiento
 
 ### Velocidad por Sprint
-| Metrica | Sprint 0 | Sprint 1 | Sprint 2 | Sprint 3 | Sprint 4 |
-|---------|----------|----------|----------|----------|----------|
-| Horas Planificadas | 120h | 120h | 120h | 120h | 120h |
-| Horas Completadas | 120h | 120h | - | - | - |
-| % Completado | 100% | 100% | - | - | - |
-| PBIs Completados | 6 | ~40 | - | - | - |
+| Metrica | Sprint 0 | Sprint 1 | Sprint 2 | Sprint 3 | Sprint 4 | Sprint 5 |
+|---------|----------|----------|----------|----------|----------|----------|
+| Horas Planificadas | 120h | 120h | 120h | 120h | 120h | 60h |
+| Horas Completadas | 120h | 120h | - | - | - | - |
+| % Completado | 100% | 100% | - | - | - | - |
+| PBIs Completados | 6 | ~40 | - | - | - | - |
 
 ### Progreso Acumulado
-| Sprint | Horas Acumuladas | % del Total (600h) |
+| Sprint | Horas Acumuladas | % del Total (660h) |
 |--------|-----------------|---------------------|
-| Sprint 0 | 120h | 20% |
-| Sprint 1 | 240h | 40% |
-| Sprint 2 | 360h | 60% |
-| Sprint 3 | 480h | 80% |
-| Sprint 4 | 600h | 100% |
+| Sprint 0 | 120h | 18% |
+| Sprint 1 | 240h | 36% |
+| Sprint 2 | 360h | 55% |
+| Sprint 3 | 480h | 73% |
+| Sprint 4 | 600h | 91% |
+| Sprint 5 | 660h | 100% |
 
 ---
 
@@ -428,8 +460,9 @@ El testing se distribuye como tarea integrada en cada sprint de funcionalidades:
 | 18 Feb 2026 | 2.0 | Reestructuracion: 20h/persona/semana, 6 sprints de 80h |
 | 3 Mar 2026 | 3.0 | Reestructuracion mayor: 30h/persona/semana, 4 sprints de 120h. Sprint 1 completado con toda la infraestructura, auth, cursos, actividades, CI/CD, deploy y testing. MVP priorizado. OAuth/2FA/Cloud storage movidos a trabajo futuro. Testing distribuido por sprint. |
 |16 Mar 2026 | 4.0 | Fechas ajustadas: Sprint 1 → 17 Feb-2 Mar, Sprint 2 → 3-16 Mar, Sprint 3 → 17-30 Mar, Sprint 4 → 31 Mar-13 Abr. Integracion OneDrive anadida a Sprint 2 (implementada y funcional). |
-|18 Mar 2026 | 5.0 | Añadido apartado de revisión de documentación existente en el sprint 3. |
+|18 Mar 2026 | 5.0 | Anadido apartado de revision de documentacion existente en el sprint 3. |
+|07 May 2026 | 6.0 | Anade Sprint 5 de revision final, ajuste de horas a 660h y fecha fin 12 May. |
 
 ---
 
-*Ultima actualizacion: 18 Marzo 2026*
+*Ultima actualizacion: 07 Mayo 2026*

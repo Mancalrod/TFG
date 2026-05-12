@@ -139,13 +139,12 @@ npm run build
 | Fase | Periodo | Horas |
 |------|---------|-------|
 | Sprint 0 (Documentacion) | Sept 2025 - 22 Feb 2026 | 120h |
-| Sprint 1 | 24 Feb - 9 Mar 2026 | 80h |
-| Sprint 2 | 10 Mar - 23 Mar 2026 | 80h |
-| Sprint 3 | 24 Mar - 6 Abr 2026 | 80h |
-| Sprint 4 | 7 Abr - 20 Abr 2026 | 80h |
-| Sprint 5 | 21 Abr - 4 May 2026 | 80h |
-| Sprint 6 | 5 May - 18 May 2026 | 80h |
-| **Total** | | **600h** |
+| Sprint 1 | 17 Feb - 2 Mar 2026 | 120h |
+| Sprint 2 | 3 Mar - 16 Mar 2026 | 120h |
+| Sprint 3 | 17 Mar - 30 Mar 2026 | 120h |
+| Sprint 4 | 31 Mar - 13 Abr 2026 | 120h |
+| Sprint 5 | 14 Abr - 12 May 2026 | 60h |
+| **Total** | | **660h** |
 
 ## Documentacion
 
@@ -174,4 +173,4 @@ Este proyecto forma parte de un Trabajo de Fin de Grado de la Universidad de Sev
 
 ---
 
-*Ultima actualizacion: Febrero 2026*
+*Ultima actualizacion: Mayo 2026*

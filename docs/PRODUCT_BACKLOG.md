@@ -6,12 +6,12 @@
 |-------|-------|
 | **Proyecto** | Sistema de Gestion de Entregables (TFG) |
 | **Product Owner** | Tutor TFG |
-| **Horas Totales Estimadas** | 600 horas |
+| **Horas Totales Estimadas** | 660 horas |
 | **Equipo** | 2 personas |
 | **Horas Semanales Disponibles** | 60 horas/semana (30h/persona) |
 | **Sprint 0** | Sept 2025 - 22 Feb 2026 (~120h) |
-| **Sprints 1-4** | 24 Feb - 19 Abr 2026 (480h) |
-| **Duracion Sprint** | 2 semanas (120h/sprint) |
+| **Sprints 1-5** | 24 Feb - 12 May 2026 (540h) |
+| **Duracion Sprint** | 2 semanas (120h/sprint), excepto Sprint 5 (4 semanas, 60h) |
 
 ---
 
@@ -51,9 +51,9 @@
 | EP-10: Frontend - UI Base | 7 | Sprint 1 | COMPLETADA |
 | EP-11: Frontend - Modulos | 10 | Sprint 1-3 | EN CURSO |
 | EP-12: Autenticacion | 5 (MVP) | Sprint 1 | COMPLETADA (MVP) |
-| EP-13: Testing | 5 | Sprint 1-4 (distribuido) | EN CURSO |
+| EP-13: Testing | 5 | Sprint 1-5 (distribuido) | EN CURSO |
 | EP-14: Despliegue y DevOps | 5 | Sprint 1 | COMPLETADA |
-| EP-15: Documentacion Final y Memoria TFG | 8 | Sprint 3-4 | PENDIENTE |
+| EP-15: Documentacion Final y Memoria TFG | 8 | Sprint 3-5 | PENDIENTE |
 
 ---
 

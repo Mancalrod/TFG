@@ -62,8 +62,10 @@ Los supuestos de capacidad empleados para el plan temporal han sido los siguient
 	\item Capacidad por sprint: \textbf{120 horas}.
 \end{itemize}
 
-Sobre esa base, el proyecto se estructur\'o en \textbf{5 iteraciones} (Sprint 0 + Sprint 1 a Sprint 4),
-con un esfuerzo total planificado de \textbf{600 horas}.
+Sobre esa base, el proyecto se estructur\'o en \textbf{6 iteraciones} (Sprint 0 + Sprint 1 a Sprint 5),
+con un esfuerzo total planificado de \textbf{660 horas}.
+Se a\~nadi\'o un Sprint 5 de cierre, con menor carga (60 h) y calendario extendido
+hasta el 12 de mayo para revisi\'on final, correcci\'on de incidencias y ajuste documental.
 
 \subsection{Planificaci\'on macro por sprints}
 
@@ -84,6 +86,8 @@ S2 & 3 Mar - 16 Mar 2026 & 120 & Funcionalidad de entregables y entregas, mejora
 S3 & 17 Mar - 30 Mar 2026 & 120 & Evaluaci\'on y feedback, mejoras de usabilidad para profesorado, refuerzo de pruebas e inicio formal de memoria. \\
 \hline
 S4 & 31 Mar - 13 Abr 2026 & 120 & Cierre t\'ecnico, pruebas finales, documentaci\'on completa, pulido del producto y preparaci\'on de defensa. \\
+\hline
+S5 & 14 Abr - 12 May 2026 & 60 & Revisi\'on final, correcci\'on de incidencias, ajustes de memoria y cierre documental. \\
 \hline
 \end{tabular}
 \caption{Planificaci\'on temporal macro del proyecto}
@@ -129,7 +133,7 @@ Para asegurar gobernanza temporal se definieron hitos de control:
 El seguimiento temporal se realiz\'o con m\'etricas sencillas pero accionables:
 \begin{itemize}
 	\item \textbf{Horas planificadas vs. horas completadas} por sprint.
-	\item \textbf{Porcentaje acumulado de ejecuci\'on} respecto a las 600 horas totales.
+	\item \textbf{Porcentaje acumulado de ejecuci\'on} respecto a las 660 horas totales.
 	\item \textbf{Velocidad de entrega} por iteraci\'on (PBIs/tareas completadas).
 	\item \textbf{Indicadores de calidad} como condici\'on de cierre (tests en verde, cobertura,
 	estabilidad de pipelines).
@@ -137,11 +141,12 @@ El seguimiento temporal se realiz\'o con m\'etricas sencillas pero accionables:
 
 Como referencia de control acumulado:
 \begin{itemize}
-	\item tras S0: 120 h ejecutadas (20\%);
-	\item tras S1: 240 h ejecutadas (40\%);
-	\item objetivo tras S2: 360 h (60\%);
-	\item objetivo tras S3: 480 h (80\%);
-	\item objetivo tras S4: 600 h (100\%).
+	\item tras S0: 120 h ejecutadas (18\%);
+	\item tras S1: 240 h ejecutadas (36\%);
+	\item objetivo tras S2: 360 h (55\%);
+	\item objetivo tras S3: 480 h (73\%);
+	\item objetivo tras S4: 600 h (91\%);
+	\item objetivo tras S5: 660 h (100\%).
 \end{itemize}
 
 \subsection{Control de desviaciones con valor ganado simplificado}
@@ -181,6 +186,8 @@ Fin S3 & 480 & 474 & 486 & 0.99 & 0.98 \\
 \hline
 Fin S4 (objetivo) & 600 & 600 & 600 & 1.00 & 1.00 \\
 \hline
+Fin S5 (objetivo) & 660 & 660 & 660 & 1.00 & 1.00 \\
+\hline
 \end{tabular}
 \caption{Seguimiento temporal con valor ganado simplificado}
 \label{tab:valor-ganado}
@@ -201,7 +208,7 @@ de planificaci\'on con trazabilidad de versiones, destacando:
 	\item incorporaci\'on de tareas documentales en S3 para evitar cuello de botella en S4.
 \end{itemize}
 
-La replanificaci\'on se adopt\'o con criterio de continuidad: no alter\'o el objetivo global de 600 h,
+La replanificaci\'on se adopt\'o con criterio de continuidad: no alter\'o el objetivo global de 660 h,
 pero mejor\'o la probabilidad de cumplimiento de hitos y redujo el riesgo de cierre tard\'io.
 
 \subsection{Lecciones aprendidas de planificaci\'on}
@@ -261,7 +268,7 @@ Se distinguen dos escenarios para evitar una lectura sesgada:
 	\item \textbf{Escenario B (referencia profesional junior)}: tarifa de 25 EUR/h.
 \end{itemize}
 
-La duraci\'on total considerada es de 600 horas.
+La duraci\'on total considerada es de 660 horas.
 
 \subsection{Coste de personal}
 
@@ -271,7 +278,7 @@ El coste principal del proyecto es el esfuerzo humano. Se calcula como:
 C_{personal} = H_{total} \times T_{hora}
 \]
 
-donde $H_{total}=600$ horas y $T_{hora}$ es la tarifa horaria del escenario.
+donde $H_{total}=660$ horas y $T_{hora}$ es la tarifa horaria del escenario.
 
 \begin{table}[ht]
 \centering
@@ -279,23 +286,30 @@ donde $H_{total}=600$ horas y $T_{hora}$ es la tarifa horaria del escenario.
 \hline
 \textbf{Escenario} & \textbf{Tarifa} & \textbf{Coste personal total} \\
 \hline
-Escenario A (acad\'emico) & 15 EUR/h & 9\,000 EUR \\
+Escenario A (acad\'emico) & 15 EUR/h & 9\,900 EUR \\
 \hline
-Escenario B (junior mercado) & 25 EUR/h & 15\,000 EUR \\
+Escenario B (junior mercado) & 25 EUR/h & 16\,500 EUR \\
 \hline
 \end{tabular}
-\caption{Coste de personal para 600 horas de proyecto}
+\caption{Coste de personal para 660 horas de proyecto}
 \label{tab:coste-personal-total}
 \end{table}
 
 \subsection{Coste de personal por iteraci\'on}
 
-Dado que cada sprint est\'a planificado en 120 horas, el coste por iteraci\'on es:
+Dado que los sprints regulares est\'an planificados en 120 horas y el sprint de cierre en 60 horas,
+el coste por iteraci\'on regular es:
 
 \[
 C_{sprint} = 120 \times T_{hora}
 \]
 
+
+Para el sprint de cierre:
+
+\[
+C_{sprint\_cierre} = 60 \times T_{hora}
+\]
 \begin{table}[ht]
 \centering
 \begin{tabular}{|P{2cm}|P{2.2cm}|P{3.3cm}|P{3.3cm}|}
@@ -312,7 +326,9 @@ S3 & 120 & 1\,800 EUR & 3\,000 EUR \\
 \hline
 S4 & 120 & 1\,800 EUR & 3\,000 EUR \\
 \hline
-\textbf{Total} & \textbf{600} & \textbf{9\,000 EUR} & \textbf{15\,000 EUR} \\
+S5 & 60 & 900 EUR & 1\,500 EUR \\
+\hline
+\textbf{Total} & \textbf{660} & \textbf{9\,900 EUR} & \textbf{16\,500 EUR} \\
 \hline
 \end{tabular}
 \caption{Coste por sprint seg\'un escenario de tarifa}
@@ -333,7 +349,7 @@ H_{QA} = 10 + 26 + 14 + 24 = 74\ \text{h}
 Esto representa un peso relativo de:
 
 \[
-\frac{74}{600} \times 100 = 12.33\%
+\frac{74}{660} \times 100 = 11.21\%
 \]
 
 del esfuerzo total del proyecto, porcentaje coherente con un producto
@@ -398,9 +414,9 @@ C_{total} = C_{personal} + C_{operacion}
 \hline
 \textbf{Escenario} & \textbf{Sin operaci\'on de pago} & \textbf{Con operaci\'on orientativa} \\
 \hline
-Escenario A (15 EUR/h) & 9\,000 EUR & 9\,132 EUR \\
+Escenario A (15 EUR/h) & 9\,900 EUR & 10\,032 EUR \\
 \hline
-Escenario B (25 EUR/h) & 15\,000 EUR & 15\,132 EUR \\
+Escenario B (25 EUR/h) & 16\,500 EUR & 16\,632 EUR \\
 \hline
 \end{tabular}
 \caption{Coste total estimado del proyecto}
@@ -411,7 +427,7 @@ Escenario B (25 EUR/h) & 15\,000 EUR & 15\,132 EUR \\
 
 Aunque el modelo base usa dos tarifas de referencia,
 se incluye un an\'alisis de sensibilidad para escenarios de mercado m\'as exigentes,
-manteniendo las 600 horas como constante de alcance.
+manteniendo las 660 horas como constante de alcance.
 
 \begin{table}[ht]
 \centering
@@ -419,13 +435,13 @@ manteniendo las 600 horas como constante de alcance.
 \hline
 \textbf{Escenario de tarifa} & \textbf{Tarifa} & \textbf{Coste total estimado (sin operaci\'on)} \\
 \hline
-Acad\'emico & 15 EUR/h & 9\,000 EUR \\
+Acad\'emico & 15 EUR/h & 9\,900 EUR \\
 \hline
-Junior mercado & 25 EUR/h & 15\,000 EUR \\
+Junior mercado & 25 EUR/h & 16\,500 EUR \\
 \hline
-Perfil intermedio & 35 EUR/h & 21\,000 EUR \\
+Perfil intermedio & 35 EUR/h & 23\,100 EUR \\
 \hline
-Perfil senior & 45 EUR/h & 27\,000 EUR \\
+Perfil senior & 45 EUR/h & 29\,700 EUR \\
 \hline
 \end{tabular}
 \caption{Sensibilidad del coste total ante variaci\'on de tarifa horaria}
