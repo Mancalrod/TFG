@@ -14,6 +14,11 @@ const labelTipoMaterial = (tipo: TipoMaterial): string => {
   return tipo;
 };
 
+const tiposMaterialSeleccionables = Object.values(TipoMaterial).filter(
+  tipo => tipo !== TipoMaterial.RAR,
+);
+const TIPO_MATERIAL_DEFAULT = TipoMaterial.PDF;
+
 const EditarEntregablePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -38,7 +43,7 @@ const EditarEntregablePage: React.FC = () => {
     fechaInicio: '',
     fechaLimite: '',
     notaMaxima: undefined,
-    tipoArchivoEsperado: undefined,
+    tipoArchivoEsperado: TIPO_MATERIAL_DEFAULT,
     tamanoMaximoBytes: undefined,
     visibilidad: Visibilidad.OCULTO,
     permiteReenvio: true,
@@ -86,7 +91,7 @@ const EditarEntregablePage: React.FC = () => {
         fechaInicio: fechaInicioLocal,
         fechaLimite: fechaLimiteLocal,
         notaMaxima: data.notaMaxima ?? undefined,
-        tipoArchivoEsperado: data.tipoArchivoEsperado as unknown as TipoMaterial | undefined,
+        tipoArchivoEsperado: (data.tipoArchivoEsperado as unknown as TipoMaterial | undefined) ?? TIPO_MATERIAL_DEFAULT,
         tamanoMaximoBytes: data.tamanoMaximoBytes ?? undefined,
         visibilidad: data.visibilidad,
         permiteReenvio: data.permiteReenvio,
@@ -391,11 +396,10 @@ const EditarEntregablePage: React.FC = () => {
             <select
               id="tipoArchivoEsperado"
               name="tipoArchivoEsperado"
-              value={(formData.tipoArchivoEsperado as string) || ''}
+              value={(formData.tipoArchivoEsperado as string) || TIPO_MATERIAL_DEFAULT}
               onChange={handleChange}
             >
-              <option value="">Cualquiera</option>
-              {Object.values(TipoMaterial).map(tipo => (
+              {tiposMaterialSeleccionables.map(tipo => (
                 <option key={tipo} value={tipo}>
                   {labelTipoMaterial(tipo)}
                 </option>

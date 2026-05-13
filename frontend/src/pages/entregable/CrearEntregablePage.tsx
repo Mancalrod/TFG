@@ -14,6 +14,11 @@ const labelTipoMaterial = (tipo: TipoMaterial): string => {
   return tipo;
 };
 
+const tiposMaterialSeleccionables = Object.values(TipoMaterial).filter(
+  tipo => tipo !== TipoMaterial.RAR,
+);
+const TIPO_MATERIAL_DEFAULT = TipoMaterial.PDF;
+
 const CrearEntregablePage: React.FC = () => {
   const { actividadId } = useParams<{ actividadId: string }>();
   const navigate = useNavigate();
@@ -35,7 +40,7 @@ const CrearEntregablePage: React.FC = () => {
     fechaInicio: '',
     fechaLimite: '',
     notaMaxima: undefined,
-    tipoArchivoEsperado: undefined,
+    tipoArchivoEsperado: TIPO_MATERIAL_DEFAULT,
     tamanoMaximoBytes: undefined,
     visibilidad: Visibilidad.OCULTO,
     permiteReenvio: true,
@@ -315,11 +320,10 @@ const CrearEntregablePage: React.FC = () => {
             <select
               id="tipoArchivoEsperado"
               name="tipoArchivoEsperado"
-              value={(formData.tipoArchivoEsperado as string) || ''}
+              value={(formData.tipoArchivoEsperado as string) || TIPO_MATERIAL_DEFAULT}
               onChange={handleChange}
             >
-              <option value="">Cualquiera</option>
-              {Object.values(TipoMaterial).map(tipo => (
+              {tiposMaterialSeleccionables.map(tipo => (
                 <option key={tipo} value={tipo}>
                   {labelTipoMaterial(tipo)}
                 </option>

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { notificacionService, usuarioService } from '../../services';
 import { PreferenciaNotificacionDTO } from '../../types';
@@ -6,6 +6,7 @@ import './PerfilPage.css';
 
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
 const MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+const OUTPUT_SIZE = 512;
 
 type ApiErrorLike = {
   response?: {
@@ -13,6 +14,17 @@ type ApiErrorLike = {
       message?: string;
     };
   };
+};
+
+type ImageSize = {
+  width: number;
+  height: number;
+};
+
+type CropState = {
+  x: number;
+  y: number;
+  zoom: number;
 };
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
@@ -35,8 +47,71 @@ const EyeClosedIcon: React.FC = () => (
   </svg>
 );
 
+const getCropMetrics = (imageSize: ImageSize, zoom: number) => {
+  const size = Math.min(imageSize.width, imageSize.height) / zoom;
+  return {
+    size,
+    maxX: Math.max(0, imageSize.width - size),
+    maxY: Math.max(0, imageSize.height - size),
+  };
+};
+
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+const buildPhotoFilename = (name: string) => {
+  const baseName = name.replace(/\.[^.]+$/, '') || 'foto-perfil';
+  return `${baseName}.jpg`;
+};
+
+const createCroppedFile = (
+  imageUrl: string,
+  imageSize: ImageSize,
+  crop: CropState,
+  originalName: string,
+): Promise<File> => new Promise((resolve, reject) => {
+  const image = new Image();
+  image.onload = () => {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    if (!context) {
+      reject(new Error('No se pudo preparar la imagen.'));
+      return;
+    }
+
+    const cropMetrics = getCropMetrics(imageSize, crop.zoom);
+    const sourceX = clamp(crop.x, 0, cropMetrics.maxX);
+    const sourceY = clamp(crop.y, 0, cropMetrics.maxY);
+
+    canvas.width = OUTPUT_SIZE;
+    canvas.height = OUTPUT_SIZE;
+    context.drawImage(
+      image,
+      sourceX,
+      sourceY,
+      cropMetrics.size,
+      cropMetrics.size,
+      0,
+      0,
+      OUTPUT_SIZE,
+      OUTPUT_SIZE,
+    );
+
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error('No se pudo recortar la imagen.'));
+        return;
+      }
+      resolve(new File([blob], buildPhotoFilename(originalName), { type: 'image/jpeg' }));
+    }, 'image/jpeg', 0.9);
+  };
+  image.onerror = () => reject(new Error('No se pudo cargar la imagen.'));
+  image.src = imageUrl;
+});
+
 const PerfilPage: React.FC = () => {
   const { usuario, actualizarFotoPerfil } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const cropCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const [actual, setActual] = useState('');
   const [nueva, setNueva] = useState('');
   const [confirmacion, setConfirmacion] = useState('');
@@ -44,7 +119,10 @@ const PerfilPage: React.FC = () => {
   const [mostrarNueva, setMostrarNueva] = useState(false);
   const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
   const [canal, setCanal] = useState<PreferenciaNotificacionDTO['canal']>('APP');
-  const [archivo, setArchivo] = useState<File | null>(null);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+  const [selectedImageName, setSelectedImageName] = useState('foto-perfil.jpg');
+  const [imageSize, setImageSize] = useState<ImageSize | null>(null);
+  const [crop, setCrop] = useState<CropState>({ x: 0, y: 0, zoom: 1 });
   const [loadingPassword, setLoadingPassword] = useState(false);
   const [loadingPhoto, setLoadingPhoto] = useState(false);
   const [loadingPref, setLoadingPref] = useState(false);
@@ -64,6 +142,76 @@ const PerfilPage: React.FC = () => {
     }
   }, [usuario]);
 
+  useEffect(() => {
+    if (!selectedImageUrl) return undefined;
+
+    const image = new Image();
+    image.onload = () => {
+      const size = { width: image.naturalWidth, height: image.naturalHeight };
+      const cropSize = Math.min(size.width, size.height);
+      setImageSize(size);
+      setCrop({
+        x: (size.width - cropSize) / 2,
+        y: (size.height - cropSize) / 2,
+        zoom: 1,
+      });
+    };
+    image.onerror = () => {
+      setMsg({ type: 'error', text: 'No se pudo cargar la imagen seleccionada.' });
+      setSelectedImageUrl(null);
+    };
+    image.src = selectedImageUrl;
+
+    return () => {
+      URL.revokeObjectURL(selectedImageUrl);
+    };
+  }, [selectedImageUrl]);
+
+  useEffect(() => {
+    if (!imageSize) return;
+
+    const cropMetrics = getCropMetrics(imageSize, crop.zoom);
+    setCrop(prev => ({
+      ...prev,
+      x: clamp(prev.x, 0, cropMetrics.maxX),
+      y: clamp(prev.y, 0, cropMetrics.maxY),
+    }));
+  }, [crop.zoom, imageSize]);
+
+  useEffect(() => {
+    if (!selectedImageUrl || !imageSize || !cropCanvasRef.current) return;
+
+    const canvas = cropCanvasRef.current;
+    const context = canvas.getContext('2d');
+    if (!context) return;
+
+    const image = new Image();
+    image.onload = () => {
+      const cropMetrics = getCropMetrics(imageSize, crop.zoom);
+      const sourceX = clamp(crop.x, 0, cropMetrics.maxX);
+      const sourceY = clamp(crop.y, 0, cropMetrics.maxY);
+
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(
+        image,
+        sourceX,
+        sourceY,
+        cropMetrics.size,
+        cropMetrics.size,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
+    };
+    image.src = selectedImageUrl;
+  }, [crop, imageSize, selectedImageUrl]);
+
+  const cropMetrics = useMemo(
+    () => imageSize ? getCropMetrics(imageSize, crop.zoom) : null,
+    [crop.zoom, imageSize],
+  );
+
   const passwordError = useMemo(() => {
     if (!nueva) return '';
     if (nueva.length < 8) return 'La nueva contraseña debe tener al menos 8 caracteres.';
@@ -77,6 +225,62 @@ const PerfilPage: React.FC = () => {
   if (!usuario) {
     return null;
   }
+
+  const fotoPerfilUrl = usuario.fotoPerfilUrl;
+  const inicialUsuario = usuario.nombre.charAt(0).toUpperCase();
+
+  const resetPhotoInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const closeCropper = () => {
+    setSelectedImageUrl(null);
+    setImageSize(null);
+    setSelectedImageName('foto-perfil.jpg');
+    setCrop({ x: 0, y: 0, zoom: 1 });
+    resetPhotoInput();
+  };
+
+  const handlePhotoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!MIME_TYPES.has(file.type) || file.size > MAX_FILE_BYTES) {
+      setMsg({ type: 'error', text: 'Formato no permitido o imagen mayor a 2MB.' });
+      resetPhotoInput();
+      return;
+    }
+
+    setMsg(null);
+    setImageSize(null);
+    setSelectedImageName(file.name);
+    setSelectedImageUrl(URL.createObjectURL(file));
+  };
+
+  const handleSavePhoto = async () => {
+    if (!selectedImageUrl || !imageSize) {
+      setMsg({ type: 'error', text: 'Selecciona una imagen antes de guardarla.' });
+      return;
+    }
+
+    setLoadingPhoto(true);
+    setMsg(null);
+    try {
+      const croppedFile = await createCroppedFile(selectedImageUrl, imageSize, crop, selectedImageName);
+      const updated = await usuarioService.subirFotoPerfil(usuario.id, croppedFile);
+      if (updated.fotoPerfilUrl) {
+        actualizarFotoPerfil(updated.fotoPerfilUrl);
+      }
+      closeCropper();
+      setMsg({ type: 'success', text: 'Foto de perfil actualizada.' });
+    } catch (error: unknown) {
+      setMsg({ type: 'error', text: getErrorMessage(error, 'No se pudo subir la foto.') });
+    } finally {
+      setLoadingPhoto(false);
+    }
+  };
 
   const handlePasswordSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -103,33 +307,6 @@ const PerfilPage: React.FC = () => {
     }
   };
 
-  const handlePhotoSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!archivo) {
-      setMsg({ type: 'error', text: 'Selecciona una imagen antes de subirla.' });
-      return;
-    }
-    if (!MIME_TYPES.has(archivo.type) || archivo.size > MAX_FILE_BYTES) {
-      setMsg({ type: 'error', text: 'Formato no permitido o imagen mayor a 2MB.' });
-      return;
-    }
-
-    setLoadingPhoto(true);
-    setMsg(null);
-    try {
-      const updated = await usuarioService.subirFotoPerfil(usuario.id, archivo);
-      if (updated.fotoPerfilUrl) {
-        actualizarFotoPerfil(updated.fotoPerfilUrl);
-      }
-      setArchivo(null);
-      setMsg({ type: 'success', text: 'Foto de perfil actualizada.' });
-    } catch (error: unknown) {
-      setMsg({ type: 'error', text: getErrorMessage(error, 'No se pudo subir la foto.') });
-    } finally {
-      setLoadingPhoto(false);
-    }
-  };
-
   const handleSaveCanal = async () => {
     setLoadingPref(true);
     setMsg(null);
@@ -144,8 +321,40 @@ const PerfilPage: React.FC = () => {
   };
 
   return (
-    <div className="perfil-page">
-      <h1>Mi perfil</h1>
+    <div className="perfil-page perfil-photo-page">
+      <section className="perfil-photo-panel">
+        <div className="perfil-photo-heading">
+          <p className="perfil-kicker">Mi perfil</p>
+          <h1>{usuario.nombre}</h1>
+        </div>
+
+        <div className="perfil-avatar-xl" aria-label="Foto de perfil">
+          {fotoPerfilUrl ? (
+            <img src={fotoPerfilUrl} alt="Foto de perfil" />
+          ) : (
+            <span>{inicialUsuario}</span>
+          )}
+        </div>
+
+        <input
+          ref={fileInputRef}
+          id="foto-perfil-input"
+          className="perfil-file-input"
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          onChange={handlePhotoSelected}
+          aria-label="Seleccionar imagen"
+        />
+        <button
+          type="button"
+          className="perfil-primary-button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={loadingPhoto}
+        >
+          Cambiar foto
+        </button>
+      </section>
+
       {msg && <div className={`perfil-msg ${msg.type}`}>{msg.text}</div>}
 
       <section className="perfil-card">
@@ -212,31 +421,14 @@ const PerfilPage: React.FC = () => {
             </button>
           </div>
           {passwordError && <p className="perfil-error">{passwordError}</p>}
-          <button type="submit" disabled={loadingPassword || !!passwordError}>
+          <button type="submit" className="perfil-primary-button" disabled={loadingPassword || !!passwordError}>
             {loadingPassword ? 'Guardando...' : 'Guardar contraseña'}
           </button>
         </form>
       </section>
 
       <section className="perfil-card">
-        <h2>Foto de perfil</h2>
-        <form onSubmit={handlePhotoSubmit}>
-          <label>
-            <span>Seleccionar imagen</span>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
-              onChange={(e) => setArchivo(e.target.files?.[0] ?? null)}
-            />
-          </label>
-          <button type="submit" disabled={loadingPhoto || !archivo}>
-            {loadingPhoto ? 'Subiendo...' : 'Subir foto'}
-          </button>
-        </form>
-      </section>
-
-      <section className="perfil-card">
-        <h2>Notificaciones</h2>
+        <h2>Preferencias</h2>
         <p>Selecciona cómo quieres recibir avisos de nuevos entregables y recordatorios de cierre.</p>
         <div className="perfil-radio-group">
           <label>
@@ -264,10 +456,100 @@ const PerfilPage: React.FC = () => {
             <span>Aplicación y correo</span>
           </label>
         </div>
-        <button type="button" onClick={handleSaveCanal} disabled={loadingPref}>
+        <button type="button" className="perfil-primary-button" onClick={handleSaveCanal} disabled={loadingPref}>
           {loadingPref ? 'Guardando...' : 'Guardar preferencias'}
         </button>
       </section>
+
+      {selectedImageUrl && (
+        <div className="perfil-crop-overlay" onClick={closeCropper}>
+          <div
+            className="perfil-crop-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="perfil-crop-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="perfil-crop-header">
+              <h2 id="perfil-crop-title">Ajustar foto</h2>
+              <button
+                type="button"
+                className="perfil-icon-button"
+                onClick={closeCropper}
+                aria-label="Cerrar"
+                disabled={loadingPhoto}
+              >
+                X
+              </button>
+            </div>
+
+            <canvas
+              ref={cropCanvasRef}
+              className="perfil-crop-canvas"
+              width={OUTPUT_SIZE}
+              height={OUTPUT_SIZE}
+            />
+
+            <div className="perfil-crop-controls">
+              <label>
+                <span>Zoom</span>
+                <input
+                  type="range"
+                  min="1"
+                  max="3"
+                  step="0.01"
+                  value={crop.zoom}
+                  onChange={(e) => setCrop(prev => ({ ...prev, zoom: Number(e.target.value) }))}
+                  disabled={!imageSize || loadingPhoto}
+                />
+              </label>
+              <label>
+                <span>Horizontal</span>
+                <input
+                  type="range"
+                  min="0"
+                  max={cropMetrics?.maxX ?? 0}
+                  step="1"
+                  value={crop.x}
+                  onChange={(e) => setCrop(prev => ({ ...prev, x: Number(e.target.value) }))}
+                  disabled={!imageSize || !cropMetrics?.maxX || loadingPhoto}
+                />
+              </label>
+              <label>
+                <span>Vertical</span>
+                <input
+                  type="range"
+                  min="0"
+                  max={cropMetrics?.maxY ?? 0}
+                  step="1"
+                  value={crop.y}
+                  onChange={(e) => setCrop(prev => ({ ...prev, y: Number(e.target.value) }))}
+                  disabled={!imageSize || !cropMetrics?.maxY || loadingPhoto}
+                />
+              </label>
+            </div>
+
+            <div className="perfil-crop-actions">
+              <button
+                type="button"
+                className="perfil-secondary-button"
+                onClick={closeCropper}
+                disabled={loadingPhoto}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="perfil-primary-button"
+                onClick={handleSavePhoto}
+                disabled={loadingPhoto || !imageSize}
+              >
+                {loadingPhoto ? 'Guardando...' : 'Guardar foto'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

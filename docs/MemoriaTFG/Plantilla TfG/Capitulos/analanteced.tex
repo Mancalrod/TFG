@@ -121,6 +121,82 @@ con impacto en tiempo de correcci\'on,
 estandarizaci\'on de criterios
 y riesgo de inconsistencias en trazabilidad.
 
+\section{An\'alisis de competidores y brechas sectoriales}
+
+Para dimensionar la aportaci\'on real del proyecto en el sector,
+se revis\'o el comportamiento de soluciones ampliamente usadas
+en docencia, as\'i como herramientas m\'as espec\'ificas de recepci\'on
+de entregas. El objetivo no es enumerar marcas, sino identificar
+patrones funcionales y brechas que condicionan la operativa docente.
+
+\subsection{Tipolog\'ias de competidores analizados}
+
+El an\'alisis se ha estructurado en cuatro familias:
+
+\begin{itemize}
+	\item \textbf{LMS generalistas} (plataformas completas de docencia):
+	priorizan gesti\'on de cursos, contenidos, evaluaciones y comunicaci\'on.
+	\item \textbf{Herramientas de evaluaci\'on t\'ecnica}:
+	orientadas a entregas de programaci\'on o autoevaluaci\'on.
+	\item \textbf{Suites colaborativas y almacenamiento cloud}:
+	centradas en compartir archivos y carpetas, no en el flujo completo
+	de entrega y evaluaci\'on.
+	\item \textbf{Gestores de entrega simples}: soluciones ligeras de recepci\'on
+	que ofrecen subida de ficheros con m\'inimo control posterior.
+\end{itemize}
+
+\subsection{LMS generalistas}
+
+Las plataformas LMS ofrecen una cobertura funcional amplia y estable,
+pero su dise\~no generalista tiende a tratar las entregas como un m\'odulo
+m\'as de un ecosistema mayor. Esto provoca que la validaci\'on de ficheros
+sea habitualmente limitada a extensi\'on y tama\~no, y que el control
+de estructura interna de paquetes ZIP recaiga en instrucciones manuales
+al alumnado o en revisi\'on posterior del docente.
+
+\subsection{Herramientas de evaluaci\'on t\'ecnica}
+
+Las plataformas especializadas en correcci\'on t\'ecnica priorizan
+integraciones con repositorios o sistemas de autoevaluaci\'on.
+Son muy potentes cuando la entrega es estrictamente c\'odigo,
+pero pierden flexibilidad cuando el entregable es heterog\'eneo
+(documentos, material multimedia, informes mixtos o combinaciones).
+
+\subsection{Suites colaborativas y almacenamiento cloud}
+
+Las suites colaborativas permiten compartir archivos y carpetas
+de forma flexible, pero no sustituyen un flujo acad\'emico completo.
+En la pr\'actica, la trazabilidad de versiones, los estados de entrega
+y la publicaci\'on de notas suelen quedar fuera del sistema,
+dependiendo de procesos manuales o documentos externos.
+
+\subsection{Gestores de entrega simples}
+
+Las soluciones m\'as ligeras se centran en el acto de subir archivos,
+pero no ofrecen trazabilidad de versiones, validaci\'on avanzada
+ni mecanismos de control contextual por curso y grupo. En estos
+escenarios el docente debe reconstruir manualmente qu\'e se entreg\'o,
+cu\'ando y bajo qu\'e reglas, lo que incrementa errores y retrabajo.
+
+\subsection{Brechas sectoriales detectadas}
+
+De la revisi\'on anterior se desprenden brechas recurrentes:
+
+\begin{itemize}
+	\item ausencia de validaci\'on previa de estructura y nombre en paquetes ZIP;
+	\item trazabilidad limitada de versiones y reenv\'ios dentro del ciclo de entrega;
+	\item validaciones por tipo de entrega insuficientes para escenarios heterog\'eneos;
+	\item control contextual por curso/grupo poco expl\'icito en herramientas generalistas;
+	\item operativa docente con descarga y comprobaci\'on manual de lotes de entrega.
+\end{itemize}
+
+\subsection{Implicaciones para el dise\~no del TFG}
+
+Estas brechas guiaron la definici\'on del alcance funcional y de las
+validaciones del sistema. La aportaci\'on se orient\'o a reducir carga
+manual, mejorar la trazabilidad y ofrecer verificaciones t\'ecnicas
+que no suelen estar disponibles en soluciones generalistas.
+
 \section{Aportaci\'on realizada (escenario \emph{objetivo})}
 
 La propuesta implementada aporta una mejora estructural,
@@ -129,12 +205,16 @@ aumentar trazabilidad y consolidar calidad de producto.
 
 \subsection{Aportaci\'on funcional}
 
-La aportaci\'on funcional incluye:
+La aportaci\'on funcional responde a las brechas operativas y sectoriales
+identificadas en secciones previas. En concreto, se implementaron:
 \begin{itemize}
-	\item gesti\'on de cursos, grupos, actividades y entregables en una interfaz unificada,
-	\item flujo de entrega con validaciones y control de versiones,
-	\item evaluaci\'on y retroalimentaci\'on integradas en el ciclo operativo,
-	\item control de acceso por rol (administrador, profesor, estudiante).
+	\item gesti\'on integral de cursos, grupos, actividades y entregables con visibilidad por rol;
+	\item validaci\'on avanzada de ZIP (estructura, extensiones y nombre esperado);
+	\item modo estricto o m\'inimo requerido en entregas ZIP seg\'un criterio docente;
+	\item control de tipos de entrega (archivo, enlace, solo texto) con reglas espec\'ificas;
+	\item versionado, reenv\'io y estado de entrega con historial trazable;
+	\item descarga masiva y previsualizaci\'on de contenido para optimizar revisi\'on;
+	\item borrador autom\'atico en cliente y revalidaci\'on previa al env\'io.
 \end{itemize}
 
 Estas capacidades se alinean con los procesos objetivo del an\'alisis:
@@ -171,6 +251,9 @@ sino a que el sistema sea verificable, mantenible y operable.
 
 \section{Matriz de mapeo debilidades-aportaciones}
 
+La matriz siguiente sintetiza la relaci\'on entre debilidades detectadas
+y la respuesta concreta implementada en el proyecto.
+
 \begin{table}[ht]
 \centering
 \begin{tabular}{|P{2.5cm}|P{4.5cm}|P{4.9cm}|}
@@ -191,6 +274,9 @@ DEB-004 & Dependencia de almacenamiento local/heterog\'eneo & Integraciones conf
 \end{table}
 
 \section{Comparativa sint\'etica}
+
+Esta comparativa resume el salto entre escenario de partida y la
+aportaci\'on del TFG en t\'erminos de operaci\'on y trazabilidad.
 
 \begin{table}[ht]
 \centering

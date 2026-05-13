@@ -143,12 +143,22 @@ const RealizarEntregaPage: React.FC = () => {
     if (!storageKey) return;
     try {
       const raw = localStorage.getItem(storageKey);
-      if (raw) {
-        const borrador: BorradorMeta = JSON.parse(raw);
-        setComentario(borrador.comentario || '');
-        setArchivos(borrador.archivos);
-        setBorradorCargado(true);
+      if (!raw) return;
+
+      const borrador: BorradorMeta = JSON.parse(raw);
+      const comentarioBorrador = typeof borrador.comentario === 'string' ? borrador.comentario : '';
+      const archivosBorrador = Array.isArray(borrador.archivos) ? borrador.archivos : [];
+      const tieneContenido = comentarioBorrador.trim().length > 0 || archivosBorrador.length > 0;
+
+      if (!tieneContenido) {
+        localStorage.removeItem(storageKey);
+        setBorradorCargado(false);
+        return;
       }
+
+      setComentario(comentarioBorrador);
+      setArchivos(archivosBorrador);
+      setBorradorCargado(true);
     } catch {
       // localStorage corrupto, ignorar
     }
@@ -157,13 +167,18 @@ const RealizarEntregaPage: React.FC = () => {
   // Guardar borrador en localStorage cuando cambie
   const guardarBorrador = useCallback(() => {
     if (!storageKey || !id) return;
-    const borrador: BorradorMeta = {
-      entregableId: parseInt(id),
-      comentario,
-      archivos,
-      ultimaModificacion: new Date().toISOString(),
-    };
     try {
+      if (comentario.trim().length === 0 && archivos.length === 0) {
+        localStorage.removeItem(storageKey);
+        return;
+      }
+
+      const borrador: BorradorMeta = {
+        entregableId: parseInt(id),
+        comentario,
+        archivos,
+        ultimaModificacion: new Date().toISOString(),
+      };
       localStorage.setItem(storageKey, JSON.stringify(borrador));
     } catch {
       // localStorage lleno, intentar limpiar
@@ -202,7 +217,7 @@ const RealizarEntregaPage: React.FC = () => {
     ? 'SOLO TEXTO (sin archivos)'
     : entregable?.tipoArchivoEsperado === 'ENLACE'
       ? 'ENLACE (en comentario, sin archivos)'
-      : (entregable?.tipoArchivoEsperado || 'CUALQUIERA');
+      : (entregable?.tipoArchivoEsperado || 'NO ESPECIFICADO');
   const puedeEnviar = noPermiteArchivos
     ? comentario.trim().length > 0 && archivos.length === 0
     : archivos.length > 0 || (comentario.trim().length > 0 && permiteSoloComentario);

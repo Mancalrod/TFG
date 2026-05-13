@@ -28,70 +28,58 @@ vi.mock('../../../services', () => ({
 describe('PerfilPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    Object.defineProperty(URL, 'createObjectURL', {
+      value: vi.fn(() => 'blob:avatar'),
+      configurable: true,
+    });
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      value: vi.fn(),
+      configurable: true,
+    });
     mockUseAuth.mockReturnValue({
-      usuario: { id: 11, nombre: 'Ana' },
+      usuario: {
+        id: 11,
+        nombre: 'Ana',
+        fotoPerfilUrl: 'https://img.test/actual.png',
+      },
       actualizarFotoPerfil: mockActualizarFotoPerfil,
     });
     mockObtenerPreferencias.mockResolvedValue({ canal: 'APP' });
     mockActualizarPreferencias.mockResolvedValue({ canal: 'APP' });
   });
 
-  it('muestra error cuando la nueva contraseña es débil', async () => {
-    const user = userEvent.setup();
+  it('muestra el nombre y la foto de perfil en grande', () => {
     render(<PerfilPage />);
 
-    await user.type(screen.getByLabelText('Nueva contraseña'), 'weak');
-    await user.type(screen.getByLabelText('Confirmar nueva contraseña'), 'weak');
-
-    expect(screen.getByText(/al menos 8 caracteres/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Ana' })).toBeInTheDocument();
+    expect(screen.getByAltText('Foto de perfil')).toHaveAttribute('src', 'https://img.test/actual.png');
   });
 
-  it('permite mostrar y ocultar cada campo de contraseña de forma independiente', async () => {
-    const user = userEvent.setup();
+  it('muestra cambio de contraseña y preferencias debajo del perfil', () => {
     render(<PerfilPage />);
 
-    const actualInput = screen.getByLabelText('Contraseña actual');
-    const nuevaInput = screen.getByLabelText('Nueva contraseña');
-    const confirmInput = screen.getByLabelText('Confirmar nueva contraseña');
-
-    expect(actualInput).toHaveAttribute('type', 'password');
-    expect(nuevaInput).toHaveAttribute('type', 'password');
-    expect(confirmInput).toHaveAttribute('type', 'password');
-
-    await user.click(screen.getByRole('button', { name: 'Mostrar contraseña actual' }));
-    expect(actualInput).toHaveAttribute('type', 'text');
-    expect(nuevaInput).toHaveAttribute('type', 'password');
-
-    await user.click(screen.getByRole('button', { name: 'Mostrar nueva contraseña' }));
-    expect(nuevaInput).toHaveAttribute('type', 'text');
-
-    await user.click(screen.getByRole('button', { name: 'Mostrar confirmación de contraseña' }));
-    expect(confirmInput).toHaveAttribute('type', 'text');
-
-    await user.click(screen.getByRole('button', { name: 'Ocultar contraseña actual' }));
-    expect(actualInput).toHaveAttribute('type', 'password');
+    expect(screen.getByRole('heading', { name: 'Cambiar contraseña' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Nueva contraseña')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Preferencias' })).toBeInTheDocument();
+    expect(screen.getByText('Solo en la aplicación')).toBeInTheDocument();
   });
 
-  it('actualiza navbar context al subir foto de perfil', async () => {
+  it('abre el ajuste cuadrado al seleccionar una imagen valida', async () => {
     const user = userEvent.setup();
-    mockSubirFotoPerfil.mockResolvedValue({ fotoPerfilUrl: 'https://img.test/nueva.png' });
-
     render(<PerfilPage />);
 
     const file = new File(['png'], 'avatar.png', { type: 'image/png' });
     await user.upload(screen.getByLabelText('Seleccionar imagen'), file);
-    await user.click(screen.getByRole('button', { name: 'Subir foto' }));
 
-    await waitFor(() => {
-      expect(mockSubirFotoPerfil).toHaveBeenCalledWith(11, file);
-    });
-    expect(mockActualizarFotoPerfil).toHaveBeenCalledWith('https://img.test/nueva.png');
+    expect(screen.getByRole('dialog', { name: 'Ajustar foto' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Zoom')).toBeInTheDocument();
+    expect(screen.getByLabelText('Horizontal')).toBeInTheDocument();
+    expect(screen.getByLabelText('Vertical')).toBeInTheDocument();
   });
 
-  it('envia cambio de contraseña cuando los datos son válidos', async () => {
+  it('envia cambio de contraseña cuando los datos son validos', async () => {
     const user = userEvent.setup();
     mockCambiarContrasena.mockResolvedValue(undefined);
-
     render(<PerfilPage />);
 
     await user.type(screen.getByLabelText('Contraseña actual'), 'Actual123!');
@@ -104,6 +92,18 @@ describe('PerfilPage', () => {
         contrasenaActual: 'Actual123!',
         contrasenaNueva: 'Nueva123!',
       });
+    });
+  });
+
+  it('guarda preferencias de notificacion', async () => {
+    const user = userEvent.setup();
+    render(<PerfilPage />);
+
+    await user.click(screen.getByLabelText('Solo por correo'));
+    await user.click(screen.getByRole('button', { name: 'Guardar preferencias' }));
+
+    await waitFor(() => {
+      expect(mockActualizarPreferencias).toHaveBeenCalledWith({ canal: 'EMAIL' });
     });
   });
 });

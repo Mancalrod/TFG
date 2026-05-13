@@ -424,6 +424,7 @@ class UsuarioServiceTest {
 
             when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
             when(grupoRepository.findById(1L)).thenReturn(Optional.of(grupo));
+            when(profesorRepository.existsByUsuarioIdAndCursoId(1L, 1L)).thenReturn(false);
             when(profesorRepository.existsByUsuarioIdAndCursoId(1L, 2L)).thenReturn(true);
 
             assertThatThrownBy(() -> usuarioService.registrarComoEstudiante(1L, 1L))

@@ -4,4 +4,8 @@
 \renewcommand*\l@subsubsection{\@dottedtocline{3}{4.3em}{3.2em}}
 \makeatother
 
-\renewcommand{\frontmatter}{\pagenumbering{Roman}}
+\renewcommand{\frontmatter}{%
+\cleardoublepage
+\pagenumbering{Roman}
+\setcounter{page}{1}%
+}

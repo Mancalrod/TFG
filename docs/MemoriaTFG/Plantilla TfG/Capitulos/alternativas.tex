@@ -1,25 +1,25 @@
-﻿\chapter{Comparaci\'on con otras alternativas}\label{alternativas}
+﻿Esta granularidad no es habitual en soluciones generalistas,
+que suelen tratar todo como subida de fichero sin reglas contextuales.
 
-\section{Introducci\'on}
+\subsubsection*{Versionado y reenv\'io con trazabilidad}
 
-Este cap\'itulo compara la soluci\'on implementada frente a alternativas t\'ecnicas
-realistas para el mismo problema.
-El objetivo no es defender una \''unica tecnolog\'ia\'', sino justificar por qu\'e,
-en el contexto de este TFG (alcance, tiempo, equipo y restricciones de despliegue),
-las decisiones adoptadas resultan las m\'as equilibradas.
+Cada entrega queda registrada con versi\'on y fecha, manteniendo un
+historial completo y una versi\'on activa por entregable.
+Cuando el reenv\'io est\'a permitido, el sistema conserva la trazabilidad
+sin sobrescribir el historial previo, facilitando auditor\'ia docente.
 
-\section{Criterios de comparaci\'on}
+\subsubsection*{Operativa docente optimizada}
 
-Se han utilizado los siguientes criterios para evaluar opciones:
+Se incorporan descargas masivas por entregable o actividad,
+previsualizaci\'on de archivos en l\'inea y listado de contenido
+de ZIP, reduciendo tareas manuales de comprobaci\'on y clasificaci\'on.
 
-\begin{itemize}
-	\item \textbf{Adecuaci\'on funcional}: capacidad para cubrir requisitos del dominio acad\'emico.
-	\item \textbf{Tiempo de implementaci\'on}: esfuerzo necesario para llegar a MVP estable.
-	\item \textbf{Mantenibilidad}: claridad estructural y facilidad de evoluci\'on.
-	\item \textbf{Coste operativo}: viabilidad en entornos gratuitos o de bajo coste.
-	\item \textbf{Seguridad y robustez}: soporte para control de acceso y endurecimiento.
-	\item \textbf{Integraci\'on y despliegue}: facilidad de automatizaci\'on CI/CD y despliegue.
-\end{itemize}
+\subsubsection*{Robustez en el flujo de estudiante}
+
+El flujo de entrega incorpora borradores autom\'aticos en cliente,
+revalidaci\'on antes de enviar y mensajes de error contextualizados.
+Esto minimiza p\'erdida de trabajo en conexiones inestables
+y mejora la experiencia del alumnado.
 
 \section{Alternativas de arquitectura y stack}
 
@@ -154,6 +154,26 @@ Se han considerado funcionalidades avanzadas (inicio de sesi\'on federado con OA
 como l\'inea de evoluci\'on.
 La decisi\'on de no imponerlas en el MVP responde al criterio
 de maximizar cobertura funcional core sin comprometer plazos.
+
+\section{Alternativas investigadas y descartadas}
+
+\subsection{SharePoint para OneDrive corporativo}
+
+Se valor\'o el uso de SharePoint como intermediario para acceder a cuentas
+corporativas de OneDrive. La opci\'on facilitaba el encaje institucional,
+pero implicaba perder capacidades clave que s\'i ofrece la integraci\'on directa,
+como la selecci\'on de carpeta de destino o la gesti\'on flexible de rutas
+durante la subida de entregas. Dado que estas funciones son parte del valor
+diferencial de la plataforma, se descart\'o esta v\'ia.
+
+\subsection{Registro de usuarios con OAuth}
+
+Se estudi\'o habilitar registro de usuarios mediante OAuth/OIDC
+para que el alumnado pudiera crear cuentas de forma aut\'onoma.
+Finalmente se prioriz\'o el flujo habitual en entornos acad\'emicos,
+donde el administrador crea usuarios y los asigna a cursos y grupos.
+Esto evita altas desalineadas con la matr\'icula real y simplifica el control
+de permisos y pertenencia a grupos.
 
 \section{Alternativas de despliegue y operaci\'on}
 

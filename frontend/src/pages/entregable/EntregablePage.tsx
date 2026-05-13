@@ -151,7 +151,7 @@ const EntregablePage: React.FC = () => {
   };
 
   const formatTipoEsperado = (tipoArchivoEsperado?: string) => {
-    if (!tipoArchivoEsperado) return 'Cualquiera';
+    if (!tipoArchivoEsperado) return 'No especificado';
     if (tipoArchivoEsperado === 'SOLO_TEXTO') return 'SOLO TEXTO (sin archivos)';
     if (tipoArchivoEsperado === 'ENLACE') return 'ENLACE (en comentario, sin archivos)';
     return tipoArchivoEsperado;
