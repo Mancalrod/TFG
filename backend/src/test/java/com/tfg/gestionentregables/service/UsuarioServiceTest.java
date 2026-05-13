@@ -43,6 +43,7 @@ class UsuarioServiceTest {
     private Usuario usuario;
     private UsuarioDTO usuarioDTO;
     private CrearUsuarioDTO crearUsuarioDTO;
+    private ActualizarUsuarioDTO actualizarUsuarioDTO;
     private Profesor profesor;
     private Estudiante estudiante;
     private Grupo grupo;
@@ -61,6 +62,11 @@ class UsuarioServiceTest {
                 .nombre("Juan").telefono("123456")
                 .correoElectronico("juan@test.com")
                 .contrasena("password123").esAdmin(false).build();
+
+        actualizarUsuarioDTO = ActualizarUsuarioDTO.builder()
+            .nombre("Juan").telefono("123456")
+            .correoElectronico("juan@test.com")
+            .contrasena("password123").esAdmin(false).build();
 
         curso = Curso.builder().id(1L).titulo("IS").codigo("IS-001").build();
         grupo = Grupo.builder().id(1L).titulo("G1").curso(curso).estudiantes(new HashSet<>()).build();
@@ -202,7 +208,7 @@ class UsuarioServiceTest {
             when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
             when(mapper.toDTO(any(Usuario.class))).thenReturn(usuarioDTO);
 
-            UsuarioDTO result = usuarioService.actualizarUsuario(1L, crearUsuarioDTO);
+            UsuarioDTO result = usuarioService.actualizarUsuario(1L, actualizarUsuarioDTO);
 
             assertThat(result).isNotNull();
         }
@@ -210,7 +216,7 @@ class UsuarioServiceTest {
         @Test
         @DisplayName("Lanza excepción si correo cambiado y ya existe")
         void actualizar_correoDuplicado() {
-            CrearUsuarioDTO dto = CrearUsuarioDTO.builder()
+                ActualizarUsuarioDTO dto = ActualizarUsuarioDTO.builder()
                     .nombre("Juan").correoElectronico("otro@test.com")
                     .contrasena("pass").build();
 
@@ -224,7 +230,7 @@ class UsuarioServiceTest {
         @Test
         @DisplayName("No codifica contraseña si está vacía")
         void actualizar_sinContrasena() {
-            CrearUsuarioDTO dto = CrearUsuarioDTO.builder()
+                ActualizarUsuarioDTO dto = ActualizarUsuarioDTO.builder()
                     .nombre("Juan").correoElectronico("juan@test.com")
                     .contrasena("").build();
 
@@ -242,7 +248,7 @@ class UsuarioServiceTest {
         void actualizar_noExiste() {
             when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> usuarioService.actualizarUsuario(99L, crearUsuarioDTO))
+            assertThatThrownBy(() -> usuarioService.actualizarUsuario(99L, actualizarUsuarioDTO))
                     .isInstanceOf(EntityNotFoundException.class);
         }
     }

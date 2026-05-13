@@ -109,7 +109,7 @@ public class UsuarioService {
     /**
      * Actualiza un usuario existente.
      */
-    public UsuarioDTO actualizarUsuario(Long id, CrearUsuarioDTO dto) {
+    public UsuarioDTO actualizarUsuario(Long id, ActualizarUsuarioDTO dto) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
 
@@ -122,8 +122,12 @@ public class UsuarioService {
         usuario.setNombre(dto.getNombre());
         usuario.setTelefono(dto.getTelefono());
         usuario.setCorreoElectronico(dto.getCorreoElectronico());
-        if (dto.getContrasena() != null && !dto.getContrasena().isBlank()) {
-            usuario.setContrasena(passwordEncoder.encode(dto.getContrasena()));
+        String nuevaContrasena = dto.getContrasena();
+        if (nuevaContrasena != null && !nuevaContrasena.isBlank()) {
+            if (nuevaContrasena.length() < 6) {
+                throw new IllegalArgumentException("La contrasena debe tener al menos 6 caracteres");
+            }
+            usuario.setContrasena(passwordEncoder.encode(nuevaContrasena));
         }
         if (dto.getEsAdmin() != null) {
             usuario.setEsAdmin(dto.getEsAdmin());

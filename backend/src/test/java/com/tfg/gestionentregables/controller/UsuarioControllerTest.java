@@ -39,6 +39,7 @@ class UsuarioControllerTest {
     private ObjectMapper objectMapper;
     private UsuarioDTO usuarioDTO;
     private CrearUsuarioDTO crearUsuarioDTO;
+    private ActualizarUsuarioDTO actualizarUsuarioDTO;
     private GrupoDTO grupoDTO;
 
     @BeforeEach
@@ -53,6 +54,10 @@ class UsuarioControllerTest {
         crearUsuarioDTO = CrearUsuarioDTO.builder()
                 .nombre("Juan").correoElectronico("juan@test.com")
                 .contrasena("password123").build();
+
+        actualizarUsuarioDTO = ActualizarUsuarioDTO.builder()
+            .nombre("Juan").correoElectronico("juan@test.com")
+            .contrasena("password123").build();
 
         grupoDTO = GrupoDTO.builder()
             .id(10L)
@@ -157,7 +162,7 @@ class UsuarioControllerTest {
 
             mockMvc.perform(put("/api/usuarios/1")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(crearUsuarioDTO)))
+                        .content(objectMapper.writeValueAsString(actualizarUsuarioDTO)))
                     .andExpect(status().isOk());
         }
     }

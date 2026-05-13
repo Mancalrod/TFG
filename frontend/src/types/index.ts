@@ -51,6 +51,14 @@ export interface CrearUsuarioDTO {
   esAdmin?: boolean;
 }
 
+export interface ActualizarUsuarioDTO {
+  nombre: string;
+  telefono?: string;
+  correoElectronico: string;
+  contrasena?: string;
+  esAdmin?: boolean;
+}
+
 export interface GrupoDTO {
   id: number;
   titulo: string;

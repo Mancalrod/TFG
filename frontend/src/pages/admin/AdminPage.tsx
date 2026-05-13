@@ -98,7 +98,7 @@ const UsuariosTab: React.FC<TabProps> = ({ showAlert }) => {
   const [editando, setEditando] = useState<UsuarioDTO | null>(null);
 
   // Form
-  const [form, setForm] = useState<CrearUsuarioDTO & { esAdmin?: boolean }>({
+  const [form, setForm] = useState<CrearUsuarioDTO>({
     nombre: '', correoElectronico: '', contrasena: '', telefono: '', esAdmin: false
   });
 
@@ -353,7 +353,15 @@ const UsuariosTab: React.FC<TabProps> = ({ showAlert }) => {
     e.preventDefault();
     try {
       if (editando) {
-        await usuarioService.actualizar(editando.id, form);
+        const trimmedPassword = form.contrasena.trim();
+        const payload = {
+          nombre: form.nombre,
+          correoElectronico: form.correoElectronico,
+          telefono: form.telefono,
+          esAdmin: form.esAdmin,
+          ...(trimmedPassword ? { contrasena: trimmedPassword } : {})
+        };
+        await usuarioService.actualizar(editando.id, payload);
         showAlert('success', 'Usuario actualizado');
       } else {
         await usuarioService.crear(form);

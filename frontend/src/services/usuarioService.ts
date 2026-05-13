@@ -1,5 +1,5 @@
 import api from './api';
-import { CambiarContrasenaDTO, CrearUsuarioDTO, GrupoDTO, UsuarioDTO } from '../types';
+import { ActualizarUsuarioDTO, CambiarContrasenaDTO, CrearUsuarioDTO, GrupoDTO, UsuarioDTO } from '../types';
 
 const BASE_URL = '/api/usuarios';
 
@@ -24,7 +24,7 @@ export const usuarioService = {
     return response.data;
   },
 
-  actualizar: async (id: number, usuario: CrearUsuarioDTO): Promise<UsuarioDTO> => {
+  actualizar: async (id: number, usuario: ActualizarUsuarioDTO): Promise<UsuarioDTO> => {
     const response = await api.put<UsuarioDTO>(`${BASE_URL}/${id}`, usuario);
     return response.data;
   },
