@@ -446,7 +446,7 @@ evitando duplicidades en el trabajo docente.
 El proyecto introduce capacidades que ampl\'ian la operativa habitual de un LMS:
 
 \begin{itemize}
-	\item \textbf{Uso de APIs de OneDrive y correo}: la integraci\'on con OneDrive permite autorizar el acceso del usuario a su cuenta (OAuth2) y gestionar entregas en su almacenamiento en la nube, mientras que el canal de correo (actualmente operado mediante Resend) soporta procesos como recuperaci\'on de contrase\~na y notificaciones de evaluaci\'on.
+	\item \textbf{Uso de APIs de OneDrive y correo}: la integraci\'on con OneDrive permite autorizar el acceso del usuario a su cuenta (OAuth2) y gestionar entregas en su almacenamiento en la nube, mientras que el canal de correo (actualmente operado mediante Brevo) soporta procesos como recuperaci\'on de contrase\~na y notificaciones de evaluaci\'on.
 	\item \textbf{Importaci\'on desde OneDrive}: se habilita la incorporaci\'on de la estructura de carpetas del usuario para organizar entregables y mantener trazabilidad con su repositorio personal.
 \end{itemize}
 
@@ -457,8 +457,8 @@ Los principales retos t\'ecnicos identificados durante el desarrollo y el despli
 \begin{itemize}
 	\item incompatibilidad de ESLint 9 con configuraciones cl\'asicas, resuelta con migraci\'on a formato \textit{flat config};
 	\item restricciones de Render en servicios Static Site y ajustes del blueprint para sincronizaci\'on correcta;
-	\item restricciones de correo saliente en PaaS, mitigadas usando proveedores HTTP (Resend) para correos transaccionales;
-	\item migraci\'on de proveedor de correo transaccional: inicialmente se utiliz\'o SendGrid, pero al finalizar su plan gratuito se migr\'o a Brevo y, finalmente, a Resend. El dise\~no del \texttt{EmailService} con patr\'on de proveedor desacoplado permiti\'o realizar ambas migraciones sin modificar l\'ogica de negocio;
+	\item restricciones de correo saliente en PaaS, mitigadas usando proveedores HTTP (Brevo) para correos transaccionales;
+	\item migraci\'on de proveedor de correo transaccional: inicialmente se utiliz\'o SendGrid, pero al finalizar su plan gratuito se migr\'o a Brevo. Se evalu\'o Resend como alternativa, pero su plan gratuito requiere dominio verificado para enviar a destinatarios arbitrarios. El dise\~no del \texttt{EmailService} con patr\'on de proveedor desacoplado permite intercambiar proveedores sin modificar l\'ogica de negocio;
 	\item conflictos y deprecaciones en SonarCloud, solventados migrando al plugin de Maven;
 	\item tiempos excesivos en OWASP Dependency Check sin API Key de NVD, mitigados con credenciales dedicadas;
 	\item errores CORS en despliegue (403) al no incluir el origen del frontend en la configuraci\'on;

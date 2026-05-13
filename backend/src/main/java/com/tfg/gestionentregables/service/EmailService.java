@@ -237,6 +237,10 @@ public class EmailService {
 
     /**
      * Envía correo usando la API HTTP de Resend para producción.
+     * Resend requiere el campo "from" en formato "Nombre <email>" cuando se usa
+     * un dominio de prueba como onboarding@resend.dev.
+     * NOTA: con el dominio gratuito onboarding@resend.dev solo se puede enviar
+     * al email registrado en la cuenta de Resend.
      */
     private void enviarViaResend(String destinatario, String asunto, String contenido) {
         if (!tieneTexto(resendApiKey)) {
@@ -250,6 +254,12 @@ public class EmailService {
             return;
         }
 
+        // Resend requiere formato "Nombre <email>" para el campo from
+        String fromFormatted = remitente;
+        if (tieneTexto(emailFromName) && !remitente.contains("<")) {
+            fromFormatted = emailFromName.trim() + " <" + remitente + ">";
+        }
+
         try {
             RestTemplate restTemplate = new RestTemplate();
 
@@ -259,17 +269,19 @@ public class EmailService {
 
             // Construir el payload de Resend
             Map<String, Object> body = Map.of(
-                "from", remitente,
+                "from", fromFormatted,
                 "to", List.of(destinatario),
                 "subject", asunto,
                 "html", contenido
             );
 
+            log.info("Enviando correo vía Resend: from={}, to={}, subject={}", fromFormatted, destinatario, asunto);
+
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
             ResponseEntity<String> response = restTemplate.postForEntity(RESEND_API_URL, request, String.class);
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("Correo enviado vía Resend a: {}", destinatario);
+                log.info("Correo enviado vía Resend a: {} (respuesta: {})", destinatario, response.getBody());
             } else {
                 log.error("Error Resend ({}): {}", response.getStatusCode(), response.getBody());
             }

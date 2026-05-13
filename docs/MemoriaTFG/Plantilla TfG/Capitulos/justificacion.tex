@@ -289,14 +289,15 @@ y mejorar calidad de tests en c\'odigo cr\'itico.
 
 En la implementaci\'on concreta se utiliza Render como PaaS gestionado para
 el despliegue de los servicios y PostgreSQL gestionado. Para el canal de
-correo se adopta Resend mediante API HTTP, evitando depender de SMTP en
+correo se adopta Brevo mediante API HTTP, evitando depender de SMTP en
 producci\'on, ya que algunos PaaS restringen puertos salientes asociados al
 protocolo de correo. Inicialmente se utiliz\'o SendGrid como proveedor
 de correo transaccional; tras la finalizaci\'on de su plan gratuito
-se migr\'o a Brevo y, posteriormente, a Resend.
-El dise\~no adaptativo del \texttt{EmailService} ha permitido estas
-migraciones sin modificar l\'ogica de negocio, demostrando la
-flexibilidad del patr\'on de proveedor desacoplado.
+se migr\'o a Brevo, que permite enviar correo a cualquier destinatario
+en su plan gratuito.
+El dise\~no adaptativo del \texttt{EmailService} soporta m\'ultiples
+proveedores (Brevo, Resend, SendGrid) mediante un patr\'on desacoplado
+que permite migrar de proveedor sin modificar l\'ogica de negocio.
 
 \textbf{Trade-off}:
 menor control fino de infraestructura frente a VPS/Kubernetes,

@@ -195,10 +195,11 @@ configuraci\'on por variables de entorno.
 \textbf{P2} y \textbf{P3} ofrecen m\'as control,
 pero su complejidad no aporta retorno proporcional dentro del alcance del TFG.
 
-Dentro de esta estrategia, el correo transaccional se resuelve con Resend
+Dentro de esta estrategia, el correo transaccional se resuelve con Brevo
 mediante API HTTP. Inicialmente se emple\'o SendGrid como proveedor
 de correo, pero tras la finalizaci\'on de su plan gratuito se migr\'o
-a Brevo y, finalmente, a Resend.
+a Brevo. Se evalu\'o tambi\'en Resend, pero su plan gratuito requiere
+un dominio verificado para enviar a destinatarios arbitrarios.
 Esta alternativa se prefiere frente a SMTP en producci\'on
 porque los PaaS pueden bloquear o restringir puertos propios del protocolo
 de correo, mientras que las peticiones HTTPS salientes son compatibles con

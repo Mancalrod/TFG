@@ -11,16 +11,16 @@ services:
       - key: NODE_ENV
         value: production
       - key: EMAIL_PROVIDER
-        value: resend
+        value: brevo
       - key: DATABASE_URL
         sync: false
       - key: DATABASE_USER
         sync: false
       - key: DATABASE_PASSWORD
         sync: false
-      - key: RESEND_API_KEY
+      - key: BREVO_API_KEY
         sync: false
-      - key: RESEND_FROM_EMAIL
+      - key: BREVO_FROM_EMAIL
         sync: false
       - key: EMAIL_FROM_NAME
         value: Polan
