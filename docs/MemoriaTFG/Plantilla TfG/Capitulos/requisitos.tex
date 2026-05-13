@@ -805,9 +805,10 @@ La vista de despliegue se organiza en cuatro bloques principales:
 
 \begin{itemize}
 \item \textbf{Cliente web}: navegador del usuario final (profesor, estudiante o administrador).
-\item \textbf{Frontend}: SPA est\'atica servida desde plataforma PaaS.
-\item \textbf{Backend}: API REST desplegada como servicio web independiente.
+\item \textbf{Frontend}: SPA est\'atica servida desde plataforma PaaS (Render).
+\item \textbf{Backend}: API REST desplegada como servicio web Docker en Render.
 \item \textbf{Datos}: base de datos PostgreSQL gestionada y accesible solo desde backend.
+\item \textbf{Servicios externos}: almacenamiento cloud, OneDrive y correo transaccional por API HTTP.
 \end{itemize}
 
 La separaci\'on de componentes permite escalar y evolucionar cada capa
@@ -823,11 +824,13 @@ l\'ogica de negocio y persistencia.
 \hline
 Cliente & Navegador moderno & Interacci\'on de usuario y consumo de API sobre HTTPS. \\
 \hline
-Frontend & React + Vite en PaaS & Renderizado de interfaz, estado de sesi\'on y experiencia por rol. \\
+Frontend & React + Vite en Render & Renderizado de interfaz, estado de sesi\'on y experiencia por rol. \\
 \hline
-Backend & Spring Boot (Java 21) en PaaS & Exposici\'on de endpoints, reglas de negocio, seguridad y orquestaci\'on de persistencia. \\
+Backend & Spring Boot (Java 21) en Render & Exposici\'on de endpoints, reglas de negocio, seguridad y orquestaci\'on de persistencia. \\
 \hline
-Persistencia & PostgreSQL gestionado & Almacenamiento transaccional y trazabilidad de datos acad\'emicos. \\
+Persistencia & Render PostgreSQL & Almacenamiento transaccional y trazabilidad de datos acad\'emicos. \\
+\hline
+Correo transaccional & Brevo API HTTP & Recuperaci\'on de contrase\~na y notificaciones sin depender de puertos SMTP salientes. \\
 \hline
 \end{tabular}
 \caption{Vista de despliegue simplificada del sistema}
@@ -961,6 +964,10 @@ incluyendo ampliaciones como:
 Las integraciones externas se dise\~nan por configuraci\'on,
 de modo que el sistema puede operar en local sin dependencia obligatoria
 de servicios de terceros.
+En producci\'on el env\'io de correos se realiza mediante Brevo a trav\'es
+de peticiones HTTPS, evitando depender del protocolo SMTP, que puede estar
+restringido en plataformas PaaS. Este canal se utiliza para recuperaci\'on
+de contrase\~na y notificaciones transaccionales.
 
 \subsection{Verificaci\'on de implementaci\'on}
 

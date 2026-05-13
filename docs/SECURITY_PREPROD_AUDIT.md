@@ -31,15 +31,17 @@ Este documento concentra tres entregables operativos:
 | spring.mail.port | local/dev | 587 | Puerto SMTP |
 | spring.mail.username | local/dev | no-reply@dominio.com | Cuenta SMTP |
 | spring.mail.password | local/dev | app-password | Credencial SMTP |
-| SENDGRID_FROM_EMAIL | local/dev/prod | no-reply@dominio.com | Remitente logico |
+| EMAIL_FROM_EMAIL | local/dev/prod | no-reply@dominio.com | Remitente logico |
+| EMAIL_FROM_NAME | local/dev/prod | Polan | Nombre visible del remitente |
 
-#### Produccion (SendGrid API)
+#### Produccion (Brevo API)
 
 | Variable | Entorno | Ejemplo | Uso |
 |---|---|---|---|
-| NODE_ENV | prod | production | Fuerza uso API SendGrid |
-| SENDGRID_API_KEY | prod | SG.xxxxxx | Token API SendGrid |
-| SENDGRID_FROM_EMAIL | prod | no-reply@dominio.com | Remitente |
+| NODE_ENV | prod | production | Activa canal HTTP en produccion |
+| EMAIL_PROVIDER | prod | brevo | Selecciona proveedor HTTP |
+| BREVO_API_KEY | prod | xkeysib-xxxxxx | Token API Brevo |
+| BREVO_FROM_EMAIL | prod | no-reply@dominio.com | Remitente verificado |
 
 ### 1.3 Backend (Cloudinary)
 
@@ -120,7 +122,7 @@ Usar este checklist como criterio de salida antes de promover a produccion.
 
 ### 2.10 A10 Server-Side Request Forgery
 
-- [ ] Integraciones externas (Cloudinary/SendGrid/OneDrive) usan dominios esperados.
+- [ ] Integraciones externas (Cloudinary/Brevo/OneDrive) usan dominios esperados.
 - [ ] No se consumen URLs arbitrarias proporcionadas por usuario sin validacion.
 
 ## 3. Matriz de Permisos por Rol y por Curso

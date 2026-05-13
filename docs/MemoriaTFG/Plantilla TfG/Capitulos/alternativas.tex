@@ -1,4 +1,4 @@
-﻿Esta granularidad no es habitual en soluciones generalistas,
+Esta granularidad no es habitual en soluciones generalistas,
 que suelen tratar todo como subida de fichero sin reglas contextuales.
 
 \subsubsection*{Versionado y reenv\'io con trazabilidad}
@@ -189,8 +189,20 @@ Opciones principales:
 
 \textbf{P1} reduce carga operativa,
 permite despliegue r\'apido y mantiene un coste ajustado para contexto acad\'emico.
+La opci\'on elegida se concreta en Render como PaaS gestionado para el servicio
+backend, el frontend est\'atico y PostgreSQL gestionado, manteniendo la
+configuraci\'on por variables de entorno.
 \textbf{P2} y \textbf{P3} ofrecen m\'as control,
 pero su complejidad no aporta retorno proporcional dentro del alcance del TFG.
+
+Dentro de esta estrategia, el correo transaccional se resuelve con Resend
+mediante API HTTP. Inicialmente se emple\'o SendGrid como proveedor
+de correo, pero tras la finalizaci\'on de su plan gratuito se migr\'o
+a Brevo y, finalmente, a Resend.
+Esta alternativa se prefiere frente a SMTP en producci\'on
+porque los PaaS pueden bloquear o restringir puertos propios del protocolo
+de correo, mientras que las peticiones HTTPS salientes son compatibles con
+el modelo operativo del despliegue.
 
 \subsection{CI/CD y calidad}
 

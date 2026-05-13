@@ -63,7 +63,7 @@ class EmailServiceTest {
     void enviarCorreo_smtp() {
         ReflectionTestUtils.setField(emailService, "nodeEnv", "development");
         ReflectionTestUtils.setField(emailService, "activeProfile", "local");
-        ReflectionTestUtils.setField(emailService, "fromEmail", "noreply@test.com");
+        ReflectionTestUtils.setField(emailService, "emailFromEmail", "noreply@test.com");
 
         emailService.enviarCorreo("destino@test.com", "Asunto", "Mensaje");
 
@@ -75,7 +75,7 @@ class EmailServiceTest {
     void enviarCorreo_smtpError() {
         ReflectionTestUtils.setField(emailService, "nodeEnv", "development");
         ReflectionTestUtils.setField(emailService, "activeProfile", "local");
-        ReflectionTestUtils.setField(emailService, "fromEmail", "noreply@test.com");
+        ReflectionTestUtils.setField(emailService, "emailFromEmail", "noreply@test.com");
         doThrow(new RuntimeException("SMTP error")).when(mailSender).send(any(SimpleMailMessage.class));
 
         emailService.enviarCorreo("destino@test.com", "Asunto", "Mensaje");
@@ -84,11 +84,12 @@ class EmailServiceTest {
     }
 
     @Test
-    @DisplayName("enviarCorreo en produccion con SendGrid vacio no usa SMTP")
-    void enviarCorreo_productionWithoutSendGridKey() {
+    @DisplayName("enviarCorreo en produccion con Brevo vacio no usa SMTP")
+    void enviarCorreo_productionWithoutBrevoKey() {
         ReflectionTestUtils.setField(emailService, "nodeEnv", "production");
         ReflectionTestUtils.setField(emailService, "activeProfile", "prod");
-        ReflectionTestUtils.setField(emailService, "sendGridApiKey", "");
+        ReflectionTestUtils.setField(emailService, "emailProvider", "brevo");
+        ReflectionTestUtils.setField(emailService, "brevoApiKey", "");
 
         emailService.enviarCorreo("destino@test.com", "Asunto", "Mensaje");
 

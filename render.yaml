@@ -8,9 +8,21 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
+      - key: NODE_ENV
+        value: production
+      - key: EMAIL_PROVIDER
+        value: resend
       - key: DATABASE_URL
         sync: false
       - key: DATABASE_USER
         sync: false
       - key: DATABASE_PASSWORD
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        sync: false
+      - key: EMAIL_FROM_NAME
+        value: Polan
+      - key: APP_FRONTEND_BASE_URL
         sync: false

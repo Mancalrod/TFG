@@ -86,11 +86,16 @@ Las variables m\'inimas para funcionamiento seguro en entornos no locales son:
 \begin{itemize}
 	\item \texttt{DATABASE\_URL}, \texttt{DATABASE\_USER}, \texttt{DATABASE\_PASSWORD},
 	\item \texttt{JWT\_SECRET},
-	\item \texttt{SPRING\_PROFILES\_ACTIVE}.
+	\item \texttt{SPRING\_PROFILES\_ACTIVE},
+	\item \texttt{APP\_FRONTEND\_BASE\_URL}.
 \end{itemize}
 
 En producci\'on se habilitan adem\'as variables para servicios externos
-como almacenamiento cloud y correo transaccional.
+como almacenamiento cloud y correo transaccional. En el despliegue sobre
+Render, el correo se configura mediante Brevo usando API HTTP, por lo que
+deben definirse \texttt{BREVO\_API\_KEY} y \texttt{BREVO\_FROM\_EMAIL}
+con un remitente verificado en Brevo. Esta elecci\'on evita depender de
+conexiones SMTP salientes, que pueden estar restringidas por el PaaS.
 
 \subsection{Variables cr\'iticas de frontend}
 
@@ -119,7 +124,8 @@ Tras cada despliegue se recomienda ejecutar al menos:
 	\item comprobaci\'on de endpoints de salud,
 	\item login con usuario de prueba,
 	\item operaci\'on de lectura y escritura en flujo acad\'emico,
-	\item verificaci\'on de subida/descarga de material.
+	\item verificaci\'on de subida/descarga de material,
+	\item prueba de correo transaccional (recuperaci\'on de contrase\~na o notificaci\'on) mediante Brevo.
 \end{enumerate}
 
 \section{Anexo D. Declaraci\'on de uso de IA generativa}

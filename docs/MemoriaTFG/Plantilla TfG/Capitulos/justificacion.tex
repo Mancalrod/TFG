@@ -1,4 +1,4 @@
-﻿\chapter{Justificaci\'on detallada de decisiones}\label{justificacion}
+\chapter{Justificaci\'on detallada de decisiones}\label{justificacion}
 
 \section{Introducci\'on}
 
@@ -286,6 +286,17 @@ y mejorar calidad de tests en c\'odigo cr\'itico.
   \item acelera iteraci\'on y validaci\'on de cambios;
   \item mantiene coste compatible con contexto acad\'emico.
 \end{itemize}
+
+En la implementaci\'on concreta se utiliza Render como PaaS gestionado para
+el despliegue de los servicios y PostgreSQL gestionado. Para el canal de
+correo se adopta Resend mediante API HTTP, evitando depender de SMTP en
+producci\'on, ya que algunos PaaS restringen puertos salientes asociados al
+protocolo de correo. Inicialmente se utiliz\'o SendGrid como proveedor
+de correo transaccional; tras la finalizaci\'on de su plan gratuito
+se migr\'o a Brevo y, posteriormente, a Resend.
+El dise\~no adaptativo del \texttt{EmailService} ha permitido estas
+migraciones sin modificar l\'ogica de negocio, demostrando la
+flexibilidad del patr\'on de proveedor desacoplado.
 
 \textbf{Trade-off}:
 menor control fino de infraestructura frente a VPS/Kubernetes,
