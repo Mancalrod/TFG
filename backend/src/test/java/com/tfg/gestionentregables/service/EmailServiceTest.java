@@ -95,4 +95,91 @@ class EmailServiceTest {
 
         verify(mailSender, never()).send(any(SimpleMailMessage.class));
     }
+
+    @Test
+    @DisplayName("enviarCorreo en produccion con Resend vacio no usa SMTP")
+    void enviarCorreo_productionWithoutResendKey() {
+        ReflectionTestUtils.setField(emailService, "nodeEnv", "production");
+        ReflectionTestUtils.setField(emailService, "activeProfile", "prod");
+        ReflectionTestUtils.setField(emailService, "emailProvider", "resend");
+        ReflectionTestUtils.setField(emailService, "resendApiKey", "");
+
+        emailService.enviarCorreo("destino@test.com", "Asunto", "Mensaje");
+
+        verify(mailSender, never()).send(any(SimpleMailMessage.class));
+    }
+
+    @Test
+    @DisplayName("enviarCorreo en produccion con Resend sin from-email no envia")
+    void enviarCorreo_productionResendNoFromEmail() {
+        ReflectionTestUtils.setField(emailService, "nodeEnv", "production");
+        ReflectionTestUtils.setField(emailService, "activeProfile", "prod");
+        ReflectionTestUtils.setField(emailService, "emailProvider", "resend");
+        ReflectionTestUtils.setField(emailService, "resendApiKey", "re_test_key");
+        ReflectionTestUtils.setField(emailService, "resendFromEmail", "");
+        ReflectionTestUtils.setField(emailService, "emailFromEmail", "");
+        ReflectionTestUtils.setField(emailService, "brevoFromEmail", "");
+        ReflectionTestUtils.setField(emailService, "sendGridFromEmail", "");
+        ReflectionTestUtils.setField(emailService, "smtpUsername", "");
+
+        emailService.enviarCorreo("destino@test.com", "Asunto", "Mensaje");
+
+        verify(mailSender, never()).send(any(SimpleMailMessage.class));
+    }
+
+    @Test
+    @DisplayName("enviarCorreo en produccion con SendGrid vacio no usa SMTP")
+    void enviarCorreo_productionWithoutSendGridKey() {
+        ReflectionTestUtils.setField(emailService, "nodeEnv", "production");
+        ReflectionTestUtils.setField(emailService, "activeProfile", "prod");
+        ReflectionTestUtils.setField(emailService, "emailProvider", "sendgrid");
+        ReflectionTestUtils.setField(emailService, "sendGridApiKey", "");
+
+        emailService.enviarCorreo("destino@test.com", "Asunto", "Mensaje");
+
+        verify(mailSender, never()).send(any(SimpleMailMessage.class));
+    }
+
+    @Test
+    @DisplayName("enviarCorreo con proveedor no soportado no envia")
+    void enviarCorreo_productionUnsupportedProvider() {
+        ReflectionTestUtils.setField(emailService, "nodeEnv", "production");
+        ReflectionTestUtils.setField(emailService, "activeProfile", "prod");
+        ReflectionTestUtils.setField(emailService, "emailProvider", "mailgun");
+
+        emailService.enviarCorreo("destino@test.com", "Asunto", "Mensaje");
+
+        verify(mailSender, never()).send(any(SimpleMailMessage.class));
+    }
+
+    @Test
+    @DisplayName("enviarCorreo auto sin ninguna API key no envia")
+    void enviarCorreo_productionAutoNoKeys() {
+        ReflectionTestUtils.setField(emailService, "nodeEnv", "production");
+        ReflectionTestUtils.setField(emailService, "activeProfile", "prod");
+        ReflectionTestUtils.setField(emailService, "emailProvider", "auto");
+        ReflectionTestUtils.setField(emailService, "brevoApiKey", "");
+        ReflectionTestUtils.setField(emailService, "resendApiKey", "");
+        ReflectionTestUtils.setField(emailService, "sendGridApiKey", "");
+
+        emailService.enviarCorreo("destino@test.com", "Asunto", "Mensaje");
+
+        verify(mailSender, never()).send(any(SimpleMailMessage.class));
+    }
+
+    @Test
+    @DisplayName("enviarCorreo SMTP sin remitente no envia")
+    void enviarCorreo_smtpNoFromEmail() {
+        ReflectionTestUtils.setField(emailService, "nodeEnv", "development");
+        ReflectionTestUtils.setField(emailService, "activeProfile", "local");
+        ReflectionTestUtils.setField(emailService, "emailFromEmail", "");
+        ReflectionTestUtils.setField(emailService, "brevoFromEmail", "");
+        ReflectionTestUtils.setField(emailService, "resendFromEmail", "");
+        ReflectionTestUtils.setField(emailService, "sendGridFromEmail", "");
+        ReflectionTestUtils.setField(emailService, "smtpUsername", "");
+
+        emailService.enviarCorreo("destino@test.com", "Asunto", "Mensaje");
+
+        verify(mailSender, never()).send(any(SimpleMailMessage.class));
+    }
 }
