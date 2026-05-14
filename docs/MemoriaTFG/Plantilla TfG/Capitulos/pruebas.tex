@@ -53,10 +53,10 @@ generados por Vitest, Playwright y Surefire.
 El n\'umero total de pruebas autom\'aticas ejecutadas en el \textit{corte} actual es:
 
 \[
-N_{\text{total}} = N_{\text{frontend unitarias}} + N_{\text{frontend E2E}} + N_{\text{backend}} = 137 + 3 + 816 = 956
+N_{\text{total}} = N_{\text{frontend unitarias}} + N_{\text{frontend E2E}} + N_{\text{backend}} = 138 + 3 + 850 = 991
 \]
 
-El desglose principal es el siguiente: frontend unitarias con 137 casos de prueba en 21 ficheros, frontend E2E con 3 escenarios end-to-end y backend con 816 casos de prueba agregados en 56 suites Surefire. Esta distribuci\'on refleja mayor concentraci\'on en verificaci\'on de servicios.
+El desglose principal es el siguiente: frontend unitarias con 138 casos de prueba en 21 ficheros, frontend E2E con 3 escenarios end-to-end y backend con 850 casos de prueba agregados en 57 suites Surefire. Esta distribuci\'on refleja mayor concentraci\'on en verificaci\'on de servicios.
 
 \section{Pruebas en frontend}
 
@@ -64,7 +64,7 @@ El desglose principal es el siguiente: frontend unitarias con 137 casos de prueb
 
 El frontend utiliza Vitest como runner principal,
 con entorno \texttt{happy-dom} y configuraci\'on de cobertura por V8.
-La suite incluye pruebas sobre componentes (por ejemplo, navegaci\'on y constructores de estructura ZIP), contextos de autenticaci\'on y tema, p\'aginas clave (login, dashboard, evaluaciones, perfil), servicios de API (auth, cursos, actividades, entregables, entregas, feedback) y utilidades de parsing y validaci\'on de estructura ZIP. Esta cobertura prioriza flujos de uso frecuentes.
+La suite actual incluye pruebas sobre componentes (navegaci\'on y constructor de estructura ZIP), contextos de autenticaci\'on y tema, p\'aginas clave (login, dashboard, actividades por curso, evaluaciones y perfil), servicios de API (auth, usuarios, cursos, actividades, entregables, entregas, feedback, notificaciones y OneDrive) y utilidades de parsing y validaci\'on de estructura ZIP. Esta cobertura prioriza flujos de uso frecuentes y puntos de integraci\'on con mayor probabilidad de regresi\'on.
 
 Se han definido umbrales m\'inimos de cobertura en la configuraci\'on de Vitest: \texttt{lines} \(\ge 95\%\), \texttt{functions} \(\ge 95\%\), \texttt{statements} \(\ge 95\%\) y \texttt{branches} \(\ge 85\%\). Estos umbrales obligan a mantener un nivel de verificaci\'on consistente.
 
@@ -86,13 +86,13 @@ Componentes (src/components) & 30 \\
 \hline
 Utilidades (\texttt{src/utils}) & 22 \\
 \hline
-P\'aginas (\texttt{src/pages}) & 15 \\
+P\'aginas (\texttt{src/pages}) & 16 \\
 \hline
 Contextos (\texttt{src/context}) & 11 \\
 \hline
 Ra\'iz de aplicaci\'on (\texttt{src/}) & 8 \\
 \hline
-\textbf{Total frontend unitarias} & \textbf{137} \\
+\textbf{Total frontend unitarias} & \textbf{138} \\
 \hline
 \end{tabular}
 \caption{Distribuci\'on de casos unitarios por m\'odulo en frontend}
@@ -109,7 +109,7 @@ el navegador se levanta contra el frontend real y se simulan endpoints API
 en los escenarios definidos. Esto reduce inestabilidad ambiental y facilita
 reproducibilidad en CI.
 
-Se validan, entre otros, los escenarios de autenticaci\'on correcta, autenticaci\'on fallida y flujo de evaluaciones con filtros y descarga. Este conjunto cubre los puntos de mayor riesgo de fricci\'on de usuario.
+Se validan, entre otros, los escenarios de autenticaci\'on correcta, autenticaci\'on fallida y flujo de evaluaciones con filtros y descarga mockeada. En el corte actual se ejecutan 3 escenarios y los 3 finalizan en verde; durante la ejecuci\'on pueden aparecer avisos de proxy de Vite para endpoints no mockeados de notificaciones, sin impacto en el resultado de la suite.
 
 \subsection{Mutaci\'on en frontend}
 
@@ -120,16 +120,14 @@ sino que detectan alteraciones sem\'anticas en el comportamiento.
 
 La cobertura mediante mutaci\'on en frontend se ha realizado con un procedimiento que selecciona el alcance en \path{src/services/**/*.ts} y \path{src/utils/**/*.ts}, excluye expl\'icitamente tests y archivos de infraestructura (\path{*.test.*}, \path{*.spec.*}, \path{api.ts}, \path{index.ts}), ejecuta \texttt{npm run test:mutation} generando mutantes y relanzando Vitest por lotes, y analiza mutantes \textit{survived}/\textit{timeout} para reforzar casos de prueba d\'ebiles. Este enfoque prioriza secciones con mayor impacto funcional.
 
-Como criterio de aceptaci\'on de esta fase, Stryker aplica umbrales
-\texttt{high=75}, \texttt{low=60} y \texttt{break=50},
-siendo este \'ultimo el que determina fallo de pipeline.
+En el corte actual, \texttt{npm run test:mutation} instrumenta 10 ficheros de servicios y utilidades con 435 mutantes. El resultado global es un \textit{mutation score} del 92.10\%, con 267 mutantes eliminados, 23 supervivientes y 1 \textit{timeout}. Como criterio de aceptaci\'on de esta fase, Stryker aplica umbrales \texttt{high=75}, \texttt{low=60} y \texttt{break=50}, siendo este \'ultimo el que determina fallo de pipeline.
 
 \section{Pruebas en backend}
 
 \subsection{Pruebas unitarias e integraci\'on}
 
 En backend se emplea JUnit junto con Spring Test y MockMvc.
-La validaci\'on cubre l\'ogica de servicios de dominio, validaciones y reglas de negocio, contratos REST de controladores, seguridad y autorizaci\'on por contexto, y entidades con conversiones DTO. Este alcance garantiza consistencia entre reglas de negocio y API expuesta.
+La validaci\'on cubre l\'ogica de servicios de dominio, validaciones y reglas de negocio, contratos REST de controladores, seguridad y autorizaci\'on por contexto, repositorios sobre H2, entidades y conversiones DTO. Este alcance garantiza consistencia entre reglas de negocio, persistencia y API expuesta.
 
 Entre los tests de referencia de mayor carga funcional destaca
 \texttt{EntregaServiceTest}, que valida escenarios de entrega,
@@ -147,9 +145,9 @@ parametrizadas y escenarios anidados.
 \hline
 \textbf{M\'odulo backend} & \textbf{Casos} \\
 \hline
-Servicios (\texttt{service}) & 513 \\
+Servicios (\texttt{service}) & 542 \\
 \hline
-Controladores (\texttt{controller}) & 144 \\
+Controladores (\texttt{controller}) & 149 \\
 \hline
 Repositorios (\texttt{repository}) & 47 \\
 \hline
@@ -165,7 +163,7 @@ Configuraci\'on (\texttt{config}) & 8 \\
 \hline
 Aplicaci\'on base (\texttt{root}) & 1 \\
 \hline
-\textbf{Total backend} & \textbf{816} \\
+\textbf{Total backend} & \textbf{850} \\
 \hline
 \end{tabular}
 \caption{Distribuci\'on de casos de prueba por m\'odulo en backend}
@@ -177,9 +175,7 @@ Aplicaci\'on base (\texttt{root}) & 1 \\
 La cobertura se genera con JaCoCo durante la fase de test,
 produciendo informe HTML en
 \texttt{backend/target/site/jacoco/index.html}.
-
-Este reporte se utiliza como soporte de revisi\'on t\'ecnica
-para detectar m\'odulos subprobados y orientar ampliaciones de suite.
+En el corte actual, el reporte agregado indica 89.55\% de instrucciones, 70.31\% de ramas, 90.75\% de l\'ineas y 91.60\% de m\'etodos cubiertos. Este reporte se utiliza como soporte de revisi\'on t\'ecnica para detectar m\'odulos subprobados y orientar ampliaciones de suite.
 
 \subsection{Mutaci\'on en backend}
 
@@ -188,13 +184,17 @@ de servicios y controladores seleccionados.
 La configuraci\'on define umbrales de mutaci\'on y cobertura,
 y genera reportes estructurados para su an\'alisis.
 
-En esta implementaci\'on se mutan de forma controlada 10 clases objetivo (7 de servicio y 3 de controlador). Las clases objetivo son \texttt{OneDriveService}, \texttt{ZipValidationService}, \texttt{FeedbackService}, \texttt{SecurityContextUserService}, \texttt{CloudinaryService}, \texttt{OneDriveController}, \texttt{MicrosoftOAuthController} y \texttt{FeedbackController}. Esta selecci\'on concentra el esfuerzo de mutaci\'on en servicios de integraci\'on y flujo cr\'itico.
+En esta implementaci\'on se mutan de forma controlada 10 clases objetivo:
+7 de servicio y 3 de controlador. La selecci\'on cubre integraci\'on con
+OneDrive, validaci\'on ZIP, feedback, mapeo de entidades, contexto de
+seguridad, recuperaci\'on de contrase\~na, Cloudinary y los controladores
+asociados a OneDrive, OAuth de Microsoft y feedback. Esta selecci\'on
+concentra el esfuerzo de mutaci\'on en servicios de integraci\'on y flujo
+cr\'itico.
 
 El flujo seguido para cobertura de mutaci\'on en backend consiste en ejecutar el perfil con \texttt{mvn -Pmutation ... mutationCoverage}, generar mutantes con operadores de retorno, aritm\'etica e incrementos, relacionar mutante y test para identificar qu\'e prueba mata cada defecto sint\'etico, y revisar mutantes supervivientes para crear pruebas adicionales o ajustar aserciones. Este proceso mejora la eficacia real de la suite.
 
-El perfil exige adem\'as un m\'inimo de mutaci\'on del 70\%
-y de cobertura del 75\%, reforzando que la cobertura no sea
-solo de l\'ineas, sino de detecci\'on efectiva de fallos.
+En el corte actual, PIT genera 144 mutantes, de los que 134 son eliminados por la suite. El resultado es un \textit{mutation score} del 93\%, una cobertura de l\'inea del 95\% sobre clases mutadas y una fuerza de test del 96\%. El perfil exige adem\'as un m\'inimo de mutaci\'on del 70\% y de cobertura del 75\%, reforzando que la cobertura no sea solo de l\'ineas, sino de detecci\'on efectiva de fallos.
 
 \section{Automatizaci\'on en CI/CD}
 
@@ -219,17 +219,17 @@ De acuerdo con el informe de estrategia de testing del proyecto
 \hline
 E2E frontend (Playwright) & 3 escenarios ejecutados, 3 en verde. \\
 \hline
-Cobertura frontend & Statements 97.77\%, Branches 90.68\%, Functions 98.19\%, Lines 98.25\%. \\
+Cobertura frontend & Statements 97.78\%, Branches 90.68\%, Functions 98.20\%, Lines 98.25\%. \\
 \hline
-Suite frontend & 137 tests aprobados en 21 archivos durante la ejecuci\'on del comando test:coverage. \\
+Suite frontend & 138 tests aprobados en 21 archivos durante la ejecuci\'on del comando test:coverage. \\
 \hline
-Suite backend completa & 816 casos en 56 suites Surefire, 0 fallos y 0 errores. \\
+Suite backend completa & 850 casos en 57 suites Surefire, 0 fallos y 0 errores. \\
 \hline
-Total pruebas autom\'aticas & 956 ejecuciones (137 unitarias frontend + 3 E2E + 816 backend). \\
+Total pruebas autom\'aticas & 991 ejecuciones (138 unitarias frontend + 3 E2E + 850 backend). \\
 \hline
-Mutaci\'on frontend (Stryker) & Score global 98.61\% (por encima del umbral \texttt{break}=50). \\
+Mutaci\'on frontend (Stryker) & Score global 92.10\% sobre 435 mutantes (por encima del umbral \texttt{break}=50). \\
 \hline
-Mutaci\'on backend (PIT) & Mutation score 93\%, line coverage 95\%, test strength 96\%. \\
+Mutaci\'on backend (PIT) & 144 mutantes generados, mutation score 93\%, line coverage 95\%, test strength 96\%. \\
 \hline
 Test objetivo backend & \texttt{EntregaServiceTest}: 89 tests, 0 fallos, 0 errores. \\
 \hline
