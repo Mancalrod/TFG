@@ -13,26 +13,11 @@ complementada con an\'alisis de mutaci\'on y ejecuci\'on automatizada en CI/CD.
 
 \section{Objetivos de verificaci\'on}
 
-Los objetivos principales de esta fase son:
-
-\begin{itemize}
-	\item verificar que los casos de uso prioritarios funcionan de forma estable;
-	\item prevenir regresiones al introducir cambios en l\'ogica de negocio;
-	\item garantizar que las restricciones de seguridad y autorizaci\'on se respetan;
-	\item medir cobertura y fortaleza de tests de forma objetiva;
-	\item integrar la validaci\'on en el ciclo continuo de construcci\'on y despliegue.
-\end{itemize}
+Los objetivos principales de esta fase son verificar que los casos de uso prioritarios funcionan de forma estable, prevenir regresiones al introducir cambios en l\'ogica de negocio, garantizar que las restricciones de seguridad y autorizaci\'on se respetan, medir cobertura y fortaleza de tests de forma objetiva, e integrar la validaci\'on en el ciclo continuo de construcci\'on y despliegue. Esta formulaci\'on conecta calidad funcional y operativa en una misma l\'inea de evidencia.
 
 \section{Estrategia de pruebas en capas}
 
-La estrategia sigue una pir\'amide de testing con cuatro niveles:
-
-\begin{enumerate}
-	\item \textbf{Pruebas unitarias}: validan l\'ogica aislada de servicios, utilidades y componentes.
-	\item \textbf{Pruebas de integraci\'on}: validan interacci\'on entre capas y contratos de API.
-	\item \textbf{Pruebas E2E}: validan flujos de usuario en navegador.
-	\item \textbf{Pruebas de mutaci\'on}: eval\'uan la capacidad real de los tests para detectar defectos.
-\end{enumerate}
+La estrategia sigue una pir\'amide de testing con cuatro niveles: pruebas unitarias para validar l\'ogica aislada de servicios, utilidades y componentes; pruebas de integraci\'on para validar interacci\'on entre capas y contratos de API; pruebas E2E para validar flujos de usuario en navegador; y pruebas de mutaci\'on para evaluar la capacidad real de los tests de detectar defectos. Esta combinaci\'on equilibra rapidez de feedback y profundidad de verificaci\'on.
 
 La Tabla~\ref{tab:matriz-pruebas} resume las tecnolog\'ias aplicadas.
 
@@ -57,6 +42,8 @@ Mutaci\'on backend & PIT & Medir capacidad de detecci\'on de fallos en servicios
 \label{tab:matriz-pruebas}
 \end{table}
 
+\clearpage
+
 \section{Inventario cuantitativo de pruebas realizadas}
 
 Para documentar de forma expl\'icita el alcance de verificaci\'on,
@@ -69,13 +56,7 @@ El n\'umero total de pruebas autom\'aticas ejecutadas en el \textit{corte} actua
 N_{\text{total}} = N_{\text{frontend unitarias}} + N_{\text{frontend E2E}} + N_{\text{backend}} = 137 + 3 + 816 = 956
 \]
 
-Desglose principal:
-
-\begin{itemize}
-\item frontend unitarias: 137 casos de prueba en 21 ficheros;
-\item frontend E2E: 3 escenarios end-to-end;
-\item backend: 816 casos de prueba agregados en 56 suites Surefire.
-\end{itemize}
+El desglose principal es el siguiente: frontend unitarias con 137 casos de prueba en 21 ficheros, frontend E2E con 3 escenarios end-to-end y backend con 816 casos de prueba agregados en 56 suites Surefire. Esta distribuci\'on refleja mayor concentraci\'on en verificaci\'on de servicios.
 
 \section{Pruebas en frontend}
 
@@ -83,23 +64,9 @@ Desglose principal:
 
 El frontend utiliza Vitest como runner principal,
 con entorno \texttt{happy-dom} y configuraci\'on de cobertura por V8.
-La suite incluye pruebas sobre:
+La suite incluye pruebas sobre componentes (por ejemplo, navegaci\'on y constructores de estructura ZIP), contextos de autenticaci\'on y tema, p\'aginas clave (login, dashboard, evaluaciones, perfil), servicios de API (auth, cursos, actividades, entregables, entregas, feedback) y utilidades de parsing y validaci\'on de estructura ZIP. Esta cobertura prioriza flujos de uso frecuentes.
 
-\begin{itemize}
-	\item componentes (por ejemplo, navegaci\'on y constructores de estructura ZIP),
-	\item contextos de autenticaci\'on y tema,
-	\item p\'aginas clave (login, dashboard, evaluaciones, perfil),
-	\item servicios de API (auth, cursos, actividades, entregables, entregas, feedback),
-	\item utilidades de parsing/validaci\'on de estructura ZIP.
-\end{itemize}
-
-Se han definido umbrales m\'inimos de cobertura en la configuraci\'on de Vitest:
-\begin{itemize}
-	\item \texttt{lines} \(\ge 95\%\),
-	\item \texttt{functions} \(\ge 95\%\),
-	\item \texttt{statements} \(\ge 95\%\),
-	\item \texttt{branches} \(\ge 85\%\).
-\end{itemize}
+Se han definido umbrales m\'inimos de cobertura en la configuraci\'on de Vitest: \texttt{lines} \(\ge 95\%\), \texttt{functions} \(\ge 95\%\), \texttt{statements} \(\ge 95\%\) y \texttt{branches} \(\ge 85\%\). Estos umbrales obligan a mantener un nivel de verificaci\'on consistente.
 
 \subsection{M\'odulos testeados en frontend}
 
@@ -142,13 +109,7 @@ el navegador se levanta contra el frontend real y se simulan endpoints API
 en los escenarios definidos. Esto reduce inestabilidad ambiental y facilita
 reproducibilidad en CI.
 
-Se validan, entre otros, los escenarios:
-
-\begin{itemize}
-	\item autenticaci\'on correcta,
-	\item autenticaci\'on fallida,
-	\item flujo de evaluaciones con filtros y descarga.
-\end{itemize}
+Se validan, entre otros, los escenarios de autenticaci\'on correcta, autenticaci\'on fallida y flujo de evaluaciones con filtros y descarga. Este conjunto cubre los puntos de mayor riesgo de fricci\'on de usuario.
 
 \subsection{Mutaci\'on en frontend}
 
@@ -157,15 +118,7 @@ excluyendo archivos de test.
 El objetivo es verificar que los tests no solo ejecutan l\'ineas,
 sino que detectan alteraciones sem\'anticas en el comportamiento.
 
-La cobertura mediante mutaci\'on en frontend se ha realizado con el siguiente
-procedimiento:
-
-\begin{enumerate}
-\item selecci\'on del alcance de mutaci\'on en \path{src/services/**/*.ts} y \path{src/utils/**/*.ts};
-\item exclusi\'on expl\'icita de tests y archivos de infraestructura (\path{*.test.*}, \path{*.spec.*}, \path{api.ts}, \path{index.ts});
-\item ejecuci\'on de \texttt{npm run test:mutation}, generando mutantes y relanzando Vitest para cada lote;
-\item an\'alisis de mutantes \textit{survived}/\textit{timeout} para reforzar casos de prueba d\'ebiles.
-\end{enumerate}
+La cobertura mediante mutaci\'on en frontend se ha realizado con un procedimiento que selecciona el alcance en \path{src/services/**/*.ts} y \path{src/utils/**/*.ts}, excluye expl\'icitamente tests y archivos de infraestructura (\path{*.test.*}, \path{*.spec.*}, \path{api.ts}, \path{index.ts}), ejecuta \texttt{npm run test:mutation} generando mutantes y relanzando Vitest por lotes, y analiza mutantes \textit{survived}/\textit{timeout} para reforzar casos de prueba d\'ebiles. Este enfoque prioriza secciones con mayor impacto funcional.
 
 Como criterio de aceptaci\'on de esta fase, Stryker aplica umbrales
 \texttt{high=75}, \texttt{low=60} y \texttt{break=50},
@@ -176,15 +129,7 @@ siendo este \'ultimo el que determina fallo de pipeline.
 \subsection{Pruebas unitarias e integraci\'on}
 
 En backend se emplea JUnit junto con Spring Test y MockMvc.
-La validaci\'on cubre:
-
-\begin{itemize}
-	\item l\'ogica de servicios de dominio,
-	\item validaciones y reglas de negocio,
-	\item contratos REST de controladores,
-	\item seguridad y autorizaci\'on por contexto,
-	\item entidades y conversiones DTO.
-\end{itemize}
+La validaci\'on cubre l\'ogica de servicios de dominio, validaciones y reglas de negocio, contratos REST de controladores, seguridad y autorizaci\'on por contexto, y entidades con conversiones DTO. Este alcance garantiza consistencia entre reglas de negocio y API expuesta.
 
 Entre los tests de referencia de mayor carga funcional destaca
 \texttt{EntregaServiceTest}, que valida escenarios de entrega,
@@ -243,28 +188,9 @@ de servicios y controladores seleccionados.
 La configuraci\'on define umbrales de mutaci\'on y cobertura,
 y genera reportes estructurados para su an\'alisis.
 
-En esta implementaci\'on se mutan de forma controlada 10 clases objetivo
-(7 de servicio y 3 de controlador). Las clases objetivo son:
+En esta implementaci\'on se mutan de forma controlada 10 clases objetivo (7 de servicio y 3 de controlador). Las clases objetivo son \texttt{OneDriveService}, \texttt{ZipValidationService}, \texttt{FeedbackService}, \texttt{SecurityContextUserService}, \texttt{CloudinaryService}, \texttt{OneDriveController}, \texttt{MicrosoftOAuthController} y \texttt{FeedbackController}. Esta selecci\'on concentra el esfuerzo de mutaci\'on en servicios de integraci\'on y flujo cr\'itico.
 
-\begin{itemize}
-\item \texttt{OneDriveService}
-\item \texttt{ZipValidationService}
-\item \texttt{FeedbackService}
-\item \texttt{SecurityContextUserService}
-\item \texttt{CloudinaryService}
-\item \texttt{OneDriveController}
-\item \texttt{MicrosoftOAuthController}
-\item \texttt{FeedbackController}
-\end{itemize}
-
-El flujo seguido para cobertura de mutaci\'on en backend ha sido:
-
-\begin{enumerate}
-\item ejecuci\'on del perfil con \texttt{mvn -Pmutation ... mutationCoverage};
-\item generaci\'on de mutantes con operadores de retorno, aritm\'etica e incrementos;
-\item relaci\'on mutante--test para identificar qu\'e prueba mata cada defecto sint\'etico;
-\item revisi\'on de mutantes supervivientes para crear pruebas adicionales o ajustar aserciones.
-\end{enumerate}
+El flujo seguido para cobertura de mutaci\'on en backend consiste en ejecutar el perfil con \texttt{mvn -Pmutation ... mutationCoverage}, generar mutantes con operadores de retorno, aritm\'etica e incrementos, relacionar mutante y test para identificar qu\'e prueba mata cada defecto sint\'etico, y revisar mutantes supervivientes para crear pruebas adicionales o ajustar aserciones. Este proceso mejora la eficacia real de la suite.
 
 El perfil exige adem\'as un m\'inimo de mutaci\'on del 70\%
 y de cobertura del 75\%, reforzando que la cobertura no sea
@@ -275,13 +201,7 @@ solo de l\'ineas, sino de detecci\'on efectiva de fallos.
 La validaci\'on se integra en pipelines de GitHub Actions,
 lo que garantiza ejecuci\'on repetible por cada cambio relevante.
 
-Workflows principales:
-
-\begin{itemize}
-	\item \texttt{frontend-ci.yml}: lint, unitarias con cobertura, E2E y build de frontend.
-	\item \texttt{full-stack-ci.yml}: verificaci\'on backend (\texttt{mvn verify}) y frontend completo.
-	\item \texttt{mutation-ci.yml}: mutaci\'on backend (PIT) y frontend (Stryker), con subida de artefactos.
-\end{itemize}
+Workflows principales: \texttt{frontend-ci.yml} para lint, unitarias con cobertura, E2E y build de frontend; \texttt{full-stack-ci.yml} para verificaci\'on backend (\texttt{mvn verify}) y frontend completo; y \texttt{mutation-ci.yml} para mutaci\'on backend (PIT) y frontend (Stryker) con subida de artefactos. Esta organizaci\'on separa capas de validaci\'on sin perder coherencia global.
 
 Esta automatizaci\'on reduce el riesgo de integraci\'on tard\'ia,
 y permite detectar regresiones antes de despliegues a entornos superiores.
@@ -318,30 +238,18 @@ Test objetivo backend & \texttt{EntregaServiceTest}: 89 tests, 0 fallos, 0 error
 \label{tab:resultados-pruebas}
 \end{table}
 
+\clearpage
+
 Estos valores muestran una madurez de testing consistente con el nivel de exigencia
 de un TFG de orientaci\'on profesional.
 
 \section{Criterios de aceptaci\'on}
 
-Como criterio operativo de calidad se establecen los siguientes m\'inimos:
-
-\begin{itemize}
-	\item \texttt{lint} sin errores,
-	\item suites unitarias/integraci\'on/E2E en verde,
-	\item coberturas por encima de umbrales configurados,
-	\item m\'etricas de mutaci\'on por encima de umbral de ruptura,
-	\item ausencia de regresiones funcionales en flujos cr\'iticos.
-\end{itemize}
+Como criterio operativo de calidad se establecen m\'inimos de \texttt{lint} sin errores, suites unitarias, integraci\'on y E2E en verde, coberturas por encima de umbrales configurados, m\'etricas de mutaci\'on por encima de umbral de ruptura y ausencia de regresiones funcionales en flujos cr\'iticos. Estos criterios permiten cierre objetivo de iteraciones.
 
 \section{Limitaciones y riesgos}
 
-Aunque la estrategia es robusta, se identifican l\'ineas de mejora:
-
-\begin{itemize}
-	\item ampliar E2E con backend real en entorno de staging para ciertos casos,
-	\item extender mutaci\'on a mayor superficie de clases backend,
-	\item reforzar pruebas de carga y comportamiento en condiciones extremas.
-\end{itemize}
+Aunque la estrategia es robusta, se identifican l\'ineas de mejora como ampliar E2E con backend real en entorno de staging para ciertos casos, extender mutaci\'on a mayor superficie de clases backend y reforzar pruebas de carga y comportamiento en condiciones extremas. Estas mejoras consolidar\'ian la robustez en escenarios de producci\'on.
 
 No obstante, las limitaciones actuales no comprometen la validez de la verificaci\'on
 para el alcance definido del proyecto.

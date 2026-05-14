@@ -10,13 +10,7 @@ evaluaci\'on y retroalimentaci\'on.
 La motivaci\'on principal se fundamenta en una realidad operativa detectada en el an\'alisis previo:
 en muchos contextos docentes, el flujo de entrega y correcci\'on combina una plataforma institucional
 de prop\'osito general con tareas manuales de clasificaci\'on, validaci\'on y descarga de archivos.
-Esa combinaci\'on introduce ineficiencias en tres dimensiones cr\'iticas:
-
-\begin{itemize}
-	\item \textbf{Esfuerzo docente}: se consume tiempo en operaciones administrativas de bajo valor.
-	\item \textbf{Experiencia del estudiante}: la entrega puede resultar poco guiada y con validaci\'on tard\'ia.
-	\item \textbf{Trazabilidad de evaluaci\'on}: la relaci\'on entrega-version-feedback no siempre queda consolidada en un mismo flujo.
-\end{itemize}
+Esa combinaci\'on introduce ineficiencias en tres dimensiones cr\'iticas. En primer lugar, el esfuerzo docente se incrementa porque se consume tiempo en operaciones administrativas de bajo valor, lo que reduce el foco en la correcci\'on y la orientaci\'on pedag\'ogica. En segundo lugar, la experiencia del estudiante se resiente, ya que la entrega resulta poco guiada y la validaci\'on suele ser tard\'ia, lo que introduce incertidumbre en el proceso. Por \'ultimo, la trazabilidad de la evaluaci\'on queda debilitada, dado que la relaci\'on entrega-versi\'on-feedback no siempre se consolida en un flujo \`unico.
 
 Por tanto, el proyecto no persigue replicar una plataforma LMS generalista,
 sino resolver de forma especializada el problema operativo de la gesti\'on de entregables,
@@ -28,13 +22,7 @@ y en la planificaci\'on ejecutiva definida en backlog y plan de sprints.
 Desde una perspectiva de ingenier\'ia del software,
 el problema se formula como la necesidad de dise\~nar un sistema que,
 con recursos acotados de tiempo y equipo,
-maximice simult\'aneamente:
-
-\begin{enumerate}
-	\item cobertura funcional del ciclo de entregables,
-	\item robustez t\'ecnica y seguridad por rol,
-	\item capacidad de evoluci\'on sin deuda estructural excesiva.
-\end{enumerate}
+maximice simult\'aneamente la cobertura funcional del ciclo de entregables, la robustez t\'ecnica y la seguridad por rol, y la capacidad de evoluci\'on sin deuda estructural excesiva. Este equilibrio exige priorizar decisiones que sostengan el flujo completo y eviten comprometer la mantenibilidad en el medio plazo.
 
 Este problema impone una restricci\'on de dise\~no clave:
 no basta con construir funcionalidades aisladas,
@@ -50,15 +38,7 @@ reduciendo tareas manuales y mejorando la eficiencia del proceso de evaluaci\'on
 \section{Metodolog\'ia para definir los objetivos}
 
 La definici\'on de objetivos no se ha realizado de forma declarativa aislada,
-sino mediante un proceso iterativo de convergencia entre:
-
-\begin{itemize}
-	\item objetivos de negocio (OBJN) definidos en el an\'alisis inicial,
-	\item requisitos funcionales y no funcionales del ERS,
-	\item decisiones arquitect\'onicas del DAS,
-	\item prioridades MoSCoW del Product Backlog,
-	\item capacidad temporal real (660 horas en 6 iteraciones).
-\end{itemize}
+sino mediante un proceso iterativo de convergencia entre objetivos de negocio (OBJN) definidos en el an\'alisis inicial, requisitos funcionales y no funcionales del ERS, decisiones arquitect\'onicas del DAS, prioridades MoSCoW del Product Backlog y la capacidad temporal real (660 horas en 6 iteraciones). Esta convergencia asegura que cada objetivo no solo responda a una necesidad, sino que sea viable dentro del calendario y del alcance del TFG.
 
 Este enfoque permite que cada objetivo sea evaluable,
 relacionable con entregables t\'ecnicos concretos
@@ -130,29 +110,13 @@ Won't Have (MVP) & inicio de sesi\'on federado (OAuth2/OIDC), 2FA integral, noti
 
 \section{Alcance funcional del trabajo}
 
-El alcance funcional cubierto en este TFG incluye:
-
-\begin{itemize}
-	\item gesti\'on de usuarios y control de acceso por rol;
-	\item gesti\'on de cursos, grupos y actividades acad\'emicas;
-	\item gesti\'on de entregables con configuraci\'on de plazos y visibilidad;
-	\item realizaci\'on de entregas, historial de versiones y descarga;
-	\item evaluaci\'on y retroalimentaci\'on docente;
-	\item automatizaci\'on de validaci\'on y despliegue en entorno CI/CD.
-\end{itemize}
+El alcance funcional cubierto en este TFG incluye la gesti\'on de usuarios y el control de acceso por rol, la gesti\'on de cursos, grupos y actividades acad\'emicas, y la administraci\'on de entregables con configuraci\'on de plazos y visibilidad. Adem\'as, se cubren la realizaci\'on de entregas con historial de versiones y descarga, la evaluaci\'on con retroalimentaci\'on docente y la automatizaci\'on de validaci\'on y despliegue en entorno CI/CD para asegurar trazabilidad t\'ecnica.
 
 \section{Delimitaci\'on expl\'icita del alcance}
 
 Para mantener viabilidad temporal y calidad de salida,
 se delimita de forma expl\'icita lo que queda fuera del MVP,
-aunque exista su consideraci\'on en el an\'alisis inicial:
-
-\begin{itemize}
-	\item inicio de sesi\'on federado (OAuth2/OIDC institucional),
-	\item doble factor de autenticaci\'on integral (2FA),
-	\item notificaciones avanzadas desacopladas,
-	\item funcionalidades avanzadas de anal\'itica y monitorizaci\'on.
-\end{itemize}
+aunque exista su consideraci\'on en el an\'alisis inicial. En concreto, se excluyen el inicio de sesi\'on federado (OAuth2/OIDC institucional), el doble factor de autenticaci\'on integral (2FA), las notificaciones avanzadas desacopladas y las funcionalidades avanzadas de anal\'itica y monitorizaci\'on, por su coste de implementaci\'on y validaci\'on en el horizonte temporal disponible.
 
 	Estas exclusiones se refieren al inicio de sesi\'on federado; la autorizaci\'on OAuth2 necesaria para conectar OneDrive s\'i est\'a implementada.
 
@@ -217,19 +181,7 @@ O8 & RQNF-008, RQNF-004 & EP-14 (S1) & CI/CD y despliegue automatizado \\
 
 \section{Riesgos estrat\'egicos asociados a los objetivos}
 
-Al definir objetivos de forma ambiciosa,
-es necesario explicitar riesgos y medidas de mitigaci\'on.
-
-\begin{itemize}
-	\item \textbf{Riesgo de sobrealcance funcional}: incorporar m\'as funcionalidades de las asumibles en 660 horas.
-	\textbf{Mitigaci\'on}: priorizaci\'on MoSCoW y control por hitos.
-
-	\item \textbf{Riesgo de deuda de calidad}: posponer testing para la fase final.
-	\textbf{Mitigaci\'on}: estrategia de pruebas integrada en cada sprint.
-
-	\item \textbf{Riesgo de incoherencia documental}: divergencia entre memoria y estado real del producto.
-	\textbf{Mitigaci\'on}: redacci\'on iterativa con trazabilidad objetiva.
-\end{itemize}
+Al definir objetivos de forma ambiciosa, es necesario explicitar riesgos y medidas de mitigaci\'on. Existe un riesgo de sobrealcance funcional si se incorporan m\'as funcionalidades de las asumibles en 660 horas, por lo que la mitigaci\'on se apoya en priorizaci\'on MoSCoW y control por hitos. Tambi\'en hay riesgo de deuda de calidad si se pospone el testing a la fase final, lo que se corrige con una estrategia de pruebas integrada en cada sprint. Por \`ultimo, el riesgo de incoherencia documental entre memoria y estado real del producto se reduce mediante redacci\'on iterativa y trazabilidad objetiva.
 
 \section{Conclusiones del cap\'itulo}
 

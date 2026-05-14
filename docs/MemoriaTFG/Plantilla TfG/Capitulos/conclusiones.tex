@@ -19,52 +19,15 @@ El objetivo general planteado en la memoria
 (dise\~nar e implementar una plataforma de gesti\'on de entregables usable,
 segura y evolutiva) puede considerarse \textbf{cumplido}.
 
-Respecto a los objetivos espec\'ificos, el balance es el siguiente:
-
-\begin{itemize}
-	\item \textbf{Modelado del dominio acad\'emico}: cumplido.
-	Se han implementado entidades, relaciones y reglas de negocio acordes al ERS/DAS.
-	\item \textbf{Soporte completo del flujo de entrega/evaluaci\'on}: cumplido.
-	El sistema cubre ciclo de vida de entregables, entregas, calificaci\'on y feedback.
-	\item \textbf{Control de acceso por roles y contexto}: cumplido.
-	Se ha materializado autorizaci\'on con verificaciones por perfil y recurso objetivo.
-	\item \textbf{Calidad t\'ecnica y verificaci\'on}: cumplido.
-	Se dispone de estrategia de pruebas en capas con m\'etricas elevadas de cobertura y mutaci\'on.
-	\item \textbf{Despliegue y operaci\'on automatizada}: cumplido.
-	Se han definido pipelines CI/CD, controles de seguridad y configuraci\'on por entornos.
-\end{itemize}
+Respecto a los objetivos espec\'ificos, el balance es positivo. El \textbf{modelado del dominio acad\'emico} se considera cumplido al haberse implementado entidades, relaciones y reglas de negocio acordes al ERS/DAS. El \textbf{soporte completo del flujo de entrega y evaluaci\'on} est\'a cubierto con el ciclo de vida de entregables, entregas, calificaci\'on y feedback, y el \textbf{control de acceso por roles y contexto} se materializa con verificaciones por perfil y recurso objetivo. Asimismo, la \textbf{calidad t\'ecnica y verificaci\'on} queda respaldada por una estrategia de pruebas en capas con m\'etricas elevadas de cobertura y mutaci\'on, y el \textbf{despliegue y operaci\'on automatizada} se sostiene en pipelines CI/CD, controles de seguridad y configuraci\'on por entornos.
 
 \section{Aportaciones principales}
 
-Las aportaciones m\'as relevantes del trabajo son:
-
-\begin{enumerate}
-	\item \textbf{Aportaci\'on funcional}:
-	una plataforma centrada en la operativa docente,
-	con flujos diferenciados para administraci\'on, profesorado y alumnado.
-	\item \textbf{Aportaci\'on t\'ecnica}:
-	arquitectura modular SPA + API,
-	persistencia versionada con Flyway,
-	seguridad JWT y soporte de integraciones cloud configurables.
-	\item \textbf{Aportaci\'on de calidad}:
-	incorporaci\'on de testing multinivel y mutaci\'on como criterio objetivo de robustez.
-	\item \textbf{Aportaci\'on de operaci\'on}:
-	canal CI/CD reproducible con validaciones continuas de calidad y seguridad.
-\end{enumerate}
+Las aportaciones m\'as relevantes del trabajo se articulan en cuatro planos. En el plano \textbf{funcional} se entrega una plataforma centrada en la operativa docente, con flujos diferenciados para administraci\'on, profesorado y alumnado. En el plano \textbf{t\'ecnico} se consolida una arquitectura modular SPA + API, persistencia versionada con Flyway, seguridad JWT y soporte de integraciones cloud configurables. En el plano de \textbf{calidad} se incorpora testing multinivel y mutaci\'on como criterio objetivo de robustez, y en el plano de \textbf{operaci\'on} se establece un canal CI/CD reproducible con validaciones continuas de calidad y seguridad.
 
 \section{Resultados y evidencia}
 
-La evidencia disponible en el proyecto permite sostener de forma objetiva
-la madurez alcanzada:
-
-\begin{itemize}
-	\item cobertura alta en frontend con umbrales exigentes en l\'ineas,
-	funciones, sentencias y ramas;
-	\item resultados favorables en mutaci\'on (frontend y backend),
-	lo que indica que los tests detectan alteraciones de comportamiento;
-	\item validaci\'on de flujos de usuario cr\'iticos mediante E2E;
-	\item automatizaci\'on de verificaciones en pipelines de integraci\'on continua.
-\end{itemize}
+La evidencia disponible en el proyecto permite sostener de forma objetiva la madurez alcanzada: existe cobertura alta en frontend con umbrales exigentes en l\'ineas, funciones, sentencias y ramas; los resultados de mutaci\'on en frontend y backend son favorables, indicando que los tests detectan alteraciones de comportamiento; se han validado flujos de usuario cr\'iticos mediante E2E; y las verificaciones est\'an automatizadas en pipelines de integraci\'on continua. Esta evidencia reduce el riesgo de regresi\'on.
 
 En conjunto, estos resultados reducen el riesgo de regresi\'on y
 proporcionan una base fiable para mantenimiento y evoluci\'on del sistema.
@@ -77,16 +40,7 @@ recomendaciones de referencia en seguridad web
 \section{Evaluaci\'on del impacto por tipo de usuario}
 
 El valor del proyecto se aprecia de forma diferente seg\'un el perfil de uso.
-Por ello, se realiza una evaluaci\'on diferenciada:
-
-\begin{itemize}
-	\item \textbf{Profesorado}: disminuci\'on de tareas manuales repetitivas,
-	mejor visibilidad del estado de entregas y consolidaci\'on del flujo de correcci\'on.
-	\item \textbf{Estudiantado}: proceso de entrega m\'as guiado,
-	mejor comprensi\'on del estado de su trabajo y acceso m\'as claro al feedback.
-	\item \textbf{Administraci\'on}: mayor control sobre estructura acad\'emica y roles,
-	con operaciones de gobierno centralizadas.
-\end{itemize}
+Por ello, se realiza una evaluaci\'on diferenciada. Para el \textbf{profesorado} se observa disminuci\'on de tareas manuales repetitivas, mejor visibilidad del estado de entregas y consolidaci\'on del flujo de correcci\'on. En el \textbf{estudiantado} el proceso de entrega es m\'as guiado, mejora la comprensi\'on del estado del trabajo y el acceso al feedback es m\'as claro. En \textbf{administraci\'on} se obtiene mayor control sobre estructura acad\'emica y roles, con operaciones de gobierno centralizadas.
 
 Desde esta perspectiva,
 el sistema no solo aporta funcionalidad t\'ecnica,
@@ -98,13 +52,7 @@ Una conclusi\'on relevante del trabajo es que el enfoque metodol\'ogico aplicado
 (requisitos formalizados, arquitectura modular, pruebas en capas y CI/CD)
 ha sido adecuado para un proyecto de este alcance.
 
-Los principales indicadores de validez del enfoque son:
-
-\begin{enumerate}
-	\item coherencia entre objetivos, requisitos, implementaci\'on y verificaci\'on;
-	\item estabilidad de las iteraciones sin desviaciones cr\'iticas de calendario;
-	\item capacidad de incorporar mejoras sin ruptura estructural del sistema.
-\end{enumerate}
+Los principales indicadores de validez del enfoque son la coherencia entre objetivos, requisitos, implementaci\'on y verificaci\'on, la estabilidad de las iteraciones sin desviaciones cr\'iticas de calendario y la capacidad de incorporar mejoras sin ruptura estructural del sistema. Estos indicadores refuerzan la disciplina metodol\'ogica aplicada.
 
 Esto refuerza la idea de que,
 en proyectos software de car\'acter acad\'emico-profesional,
@@ -114,16 +62,7 @@ tan importante como la selecci\'on tecnol\'ogica.
 \section{Limitaciones del trabajo}
 
 Como en todo proyecto con alcance temporal acotado,
-se identifican limitaciones que delimitan el estado actual:
-
-\begin{itemize}
-	\item no todas las funcionalidades \emph{Should/Could} del backlog
-	est\'an cerradas al 100\% en el corte del TFG;
-	\item ciertas capacidades avanzadas (p. ej., autenticaci\'on federada completa,
-	2FA integral u observabilidad avanzada) se mantienen como evoluci\'on posterior;
-	\item la estrategia E2E predominante en el ciclo actual es mockeada,
-	por lo que conviene reforzar escenarios con backend real en staging.
-\end{itemize}
+se identifican limitaciones que delimitan el estado actual. No todas las funcionalidades \emph{Should/Could} del backlog est\'an cerradas al 100\% en el corte del TFG, ciertas capacidades avanzadas (p. ej., autenticaci\'on federada completa, 2FA integral u observabilidad avanzada) se mantienen como evoluci\'on posterior, y la estrategia E2E predominante en el ciclo actual es mockeada, por lo que conviene reforzar escenarios con backend real en staging. Estas limitaciones orientan la hoja de ruta futura.
 
 Estas limitaciones no invalidan el cumplimiento del objetivo principal,
 pero orientan de forma clara la hoja de ruta futura.
@@ -131,27 +70,12 @@ pero orientan de forma clara la hoja de ruta futura.
 \section{Lecciones aprendidas}
 
 Durante la ejecuci\'on del proyecto se consolidan varios aprendizajes
-de inter\'es para trabajos similares:
-
-\begin{itemize}
-	\item dise\~nar la trazabilidad desde el inicio (requisito-backlog-c\'odigo-prueba)
-	simplifica justificaci\'on t\'ecnica y auditor\'ia;
-	\item la calidad debe construirse iterativamente,
-	no solo en la fase final de cierre;
-	\item desacoplar configuraci\'on por entorno reduce fricci\'on en migraciones de infraestructura;
-	\item integrar seguridad y permisos en la l\'ogica de dominio evita defectos estructurales costosos.
-\end{itemize}
+de inter\'es para trabajos similares. Dise\~nar la trazabilidad desde el inicio (requisito-backlog-c\'odigo-prueba) simplifica justificaci\'on t\'ecnica y auditor\'ia; la calidad debe construirse iterativamente y no solo en la fase final de cierre; desacoplar configuraci\'on por entorno reduce fricci\'on en migraciones de infraestructura; e integrar seguridad y permisos en la l\'ogica de dominio evita defectos estructurales costosos. Estos aprendizajes son transferibles a proyectos acad\'emicos similares.
 
 \section{Riesgos residuales y deuda t\'ecnica controlada}
 
 En el estado actual se identifican riesgos residuales,
-asumidos de forma expl\'icita y controlada:
-
-\begin{itemize}
-	\item cobertura funcional incompleta en funcionalidades \emph{Should/Could};
-	\item necesidad de ampliar E2E contra backend real para ciertos escenarios;
-	\item dependencia parcial de configuraciones externas en integraciones cloud.
-\end{itemize}
+asumidos de forma expl\'icita y controlada. Se reconoce cobertura funcional incompleta en funcionalidades \emph{Should/Could}, la necesidad de ampliar E2E contra backend real para ciertos escenarios y la dependencia parcial de configuraciones externas en integraciones cloud. Esta deuda se considera controlada por estar identificada y priorizada.
 
 La deuda t\'ecnica asociada se considera \textbf{controlada},
 porque est\'a identificada,
@@ -163,28 +87,15 @@ Se proponen l\'ineas de evoluci\'on priorizadas por impacto y viabilidad.
 
 \subsection{Corto plazo}
 
-\begin{itemize}
-	\item cerrar PBIs pendientes de usabilidad y reporting docente;
-	\item ampliar E2E con entorno semirreal y pruebas de regresi\'on ampliadas;
-	\item reforzar auditor\'ia de permisos y evidencias de seguridad en preproducci\'on.
-\end{itemize}
+En el corto plazo se propone cerrar PBIs pendientes de usabilidad y reporting docente, ampliar E2E con entorno semirreal y pruebas de regresi\'on ampliadas, y reforzar auditor\'ia de permisos y evidencias de seguridad en preproducci\'on. Estas acciones aumentan robustez sin ampliar de forma significativa el alcance funcional.
 
 \subsection{Medio plazo}
 
-\begin{itemize}
-	\item autenticaci\'on federada institucional completa y doble factor transversal;
-	\item observabilidad avanzada (m\'etricas de negocio, trazas distribuidas y alertado);
-	\item funcionalidades anal\'iticas para seguimiento de actividad y carga de correcci\'on.
-\end{itemize}
+En el medio plazo se plantea incorporar autenticaci\'on federada institucional completa y doble factor transversal, observabilidad avanzada (m\'etricas de negocio, trazas distribuidas y alertado) y funcionalidades anal\'iticas para seguimiento de actividad y carga de correcci\'on. Este bloque mejora gobierno y escalabilidad operativa.
 
 \subsection{Largo plazo}
 
-\begin{itemize}
-	\item incorporaci\'on de m\'odulos de apoyo docente
-	(detecci\'on de patrones de entrega, recomendaci\'on de revisi\'on, etc.);
-	\item estudio de interoperabilidad con LMS institucionales;
-	\item escalado multi-instituci\'on con pol\'iticas avanzadas de gobierno de datos.
-\end{itemize}
+En el largo plazo se contempla la incorporaci\'on de m\'odulos de apoyo docente (detecci\'on de patrones de entrega, recomendaci\'on de revisi\'on, etc.), el estudio de interoperabilidad con LMS institucionales y el escalado multi-instituci\'on con pol\'iticas avanzadas de gobierno de datos. Estas l\'ineas ampl\'ian impacto sin comprometer el n\'ucleo existente.
 
 \section{Hoja de ruta priorizada de continuidad}
 

@@ -14,16 +14,7 @@ con foco en cuatro ejes: producto, arquitectura, calidad y operaci\'on.
 
 \subsection{Criterios utilizados}
 
-La selecci\'on de alternativas se realiz\'o usando un enfoque multicriterio,
-priorizando los siguientes factores:
-
-\begin{itemize}
-  \item alineaci\'on con requisitos funcionales y no funcionales del ERS;
-  \item viabilidad temporal dentro de 660 horas de proyecto;
-  \item mantenibilidad y capacidad de evoluci\'on posterior;
-  \item coste operativo compatible con entorno acad\'emico;
-  \item seguridad y trazabilidad del ciclo completo.
-\end{itemize}
+La selecci\'on de alternativas se realiz\'o usando un enfoque multicriterio, priorizando la alineaci\'on con requisitos funcionales y no funcionales del ERS, la viabilidad temporal dentro de 660 horas de proyecto, la mantenibilidad y capacidad de evoluci\'on posterior, el coste operativo compatible con entorno acad\'emico y la seguridad con trazabilidad del ciclo completo. Esta pauta evita decisiones aisladas y garantiza coherencia transversal.
 
 \subsection{Ponderaci\'on de criterios}
 
@@ -58,11 +49,7 @@ Seguridad y robustez t\'ecnica & 15 \\
 
 \subsection{Decisi\'on D1: definir un MVP centrado en flujo acad\'emico nuclear}
 
-\textbf{Alternativas consideradas}:
-\begin{itemize}
-  \item incorporar desde inicio todas las funcionalidades del backlog;
-  \item limitar el alcance a un MVP con ciclo completo de entrega y evaluaci\'on.
-\end{itemize}
+\textbf{Alternativas consideradas}: incorporar desde inicio todas las funcionalidades del backlog o limitar el alcance a un MVP con ciclo completo de entrega y evaluaci\'on. La comparativa se centr\'o en riesgo de entrega y capacidad de validaci\'on.
 
 \textbf{Decisi\'on adoptada}: segunda alternativa.
 
@@ -71,12 +58,7 @@ maximizar valor entregado en plazo,
 evitando dispersi\'on en funcionalidades accesorias
 que pod\'ian comprometer la estabilidad del n\'ucleo.
 
-\textbf{Impacto positivo}:
-\begin{itemize}
-  \item mayor probabilidad de cierre funcional completo;
-  \item mejor cobertura de pruebas sobre procesos cr\'iticos;
-  \item documentaci\'on m\'as s\'olida de extremo a extremo.
-\end{itemize}
+\textbf{Impacto positivo}: mayor probabilidad de cierre funcional completo, mejor cobertura de pruebas sobre procesos cr\'iticos y documentaci\'on m\'as s\'olida de extremo a extremo. Este impacto refuerza la validez acad\'emica del resultado.
 
 \textbf{Compromiso asumido}:
 funcionalidades \emph{Should/Could} pasan a hoja de ruta,
@@ -87,31 +69,17 @@ sin bloquear la validez del resultado principal.
 \textbf{Decisi\'on adoptada}:
 separar claramente experiencias de administrador, profesor y estudiante.
 
-\textbf{Razones}:
-\begin{itemize}
-  \item reduce ambig\"uedad de permisos en interfaz y API;
-  \item simplifica pruebas de autorizaci\'on y casos negativos;
-  \item mejora usabilidad al mostrar solo operaciones pertinentes.
-\end{itemize}
+\textbf{Razones}: reduce ambig\"uedad de permisos en interfaz y API, simplifica pruebas de autorizaci\'on y casos negativos, y mejora usabilidad al mostrar solo operaciones pertinentes. Esta separaci\'on evita errores de contexto en operaciones sensibles.
 
 \section{Decisiones de arquitectura}
 
 \subsection{Decisi\'on D3: arquitectura SPA + API desacoplada}
 
-\textbf{Alternativas}:
-\begin{itemize}
-  \item aplicaci\'on monol\'itica renderizada en servidor;
-  \item frontend SPA + backend REST desacoplado.
-\end{itemize}
+\textbf{Alternativas}: aplicaci\'on monol\'itica renderizada en servidor o frontend SPA con backend REST desacoplado. La decisi\'on se evalu\'o en t\'erminos de evoluci\'on y coste de integraci\'on.
 
 \textbf{Decisi\'on adoptada}: SPA + API.
 
-\textbf{Razones de peso}:
-\begin{itemize}
-  \item separaci\'on de responsabilidades y menor acoplamiento;
-  \item evoluci\'on independiente de capa de presentaci\'on y l\'ogica;
-  \item mejor ajuste a un dominio con flujos ricos de interfaz (evaluaciones, filtros, historial).
-\end{itemize}
+\textbf{Razones de peso}: separaci\'on de responsabilidades y menor acoplamiento, evoluci\'on independiente de capa de presentaci\'on y l\'ogica, y mejor ajuste a un dominio con flujos ricos de interfaz (evaluaciones, filtros, historial). Esta elecci\'on maximiza mantenibilidad en el medio plazo.
 
 \textbf{Trade-off}:
 aumenta esfuerzo de integraci\'on y de pruebas E2E,
@@ -122,25 +90,14 @@ compensado por mayor mantenibilidad a medio plazo.
 \textbf{Decisi\'on adoptada}:
 patr\'on \texttt{controller-service-repository-entity} con DTOs de frontera.
 
-\textbf{Razones}:
-\begin{itemize}
-  \item control claro de responsabilidades;
-  \item testabilidad por m\'odulo;
-  \item evita exponer modelo de persistencia en contratos externos;
-  \item facilita versionado de API y evoluci\'on de dominio.
-\end{itemize}
+\textbf{Razones}: control claro de responsabilidades, testabilidad por m\'odulo, evitaci\'on de exponer modelo de persistencia en contratos externos y facilidad para versionado de API y evoluci\'on de dominio. El patr\'on elegido reduce riesgos de acoplamiento a futuro.
 
 \subsection{Decisi\'on D5: uso de DTOs y mapper dedicado}
 
 \textbf{Problema que resuelve}:
 evitar dependencia directa entre entidades JPA y respuestas HTTP.
 
-\textbf{Razones}:
-\begin{itemize}
-  \item minimiza acoplamiento entre capa de datos y capa API;
-  \item reduce riesgo de sobreexposici\'on de atributos sensibles;
-  \item permite modelar respuestas orientadas al caso de uso.
-\end{itemize}
+\textbf{Razones}: minimiza acoplamiento entre capa de datos y capa API, reduce riesgo de sobreexposici\'on de atributos sensibles y permite modelar respuestas orientadas al caso de uso. Esto asegura contratos m\'as estables y seguros.
 
 \textbf{Coste asumido}:
 mayor volumen de c\'odigo estructural,
@@ -150,12 +107,7 @@ aceptado por mejora en mantenibilidad y seguridad de contrato.
 
 \subsection{Decisi\'on D6: backend en Spring Boot + Java 21}
 
-\textbf{Razones principales}:
-\begin{itemize}
-  \item ecosistema maduro en seguridad, validaci\'on y persistencia;
-  \item integraci\'on robusta con Spring Security, JPA y testing;
-  \item soporte industrial y documentaci\'on extensa.
-\end{itemize}
+\textbf{Razones principales}: ecosistema maduro en seguridad, validaci\'on y persistencia, integraci\'on robusta con Spring Security, JPA y testing, y soporte industrial con documentaci\'on extensa. Esta base reduce incertidumbre en implementaci\'on.
 
 \textbf{Comparativa resumida}:
 frente a opciones como Node.js o Django,
@@ -164,12 +116,7 @@ Spring reduce incertidumbre de ensamblaje en aspectos cr\'iticos
 
 \subsection{Decisi\'on D7: frontend en React + TypeScript + Vite}
 
-\textbf{Razones}:
-\begin{itemize}
-  \item equilibrio entre productividad y control tipado;
-  \item ecosistema amplio para rutas, formularios y testing;
-  \item arranque y build r\'apidos con Vite.
-\end{itemize}
+\textbf{Razones}: equilibrio entre productividad y control tipado, ecosistema amplio para rutas, formularios y testing, y arranque y build r\'apidos con Vite. Esta combinaci\'on facilita entregas incrementales sin perder control de calidad.
 
 \textbf{Compromiso}:
 mayor libertad implica mayor disciplina de arquitectura en frontend,
@@ -182,12 +129,7 @@ mitigada mediante organizaci\'on por m\'odulos (pages/components/context/service
 \textbf{Motivaci\'on}:
 compatible con arquitectura desacoplada y despliegue stateless.
 
-\textbf{Razones de elecci\'on}:
-\begin{itemize}
-  \item reduce estado de sesi\'on en servidor;
-  \item habilita renovaci\'on transparente de sesi\'on en cliente;
-  \item facilita escalado horizontal del backend.
-\end{itemize}
+\textbf{Razones de elecci\'on}: reduce estado de sesi\'on en servidor, habilita renovaci\'on transparente de sesi\'on en cliente y facilita escalado horizontal del backend. Esto mejora la coherencia con un modelo API-first.
 
 \textbf{Riesgos identificados}:
 control de expiraci\'on y revocaci\'on m\'as complejo que sesi\'on tradicional.
@@ -210,21 +152,11 @@ al contexto objetivo antes de permitir operaciones sensibles.
 
 \subsection{Decisi\'on D10: PostgreSQL como base de datos principal}
 
-\textbf{Razones}:
-\begin{itemize}
-  \item robustez transaccional y consistencia;
-  \item buena compatibilidad con JPA/Hibernate;
-  \item adaptaci\'on sencilla a entornos gestionados.
-\end{itemize}
+\textbf{Razones}: robustez transaccional y consistencia, buena compatibilidad con JPA/Hibernate y adaptaci\'on sencilla a entornos gestionados. Esta elecci\'on reduce riesgos de despliegue.
 
 \subsection{Decisi\'on D11: Flyway como autoridad de esquema}
 
-\textbf{Razones}:
-\begin{itemize}
-  \item trazabilidad expl\'icita de cambios en base de datos;
-  \item despliegues reproducibles entre entornos;
-  \item menor riesgo de divergencias silenciosas de esquema.
-\end{itemize}
+\textbf{Razones}: trazabilidad expl\'icita de cambios en base de datos, despliegues reproducibles entre entornos y menor riesgo de divergencias silenciosas de esquema. Se prioriza control sobre automatismos impl\'icitos.
 
 \textbf{Decisi\'on asociada}:
 usar \texttt{ddl-auto=validate} en producci\'on para evitar
@@ -235,24 +167,13 @@ mutaciones impl\'icitas del esquema fuera de control.
 \textbf{Decisi\'on adoptada}:
 almacenamiento local en desarrollo y cloud persistente en producci\'on.
 
-\textbf{Razones}:
-\begin{itemize}
-  \item simplicidad y velocidad en entorno local;
-  \item persistencia y resiliencia en entornos con filesystem ef\'imero;
-  \item capacidad de habilitar integraciones externas sin romper n\'ucleo.
-\end{itemize}
+\textbf{Razones}: simplicidad y velocidad en entorno local, persistencia y resiliencia en entornos con filesystem ef\'imero, y capacidad de habilitar integraciones externas sin romper el n\'ucleo. Se busca equilibrio entre agilidad y robustez operativa.
 
 \section{Decisiones de calidad y verificaci\'on}
 
 \subsection{Decisi\'on D13: testing en capas}
 
-\textbf{Razones}:
-\begin{itemize}
-  \item unitarias para retroalimentaci\'on r\'apida;
-  \item integraci\'on para contratos y seguridad;
-  \item E2E para validar experiencia real por rol;
-  \item mutaci\'on para medir eficacia real de la suite.
-\end{itemize}
+\textbf{Razones}: unitarias para retroalimentaci\'on r\'apida, integraci\'on para contratos y seguridad, E2E para validar experiencia real por rol y mutaci\'on para medir eficacia real de la suite. Esta mezcla permite cubrir profundidad y visi\'on de conjunto.
 
 \textbf{Resultado esperado}:
 combinar profundidad y coste de mantenimiento,
@@ -271,21 +192,11 @@ y mejorar calidad de tests en c\'odigo cr\'itico.
 
 \subsection{Decisi\'on D15: GitHub Actions como columna vertebral CI/CD}
 
-\textbf{Razones}:
-\begin{itemize}
-  \item integraci\'on nativa con repositorio;
-  \item trazabilidad de checks por commit/PR;
-  \item menor sobrecarga de operaci\'on para equipo reducido.
-\end{itemize}
+\textbf{Razones}: integraci\'on nativa con repositorio, trazabilidad de checks por commit/PR y menor sobrecarga de operaci\'on para equipo reducido. Esta decisi\'on minimiza fricci\'on en el ciclo diario.
 
 \subsection{Decisi\'on D16: despliegue en PaaS gestionado}
 
-\textbf{Razones}:
-\begin{itemize}
-  \item minimiza administraci\'on de infraestructura;
-  \item acelera iteraci\'on y validaci\'on de cambios;
-  \item mantiene coste compatible con contexto acad\'emico.
-\end{itemize}
+\textbf{Razones}: minimiza administraci\'on de infraestructura, acelera iteraci\'on y validaci\'on de cambios y mantiene coste compatible con contexto acad\'emico. Se prioriza estabilidad operativa frente a control extremo.
 
 En la implementaci\'on concreta se utiliza Render como PaaS gestionado para
 el despliegue de los servicios y PostgreSQL gestionado. Para el canal de
@@ -333,6 +244,8 @@ D16 & PaaS gestionado & VPS/Kubernetes & Tiempo y coste operativos contenidos \\
 \caption{Resumen de decisiones clave y justificaci\'on dominante}
 \label{tab:resumen-decisiones}
 \end{table}
+
+\clearpage
 
 \section{An\'alisis coste-beneficio por bloques de decisiones}
 
@@ -467,6 +380,8 @@ D16 & RQNF-008, RQNF-004 & Workflows CI/CD y despliegue automatizado en PaaS & O
 \caption{Trazabilidad entre decisiones, requisitos y evidencia}
 \label{tab:trazabilidad-decisiones}
 \end{table}
+
+\clearpage
 
 \section{Decisiones descartadas y por qu\'e no se adoptaron en esta fase}
 

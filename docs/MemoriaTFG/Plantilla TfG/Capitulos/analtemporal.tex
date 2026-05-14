@@ -9,30 +9,14 @@ No se replica un proceso empresarial completo,
 pero s\'i se mantienen los elementos que aportan mayor valor de control:
 iteraciones cortas, objetivos por sprint, revisi\'on frecuente y replanificaci\'on basada en evidencia.
 
-Los roles de trabajo utilizados han sido:
-\begin{itemize}
-\item \textbf{Equipo de desarrollo}: dos autores con responsabilidad compartida en backend,
-frontend, pruebas y documentaci\'on t\'ecnica.
-\item \textbf{Tutor del TFG}: rol de supervisi\'on funcional y t\'ecnica,
-validando hitos, alcance y calidad de entregables.
-\item \textbf{Stakeholders acad\'emicos}: referencia de necesidades operativas de uso
-(docencia, entrega y evaluaci\'on).
-\end{itemize}
+Los roles de trabajo utilizados han sido el \textbf{equipo de desarrollo}, formado por dos autores con responsabilidad compartida en backend, frontend, pruebas y documentaci\'on t\'ecnica; el \textbf{tutor del TFG}, con funci\'on de supervisi\'on funcional y t\'ecnica para validar hitos, alcance y calidad de entregables; y los \textbf{stakeholders acad\'emicos}, como referencia de necesidades operativas reales en docencia, entrega y evaluaci\'on. Esta combinaci\'on permite equilibrar rigor t\'ecnico con alineaci\'on a uso docente.
 
 La duraci\'on de iteraci\'on se fij\'o en dos semanas,
 con entregables funcionales incrementales y una revisi\'on de cierre por sprint.
 
 \subsection{Herramientas de gesti\'on y seguimiento}
 
-La gesti\'on del trabajo se ha apoyado en artefactos versionados del propio repositorio
-y en herramientas de planificaci\'on integradas con el flujo de desarrollo:
-
-\begin{itemize}
-\item \textbf{Product Backlog} y \textbf{Sprint Backlog} para priorizaci\'on y control de alcance.
-\item \textbf{GitHub Issues/Projects} para trazabilidad de tareas y decisiones de ejecuci\'on.
-\item \textbf{Registro horario por sprint} consolidado en la planificaci\'on del proyecto,
-con contraste entre capacidad prevista y dedicaci\'on real.
-\end{itemize}
+La gesti\'on del trabajo se ha apoyado en artefactos versionados del propio repositorio y en herramientas de planificaci\'on integradas con el flujo de desarrollo. En concreto, se utilizaron \textbf{Product Backlog} y \textbf{Sprint Backlog} para priorizaci\'on y control de alcance, \textbf{GitHub Issues/Projects} para trazabilidad de tareas y decisiones de ejecuci\'on, y un \textbf{registro horario por sprint} que contrasta capacidad prevista con dedicaci\'on real. Esta triangulaci\'on permite justificar desviaciones de forma auditable.
 
 Este esquema permite justificar desviaciones de forma auditable,
 conectando horas, funcionalidades y evidencia de validaci\'on.
@@ -44,23 +28,11 @@ basado en \emph{sprints} quincenales, con revisiones peri\'odicas del alcance.
 El objetivo de este enfoque no es \'unicamente repartir tareas, sino reducir riesgo t\'ecnico
 de forma temprana y asegurar que cada incremento entregue valor funcional verificable.
 
-El marco de trabajo adoptado combina:
-\begin{itemize}
-	\item \textbf{Planificaci\'on por objetivos}: cada sprint se orienta a un bloque funcional medible.
-	\item \textbf{Control continuo}: seguimiento semanal de avance, calidad y bloqueos.
-	\item \textbf{Replanificaci\'on expl\'icita}: adaptaci\'on del calendario cuando cambian supuestos.
-\end{itemize}
+El marco de trabajo adoptado combina planificaci\'on por objetivos (cada sprint se orienta a un bloque funcional medible), control continuo con seguimiento semanal de avance, calidad y bloqueos, y replanificaci\'on expl\'icita cuando cambian supuestos. Esta mezcla aporta disciplina sin perder capacidad de ajuste.
 
 \subsection{Hip\'otesis de capacidad y calendario base}
 
-Los supuestos de capacidad empleados para el plan temporal han sido los siguientes:
-\begin{itemize}
-	\item Equipo de desarrollo: \textbf{2 personas}.
-	\item Dedicaci\'on estimada: \textbf{30 horas por persona y semana}.
-	\item Capacidad total semanal: \textbf{60 horas/semana}.
-	\item Duraci\'on de sprint: \textbf{2 semanas}.
-	\item Capacidad por sprint: \textbf{120 horas}.
-\end{itemize}
+Los supuestos de capacidad empleados para el plan temporal fueron un equipo de desarrollo de \textbf{2 personas}, con dedicaci\'on estimada de \textbf{30 horas por persona y semana}, lo que fija una capacidad total semanal de \textbf{60 horas}. Se definieron sprints de \textbf{2 semanas}, con una capacidad por sprint de \textbf{120 horas}. Estos supuestos hacen expl\'icita la base del calendario y permiten medir desviaciones.
 
 Sobre esa base, el proyecto se estructur\'o en \textbf{6 iteraciones} (Sprint 0 + Sprint 1 a Sprint 5),
 con un esfuerzo total planificado de \textbf{660 horas}.
@@ -97,57 +69,22 @@ S5 & 14 Abr - 12 May 2026 & 60 & Revisi\'on final, correcci\'on de incidencias, 
 \subsection{Planificaci\'on micro y distribuci\'on del esfuerzo}
 
 Adem\'as de la visi\'on macro, cada sprint se descompuso en l\'ineas de trabajo concretas
-con asignaci\'on horaria por responsable. El criterio aplicado fue:
-\begin{enumerate}
-	\item identificar primero las tareas cr\'iticas de MVP;
-	\item reservar capacidad para pruebas en cada iteraci\'on;
-	\item mantener un \emph{buffer} expl\'icito para incidencias.
-\end{enumerate}
+con asignaci\'on horaria por responsable. El criterio aplicado fue identificar primero las tareas cr\'iticas de MVP, reservar capacidad para pruebas en cada iteraci\'on y mantener un \emph{buffer} expl\'icito para incidencias. Esta pauta reduce el riesgo de concentrar la validaci\'on en la fase final.
 
-En t\'erminos acumulados, la distribuci\'on de esfuerzo se ha orientado a:
-\begin{itemize}
-	\item construcci\'on de base arquitect\'onica y seguridad en fases tempranas;
-	\item desarrollo de funcionalidad de negocio en fases intermedias;
-	\item validaci\'on de calidad, documentaci\'on y cierre en fase final.
-\end{itemize}
+En t\'erminos acumulados, la distribuci\'on de esfuerzo se ha orientado a construir la base arquitect\'onica y de seguridad en fases tempranas, desarrollar funcionalidad de negocio en fases intermedias y concentrar validaci\'on de calidad, documentaci\'on y cierre en la fase final. Esta secuencia protege la estabilidad del sistema a medida que crece el alcance.
 
 Esta distribuci\'on evita concentrar el testing al final y reduce el riesgo de deuda t\'ecnica
 de cierre, un problema habitual en proyectos con calendario acad\'emico estricto.
 
 \subsection{Hitos de control del proyecto}
 
-Para asegurar gobernanza temporal se definieron hitos de control:
-\begin{itemize}
-	\item \textbf{H1}: cierre de requisitos y arquitectura (ERS/DAS validados).
-	\item \textbf{H2}: disponibilidad de la base t\'ecnica del producto (backend, frontend, seguridad).
-	\item \textbf{H3}: primer flujo operativo extremo a extremo (actividad-entrega).
-	\item \textbf{H4}: despliegue operativo y pipelines CI/CD estables.
-	\item \textbf{H5}: incorporaci\'on del m\'odulo de evaluaci\'on y feedback.
-	\item \textbf{H6}: estabilizaci\'on de calidad (pruebas autom\'aticas y mutaci\'on).
-	\item \textbf{H7}: cierre de memoria t\'ecnica y validaci\'on documental.
-	\item \textbf{H8}: preparaci\'on de defensa y cierre final del proyecto.
-\end{itemize}
+Para asegurar gobernanza temporal se definieron hitos de control: \textbf{H1} (cierre de requisitos y arquitectura con ERS/DAS validados), \textbf{H2} (disponibilidad de la base t\'ecnica del producto en backend, frontend y seguridad), \textbf{H3} (primer flujo operativo extremo a extremo actividad-entrega), \textbf{H4} (despliegue operativo y pipelines CI/CD estables), \textbf{H5} (incorporaci\'on del m\'odulo de evaluaci\'on y feedback), \textbf{H6} (estabilizaci\'on de calidad con pruebas autom\'aticas y mutaci\'on), \textbf{H7} (cierre de memoria t\'ecnica y validaci\'on documental) y \textbf{H8} (preparaci\'on de defensa y cierre final del proyecto). Esta secuencia introduce puntos de control verificables en momentos cr\'iticos.
 
 \subsection{Seguimiento del avance y m\'etricas de control}
 
-El seguimiento temporal se realiz\'o con m\'etricas sencillas pero accionables:
-\begin{itemize}
-	\item \textbf{Horas planificadas vs. horas completadas} por sprint.
-	\item \textbf{Porcentaje acumulado de ejecuci\'on} respecto a las 660 horas totales.
-	\item \textbf{Velocidad de entrega} por iteraci\'on (PBIs/tareas completadas).
-	\item \textbf{Indicadores de calidad} como condici\'on de cierre (tests en verde, cobertura,
-	estabilidad de pipelines).
-\end{itemize}
+El seguimiento temporal se realiz\'o con m\'etricas sencillas pero accionables: horas planificadas frente a horas completadas por sprint, porcentaje acumulado de ejecuci\'on respecto a las 660 horas totales, velocidad de entrega por iteraci\'on (PBIs o tareas completadas) e indicadores de calidad como condici\'on de cierre (tests en verde, cobertura y estabilidad de pipelines). Estas m\'etricas conectan avance, alcance y calidad en una misma lectura.
 
-Como referencia de control acumulado:
-\begin{itemize}
-	\item tras S0: 120 h ejecutadas (18\%);
-	\item tras S1: 240 h ejecutadas (36\%);
-	\item objetivo tras S2: 360 h (55\%);
-	\item objetivo tras S3: 480 h (73\%);
-	\item objetivo tras S4: 600 h (91\%);
-	\item objetivo tras S5: 660 h (100\%).
-\end{itemize}
+Como referencia de control acumulado, tras S0 se ejecutaron 120 h (18\%), tras S1 se alcanzaron 240 h (36\%), el objetivo tras S2 fue 360 h (55\%), tras S3 480 h (73\%), tras S4 600 h (91\%) y tras S5 660 h (100\%). Esta trayectoria permite comprobar si la ejecuci\'on se mantiene alineada con el plan.
 
 \subsection{Control de desviaciones con valor ganado simplificado}
 
@@ -155,12 +92,7 @@ Para reforzar el control temporal,
 se ha aplicado una lectura simplificada de valor ganado,
 adaptada a proyectos de alcance acad\'emico.
 
-Se consideran tres magnitudes:
-\begin{itemize}
-	\item \textbf{PV} (\emph{Planned Value}): horas planificadas acumuladas.
-	\item \textbf{EV} (\emph{Earned Value}): horas equivalentes al trabajo realmente completado.
-	\item \textbf{AC} (\emph{Actual Cost}): horas reales consumidas.
-\end{itemize}
+Se consideran tres magnitudes: \textbf{PV} (\emph{Planned Value}), como horas planificadas acumuladas; \textbf{EV} (\emph{Earned Value}), como horas equivalentes al trabajo realmente completado; y \textbf{AC} (\emph{Actual Cost}), como horas reales consumidas. Esta base permite interpretar desviaciones de manera objetiva.
 
 Los indicadores de interpretaci\'on utilizados son:
 
@@ -200,29 +132,14 @@ lo que valida la eficacia de la replanificaci\'on incremental.
 \subsection{Desviaciones y replanificaci\'on}
 
 El plan no permaneci\'o est\'atico durante todo el proyecto. Se registraron revisiones
-de planificaci\'on con trazabilidad de versiones, destacando:
-\begin{itemize}
-	\item ajuste del modelo de capacidad (de una planificaci\'on inicial m\'as fragmentada
-	a una estructura de sprints de 120 h);
-	\item recalibraci\'on de fechas de S1-S4 para alinear ejecuci\'on t\'ecnica y calendario acad\'emico;
-	\item incorporaci\'on de tareas documentales en S3 para evitar cuello de botella en S4.
-\end{itemize}
+de planificaci\'on con trazabilidad de versiones, destacando el ajuste del modelo de capacidad (de una planificaci\'on inicial m\'as fragmentada a una estructura de sprints de 120 h), la recalibraci\'on de fechas de S1-S4 para alinear ejecuci\'on t\'ecnica y calendario acad\'emico, y la incorporaci\'on de tareas documentales en S3 para evitar cuello de botella en S4. Estas revisiones preservan el objetivo global sin perder consistencia temporal.
 
 La replanificaci\'on se adopt\'o con criterio de continuidad: no alter\'o el objetivo global de 660 h,
 pero mejor\'o la probabilidad de cumplimiento de hitos y redujo el riesgo de cierre tard\'io.
 
 \subsection{Lecciones aprendidas de planificaci\'on}
 
-Del seguimiento temporal se extraen tres lecciones principales:
-
-\begin{itemize}
-	\item \textbf{Iniciar testing temprano reduce retrabajo}: distribuir pruebas por sprint
-	evita acumulaci\'on de defectos al final.
-	\item \textbf{Documentar en paralelo reduce riesgo de cierre}: incorporar memoria desde S3
-	disminuye el cuello de botella de la fase final.
-	\item \textbf{Planificar buffer expl\'icito mejora estabilidad}: la reserva de capacidad
-	absorbe incidencias sin romper hitos cr\'iticos.
-\end{itemize}
+Del seguimiento temporal se extraen tres lecciones principales. Iniciar testing temprano reduce retrabajo porque distribuir pruebas por sprint evita acumulaci\'on de defectos al final. Documentar en paralelo reduce riesgo de cierre, ya que incorporar memoria desde S3 disminuye el cuello de botella de la fase final. Planificar un \emph{buffer} expl\'icito mejora estabilidad al absorber incidencias sin romper hitos cr\'iticos.
 
 \subsection{Riesgos temporales y mitigaci\'on}
 
@@ -262,11 +179,7 @@ alineada con los requisitos del TFG y con las restricciones del calendario acad\
 El an\'alisis de costes se ha realizado con enfoque de \textbf{coste de esfuerzo}.
 La unidad base de c\'alculo es la hora de trabajo invertida por el equipo.
 
-Se distinguen dos escenarios para evitar una lectura sesgada:
-\begin{itemize}
-	\item \textbf{Escenario A (referencia acad\'emica)}: tarifa de 15 EUR/h.
-	\item \textbf{Escenario B (referencia profesional junior)}: tarifa de 25 EUR/h.
-\end{itemize}
+Se distinguen dos escenarios para evitar una lectura sesgada: el \textbf{Escenario A} (referencia acad\'emica) con tarifa de 15 EUR/h y el \textbf{Escenario B} (referencia profesional junior) con tarifa de 25 EUR/h. Esta doble referencia permite contextualizar el coste seg\'un perfiles de mercado diferentes.
 
 La duraci\'on total considerada es de 660 horas.
 

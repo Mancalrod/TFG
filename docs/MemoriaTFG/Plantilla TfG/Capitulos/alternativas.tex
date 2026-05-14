@@ -25,12 +25,7 @@ y mejora la experiencia del alumnado.
 
 \subsection{Arquitectura de aplicaci\'on}
 
-Se valoraron dos enfoques principales:
-
-\begin{itemize}
-	\item \textbf{A1 - SPA + API desacoplada} (opci\'on elegida).
-	\item \textbf{A2 - Aplicaci\'on monol\'itica server-side renderizada}.
-\end{itemize}
+Se valoraron dos enfoques principales: \textbf{A1 - SPA + API desacoplada} (opci\'on elegida) y \textbf{A2 - Aplicaci\'on monol\'itica server-side renderizada}. Esta comparativa permite sopesar flexibilidad de evoluci\'on frente a simplicidad inicial.
 
 \textbf{A1} permite separar claramente la capa de experiencia de usuario
 de la l\'ogica de negocio y persistencia, facilitando pruebas independientes,
@@ -42,21 +37,9 @@ en escenarios con roles y paneles diferenciados.
 
 \subsection{Backend framework}
 
-Se compararon principalmente:
+Se compararon principalmente \textbf{B1 - Spring Boot (Java)} (elegida), \textbf{B2 - Node.js (Express/Nest)} y \textbf{B3 - Django (Python)}. El an\'alisis consider\'o compatibilidad con seguridad, persistencia y tiempos de entrega.
 
-\begin{itemize}
-	\item \textbf{B1 - Spring Boot (Java)} (elegida).
-	\item \textbf{B2 - Node.js (Express/Nest)}.
-	\item \textbf{B3 - Django (Python)}.
-\end{itemize}
-
-La elecci\'on de \textbf{Spring Boot} se justifica por:
-
-\begin{itemize}
-	\item ecosistema maduro para seguridad, JPA, validaci\'on y testing,
-	\item integraci\'on natural con migraciones Flyway,
-	\item buen soporte para arquitectura por capas y control transaccional.
-\end{itemize}
+La elecci\'on de \textbf{Spring Boot} se justifica por su ecosistema maduro para seguridad, JPA, validaci\'on y testing, por la integraci\'on natural con migraciones Flyway y por el buen soporte a arquitectura por capas y control transaccional. Estos factores reducen incertidumbre t\'ecnica en el alcance temporal disponible.
 
 Node.js y Django son opciones v\'alidas,
 pero para este proyecto requer\'ian m\'as decisiones de ensamblaje
@@ -65,13 +48,7 @@ en el tiempo disponible.
 
 \subsection{Frontend framework}
 
-Alternativas consideradas:
-
-\begin{itemize}
-	\item \textbf{F1 - React + TypeScript + Vite} (elegida).
-	\item \textbf{F2 - Angular}.
-	\item \textbf{F3 - Vue}.
-\end{itemize}
+Alternativas consideradas: \textbf{F1 - React + TypeScript + Vite} (elegida), \textbf{F2 - Angular} y \textbf{F3 - Vue}. La selecci\'on se orient\'o a equilibrio entre velocidad de desarrollo y control de complejidad.
 
 React con TypeScript y Vite ofrece buen equilibrio entre velocidad de desarrollo,
 ecosistema y control de complejidad para una SPA de tama\~no medio.
@@ -84,44 +61,36 @@ y la alineaci\'on con librer\'ias de testing/CI favorecieron React.
 
 \subsection{Base de datos relacional}
 
-Opciones comparadas:
-
-\begin{itemize}
-	\item \textbf{D1 - PostgreSQL gestionado} (elegida en producci\'on).
-	\item \textbf{D2 - MySQL gestionado}.
-	\item \textbf{D3 - H2 embebida} (solo desarrollo/pruebas locales).
-\end{itemize}
+Opciones comparadas: \textbf{D1 - PostgreSQL gestionado} (elegida en producci\'on), \textbf{D2 - MySQL gestionado} y \textbf{D3 - H2 embebida} (solo desarrollo/pruebas locales). La selecci\'on equilibra estabilidad productiva con agilidad local.
 
 PostgreSQL se mantuvo como opci\'on principal por estabilidad, compatibilidad
 con el stack y buen comportamiento en entornos PaaS.
 H2 se reserva para contextos de desarrollo y pruebas, no para producci\'on.
 
-Adem\'as, se produjo una migraci\'on de proveedor de Postgres (Neon a Render Postgres)
-sin cambios de c\'odigo de dominio,
+Dentro de las alternativas de base de datos desplegadas,
+inicialmente se decidi\'o utilizar \textbf{Neon} como proveedor PostgreSQL
+por sus mejores caracter\'isticas percibidas para el arranque del proyecto:
+aprovisionamiento r\'apido, enfoque serverless y facilidad de conexi\'on
+desde un backend desplegado en PaaS.
+No obstante, durante la validaci\'on operativa se detectaron limitaciones
+en su plan gratuito que condicionaban la continuidad del despliegue acad\'emico.
+Por ello se migr\'o a \textbf{Render PostgreSQL},
+manteniendo PostgreSQL como decisi\'on t\'ecnica de base y cambiando solo
+el proveedor gestionado.
+La migraci\'on se realiz\'o sin cambios de c\'odigo de dominio,
 apoy\'andose en variables de entorno y configuraci\'on portable del datasource,
 lo que confirma bajo acoplamiento a proveedor concreto.
 
 \subsection{Estrategia de esquema}
 
-Se compararon:
-
-\begin{itemize}
-	\item \textbf{E1 - Flyway como autoridad de esquema} (elegida).
-	\item \textbf{E2 - Hibernate \texttt{ddl-auto=update} en producci\'on}.
-\end{itemize}
+Se compararon \textbf{E1 - Flyway como autoridad de esquema} (elegida) y \textbf{E2 - Hibernate \texttt{ddl-auto=update} en producci\'on}. La decisi\'on prioriza trazabilidad y control expl\'icito del cambio.
 
 Se adopta \textbf{E1} por trazabilidad y control expl\'icito de cambios,
 reduciendo riesgo de divergencias de esquema entre entornos.
 
 \subsection{Almacenamiento de archivos}
 
-Alternativas evaluadas:
-
-\begin{itemize}
-	\item \textbf{S1 - Almacenamiento local en servidor}.
-	\item \textbf{S2 - Cloudinary} (elegida para producci\'on persistente).
-	\item \textbf{S3 - OneDrive/Microsoft Graph} (integraci\'on opcional por contexto acad\'emico).
-\end{itemize}
+Alternativas evaluadas: \textbf{S1 - Almacenamiento local en servidor}, \textbf{S2 - Cloudinary} (elegida para producci\'on persistente) y \textbf{S3 - OneDrive/Microsoft Graph} (integraci\'on opcional por contexto acad\'emico). La opci\'on final combina persistencia en producci\'on con flexibilidad institucional.
 
 La opci\'on local es simple y adecuada en desarrollo,
 pero en plataformas con sistema de archivos ef\'imero (como despliegues free)
@@ -136,12 +105,7 @@ pero se mantiene como capacidad configurable y no obligatoria del n\'ucleo.
 
 \subsection{Modelo de autenticaci\'on}
 
-Se compararon dos enfoques principales:
-
-\begin{itemize}
-	\item \textbf{A1 - JWT (access + refresh)} (elegido).
-	\item \textbf{A2 - Sesi\'on server-side tradicional}.
-\end{itemize}
+Se compararon dos enfoques principales: \textbf{A1 - JWT (access + refresh)} (elegido) y \textbf{A2 - Sesi\'on server-side tradicional}. La elecci\'on favorece coherencia con arquitectura SPA y escalado stateless.
 
 En una SPA desacoplada, JWT con refresh ofrece una experiencia m\'as natural
 para cliente API-first y facilita escalado stateless del backend.
@@ -179,13 +143,7 @@ de permisos y pertenencia a grupos.
 
 \subsection{Estrategia de despliegue}
 
-Opciones principales:
-
-\begin{itemize}
-	\item \textbf{P1 - PaaS con automatizaci\'on GitHub Actions + Render} (elegida).
-	\item \textbf{P2 - VPS autogestionado con pipeline manual o Jenkins}.
-	\item \textbf{P3 - Orquestaci\'on completa en Kubernetes}.
-\end{itemize}
+Opciones principales: \textbf{P1 - PaaS con automatizaci\'on GitHub Actions + Render} (elegida), \textbf{P2 - VPS autogestionado con pipeline manual o Jenkins} y \textbf{P3 - Orquestaci\'on completa en Kubernetes}. La selecci\'on busca minimizar carga operativa y mantener viabilidad acad\'emica.
 
 \textbf{P1} reduce carga operativa,
 permite despliegue r\'apido y mantiene un coste ajustado para contexto acad\'emico.
@@ -207,12 +165,7 @@ el modelo operativo del despliegue.
 
 \subsection{CI/CD y calidad}
 
-Se compararon:
-
-\begin{itemize}
-	\item \textbf{C1 - CI/CD integrada en GitHub Actions} (elegida).
-	\item \textbf{C2 - CI externa (GitLab CI/Jenkins) con mayor administraci\'on}.
-\end{itemize}
+Se compararon \textbf{C1 - CI/CD integrada en GitHub Actions} (elegida) y \textbf{C2 - CI externa (GitLab CI/Jenkins) con mayor administraci\'on}. La decisi\'on prioriza trazabilidad y menor sobrecarga operativa.
 
 La alternativa elegida integra lint, tests, build, an\'alisis de seguridad,
 mutaci\'on y publicaci\'on de artefactos en un flujo unificado y reproducible.
@@ -253,15 +206,7 @@ riesgo t\'ecnico y viabilidad temporal del proyecto.
 
 \section{Decisiones adoptadas y justificaci\'on final}
 
-Las decisiones finales que mejor explican el resultado del proyecto son:
-
-\begin{itemize}
-	\item arquitectura SPA + API desacoplada para separar responsabilidades;
-	\item backend Spring Boot con persistencia relacional y migraciones Flyway;
-	\item frontend React + TypeScript para productividad con control tipado;
-	\item almacenamiento cloud persistente en producci\'on y local en desarrollo;
-	\item despliegue en PaaS con CI/CD automatizada y verificaciones de calidad.
-\end{itemize}
+Las decisiones finales que mejor explican el resultado del proyecto son la arquitectura SPA + API desacoplada para separar responsabilidades, un backend Spring Boot con persistencia relacional y migraciones Flyway, un frontend React + TypeScript para productividad con control tipado, almacenamiento cloud persistente en producci\'on y local en desarrollo, y despliegue en PaaS con CI/CD automatizada y verificaciones de calidad. Esta combinaci\'on asegura equilibrio entre viabilidad temporal y robustez t\'ecnica.
 
 Esta combinaci\'on ha permitido llegar a un sistema funcional,
 con cobertura de pruebas alta y capacidad de evoluci\'on,

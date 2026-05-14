@@ -10,20 +10,11 @@ pero facilita reproducci\'on, mantenimiento y auditor\'ia del proyecto.
 
 \subsection{Requisitos previos}
 
-Para ejecutar la soluci\'on en entorno local se requiere:
-
-\begin{itemize}
-	\item JDK 21 y Maven 3.9+ para backend.
-	\item Node.js 18+ y npm 9+ para frontend.
-	\item PostgreSQL 14+ disponible en local o contenedor.
-\end{itemize}
+Para ejecutar la soluci\'on en entorno local se requiere JDK 21 y Maven 3.9+ para backend, Node.js 18+ y npm 9+ para frontend, y PostgreSQL 14+ disponible en local o contenedor. Estos requisitos aseguran compatibilidad con el stack desplegado.
 
 \subsection{Preparaci\'on del entorno}
 
-\begin{enumerate}
-	\item Clonar el repositorio y situarse en la ra\'iz del proyecto.
-	\item Verificar credenciales y variables seg\'un el Anexo B.
-\end{enumerate}
+La preparaci\'on del entorno consiste en clonar el repositorio y situarse en la ra\'iz del proyecto, y en verificar credenciales y variables seg\'un el Anexo B. Este orden evita configuraciones incompletas antes de arrancar servicios.
 
 \subsection{Base de datos}
 
@@ -81,14 +72,7 @@ npm run build
 
 \subsection{Variables cr\'iticas de backend}
 
-Las variables m\'inimas para funcionamiento seguro en entornos no locales son:
-
-\begin{itemize}
-	\item \texttt{DATABASE\_URL}, \texttt{DATABASE\_USER}, \texttt{DATABASE\_PASSWORD},
-	\item \texttt{JWT\_SECRET},
-	\item \texttt{SPRING\_PROFILES\_ACTIVE},
-	\item \texttt{APP\_FRONTEND\_BASE\_URL}.
-\end{itemize}
+Las variables m\'inimas para funcionamiento seguro en entornos no locales son \texttt{DATABASE\_URL}, \texttt{DATABASE\_USER}, \texttt{DATABASE\_PASSWORD}, \texttt{JWT\_SECRET}, \texttt{SPRING\_PROFILES\_ACTIVE} y \texttt{APP\_FRONTEND\_BASE\_URL}. Esta configuraci\'on garantiza conectividad, seguridad y coherencia de entorno.
 
 En producci\'on se habilitan adem\'as variables para servicios externos
 como almacenamiento cloud y correo transaccional. En el despliegue sobre
@@ -106,27 +90,14 @@ La variable principal de configuraci\'on de cliente es
 
 \subsection{Comprobaciones de salud}
 
-El sistema expone endpoints de salud para diferenciaci\'on operativa:
-
-\begin{itemize}
-	\item liveness: valida disponibilidad del proceso,
-	\item readiness: valida disponibilidad real de dependencias (base de datos).
-\end{itemize}
+El sistema expone endpoints de salud para diferenciaci\'on operativa: \'el de \textit{liveness} valida disponibilidad del proceso y el de \textit{readiness} valida disponibilidad real de dependencias como la base de datos. Esta separaci\'on permite detectar fallos de conectividad de forma temprana.
 
 Esta separaci\'on permite detectar de forma temprana incidencias de conectividad
 y reducir falsos positivos en monitorizaci\'on.
 
 \subsection{Validaci\'on post-despliegue}
 
-Tras cada despliegue se recomienda ejecutar al menos:
-
-\begin{enumerate}
-	\item comprobaci\'on de endpoints de salud,
-	\item login con usuario de prueba,
-	\item operaci\'on de lectura y escritura en flujo acad\'emico,
-	\item verificaci\'on de subida/descarga de material,
-	\item prueba de correo transaccional (recuperaci\'on de contrase\~na o notificaci\'on) mediante Brevo.
-\end{enumerate}
+Tras cada despliegue se recomienda, como m\'inimo, comprobar endpoints de salud, realizar login con usuario de prueba, ejecutar operaci\'on de lectura y escritura en flujo acad\'emico, verificar subida y descarga de material y probar el correo transaccional (recuperaci\'on de contrase\~na o notificaci\'on) mediante Brevo. Estas comprobaciones validan la operativa esencial en producci\'on.
 
 \section{Anexo D. Declaraci\'on de uso de IA generativa}
 
@@ -138,36 +109,13 @@ de dise\~no o implementaci\'on sin validaci\'on humana.
 
 \subsection{Alcance y criterios de uso}
 
-El uso de IA se limit\'o a los siguientes casos:
+El uso de IA se limit\'o a apoyo de redacci\'on y reformulaci\'on de texto t\'ecnico, revisi\'on de estructura y coherencia de secciones, generaci\'on de listados de verificaci\'on y casos borde, microcopy y textos de ayuda para interfaz, y aclaraciones puntuales de sintaxis o formatos (por ejemplo, JSON o \LaTeX{}). Estas tareas se consideraron de bajo riesgo y siempre se validaron manualmente.
 
-\begin{itemize}
-	\item apoyo de redacci\'on y reformulaci\'on de texto t\'ecnico;
-	\item revisi\'on de estructura y coherencia de secciones;
-	\item generaci\'on de listados de verificaci\'on y casos borde;
-	\item microcopy y textos de ayuda para interfaz;
-	\item aclaraciones puntuales de sintaxis o formatos (por ejemplo, JSON o \LaTeX{}).
-\end{itemize}
-
-Se excluyeron expl\'icitamente usos como:
-
-\begin{itemize}
-	\item decisiones arquitect\'onicas finales sin justificaci\'on propia;
-	\item c\'odigo productivo incorporado sin revisi\'on manual;
-	\item resultados emp\'iricos o m\'etricas no verificadas;
-	\item contenido no contrastado con el repositorio y la evidencia de pruebas.
-\end{itemize}
+Se excluyeron expl\'icitamente usos como decisiones arquitect\'onicas finales sin justificaci\'on propia, c\'odigo productivo incorporado sin revisi\'on manual, resultados emp\'iricos o m\'etricas no verificadas y contenido no contrastado con el repositorio y la evidencia de pruebas. Esta restricci\'on garantiza responsabilidad t\'ecnica.
 
 \subsection{Proceso de control y verificaci\'on}
 
-Cada propuesta generada por IA se trat\'o como borrador. El proceso seguido fue:
-
-\begin{enumerate}
-	\item formular la consulta indicando el contexto del proyecto,
-	\item evaluar si la respuesta era coherente con requisitos y c\'odigo,
-	\item ajustar manualmente terminolog\'ia y rigor acad\'emico,
-	\item contrastar con artefactos del repositorio (memoria, c\'odigo, tests),
-	\item integrar la versi\'on final ya revisada.
-\end{enumerate}
+Cada propuesta generada por IA se trat\'o como borrador. El proceso seguido consisti\'o en formular la consulta indicando el contexto del proyecto, evaluar si la respuesta era coherente con requisitos y c\'odigo, ajustar manualmente terminolog\'ia y rigor acad\'emico, contrastar con artefactos del repositorio (memoria, c\'odigo, tests) e integrar la versi\'on final ya revisada. Este flujo evita incorporaciones autom\'aticas sin validaci\'on.
 
 \subsection{Ejemplos concretos de consultas y respuestas}
 
@@ -175,47 +123,45 @@ Los siguientes ejemplos resumen consultas reales y la respuesta resumida
 que se utiliz\'o como punto de partida. En todos los casos se realiz\'o
 revisi\'on manual antes de incorporar el contenido a la memoria o al producto.
 
-\begin{enumerate}
-	\item \textbf{Redacci\'on acad\'emica de objetivos}.
-	\textbf{Consulta}: \emph{Reescribe este p\'arrafo de objetivos para un tono acad\'emico,
-	evitando repeticiones y manteniendo el significado}. 
-	\textbf{Respuesta resumida}: propuesta de redacci\'on m\'as concisa
-	con estructura en dos frases y vocabulario t\'ecnico coherente.
-	\textbf{Aplicaci\'on}: se ajustaron t\'erminos a la nomenclatura del ERS
-	y se incorpor\'o solo tras validar la trazabilidad con requisitos.
+\textbf{Ejemplo 1. Redacci\'on acad\'emica de objetivos.}
+\textbf{Consulta}: \emph{Reescribe este p\'arrafo de objetivos para un tono acad\'emico,
+evitando repeticiones y manteniendo el significado}. 
+\textbf{Respuesta resumida}: propuesta de redacci\'on m\'as concisa
+con estructura en dos frases y vocabulario t\'ecnico coherente.
+\textbf{Aplicaci\'on}: se ajustaron t\'erminos a la nomenclatura del ERS
+y se incorpor\'o solo tras validar la trazabilidad con requisitos.
 
-	\item \textbf{Estructura de secci\'on comparativa}.
-	\textbf{Consulta}: \emph{Sugiere un esquema para un an\'alisis de competidores
-	en una memoria de TFG de software}. 
-	\textbf{Respuesta resumida}: se propuso dividir por tipolog\'ias de competidor,
-	incluir criterios de comparaci\'on y cerrar con diferenciadores propios.
-	\textbf{Aplicaci\'on}: el esquema se adapt\'o al contenido real del proyecto
-	y a las evidencias t\'ecnicas implementadas.
+\textbf{Ejemplo 2. Estructura de secci\'on comparativa.}
+\textbf{Consulta}: \emph{Sugiere un esquema para un an\'alisis de competidores
+en una memoria de TFG de software}. 
+\textbf{Respuesta resumida}: se propuso dividir por tipolog\'ias de competidor,
+incluir criterios de comparaci\'on y cerrar con diferenciadores propios.
+\textbf{Aplicaci\'on}: el esquema se adapt\'o al contenido real del proyecto
+y a las evidencias t\'ecnicas implementadas.
 
-	\item \textbf{Validaci\'on de estructuras ZIP}.
-	\textbf{Consulta}: \emph{Prop\'on ejemplos de reglas para validar estructura
-	interna de un ZIP con archivos obligatorios y carpetas esperadas}. 
-	\textbf{Respuesta resumida}: lista de casos con archivos obligatorios,
-	extensiones permitidas y modos estricto/m\'inimo requerido.
-	\textbf{Aplicaci\'on}: se contrast\'o con la l\'ogica del servicio de validaci\'on
-	y se redact\'o la explicaci\'on en la memoria con terminolog\'ia consistente.
+\textbf{Ejemplo 3. Validaci\'on de estructuras ZIP.}
+\textbf{Consulta}: \emph{Prop\'on ejemplos de reglas para validar estructura
+interna de un ZIP con archivos obligatorios y carpetas esperadas}. 
+\textbf{Respuesta resumida}: lista de casos con archivos obligatorios,
+extensiones permitidas y modos estricto/m\'inimo requerido.
+\textbf{Aplicaci\'on}: se contrast\'o con la l\'ogica del servicio de validaci\'on
+y se redact\'o la explicaci\'on en la memoria con terminolog\'ia consistente.
 
-	\item \textbf{Textos de ayuda en interfaz de entrega}.
-	\textbf{Consulta}: \emph{Sugiere mensajes breves y claros para indicar
-	que una entrega requiere un ZIP con nombre y estructura concretos}. 
-	\textbf{Respuesta resumida}: propuestas de microcopy con tono informativo
-	y referencias expl\'icitas a nombre esperado, tama\~no y estructura.
-	\textbf{Aplicaci\'on}: los textos se ajustaron manualmente para alinearlos
-	con el vocabulario usado en la UI del proyecto.
+\textbf{Ejemplo 4. Textos de ayuda en interfaz de entrega.}
+\textbf{Consulta}: \emph{Sugiere mensajes breves y claros para indicar
+que una entrega requiere un ZIP con nombre y estructura concretos}. 
+\textbf{Respuesta resumida}: propuestas de microcopy con tono informativo
+y referencias expl\'icitas a nombre esperado, tama\~no y estructura.
+\textbf{Aplicaci\'on}: los textos se ajustaron manualmente para alinearlos
+con el vocabulario usado en la UI del proyecto.
 
-	\item \textbf{Casos borde para pruebas}.
-	\textbf{Consulta}: \emph{Enumera casos borde para pruebas de subida de ZIP
-	en un sistema de entregables}. 
-	\textbf{Respuesta resumida}: listado de escenarios (nombre incorrecto,
-	estructura incompleta, archivos extra, ZIP corrupto, tama\~no excedido).
-	\textbf{Aplicaci\'on}: se utiliz\'o como checklist de verificaci\'on y
-	se descartaron casos no aplicables al alcance real.
-\end{enumerate}
+\textbf{Ejemplo 5. Casos borde para pruebas.}
+\textbf{Consulta}: \emph{Enumera casos borde para pruebas de subida de ZIP
+en un sistema de entregables}. 
+\textbf{Respuesta resumida}: listado de escenarios (nombre incorrecto,
+estructura incompleta, archivos extra, ZIP corrupto, tama\~no excedido).
+\textbf{Aplicaci\'on}: se utiliz\'o como checklist de verificaci\'on y
+se descartaron casos no aplicables al alcance real.
 
 Este anexo se incluye para garantizar transparencia metodol\'ogica
 y trazabilidad del proceso de elaboraci\'on de la memoria.
