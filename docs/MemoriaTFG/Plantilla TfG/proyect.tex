@@ -2,15 +2,16 @@
 \documentclass{pclass}
 \usepackage[utf8]{inputenc} % para linux y mac 
 %\usepackage[latin1]{inputenc} % para windows
-  
-
 %DIFERENTES TIPOS DE LETRA
 %\usepackage{palatino}
-\usepackage{times}   
+\usepackage{times}
+\usepackage{placeins}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.8}
 \setlength{\headheight}{14.5pt}
 \setlength{\emergencystretch}{2em}
-
-
 \begin{document}
 \tipo{Grado}   % Grado o M\'aster
 \titulopro{Sistema de Gesti\'on de Entregables Acad\'emicos}
@@ -19,22 +20,15 @@
 \autores{Manuel Mar\'ia Calder\'on Rodr\'iguez}{Jos\'e Manuel M\'arquez Guti\'errez}
 \dia{Mayo de 2026}
 \titulacion{Grado en Ingenier\'ia Inform\'atica --- Ingenier\'ia del Software}
-
 \hacerportada
-
 	\input{tocdef}
 \frontmatter
-        
     \input{resumen}
     \input{agradecimientos}	
-
 	\tableofcontents % Índice de contenidos
  	\listoftables % Índice de cuadros
  	\listoffigures % Índice de figuras
-
-
  \mainmatter  
-    
 	\input{Capitulos/defobjetivos}
 	\input{Capitulos/requisitos}
 	\input{Capitulos/analanteced}
@@ -44,16 +38,10 @@
 	\input{Capitulos/pruebas}
 	\input{Capitulos/manual}
 	\input{Capitulos/conclusiones}
-
 \appendix
 	\input{Capitulos/apendices}
-
 \backmatter
-
 %\bibliographystyle{sousa5}
-
 \bibliographystyle{apacite}
-
 \bibliography{pfcbib}
-
 \end{document}

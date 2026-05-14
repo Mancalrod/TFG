@@ -242,7 +242,7 @@
 % 4 --> Etiqueta (label) para referencias
 % 5 --> Opciones que queramos pasarle al \includegraphics
 \newcommand{\figura}[5]{
-  \begin{figure}[hbtp]
+  \begin{figure}[!htbp]
     \begin{center}
     \includegraphics[width=#1\textwidth,#5]{#2}
     \caption{#3}
@@ -257,7 +257,7 @@
 %4---> contenido de la tabla separando columnas con & y filas con \\
 
 \newcommand{\cuadro}[4]{
-		\begin{table}[hbtp]
+		\begin{table}[!htbp]
 			\centering
 				\begin{tabular}{#1}
 					\hline

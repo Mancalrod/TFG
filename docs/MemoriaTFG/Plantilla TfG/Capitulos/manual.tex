@@ -1,5 +1,6 @@
 \chapter{Manual de usuario}\label{manual}
 
+\FloatBarrier
 \section{Introducci\'on}
 
 Este cap\'itulo describe el uso operativo del sistema desde la perspectiva de sus
@@ -11,6 +12,7 @@ El sistema dispone de tres perfiles principales:
 \textbf{administrador}, \textbf{profesor} y \textbf{estudiante}.
 Cada perfil accede a vistas y operaciones diferentes seg\'un permisos.
 
+\FloatBarrier
 \section{Acceso al sistema}
 
 \subsection{Requisitos previos de uso}
@@ -38,11 +40,12 @@ Si la renovaci\'on falla, la sesi\'on se cierra y el usuario debe autenticarse d
 
 El flujo de recuperaci\'on consiste en que el usuario solicita recuperaci\'on indicando su correo, el sistema emite un token temporal y env\'ia instrucciones de restablecimiento, y el usuario accede al formulario de nueva contrase\~na para introducir token y clave nueva. Este procedimiento reduce riesgo de accesos indebidos y mantiene trazabilidad del cambio.
 
+\FloatBarrier
 \section{Perfiles y permisos}
 
 La Tabla~\ref{tab:manual-perfiles} resume capacidades por perfil.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{|P{2.6cm}|P{9.3cm}|}
 \hline
@@ -59,18 +62,18 @@ Estudiante & Consultar cursos y actividades visibles; realizar entregas; consult
 \label{tab:manual-perfiles}
 \end{table}
 
+\FloatBarrier
 \section{Vistas comunes a todos los perfiles}
 
 Las siguientes pantallas son compartidas por los tres perfiles del sistema:
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Pantalla de Inicio de sesión (Todos los roles).png}}{Pantalla de inicio de sesi\'on. Vista compartida por todos los perfiles.}{fig:manual-comun-login}{}
 
-\figura{0.92}{\detokenize{../Pantallas de TFG/Sección de perfil (Parte 1) (Todos los roles).png}}{Secci\'on de perfil (1/2). Vista compartida por todos los perfiles.}{fig:manual-comun-perfil-1}{}
+\figura{0.92}{\detokenize{../Pantallas de TFG/Sección de perfil (Parte 1).png}}{Secci\'on de perfil (1/2). Vista compartida por todos los perfiles.}{fig:manual-comun-perfil-1}{}
 
-\figura{0.92}{\detokenize{../Pantallas de TFG/Sección de perfil (Parte 2) (Todos los roles).png}}{Secci\'on de perfil (2/2). Vista compartida por todos los perfiles.}{fig:manual-comun-perfil-2}{}
+\figura{0.92}{\detokenize{../Pantallas de TFG/Sección de perfil (Parte 2).png}}{Secci\'on de perfil (2/2). Vista compartida por todos los perfiles.}{fig:manual-comun-perfil-2}{}
 
-\clearpage
-
+\FloatBarrier
 \section{Gu\'ia de uso para profesorado}
 
 \subsection{Vistas principales}
@@ -91,15 +94,11 @@ subsecciones siguientes para mantener relaci\'on directa entre imagen y tarea.
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Dentro de una asignatura - Crear una actividad (Parte 2) (Profesor).png}}{Creaci\'on de actividad (2/2).}{fig:manual-profesor-crear-actividad-2}{}
 
-\clearpage
-
 \figura{0.92}{\detokenize{../Pantallas de TFG/Dentro de una asignatura - Eliminar una actividad (Profesor).png}}{Eliminaci\'on de actividad desde la asignatura.}{fig:manual-profesor-eliminar-actividad}{}
 
 El flujo recomendado consiste en acceder a \texttt{/cursos} y seleccionar un curso, crear la actividad desde el detalle del curso, definir t\'itulo, descripci\'on, fechas y visibilidad, y asignar grupos destinatarios cuando aplique. Esta secuencia garantiza que la actividad queda contextualizada antes de publicarse.
 
 Las validaciones clave establecen que el t\'itulo es obligatorio, que la fecha de inicio no puede ser posterior a la fecha l\'imite y que la visibilidad condiciona si el alumnado puede ver la actividad. Estas reglas previenen errores de configuraci\'on y evitan confusiones en el calendario docente.
-
-\clearpage
 
 \subsection{Crear y editar entregables}
 
@@ -112,8 +111,6 @@ desde la vista de alta de entregables del detalle de actividad.
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Dentro de una actividad - Crear entregables (Parte 2) (Profesor).png}}{Creaci\'on de entregables (2/2).}{fig:manual-profesor-crear-entregables-2}{}
 
-\clearpage
-
 Los par\'ametros relevantes de configuraci\'on incluyen t\'itulo, descripci\'on y fecha l\'imite, el tipo de archivo esperado seg\'un el cat\'alogo \texttt{TipoMaterial} (PDF, DOCX, ZIP, RAR, TXT, IMAGEN, VIDEO, ENLACE, SOLO\_TEXTO u OTRO), el tama\~no m\'aximo permitido, la posibilidad de reenv\'io y la visibilidad de notas para estudiantes. Esta configuraci\'on determina el comportamiento de validaci\'on y la comunicaci\'on con el alumnado.
 
 Cuando el tipo esperado es ZIP, puede definirse estructura esperada
@@ -125,8 +122,6 @@ y validaci\'on estricta, lo que obliga a que la entrega siga el formato indicado
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Dentro de una actividad - Editar Actividad (Parte 3) (Profesor).png}}{Edici\'on de actividad (3/3).}{fig:manual-profesor-editar-actividad-3}{}
 
-\clearpage
-
 \subsection{Revisar entregas y evaluar}
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Dentro de un entregable (Profesor).png}}{Detalle de entregable para revisiones.}{fig:manual-profesor-detalle-entregable}{}
@@ -134,8 +129,6 @@ y validaci\'on estricta, lo que obliga a que la entrega siga el formato indicado
 \figura{0.92}{\detokenize{../Pantallas de TFG/Sección de evaluaciones (Parte 1) (Profesor).png}}{Bandeja de evaluaciones (1/2).}{fig:manual-profesor-evaluaciones-1}{}
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Sección de evaluaciones (Parte 2) (Profesor).png}}{Bandeja de evaluaciones (2/2).}{fig:manual-profesor-evaluaciones-2}{}
-
-\clearpage
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Evaluar la actividad de un alumno (Profesor).png}}{Evaluaci\'on de la actividad de un alumno.}{fig:manual-profesor-evaluar-alumno}{}
 
@@ -146,12 +139,11 @@ Las acciones habituales incluyen filtrar por curso, actividad, entregable y esta
 El sistema permite descargar entregas de forma agregada en ZIP,
 tanto a nivel de entregable como de actividad completa.
 
-\clearpage
-
 \subsection{Flujo docente recomendado de extremo a extremo}
 
 Para maximizar consistencia y reducir retrabajo, se propone una secuencia de trabajo docente que comienza con la creaci\'on de la actividad con fechas y grupos delimitados, contin\'ua con la publicaci\'on de entregables con requisitos de formato y tama\~no expl\'icitos, y se sostiene con revisiones peri\'odicas del estado de entregas pendientes. A partir de ah\'i se recomienda corregir por lotes homog\'eneos (por grupo o por entregable), registrar feedback accionable con criterio de nota transparente y publicar calificaciones cuando el bloque de correcci\'on est\'e validado. Este flujo mejora la trazabilidad y evita inconsistencias entre estado de evaluaci\'on y comunicaci\'on al alumnado.
 
+\FloatBarrier
 \section{Gu\'ia de uso para estudiantes}
 
 \subsection{Vistas principales}
@@ -188,13 +180,9 @@ con la configuraci\'on docente. Esta adaptaci\'on previene errores antes de envi
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Realizar entrega (Parte 2) (Estudiante).png}}{Formulario de entrega (2/2).}{fig:manual-estudiante-entrega-2}{}
 
-\clearpage
-
 Adem\'as, el formulario incluye guardado temporal en local
 (borrador), lo que reduce riesgo de p\'erdida de trabajo
 si se interrumpe la sesi\'on o falla la conexi\'on.
-
-\clearpage
 
 \subsection{Recomendaciones para entregas sin incidencias}
 
@@ -215,8 +203,7 @@ En el detalle de entrega (\texttt{/entregas/:id}) el estudiante puede revisar ve
 Si la nota no es visible, la entrega aparece sin calificaci\'on p\'ublica,
 aunque internamente ya haya sido evaluada por el profesor.
 
-\clearpage
-
+\FloatBarrier
 \section{Gu\'ia de uso para administraci\'on}
 
 \subsection{Administraci\'on de usuarios}
@@ -232,8 +219,6 @@ crear nuevas identidades, modificar datos y retirar cuentas cuando proceda.
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Panel de administración - Eliminar usuario.png}}{Eliminaci\'on de usuarios.}{fig:manual-admin-eliminar-usuario}{}
 
-\clearpage
-
 \subsection{Administraci\'on de cursos}
 
 El bloque de cursos agrupa alta, edici\'on, eliminaci\'on y asignaci\'on
@@ -245,15 +230,11 @@ de profesorado responsable.
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Panel de administracion - Nuevo curso (Parte 2).png}}{Creaci\'on de curso (2/2).}{fig:manual-admin-crear-curso-2}{}
 
-\clearpage
-
 \figura{0.92}{\detokenize{../Pantallas de TFG/Panel de administracion - Editar curso.png}}{Edici\'on de curso.}{fig:manual-admin-editar-curso}{}
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Panel de administración - Eliminar curso.png}}{Eliminaci\'on de curso.}{fig:manual-admin-eliminar-curso}{}
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Panel de administracion - Asignar profesores.png}}{Asignaci\'on de profesorado a cursos.}{fig:manual-admin-asignar-profesores}{}
-
-\clearpage
 
 \subsection{Administraci\'on de grupos}
 
@@ -270,8 +251,6 @@ mantener sus datos y asignar usuarios a cada grupo.
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Panel de administración - Asignación de usuarios en grupo.png}}{Asignaci\'on de usuarios en grupo.}{fig:manual-admin-asignacion-grupo}{}
 
-\clearpage
-
 \subsection{Panel de administraci\'on}
 
 El panel \texttt{/admin} est\'a organizado en tres pesta\~nas principales: \textbf{Usuarios} para alta, edici\'on, eliminaci\'on y asignaci\'on de roles, \textbf{Cursos} para creaci\'on y mantenimiento de cursos, y \textbf{Grupos} para creaci\'on y gesti\'on de grupos asociados a cursos. Esta separaci\'on reduce errores de administraci\'on cruzada.
@@ -287,6 +266,7 @@ por lo que se recomienda limitar su uso a personal autorizado.
 
 Para mantener orden operativo y seguridad, se recomienda aplicar el principio de m\'inimo privilegio en asignaci\'on de roles, realizar revisi\'on peri\'odica de cuentas inactivas o duplicadas, separar cuentas de administraci\'on de cuentas de uso docente y registrar cambios sensibles en altas, bajas y cambios de rol. Estas medidas reducen riesgo de exposici\'on accidental.
 
+\FloatBarrier
 \section{Mensajes de error y resoluci\'on de incidencias}
 
 Las incidencias m\'as frecuentes y su acci\'on recomendada incluyen credenciales inv\'alidas (verificar correo y contrase\~na), sesi\'on expirada (iniciar sesi\'on de nuevo), archivo no permitido (revisar tipo, extensi\'on y tama\~no del entregable), ausencia de permisos (comprobar rol y pertenencia a curso o grupo) y error al enviar entrega (reintentar y comprobar conexi\'on). Esta orientaci\'on reduce tiempo de resoluci\'on.
@@ -296,7 +276,7 @@ la hora, operaci\'on realizada y mensaje mostrado para facilitar diagn\'ostico.
 
 \subsection{Matriz de incidencias operativas}
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{|P{3.2cm}|P{4.4cm}|P{3.8cm}|}
 \hline
@@ -317,8 +297,8 @@ Error en descarga ZIP & Interrupci\'on de red o contenido no disponible & Reinte
 \label{tab:manual-incidencias}
 \end{table}
 
-\clearpage
 
+\FloatBarrier
 \section{Seguridad y protecci\'on de la informaci\'on en el uso diario}
 
 La seguridad operativa depende tanto de mecanismos t\'ecnicos
@@ -328,6 +308,7 @@ Para preservar confidencialidad e integridad de datos acad\'emicos, se recomiend
 Estas medidas reducen riesgos de acceso no autorizado
 y publicaci\'on accidental de informaci\'on acad\'emica sensible.
 
+\FloatBarrier
 \section{Checklist operativo por perfil}
 
 Como apoyo de uso r\'apido se incluye un checklist resumido por rol: el \textbf{administrador} se centra en alta de usuarios, asignaci\'on de roles y revisi\'on de estructura de cursos y grupos; el \textbf{profesor} en configuraci\'on de actividad, publicaci\'on de entregable, correcci\'on y publicaci\'on de nota; y el \textbf{estudiante} en revisi\'on de actividad visible, entrega en plazo y verificaci\'on de estado y feedback. Este recordatorio reduce omisiones operativas.
@@ -335,10 +316,12 @@ Como apoyo de uso r\'apido se incluye un checklist resumido por rol: el \textbf{
 El uso sistem\'atico de este checklist disminuye errores de operaci\'on
 y mejora la consistencia del proceso acad\'emico.
 
+\FloatBarrier
 \section{Buenas pr\'acticas de uso}
 
 Para minimizar incidencias operativas se recomienda comprobar siempre fecha l\'imite y tipo de entrega antes de enviar, revisar la vista de detalle tras cada acci\'on cr\'itica, mantener actualizado el perfil de usuario, evitar compartir credenciales y cerrar sesi\'on en equipos compartidos. Estas acciones consolidan un uso seguro y ordenado.
 
+\FloatBarrier
 \section{Alternativa o complemento a la ense\~nanza virtual}
 
 La plataforma se centra en el ciclo de actividades, entregables y evaluaci\'on.
@@ -353,18 +336,22 @@ manteniendo el resto de la docencia (contenidos, foros, cuestionarios) en el LMS
 La convivencia es viable mediante enlaces cruzados y coordinaci\'on de calendarios,
 evitando duplicidades en el trabajo docente.
 
+\FloatBarrier
 \section{Aspectos novedosos}
 
 El proyecto introduce capacidades que ampl\'ian la operativa habitual de un LMS. Por un lado, el uso de APIs de OneDrive y correo permite autorizar el acceso del usuario a su cuenta (OAuth2) y gestionar entregas en su almacenamiento en la nube, mientras que el canal de correo (actualmente operado mediante Brevo) soporta procesos como recuperaci\'on de contrase\~na y notificaciones de evaluaci\'on. Por otro, la importaci\'on desde OneDrive habilita la incorporaci\'on de la estructura de carpetas del usuario para organizar entregables y mantener trazabilidad con su repositorio personal.
 
+\FloatBarrier
 \section{Desaf\'ios t\'ecnicos encontrados en el proyecto}
 
 Los principales retos t\'ecnicos identificados durante el desarrollo y el despliegue incluyen la incompatibilidad de ESLint 9 con configuraciones cl\'asicas (resuelta con migraci\'on a formato \textit{flat config}), restricciones de Render en servicios Static Site que exigieron ajustes del blueprint, y restricciones de correo saliente en PaaS mitigadas con proveedores HTTP (Brevo) para correos transaccionales. Tambi\'en se abord\'o la migraci\'on de proveedor de correo transaccional: inicialmente se utiliz\'o SendGrid, pero al finalizar su plan gratuito se migr\'o a Brevo; se evalu\'o Resend como alternativa, aunque su plan gratuito exige dominio verificado, y el dise\~no del \texttt{EmailService} con patr\'on de proveedor desacoplado permite intercambiar proveedores sin modificar l\'ogica de negocio. Se suman conflictos y deprecaciones en SonarCloud solventados migrando al plugin de Maven, tiempos excesivos en OWASP Dependency Check sin API Key de NVD mitigados con credenciales dedicadas, errores CORS en despliegue (403) al no incluir el origen del frontend en la configuraci\'on, e inactividad del backend en el tier gratuito mitigada mediante \textit{keep-alive} automatizado.
 
+\FloatBarrier
 \section{An\'alisis de la evoluci\'on del proyecto}
 
 El historial de commits con prefijo \texttt{feat} refleja una evoluci\'on en fases (36 registros). La fase de \textbf{arranque y base} incluye el commit inicial, definici\'on de estructura y primeros flujos de CI; la fase de \textbf{infraestructura} agrupa despliegue continuo, Render y workflows de mantenimiento y seguridad (Dependabot, Sonar, auditor\'ias). La \textbf{funcionalidad nuclear} incorpora JWT, recuperaci\'on de contrase\~na, mejoras de administraci\'on, integraci\'on OneDrive, descargas y panel de evaluaciones; la fase de \textbf{calidad y robustez} ampl\'ia test, mutaci\'on y cobertura eliminando \textit{hotspots}; y la fase de \textbf{documentaci\'on} consolida la memoria del TFG. Esta progresi\'on evidencia una evoluci\'on incremental y trazable.
 
+\FloatBarrier
 \section{Conclusiones del cap\'itulo}
 
 El manual de usuario consolida el uso operativo del sistema y garantiza

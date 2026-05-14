@@ -1,5 +1,6 @@
 ﻿\chapter{Pruebas}\label{pruebas}
 
+\FloatBarrier
 \section{Introducci\'on}
 
 La fase de pruebas tiene como objetivo validar el sistema desde una doble perspectiva:
@@ -11,17 +12,19 @@ como los flujos de usuario de extremo a extremo.
 Por este motivo se adopta una estrategia de pruebas en capas,
 complementada con an\'alisis de mutaci\'on y ejecuci\'on automatizada en CI/CD.
 
+\FloatBarrier
 \section{Objetivos de verificaci\'on}
 
 Los objetivos principales de esta fase son verificar que los casos de uso prioritarios funcionan de forma estable, prevenir regresiones al introducir cambios en l\'ogica de negocio, garantizar que las restricciones de seguridad y autorizaci\'on se respetan, medir cobertura y fortaleza de tests de forma objetiva, e integrar la validaci\'on en el ciclo continuo de construcci\'on y despliegue. Esta formulaci\'on conecta calidad funcional y operativa en una misma l\'inea de evidencia.
 
+\FloatBarrier
 \section{Estrategia de pruebas en capas}
 
 La estrategia sigue una pir\'amide de testing con cuatro niveles: pruebas unitarias para validar l\'ogica aislada de servicios, utilidades y componentes; pruebas de integraci\'on para validar interacci\'on entre capas y contratos de API; pruebas E2E para validar flujos de usuario en navegador; y pruebas de mutaci\'on para evaluar la capacidad real de los tests de detectar defectos. Esta combinaci\'on equilibra rapidez de feedback y profundidad de verificaci\'on.
 
 La Tabla~\ref{tab:matriz-pruebas} resume las tecnolog\'ias aplicadas.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{|P{2.9cm}|P{3.6cm}|P{5.4cm}|}
 \hline
@@ -42,8 +45,7 @@ Mutaci\'on backend & PIT & Medir capacidad de detecci\'on de fallos en servicios
 \label{tab:matriz-pruebas}
 \end{table}
 
-\clearpage
-
+\FloatBarrier
 \section{Inventario cuantitativo de pruebas realizadas}
 
 Para documentar de forma expl\'icita el alcance de verificaci\'on,
@@ -58,6 +60,7 @@ N_{\text{total}} = N_{\text{frontend unitarias}} + N_{\text{frontend E2E}} + N_{
 
 El desglose principal es el siguiente: frontend unitarias con 138 casos de prueba en 21 ficheros, frontend E2E con 3 escenarios end-to-end y backend con 850 casos de prueba agregados en 57 suites Surefire. Esta distribuci\'on refleja mayor concentraci\'on en verificaci\'on de servicios.
 
+\FloatBarrier
 \section{Pruebas en frontend}
 
 \subsection{Pruebas unitarias y cobertura}
@@ -74,7 +77,7 @@ Adem\'as de la cobertura porcentual, se ha realizado un inventario por m\'odulo
 de la suite unitaria para dejar evidencia de qu\'e zonas funcionales reciben
 mayor esfuerzo de verificaci\'on.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{|P{5.6cm}|P{2.2cm}|}
 \hline
@@ -122,6 +125,7 @@ La cobertura mediante mutaci\'on en frontend se ha realizado con un procedimient
 
 En el corte actual, \texttt{npm run test:mutation} instrumenta 10 ficheros de servicios y utilidades con 435 mutantes. El resultado global es un \textit{mutation score} del 92.10\%, con 267 mutantes eliminados, 23 supervivientes y 1 \textit{timeout}. Como criterio de aceptaci\'on de esta fase, Stryker aplica umbrales \texttt{high=75}, \texttt{low=60} y \texttt{break=50}, siendo este \'ultimo el que determina fallo de pipeline.
 
+\FloatBarrier
 \section{Pruebas en backend}
 
 \subsection{Pruebas unitarias e integraci\'on}
@@ -139,7 +143,7 @@ El backend se ha cuantificado a partir de nodos \texttt{testcase}
 en reportes Surefire, lo que permite reflejar correctamente pruebas
 parametrizadas y escenarios anidados.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{|P{5.6cm}|P{2.2cm}|}
 \hline
@@ -196,6 +200,7 @@ El flujo seguido para cobertura de mutaci\'on en backend consiste en ejecutar el
 
 En el corte actual, PIT genera 144 mutantes, de los que 134 son eliminados por la suite. El resultado es un \textit{mutation score} del 93\%, una cobertura de l\'inea del 95\% sobre clases mutadas y una fuerza de test del 96\%. El perfil exige adem\'as un m\'inimo de mutaci\'on del 70\% y de cobertura del 75\%, reforzando que la cobertura no sea solo de l\'ineas, sino de detecci\'on efectiva de fallos.
 
+\FloatBarrier
 \section{Automatizaci\'on en CI/CD}
 
 La validaci\'on se integra en pipelines de GitHub Actions,
@@ -206,12 +211,13 @@ Workflows principales: \texttt{frontend-ci.yml} para lint, unitarias con cobertu
 Esta automatizaci\'on reduce el riesgo de integraci\'on tard\'ia,
 y permite detectar regresiones antes de despliegues a entornos superiores.
 
+\FloatBarrier
 \section{Resultados verificados}
 
 De acuerdo con el informe de estrategia de testing del proyecto
 (corte de verificaci\'on final), se obtienen los siguientes resultados representativos:
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{|P{4.4cm}|P{7.4cm}|}
 \hline
@@ -238,15 +244,15 @@ Test objetivo backend & \texttt{EntregaServiceTest}: 89 tests, 0 fallos, 0 error
 \label{tab:resultados-pruebas}
 \end{table}
 
-\clearpage
-
 Estos valores muestran una madurez de testing consistente con el nivel de exigencia
 de un TFG de orientaci\'on profesional.
 
+\FloatBarrier
 \section{Criterios de aceptaci\'on}
 
 Como criterio operativo de calidad se establecen m\'inimos de \texttt{lint} sin errores, suites unitarias, integraci\'on y E2E en verde, coberturas por encima de umbrales configurados, m\'etricas de mutaci\'on por encima de umbral de ruptura y ausencia de regresiones funcionales en flujos cr\'iticos. Estos criterios permiten cierre objetivo de iteraciones.
 
+\FloatBarrier
 \section{Limitaciones y riesgos}
 
 Aunque la estrategia es robusta, se identifican l\'ineas de mejora como ampliar E2E con backend real en entorno de staging para ciertos casos, extender mutaci\'on a mayor superficie de clases backend y reforzar pruebas de carga y comportamiento en condiciones extremas. Estas mejoras consolidar\'ian la robustez en escenarios de producci\'on.
@@ -254,6 +260,7 @@ Aunque la estrategia es robusta, se identifican l\'ineas de mejora como ampliar 
 No obstante, las limitaciones actuales no comprometen la validez de la verificaci\'on
 para el alcance definido del proyecto.
 
+\FloatBarrier
 \section{Conclusiones del cap\'itulo}
 
 La estrategia de pruebas aplicada combina cobertura, profundidad y automatizaci\'on,

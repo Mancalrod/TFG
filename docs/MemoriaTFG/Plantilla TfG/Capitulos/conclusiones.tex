@@ -1,5 +1,6 @@
 ﻿\chapter{Conclusiones y desarrollos futuros}\label{conclusiones}
 
+\FloatBarrier
 \section{S\'intesis final del trabajo}
 
 El desarrollo realizado ha permitido construir un sistema web de gesti\'on de
@@ -13,6 +14,7 @@ alineada con el problema de negocio detectado en el contexto docente:
 mejorar la gesti\'on de actividades, entregas, evaluaciones y feedback
 frente a herramientas generalistas con menor adecuaci\'on a la operativa diaria.
 
+\FloatBarrier
 \section{Grado de cumplimiento de objetivos}
 
 El objetivo general planteado en la memoria
@@ -21,10 +23,12 @@ segura y evolutiva) puede considerarse \textbf{cumplido}.
 
 Respecto a los objetivos espec\'ificos, el balance es positivo. El \textbf{modelado del dominio acad\'emico} se considera cumplido al haberse implementado entidades, relaciones y reglas de negocio acordes al ERS/DAS. El \textbf{soporte completo del flujo de entrega y evaluaci\'on} est\'a cubierto con el ciclo de vida de entregables, entregas, calificaci\'on y feedback, y el \textbf{control de acceso por roles y contexto} se materializa con verificaciones por perfil y recurso objetivo. Asimismo, la \textbf{calidad t\'ecnica y verificaci\'on} queda respaldada por una estrategia de pruebas en capas con m\'etricas elevadas de cobertura y mutaci\'on, y el \textbf{despliegue y operaci\'on automatizada} se sostiene en pipelines CI/CD, controles de seguridad y configuraci\'on por entornos.
 
+\FloatBarrier
 \section{Aportaciones principales}
 
 Las aportaciones m\'as relevantes del trabajo se articulan en cuatro planos. En el plano \textbf{funcional} se entrega una plataforma centrada en la operativa docente, con flujos diferenciados para administraci\'on, profesorado y alumnado. En el plano \textbf{t\'ecnico} se consolida una arquitectura modular SPA + API, persistencia versionada con Flyway, seguridad JWT y soporte de integraciones cloud configurables. En el plano de \textbf{calidad} se incorpora testing multinivel y mutaci\'on como criterio objetivo de robustez, y en el plano de \textbf{operaci\'on} se establece un canal CI/CD reproducible con validaciones continuas de calidad y seguridad.
 
+\FloatBarrier
 \section{Resultados y evidencia}
 
 La evidencia disponible en el proyecto permite sostener de forma objetiva la madurez alcanzada: existe cobertura alta en frontend con umbrales exigentes en l\'ineas, funciones, sentencias y ramas; los resultados de mutaci\'on en frontend y backend son favorables, indicando que los tests detectan alteraciones de comportamiento; se han validado flujos de usuario cr\'iticos mediante E2E; y las verificaciones est\'an automatizadas en pipelines de integraci\'on continua. Esta evidencia reduce el riesgo de regresi\'on.
@@ -37,6 +41,7 @@ con documentaci\'on t\'ecnica oficial de las tecnolog\'ias empleadas y
 recomendaciones de referencia en seguridad web
 \cite{springbootdocs,reactdocs,flywaydocs,vitestdocs,playwrightdocs,owasptop10}.
 
+\FloatBarrier
 \section{Evaluaci\'on del impacto por tipo de usuario}
 
 El valor del proyecto se aprecia de forma diferente seg\'un el perfil de uso.
@@ -46,6 +51,7 @@ Desde esta perspectiva,
 el sistema no solo aporta funcionalidad t\'ecnica,
 sino tambi\'en una mejora organizativa en la operativa acad\'emica.
 
+\FloatBarrier
 \section{Validaci\'on del enfoque de ingenier\'ia adoptado}
 
 Una conclusi\'on relevante del trabajo es que el enfoque metodol\'ogico aplicado
@@ -59,6 +65,7 @@ en proyectos software de car\'acter acad\'emico-profesional,
 la disciplina metodol\'ogica es un factor diferencial
 tan importante como la selecci\'on tecnol\'ogica.
 
+\FloatBarrier
 \section{Limitaciones del trabajo}
 
 Como en todo proyecto con alcance temporal acotado,
@@ -67,11 +74,13 @@ se identifican limitaciones que delimitan el estado actual. No todas las funcion
 Estas limitaciones no invalidan el cumplimiento del objetivo principal,
 pero orientan de forma clara la hoja de ruta futura.
 
+\FloatBarrier
 \section{Lecciones aprendidas}
 
 Durante la ejecuci\'on del proyecto se consolidan varios aprendizajes
 de inter\'es para trabajos similares. Dise\~nar la trazabilidad desde el inicio (requisito-backlog-c\'odigo-prueba) simplifica justificaci\'on t\'ecnica y auditor\'ia; la calidad debe construirse iterativamente y no solo en la fase final de cierre; desacoplar configuraci\'on por entorno reduce fricci\'on en migraciones de infraestructura; e integrar seguridad y permisos en la l\'ogica de dominio evita defectos estructurales costosos. Estos aprendizajes son transferibles a proyectos acad\'emicos similares.
 
+\FloatBarrier
 \section{Riesgos residuales y deuda t\'ecnica controlada}
 
 En el estado actual se identifican riesgos residuales,
@@ -81,6 +90,7 @@ La deuda t\'ecnica asociada se considera \textbf{controlada},
 porque est\'a identificada,
 priorizada y conectada con una hoja de ruta de evoluci\'on.
 
+\FloatBarrier
 \section{Desarrollos futuros}
 
 Se proponen l\'ineas de evoluci\'on priorizadas por impacto y viabilidad.
@@ -97,12 +107,13 @@ En el medio plazo se plantea incorporar autenticaci\'on federada institucional c
 
 En el largo plazo se contempla la incorporaci\'on de m\'odulos de apoyo docente (detecci\'on de patrones de entrega, recomendaci\'on de revisi\'on, etc.), el estudio de interoperabilidad con LMS institucionales y el escalado multi-instituci\'on con pol\'iticas avanzadas de gobierno de datos. Estas l\'ineas ampl\'ian impacto sin comprometer el n\'ucleo existente.
 
+\FloatBarrier
 \section{Hoja de ruta priorizada de continuidad}
 
 Para facilitar la continuidad del producto,
 se sintetiza una priorizaci\'on por horizonte temporal y retorno esperado.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{|P{2.5cm}|P{5.2cm}|P{3.8cm}|}
 \hline
@@ -119,6 +130,7 @@ Largo plazo & interoperabilidad institucional y m\'odulos avanzados de apoyo doc
 \label{tab:hoja-ruta-conclusiones}
 \end{table}
 
+\FloatBarrier
 \section{Reflexi\'on final}
 
 El trabajo realizado demuestra que,
@@ -130,6 +142,7 @@ priorizaci\'on de alcance y verificaci\'on continua.
 La principal fortaleza del resultado no reside \'unicamente en las funcionalidades implementadas,
 sino en la consistencia entre problema, decisiones adoptadas y evidencia de calidad.
 
+\FloatBarrier
 \section{Cierre}
 
 El TFG demuestra que es posible construir,

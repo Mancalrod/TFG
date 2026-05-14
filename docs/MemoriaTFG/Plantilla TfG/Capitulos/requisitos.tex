@@ -1,5 +1,6 @@
 ﻿\chapter{An\'alisis de requisitos, dise\~no e implementaci\'on}\label{requisitos}
 
+\FloatBarrier
 \section{Introducci\'on}
 
 Este cap\'itulo integra tres perspectivas que en un desarrollo profesional no deben
@@ -10,6 +11,7 @@ El objetivo es demostrar trazabilidad de extremo a extremo: desde la necesidad
 identificada en el an\'alisis inicial hasta su materializaci\'on en componentes software,
 persistencia, seguridad, pruebas y despliegue.
 
+\FloatBarrier
 \section{Ecosistema de desarrollo y operaci\'on}
 
 \subsection{Lenguajes y herramientas utilizadas}
@@ -42,6 +44,7 @@ nunca como sustituto del criterio de ingenier\'ia del autor.
 El alcance y las salvaguardas aplicadas se detallan en el
 Anexo D de esta memoria.
 
+\FloatBarrier
 \section{An\'alisis de requisitos}
 
 \subsection{Fuentes de requisitos}
@@ -83,7 +86,7 @@ evitando tanto la elevaci\'on de privilegios como la evaluaci\'on fuera de conte
 Los requisitos no funcionales aportan condiciones de calidad del producto.
 La Tabla~\ref{tab:rqnf-resumen} resume los m\'as relevantes para el alcance actual.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{|P{2.1cm}|P{3.5cm}|P{6.4cm}|}
 \hline
@@ -121,7 +124,7 @@ La trazabilidad se gestiona en tres niveles: \textbf{nivel de an\'alisis} con id
 
 La Tabla~\ref{tab:trazabilidad-requisitos} muestra ejemplos representativos.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{|P{2.2cm}|P{3.2cm}|P{4.0cm}|P{2.6cm}|}
 \hline
@@ -169,7 +172,7 @@ y verificaci\'on (pruebas por flujo cr\'itico y por requisito).
 El ERS descompone el sistema en cinco subsistemas. Esta descomposici\'on
 ha sido reutilizada como gu\'ia de dise\~no modular durante el desarrollo.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \small
 \begin{tabular}{|P{2.0cm}|P{3.9cm}|P{5.9cm}|}
@@ -200,7 +203,7 @@ real del TFG.
 
 \subsubsection*{Requisitos generales (RQG)}
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \small
 \begin{tabular}{|P{1.4cm}|P{3.2cm}|P{7.2cm}|}
@@ -229,7 +232,7 @@ RQG-007 & Seguridad y control de acceso & Restricci\'on de visibilidad/operaci\'
 
 \subsubsection*{Requisitos de informaci\'on (RQI)}
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \small
 \begin{tabular}{|P{1.4cm}|P{3.2cm}|P{7.2cm}|}
@@ -258,7 +261,7 @@ Las tablas siguientes recogen las capacidades operativas que debe ofrecer
 el sistema al usuario final, separadas en dos bloques para mantener legible
 el inventario completo.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \small
 \begin{tabular}{|P{1.4cm}|P{3.3cm}|P{7.1cm}|}
@@ -295,7 +298,7 @@ RQF-012 & Modificar entregables & Edici\'on de entregable por docente autorizado
 \label{tab:rqf-inventario-1}
 \end{table}
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \small
 \begin{tabular}{|P{1.4cm}|P{3.3cm}|P{7.1cm}|}
@@ -339,7 +342,7 @@ RQF-025 & Integraci\'on cloud & Uso de almacenamiento en nube seg\'un configurac
 La tabla siguiente agrupa las restricciones que condicionan qui\'en puede
 ejecutar cada operaci\'on, en qu\'e contexto acad\'emico y bajo qu\'e condiciones.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \small
 \begin{tabular}{|P{1.6cm}|P{3.5cm}|P{6.6cm}|}
@@ -373,7 +376,7 @@ REGN-008 & Emisi\'on de feedback & Solo el docente autorizado publica feedback e
 La tabla siguiente resume las condiciones de calidad que debe cumplir
 el sistema m\'as all\'a de la funcionalidad visible.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \small
 \begin{tabular}{|P{1.6cm}|P{3.2cm}|P{6.9cm}|}
@@ -414,7 +417,7 @@ El DAS aporta una base visual amplia (diagramas t\'ecnicos, secuencias,
 navegabilidad y mockups) que se reutiliza en esta memoria para explicar
 de forma verificable cada decisi\'on de dise\~no e implementaci\'on.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \small
 \begin{tabular}{|P{3.5cm}|P{5.5cm}|P{2.8cm}|}
@@ -463,7 +466,7 @@ Adicionalmente, el DAS incluye un inventario de diecis\'eis mockups que cubre
 las operaciones esenciales por rol. Para mantener equilibrio entre exhaustividad
 y legibilidad, su trazado completo se resume en la Tabla~\ref{tab:das-mockups}.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \small
 \begin{tabular}{|P{4.9cm}|P{6.8cm}|}
@@ -530,7 +533,7 @@ Por \`ultimo, el diagrama de navegabilidad refuerza la consistencia entre
 estructura funcional y experiencia de usuario por rol, evitando rutas
 incoherentes con las restricciones de autorizaci\'on descritas en ERS.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \small
 \begin{tabular}{|P{2.5cm}|P{3.6cm}|P{3.8cm}|P{2.4cm}|}
@@ -589,7 +592,7 @@ la trazabilidad de versiones y el control de evidencias de env\'io.
 
 \figura{0.70}{\detokenize{../assets/EntregaConAlgoPuesto.png}}{Mockup de entrega con archivo adjunto (DAS)}{fig:das-mock-entrega-con-archivo}{}
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \small
 \begin{tabular}{|P{2.1cm}|P{3.4cm}|P{4.0cm}|P{2.8cm}|}
@@ -634,7 +637,7 @@ cat\'alogo funcional y los flujos reales desarrollados.
 
 \figura{0.82}{\detokenize{../assets/CU-4.drawio.png}}{Caso de uso representativo CU-4 (DAS)}{fig:das-cu-4}{}
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \small
 \begin{tabular}{|P{3.0cm}|P{4.0cm}|P{2.7cm}|P{2.5cm}|}
@@ -666,7 +669,7 @@ integra tres niveles de evidencia: requisito formal en ERS, artefacto de
 dise\~no en DAS y materializaci\'on en componentes software y pruebas del
 proyecto.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \small
 \begin{tabular}{|P{2.5cm}|P{3.5cm}|P{3.0cm}|P{2.9cm}|}
@@ -703,6 +706,7 @@ De esta forma, la memoria no solo resume resultados: tambi\'en preserva la
 trazabilidad documental completa entre especificaci\'on inicial, dise\~no t\'ecnico
 y comportamiento implementado.
 
+\FloatBarrier
 \section{Dise\~no del sistema}
 
 \subsection{Arquitectura de alto nivel}
@@ -722,7 +726,7 @@ sin romper el resto del sistema,
 manteniendo adem\'as una frontera de seguridad clara entre cliente,
 l\'ogica de negocio y persistencia.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{|P{2.9cm}|P{3.1cm}|P{5.6cm}|}
 \hline
@@ -771,6 +775,7 @@ El frontend se organiza en m\'odulos \texttt{pages}, \texttt{components}, \textt
 La capa de red encapsula llamadas HTTP y gesti\'on de tokens,
 incluyendo renovaci\'on autom\'atica de sesi\'on al expirar el token de acceso.
 
+\FloatBarrier
 \section{Implementaci\'on}
 
 \subsection{Implementaci\'on backend}
@@ -815,6 +820,7 @@ La verificaci\'on se realiza en capas (unitaria, integraci\'on, E2E y mutaci\'on
 apoyada por pipelines CI/CD y controles de seguridad en preproducci\'on.
 Este enfoque proporciona evidencia objetiva de robustez y reduce el riesgo de regresiones.
 
+\FloatBarrier
 \section{Discusi\'on t\'ecnica}
 
 \subsection{Decisiones y compromisos}
@@ -828,6 +834,7 @@ Aunque el n\'ucleo funcional est\'a cubierto, se identifican l\'ineas de evoluci
 Estas mejoras no condicionan la validez del TFG,
 sino que delimitan una hoja de ruta t\'ecnica razonable para continuidad del proyecto.
 
+\FloatBarrier
 \section{Conclusiones del cap\'itulo}
 
 El an\'alisis realizado demuestra coherencia entre lo especificado y lo implementado.

@@ -1,5 +1,6 @@
 \chapter{Justificaci\'on detallada de decisiones}\label{justificacion}
 
+\FloatBarrier
 \section{Introducci\'on}
 
 En un TFG de ingenier\'ia de software, implementar funcionalidades no es suficiente
@@ -10,6 +11,7 @@ Este cap\'itulo ampl\'ia de forma exhaustiva la justificaci\'on de decisiones
 adoptadas durante el proyecto,
 con foco en cuatro ejes: producto, arquitectura, calidad y operaci\'on.
 
+\FloatBarrier
 \section{Marco de toma de decisiones}
 
 \subsection{Criterios utilizados}
@@ -22,7 +24,7 @@ Para evitar decisiones ad-hoc,
 se aplic\'o una ponderaci\'on orientativa de criterios
 que se mantuvo estable en los principales bloques de dise\~no.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{|P{6.4cm}|P{2.5cm}|}
 \hline
@@ -45,6 +47,7 @@ Seguridad y robustez t\'ecnica & 15 \\
 \label{tab:pesos-criterios}
 \end{table}
 
+\FloatBarrier
 \section{Decisiones de alcance funcional}
 
 \subsection{Decisi\'on D1: definir un MVP centrado en flujo acad\'emico nuclear}
@@ -71,6 +74,7 @@ separar claramente experiencias de administrador, profesor y estudiante.
 
 \textbf{Razones}: reduce ambig\"uedad de permisos en interfaz y API, simplifica pruebas de autorizaci\'on y casos negativos, y mejora usabilidad al mostrar solo operaciones pertinentes. Esta separaci\'on evita errores de contexto en operaciones sensibles.
 
+\FloatBarrier
 \section{Decisiones de arquitectura}
 
 \subsection{Decisi\'on D3: arquitectura SPA + API desacoplada}
@@ -103,6 +107,7 @@ evitar dependencia directa entre entidades JPA y respuestas HTTP.
 mayor volumen de c\'odigo estructural,
 aceptado por mejora en mantenibilidad y seguridad de contrato.
 
+\FloatBarrier
 \section{Decisiones de stack tecnol\'ogico}
 
 \subsection{Decisi\'on D6: backend en Spring Boot + Java 21}
@@ -122,6 +127,7 @@ Spring reduce incertidumbre de ensamblaje en aspectos cr\'iticos
 mayor libertad implica mayor disciplina de arquitectura en frontend,
 mitigada mediante organizaci\'on por m\'odulos (pages/components/context/services).
 
+\FloatBarrier
 \section{Decisiones de seguridad}
 
 \subsection{Decisi\'on D8: autenticaci\'on JWT con refresh token}
@@ -148,6 +154,7 @@ puede operar con permisos distintos seg\'un curso, grupo o actividad.
 validaci\'on en controladores y servicios de pertenencia real
 al contexto objetivo antes de permitir operaciones sensibles.
 
+\FloatBarrier
 \section{Decisiones de datos e integraciones}
 
 \subsection{Decisi\'on D10: PostgreSQL como base de datos principal}
@@ -169,6 +176,7 @@ almacenamiento local en desarrollo y cloud persistente en producci\'on.
 
 \textbf{Razones}: simplicidad y velocidad en entorno local, persistencia y resiliencia en entornos con filesystem ef\'imero, y capacidad de habilitar integraciones externas sin romper el n\'ucleo. Se busca equilibrio entre agilidad y robustez operativa.
 
+\FloatBarrier
 \section{Decisiones de calidad y verificaci\'on}
 
 \subsection{Decisi\'on D13: testing en capas}
@@ -188,6 +196,7 @@ la cobertura porcentual no garantiza detecci\'on efectiva de fallos.
 los mutantes supervivientes ayudan a localizar huecos de aserciones
 y mejorar calidad de tests en c\'odigo cr\'itico.
 
+\FloatBarrier
 \section{Decisiones de operaci\'on y despliegue}
 
 \subsection{Decisi\'on D15: GitHub Actions como columna vertebral CI/CD}
@@ -214,9 +223,10 @@ que permite migrar de proveedor sin modificar l\'ogica de negocio.
 menor control fino de infraestructura frente a VPS/Kubernetes,
 considerado aceptable para objetivos y alcance del TFG.
 
+\FloatBarrier
 \section{Matriz consolidada de decisiones}
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{|P{1.6cm}|P{3.8cm}|P{3.2cm}|P{4.4cm}|}
 \hline
@@ -245,8 +255,7 @@ D16 & PaaS gestionado & VPS/Kubernetes & Tiempo y coste operativos contenidos \\
 \label{tab:resumen-decisiones}
 \end{table}
 
-\clearpage
-
+\FloatBarrier
 \section{An\'alisis coste-beneficio por bloques de decisiones}
 
 Para reforzar la justificaci\'on,
@@ -328,12 +337,13 @@ validaci\'on continua sobre entorno similar a producci\'on.
 alto. La operativa se vuelve estable y menos dependiente
 de ejecuciones manuales fr\'agiles.
 
+\FloatBarrier
 \section{Riesgos asociados a decisiones y medidas de contingencia}
 
 Ninguna decisi\'on de ingenier\'ia es neutra;
 por ello se explicitan riesgos y mitigaciones por cada eje principal.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{|P{3.4cm}|P{4.3cm}|P{4.5cm}|}
 \hline
@@ -354,13 +364,14 @@ CI/CD automatizada & Falsos positivos por inestabilidad de tests & Separaci\'on 
 \label{tab:riesgos-decisiones}
 \end{table}
 
+\FloatBarrier
 \section{Trazabilidad de decisiones con requisitos y evidencia}
 
 Para que la justificaci\'on no quede en el plano discursivo,
 se vinculan decisiones con requisitos y con evidencia emp\'irica observada
 en implementaci\'on y verificaci\'on.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{|P{1.6cm}|P{2.8cm}|P{2.9cm}|P{4.7cm}|}
 \hline
@@ -381,8 +392,7 @@ D16 & RQNF-008, RQNF-004 & Workflows CI/CD y despliegue automatizado en PaaS & O
 \label{tab:trazabilidad-decisiones}
 \end{table}
 
-\clearpage
-
+\FloatBarrier
 \section{Decisiones descartadas y por qu\'e no se adoptaron en esta fase}
 
 \subsection{Autenticaci\'on federada completa en MVP}
@@ -403,6 +413,7 @@ Kubernetes y configuraciones equivalentes se descartaron
 por sobrecoste operativo para un equipo reducido y un contexto de TFG,
 siendo m\'as adecuado reservarlo para fases de escalado posterior.
 
+\FloatBarrier
 \section{Conclusiones del cap\'itulo}
 
 La justificaci\'on detallada muestra que las decisiones del proyecto

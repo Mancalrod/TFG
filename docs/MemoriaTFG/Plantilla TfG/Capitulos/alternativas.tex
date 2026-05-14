@@ -21,6 +21,7 @@ revalidaci\'on antes de enviar y mensajes de error contextualizados.
 Esto minimiza p\'erdida de trabajo en conexiones inestables
 y mejora la experiencia del alumnado.
 
+\FloatBarrier
 \section{Alternativas de arquitectura y stack}
 
 \subsection{Arquitectura de aplicaci\'on}
@@ -57,6 +58,7 @@ pero con curva de entrada superior para el alcance temporal del TFG.
 Vue mantiene una DX excelente, aunque en este caso la experiencia previa del equipo
 y la alineaci\'on con librer\'ias de testing/CI favorecieron React.
 
+\FloatBarrier
 \section{Alternativas de persistencia y almacenamiento}
 
 \subsection{Base de datos relacional}
@@ -101,6 +103,7 @@ La integraci\'on \textbf{OneDrive} aporta valor en casos docentes
 que requieren sincronizaci\'on con ecosistemas Microsoft,
 pero se mantiene como capacidad configurable y no obligatoria del n\'ucleo.
 
+\FloatBarrier
 \section{Alternativas de seguridad y sesi\'on}
 
 \subsection{Modelo de autenticaci\'on}
@@ -119,6 +122,7 @@ como l\'inea de evoluci\'on.
 La decisi\'on de no imponerlas en el MVP responde al criterio
 de maximizar cobertura funcional core sin comprometer plazos.
 
+\FloatBarrier
 \section{Alternativas investigadas y descartadas}
 
 \subsection{SharePoint para OneDrive corporativo}
@@ -139,6 +143,7 @@ donde el administrador crea usuarios y los asigna a cursos y grupos.
 Esto evita altas desalineadas con la matr\'icula real y simplifica el control
 de permisos y pertenencia a grupos.
 
+\FloatBarrier
 \section{Alternativas de despliegue y operaci\'on}
 
 \subsection{Estrategia de despliegue}
@@ -170,12 +175,13 @@ Se compararon \textbf{C1 - CI/CD integrada en GitHub Actions} (elegida) y \textb
 La alternativa elegida integra lint, tests, build, an\'alisis de seguridad,
 mutaci\'on y publicaci\'on de artefactos en un flujo unificado y reproducible.
 
+\FloatBarrier
 \section{Comparativa multicriterio}
 
 La Tabla~\ref{tab:comparativa-global} sintetiza la comparaci\'on global
 entre enfoques de soluci\'on.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \small
 \begin{tabular}{|P{3.9cm}|c|c|c|}
@@ -204,6 +210,7 @@ la alternativa seleccionada no maximiza todos los ejes te\'oricos,
 pero s\'i ofrece el mejor equilibrio entre valor entregado,
 riesgo t\'ecnico y viabilidad temporal del proyecto.
 
+\FloatBarrier
 \section{Decisiones adoptadas y justificaci\'on final}
 
 Las decisiones finales que mejor explican el resultado del proyecto son la arquitectura SPA + API desacoplada para separar responsabilidades, un backend Spring Boot con persistencia relacional y migraciones Flyway, un frontend React + TypeScript para productividad con control tipado, almacenamiento cloud persistente en producci\'on y local en desarrollo, y despliegue en PaaS con CI/CD automatizada y verificaciones de calidad. Esta combinaci\'on asegura equilibrio entre viabilidad temporal y robustez t\'ecnica.
@@ -212,6 +219,7 @@ Esta combinaci\'on ha permitido llegar a un sistema funcional,
 con cobertura de pruebas alta y capacidad de evoluci\'on,
 sin sobredimensionar infraestructura ni desviarse del objetivo acad\'emico.
 
+\FloatBarrier
 \section{Conclusiones del cap\'itulo}
 
 La comparaci\'on confirma que la soluci\'on implementada no responde a una selecci\'on

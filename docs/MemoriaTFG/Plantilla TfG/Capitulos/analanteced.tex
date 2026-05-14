@@ -1,5 +1,6 @@
 ﻿\chapter{An\'alisis de antecedentes y aportaci\'on realizada}\label{analanteced}
 
+\FloatBarrier
 \section{Introducci\'on}
 
 Este cap\'itulo analiza la situaci\'on de partida del dominio de gesti\'on de entregables acad\'emicos
@@ -13,6 +14,7 @@ sino explicar por qu\'e el problema exist\'ia,
 qu\'e brechas de ingenier\'ia lo sosten\'ian,
 y c\'omo la soluci\'on propuesta aporta una mejora estructural defendible.
 
+\FloatBarrier
 \section{Metodolog\'ia de an\'alisis de antecedentes}
 
 Se adopta un enfoque en tres pasos: la caracterizaci\'on del escenario \emph{actual} (actores, procesos, fortalezas y debilidades), la identificaci\'on de brechas operativas y tecnol\'ogicas, y la definici\'on del escenario \emph{objetivo} con mapeo expl\'icito de aportaciones. Este orden evita saltos l\'ogicos y permite justificar cada mejora a partir de una necesidad concreta.
@@ -20,6 +22,7 @@ Se adopta un enfoque en tres pasos: la caracterizaci\'on del escenario \emph{act
 Este m\'etodo evita descripciones gen\'ericas y permite mantener trazabilidad
 entre problema detectado, decisi\'on de dise\~no e impacto obtenido.
 
+\FloatBarrier
 \section{Situaci\'on actual (escenario \emph{actual})}
 
 \subsection{Actores y procesos principales}
@@ -44,13 +47,14 @@ Junto a las fortalezas, se detectan debilidades que afectan al rendimiento del p
 
 Las debilidades anteriores no se explican por errores puntuales, sino por causas sist\'emicas. En el plano de proceso predomina la carga manual en fases cr\'iticas de correcci\'on, y en el plano de producto falta especializaci\'on para el ciclo completo de entregables. A nivel t\'ecnico existe acoplamiento entre flujo acad\'emico y herramientas de prop\'osito general, y en calidad se observa una trazabilidad escasa entre entrega, versi\'on, evaluaci\'on y feedback. Esta combinaci\'on explica por qu\'e las mejoras parciales no eliminan la fricci\'on operativa.
 
+\FloatBarrier
 \section{Brechas entre escenario actual y necesidades objetivo}
 
 Para justificar la intervenci\'on,
 se identifican brechas concretas entre la situaci\'on \emph{actual}
 y el resultado esperado en t\'erminos de ingenier\'ia.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{|P{3.2cm}|P{4.4cm}|P{4.9cm}|}
 \hline
@@ -71,6 +75,7 @@ Calidad y despliegue & Validaci\'on heterog\'enea por tarea & Verificaci\'on aut
 \label{tab:brechas-antecedentes}
 \end{table}
 
+\FloatBarrier
 \section{Entorno tecnol\'ogico de partida}
 
 El contexto previo se caracteriza por una plataforma institucional LMS con autenticaci\'on centralizada, acceso multiplataforma desde navegador y dependencia de herramientas locales para el tratamiento de paquetes de entrega. Esta dependencia traslada parte del esfuerzo al puesto de trabajo del docente y amplifica diferencias de criterio en la gesti\'on de materiales.
@@ -81,6 +86,7 @@ con impacto en tiempo de correcci\'on,
 estandarizaci\'on de criterios
 y riesgo de inconsistencias en trazabilidad.
 
+\FloatBarrier
 \section{An\'alisis de competidores y brechas sectoriales}
 
 Para dimensionar la aportaci\'on real del proyecto en el sector,
@@ -137,6 +143,7 @@ validaciones del sistema. La aportaci\'on se orient\'o a reducir carga
 manual, mejorar la trazabilidad y ofrecer verificaciones t\'ecnicas
 que no suelen estar disponibles en soluciones generalistas.
 
+\FloatBarrier
 \section{Aportaci\'on realizada (escenario \emph{objetivo})}
 
 La propuesta implementada aporta una mejora estructural,
@@ -168,12 +175,13 @@ Adem\'as de funcionalidad, el proyecto incorpora capacidades de calidad y operac
 La aportaci\'on, por tanto, no se limita a ``que funcione'',
 sino a que el sistema sea verificable, mantenible y operable.
 
+\FloatBarrier
 \section{Matriz de mapeo debilidades-aportaciones}
 
 La matriz siguiente sintetiza la relaci\'on entre debilidades detectadas
 y la respuesta concreta implementada en el proyecto.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{|P{2.5cm}|P{4.5cm}|P{4.9cm}|}
 \hline
@@ -192,12 +200,13 @@ DEB-004 & Dependencia de almacenamiento local/heterog\'eneo & Integraciones conf
 \label{tab:mapeo-debilidades-aportacion}
 \end{table}
 
+\FloatBarrier
 \section{Comparativa sint\'etica}
 
 Esta comparativa resume el salto entre escenario de partida y la
 aportaci\'on del TFG en t\'erminos de operaci\'on y trazabilidad.
 
-\begin{table}[ht]
+\begin{table}[!htbp]
 \centering
 \small
 \begin{tabular}{|P{3.0cm}|P{5.3cm}|P{5.3cm}|}
@@ -219,10 +228,12 @@ Calidad del desarrollo & Validaci\'on heterog\'enea seg\'un tarea & Estrategia d
 \label{tab:comparativa-antecedentes}
 \end{table}
 
+\FloatBarrier
 \section{Alineaci\'on con objetivos de negocio}
 
 La aportaci\'on realizada responde de forma directa a los objetivos de negocio definidos en la fase de an\'alisis. Se materializa el \textbf{OBJN-001} al agilizar la gesti\'on docente y reducir tareas manuales de bajo valor, se satisface el \textbf{OBJN-002} al mejorar accesibilidad y usabilidad del proceso de entrega, se refuerza el \textbf{OBJN-003} al centralizar evaluaci\'on y retroalimentaci\'on con trazabilidad, y se cumple el \textbf{OBJN-004} al estructurar informaci\'on que facilita evoluci\'on e integraciones futuras.
 
+\FloatBarrier
 \section{Limitaciones residuales y continuidad}
 
 Aun cuando la mejora es significativa, se mantienen l\'ineas de continuidad planificadas: ampliaci\'on de funcionalidades avanzadas fuera del MVP, extensi\'on de integraciones externas seg\'un contexto institucional y refuerzo de observabilidad y m\'etricas operativas de producci\'on. Esta continuidad permite evolucionar sin comprometer la estabilidad alcanzada.
@@ -230,6 +241,7 @@ Aun cuando la mejora es significativa, se mantienen l\'ineas de continuidad plan
 Estas limitaciones no invalidan la aportaci\'on obtenida,
 sino que delimitan una hoja de ruta realista para evoluci\'on posterior.
 
+\FloatBarrier
 \section{Conclusiones del cap\'itulo}
 
 El an\'alisis de antecedentes confirma que el principal problema del dominio
