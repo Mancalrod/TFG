@@ -1,4 +1,16 @@
 \chapter{Manual de usuario}\label{manual}
+% tfg-floatbarrier-auto
+\makeatletter
+\@ifundefined{tfgfloatbarrier}{
+  \def\tfgfloatbarrier{1}
+  \let\tfgorigfigure\figure
+  \let\tfgendorigfigure\endfigure
+  \renewenvironment{figure}{\tfgorigfigure}{\tfgendorigfigure\FloatBarrier}
+  \let\tfgorigtable\table
+  \let\tfgendorigtable\endtable
+  \renewenvironment{table}{\tfgorigtable}{\tfgendorigtable\FloatBarrier}
+}{}
+\makeatother
 
 \FloatBarrier
 \section{Introducci\'on}
@@ -122,6 +134,8 @@ y validaci\'on estricta, lo que obliga a que la entrega siga el formato indicado
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Dentro de una actividad - Editar Actividad (Parte 3) (Profesor).png}}{Edici\'on de actividad (3/3).}{fig:manual-profesor-editar-actividad-3}{}
 
+\FloatBarrier
+
 \subsection{Revisar entregas y evaluar}
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Dentro de un entregable (Profesor).png}}{Detalle de entregable para revisiones.}{fig:manual-profesor-detalle-entregable}{}
@@ -219,6 +233,8 @@ crear nuevas identidades, modificar datos y retirar cuentas cuando proceda.
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Panel de administración - Eliminar usuario.png}}{Eliminaci\'on de usuarios.}{fig:manual-admin-eliminar-usuario}{}
 
+\FloatBarrier
+
 \subsection{Administraci\'on de cursos}
 
 El bloque de cursos agrupa alta, edici\'on, eliminaci\'on y asignaci\'on
@@ -236,6 +252,8 @@ de profesorado responsable.
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Panel de administracion - Asignar profesores.png}}{Asignaci\'on de profesorado a cursos.}{fig:manual-admin-asignar-profesores}{}
 
+\FloatBarrier
+
 \subsection{Administraci\'on de grupos}
 
 El bloque de grupos permite crear agrupaciones acad\'emicas,
@@ -250,6 +268,8 @@ mantener sus datos y asignar usuarios a cada grupo.
 \figura{0.92}{\detokenize{../Pantallas de TFG/Panel de administración - Eliminar Grupo.png}}{Eliminaci\'on de grupo.}{fig:manual-admin-eliminar-grupo}{}
 
 \figura{0.92}{\detokenize{../Pantallas de TFG/Panel de administración - Asignación de usuarios en grupo.png}}{Asignaci\'on de usuarios en grupo.}{fig:manual-admin-asignacion-grupo}{}
+
+\FloatBarrier
 
 \subsection{Panel de administraci\'on}
 
@@ -297,8 +317,8 @@ Error en descarga ZIP & Interrupci\'on de red o contenido no disponible & Reinte
 \label{tab:manual-incidencias}
 \end{table}
 
-
 \FloatBarrier
+
 \section{Seguridad y protecci\'on de la informaci\'on en el uso diario}
 
 La seguridad operativa depende tanto de mecanismos t\'ecnicos
@@ -309,6 +329,7 @@ Estas medidas reducen riesgos de acceso no autorizado
 y publicaci\'on accidental de informaci\'on acad\'emica sensible.
 
 \FloatBarrier
+
 \section{Checklist operativo por perfil}
 
 Como apoyo de uso r\'apido se incluye un checklist resumido por rol (Tabla~\ref{tab:manual-checklist}): el administrador se centra en el alta de usuarios y revisi\'on de la estructura; el profesor en la configuraci\'on de actividades y evaluaci\'on; y el estudiante en la correcta realizaci\'on de la entrega. Este recordatorio reduce omisiones operativas y mejora la consistencia del proceso acad\'emico.
@@ -331,11 +352,13 @@ Como apoyo de uso r\'apido se incluye un checklist resumido por rol (Tabla~\ref{
 \end{table}
 
 \FloatBarrier
+
 \section{Buenas pr\'acticas de uso}
 
 Para minimizar incidencias operativas se recomienda comprobar siempre fecha l\'imite y tipo de entrega antes de enviar, revisar la vista de detalle tras cada acci\'on cr\'itica, mantener actualizado el perfil de usuario, evitar compartir credenciales y cerrar sesi\'on en equipos compartidos. Estas acciones consolidan un uso seguro y ordenado.
 
 \FloatBarrier
+
 \section{Alternativa a la ense\~nanza virtual y aspectos novedosos}
 
 La plataforma se centra en el ciclo de actividades, entregables y evaluaci\'on. En contextos donde no se requiere un LMS completo, puede funcionar como alternativa ligera, con menor complejidad operativa y una curva de aprendizaje m\'as directa. Cuando ya existe un entorno como Moodle, el sistema puede actuar como complemento especializado para la gesti\'on de entregas, correcciones y publicaci\'on de notas, manteniendo el resto de la docencia (contenidos, foros, cuestionarios) en el LMS matriz. La convivencia es viable mediante enlaces cruzados y coordinaci\'on de calendarios, evitando duplicidades en el trabajo docente.
@@ -346,11 +369,13 @@ Como aspecto novedoso, el proyecto introduce capacidades que ampl\'ian la operat
 Los principales retos t\'ecnicos identificados durante el desarrollo y el despliegue incluyen la incompatibilidad de ESLint 9 con configuraciones cl\'asicas (resuelta con migraci\'on a formato \textit{flat config}), restricciones de Render en servicios Static Site (plataforma de despliegue principal ya descrita en el Cap\'itulo \ref{requisitos}) que exigieron ajustes del blueprint, y restricciones de correo saliente en PaaS mitigadas con proveedores HTTP (Brevo) para correos transaccionales. Tambi\'en se abord\'o la migraci\'on de proveedor de correo transaccional: inicialmente se utiliz\'o SendGrid, pero al finalizar su plan gratuito se migr\'o a Brevo; se evalu\'o Resend como alternativa, aunque su plan gratuito exige dominio verificado, y el dise\~no del \texttt{EmailService} con patr\'on de proveedor desacoplado permite intercambiar proveedores sin modificar l\'ogica de negocio. Se suman conflictos y deprecaciones en SonarCloud solventados migrando al plugin de Maven, tiempos excesivos en OWASP Dependency Check sin API Key de NVD mitigados con credenciales dedicadas, errores CORS en despliegue (403) al no incluir el origen del frontend en la configuraci\'on, e inactividad del backend en el tier gratuito mitigada mediante \textit{keep-alive} automatizado.
 
 \FloatBarrier
+
 \section{An\'alisis de la evoluci\'on del proyecto}
 
 El historial de commits con prefijo \texttt{feat} refleja una evoluci\'on en fases (36 registros). La fase de \textbf{arranque y base} incluye el commit inicial, definici\'on de estructura y primeros flujos de CI; la fase de \textbf{infraestructura} agrupa despliegue continuo, Render y workflows de mantenimiento y seguridad (Dependabot, Sonar, auditor\'ias). La \textbf{funcionalidad nuclear} incorpora JWT, recuperaci\'on de contrase\~na, mejoras de administraci\'on, integraci\'on OneDrive, descargas y panel de evaluaciones; la fase de \textbf{calidad y robustez} ampl\'ia test, mutaci\'on y cobertura eliminando \textit{hotspots}; y la fase de \textbf{documentaci\'on} consolida la memoria del TFG. Esta progresi\'on evidencia una evoluci\'on incremental y trazable.
 
 \FloatBarrier
+
 \section{Conclusiones}
 
 El manual de usuario consolida el uso operativo del sistema y garantiza que los tres perfiles principales disponen de un procedimiento claro, coherente con las reglas de negocio y alineado con los requisitos definidos.

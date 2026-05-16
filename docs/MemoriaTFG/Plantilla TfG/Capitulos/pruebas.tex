@@ -1,4 +1,16 @@
 \chapter{Pruebas}\label{pruebas}
+% tfg-floatbarrier-auto
+\makeatletter
+\@ifundefined{tfgfloatbarrier}{
+  \def\tfgfloatbarrier{1}
+  \let\tfgorigfigure\figure
+  \let\tfgendorigfigure\endfigure
+  \renewenvironment{figure}{\tfgorigfigure}{\tfgendorigfigure\FloatBarrier}
+  \let\tfgorigtable\table
+  \let\tfgendorigtable\endtable
+  \renewenvironment{table}{\tfgorigtable}{\tfgendorigtable\FloatBarrier}
+}{}
+\makeatother
 
 \FloatBarrier
 \section{Introducci\'on}

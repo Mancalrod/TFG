@@ -1,4 +1,16 @@
 \chapter{An\'alisis de requisitos, dise\~no e implementaci\'on}\label{requisitos}
+% tfg-floatbarrier-auto
+\makeatletter
+\@ifundefined{tfgfloatbarrier}{
+  \def\tfgfloatbarrier{1}
+  \let\tfgorigfigure\figure
+  \let\tfgendorigfigure\endfigure
+  \renewenvironment{figure}{\tfgorigfigure}{\tfgendorigfigure\FloatBarrier}
+  \let\tfgorigtable\table
+  \let\tfgendorigtable\endtable
+  \renewenvironment{table}{\tfgorigtable}{\tfgendorigtable\FloatBarrier}
+}{}
+\makeatother
 
 \FloatBarrier
 \section{Introducci\'on}
@@ -20,9 +32,9 @@ El ecosistema t\'ecnico del proyecto se ha definido para garantizar coherencia e
 
 \begin{itemize}
     \item \textbf{Backend:} Se emplea \textbf{Java 21} como lenguaje principal, apoyado en el framework \textbf{Spring Boot} (\url{https://spring.io/projects/spring-boot}) para acelerar la creaci\'on de la API REST. La seguridad se gestiona con \textbf{Spring Security}, el acceso a base de datos mediante \textbf{JPA/Hibernate}, la construcci\'on con \textbf{Maven} (\url{https://maven.apache.org/}) y el control de versiones de la base de datos a trav\'es de \textbf{Flyway} (\url{https://flywaydb.org/}).
-    \item \textbf{Frontend:} La interfaz de usuario se desarrolla como una Single Page Application utilizando \textbf{React} (\url{https://react.dev/}) y \textbf{TypeScript} (\url{https://www.typescriptlang.org/}) para proveer tipado est\'atico. El empaquetado y entorno de desarrollo r\'apido lo proporciona \textbf{Vite} (\url{https://vitejs.dev/}), mientras que el enrutamiento y las peticiones HTTP se manejan con \textbf{React Router} y \textbf{Axios}. Para el aseguramiento de la calidad se integra \textbf{Vitest} (\url{https://vitest.dev/}) como entorno de pruebas unitarias y \textbf{Stryker} (\url{https://stryker-mutator.io/}) para el an\'alisis de mutaci\'on de c\'odigo.
+    \item \textbf{Frontend:} La interfaz de usuario se desarrolla como una Single Page Application utilizando \textbf{React} (\url{https://react.dev/}) y \textbf{TypeScript} (\url{https://www.typescriptlang.org/}) para proveer tipado est\'atico. El empaquetado y entorno de desarrollo r\'apido lo proporciona \textbf{Vite} (\url{https://vitejs.dev/}), usado como \emph{bundler} y servidor de desarrollo para acelerar el arranque y generar el build de producci\'on, mientras que el enrutamiento y las peticiones HTTP se manejan con \textbf{React Router} y \textbf{Axios}. Para el aseguramiento de la calidad se integra \textbf{Vitest} (\url{https://vitest.dev/}) como entorno de pruebas unitarias y \textbf{Stryker} (\url{https://stryker-mutator.io/}) para pruebas de mutaci\'on, introduciendo cambios sint\'eticos en el c\'odigo para medir la fortaleza real de los tests.
     \item \textbf{Documentaci\'on:} La redacci\'on de memorias y documentos formales se realiza en \textbf{\LaTeX{}} (\url{https://www.latex-project.org/}) por su alta calidad tipogr\'afica, apoyado por documentaci\'on auxiliar r\'apida en \textbf{Markdown}.
-    \item \textbf{Ingenier\'ia de requisitos y modelado:} Para la gesti\'on de requisitos y la generaci\'on de modelos formales (ERS y DAS) se ha utilizado \textbf{Proteus} (\url{https://personal.us.es/amador/proteus/}), una herramienta especializada en trazabilidad e ingenier\'ia del software.
+    \item \textbf{Ingenier\'ia de requisitos y modelado:} Para la gesti\'on de requisitos y la generaci\'on de modelos formales (ERS y DAS) se ha utilizado \textbf{Proteus} (\url{https://github.com/proteus-University-of-Seville/proteus-core}), una herramienta especializada en trazabilidad e ingenier\'ia del software.
     \item \textbf{Gesti\'on del proyecto:} La planificaci\'on iterativa, el backlog y el control del flujo de trabajo se encuentran alojados y versionados en el propio repositorio del proyecto utilizando herramientas nativas de control de versiones.
 \end{itemize}
 
@@ -639,19 +651,19 @@ Profesor y estudiante & Consulta y trazabilidad de resultados & Mockups de comen
 \label{tab:das-cobertura-rol}
 \end{table}
 
-\subsection{Cat\'alogo operativo de casos de uso y cobertura funcional}
+\subsection{Cat\'alogo de casos de uso y matriz de trazabilidad ERS-DAS-implementaci\'on}
 
-El modelo de casos de uso del DAS se estructura como un conjunto amplio de
-operaciones del sistema que cubren autenticaci\'on, gesti\'on acad\'emica,
-entregas, evaluaci\'on y supervisi\'on docente. Esta descomposici\'on se
-reutiliza en la memoria para demostrar que la implementaci\'on del MVP no es
-una selecci\'on arbitraria de pantallas, sino la materializaci\'on de un
-modelo operativo previo.
+El DAS define un cat\'alogo amplio de casos de uso; en esta memoria se han
+seleccionado cuatro diagramas representativos (Figuras~\ref{fig:das-cu-1} a
+\ref{fig:das-cu-4}) que cubren acceso, gesti\'on acad\'emica, entregas y
+evaluaci\'on. Esta selecci\'on se corresponde con los flujos implementados en el
+MVP y sirve como base visual para enlazar el modelo operativo con la evidencia
+de implementaci\'on y pruebas.
 
 Como representaci\'on visual de dicha cobertura, se incluyen cuatro diagramas
 de casos de uso de referencia (Figuras~\ref{fig:das-cu-1} a
-\ref{fig:das-cu-4}), suficientes para documentar el enlace entre el
-cat\'alogo funcional y los flujos reales desarrollados.
+\ref{fig:das-cu-4}), para documentar el enlace entre el cat\'alogo funcional y
+los flujos reales desarrollados.
 
 \figura{0.82}{\detokenize{../assets/CU-1.drawio.png}}{Caso de uso representativo CU-1 (DAS)}{fig:das-cu-1}{}
 
@@ -660,6 +672,12 @@ cat\'alogo funcional y los flujos reales desarrollados.
 \figura{0.82}{\detokenize{../assets/CU-3.drawio.png}}{Caso de uso representativo CU-3 (DAS)}{fig:das-cu-3}{}
 
 \figura{0.82}{\detokenize{../assets/CU-4.drawio.png}}{Caso de uso representativo CU-4 (DAS)}{fig:das-cu-4}{}
+
+\FloatBarrier
+
+Para resumir la cobertura por familias operativas dentro del MVP, la
+Tabla~\ref{tab:das-familias-casos-uso} agrupa el alcance funcional, el actor
+dominante y el grado de cobertura logrado.
 
 \begin{table}[!htbp]
 \centering
@@ -686,7 +704,7 @@ Supervisi\'on y trazabilidad & Vistas cruzadas profesor-estudiante y revisi\'on 
 \label{tab:das-familias-casos-uso}
 \end{table}
 
-\subsection{Matriz ampliada de trazabilidad ERS-DAS-implementaci\'on}
+\FloatBarrier
 
 Para reforzar la coherencia documental, la Tabla~\ref{tab:trazabilidad-ampliada}
 integra tres niveles de evidencia: requisito formal en ERS, artefacto de
@@ -721,6 +739,8 @@ RQNF-004, RQNF-005, RQNF-009 & Arquitectura de subsistemas + separaci\'on de cap
 \caption{Trazabilidad ampliada entre ERS, DAS e implementaci\'on efectiva}
 \label{tab:trazabilidad-ampliada}
 \end{table}
+
+\FloatBarrier
 
 \subsection{Cobertura documental alcanzada}
 

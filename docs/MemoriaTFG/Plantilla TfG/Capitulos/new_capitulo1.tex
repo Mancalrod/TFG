@@ -1,4 +1,16 @@
-﻿\chapter{Introducci\'on y antecedentes}\label{cap_intro}
+\chapter{Introducci\'on y antecedentes}\label{cap_intro}
+% tfg-floatbarrier-auto
+\makeatletter
+\@ifundefined{tfgfloatbarrier}{
+  \def\tfgfloatbarrier{1}
+  \let\tfgorigfigure\figure
+  \let\tfgendorigfigure\endfigure
+  \renewenvironment{figure}{\tfgorigfigure}{\tfgendorigfigure\FloatBarrier}
+  \let\tfgorigtable\table
+  \let\tfgendorigtable\endtable
+  \renewenvironment{table}{\tfgorigtable}{\tfgendorigtable\FloatBarrier}
+}{}
+\makeatother
 
 \FloatBarrier
 \section{Contexto y problema a resolver}
@@ -244,7 +256,7 @@ Anexo D de esta memoria.
 
 \FloatBarrier
 
-﻿\section{An\'alisis de antecedentes y aportaci\'on realizada}\label{analanteced}
+?\section{An\'alisis de antecedentes y aportaci\'on realizada}\label{analanteced}
 
 \FloatBarrier
 \subsection{Introducci\'on}
