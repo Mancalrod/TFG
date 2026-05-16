@@ -853,14 +853,37 @@ Este enfoque proporciona evidencia objetiva de robustez y reduce el riesgo de re
 
 \subsection{Decisiones y compromisos}
 
-Las decisiones principales del dise\~no implican compensaciones expl\'icitas. La separaci\'on SPA + API mejora mantenibilidad y escalado, a costa de mayor esfuerzo de orquestaci\'on y pruebas de integraci\'on. El uso de JWT con refresh token simplifica backend stateless, pero exige controles cuidadosos de expiraci\'on y renovaci\'on. La adopci\'on de DTOs y capas reduce acoplamiento con mayor c\'odigo estructural, y las migraciones versionadas aportan trazabilidad de datos requiriendo disciplina de despliegue entre entornos.
+Las decisiones principales del dise\~no implican compensaciones expl\'icitas. No se busc\'o seleccionar la alternativa m\'as avanzada en cada eje, sino construir una soluci\'on coherente con el alcance del MVP, el tiempo disponible, los requisitos del ERS y la necesidad de mantener trazabilidad entre especificaci\'on, implementaci\'on y pruebas. Por ello, cada decisi\'on se evalu\'o atendiendo a cuatro criterios: valor funcional para el flujo de entregables, mantenibilidad, riesgo de integraci\'on y coste operativo en un entorno acad\'emico.
+
+\subsubsection*{Arquitectura SPA + API}
+
+La separaci\'on entre frontend SPA y backend REST se adopt\'o porque el dominio requiere experiencias diferenciadas por rol y una API reutilizable para operaciones de entrega, evaluaci\'on y administraci\'on. Esta elecci\'on mejora la mantenibilidad y permite evolucionar la interfaz sin modificar el n\'ucleo de negocio. El compromiso asumido es un mayor esfuerzo de orquestaci\'on: gesti\'on de CORS, contratos HTTP, renovaci\'on de sesi\'on y pruebas de integraci\'on entre cliente y servidor. Se consider\'o aceptable porque el proyecto ya incorporaba pipelines, pruebas automatizadas y una estructura de servicios capaz de absorber esa complejidad.
+
+\subsubsection*{Seguridad y gesti\'on de sesi\'on}
+
+El uso de JWT con refresh token se eligi\'o por su ajuste natural a una aplicaci\'on desacoplada y por reducir estado de sesi\'on en servidor. Frente a una sesi\'on server-side tradicional, esta opci\'on facilita despliegues donde el backend puede escalar o reiniciarse sin depender de memoria local de sesi\'on. La contrapartida es que obliga a controlar expiraci\'on, renovaci\'on, cierre de sesi\'on y protecci\'on de rutas con mayor disciplina. Para mitigarlo, se centraliz\'o la validaci\'on en filtros de seguridad y se reforz\'o la autorizaci\'on por rol y contexto acad\'emico.
+
+\subsubsection*{Persistencia, migraciones y almacenamiento}
+
+La persistencia relacional se mantuvo como base del sistema porque el dominio contiene relaciones fuertes entre usuarios, cursos, grupos, actividades, entregables, entregas y feedback. Esta decisi\'on favorece integridad referencial y consultas trazables. Flyway se adopt\'o para que la evoluci\'on del esquema quedara versionada, especialmente al introducir campos de validaci\'on ZIP, preferencias de notificaci\'on e integraciones cloud. Como compromiso, cada cambio de datos exige disciplina de migraci\'on, pero a cambio se reduce el riesgo de divergencias entre entornos.
+
+En almacenamiento de archivos se separaron dos necesidades. Para persistencia operativa de producci\'on se prioriz\'o un proveedor cloud configurable, evitando depender del sistema de archivos ef\'imero de la plataforma PaaS. Para contextos acad\'emicos donde el profesorado ya trabaja con Microsoft 365, se incorpor\'o OneDrive como integraci\'on opcional, no como dependencia obligatoria del n\'ucleo. Esta separaci\'on permite que el sistema funcione sin servicios externos durante desarrollo y que, en producci\'on, pueda activar capacidades institucionales cuando el entorno lo permita.
+
+\subsubsection*{API de OneDrive frente a SharePoint}
+
+La integraci\'on con OneDrive se resolvi\'o mediante Microsoft Graph sobre la unidad del usuario autenticado. Esta decisi\'on responde al problema operativo concreto del proyecto: el profesorado necesita conectar su propia cuenta, explorar carpetas, seleccionar rutas de destino por actividad o por entregable y recibir entregas con una estructura controlada. El acceso directo mediante OAuth2 y permisos delegados permite trabajar sobre la unidad del usuario con operaciones de subida, descarga, listado de carpetas y renovaci\'on de token, manteniendo la integraci\'on acotada al flujo de entregables.
+
+SharePoint se valor\'o como alternativa para escenarios corporativos, pero su orientaci\'on principal es la gesti\'on de sitios, bibliotecas documentales y permisos compartidos a nivel de organizaci\'on. Ese enfoque encaja bien cuando se quiere centralizar documentaci\'on institucional, pero introduce dependencias adicionales de tenant, aprovisionamiento de sitios, bibliotecas y pol\'iticas administradas. Para este TFG, esa complejidad no aportaba una mejora proporcional sobre la necesidad principal: seleccionar carpetas del OneDrive del usuario y organizar entregas de forma flexible. Por ello se descart\'o como v\'ia principal y se prioriz\'o la API de OneDrive mediante Microsoft Graph, dejando SharePoint como posible extensi\'on futura si la implantaci\'on institucional exigiera repositorios compartidos.
+
+\subsubsection*{Despliegue y servicios externos}
+
+El despliegue en PaaS con CI/CD automatizada se adopt\'o para reducir carga operativa y mantener reproducibilidad. Del mismo modo, el correo transaccional mediante Brevo se seleccion\'o por operar sobre API HTTPS, evitando restricciones frecuentes de SMTP saliente en plataformas gestionadas. Estas elecciones no maximizan el control de infraestructura, como ocurrir\'ia con un VPS autogestionado, pero reducen riesgos de administraci\'on y concentran el esfuerzo del TFG en el producto, las pruebas y la trazabilidad funcional.
 
 \subsection{Limitaciones y trabajo futuro}
 
-Aunque el n\'ucleo funcional est\'a cubierto, se identifican l\'ineas de evoluci\'on como la ampliaci\'on de autenticaci\'on avanzada (p. ej., 2FA completa), una observabilidad m\'as profunda con m\'etricas operativas y el cierre progresivo de requisitos \emph{Should/Could} pendientes. Estas mejoras no condicionan la validez del TFG, pero gu\'ian la continuidad t\'ecnica.
+Aunque el n\'ucleo funcional est\'a cubierto, las decisiones anteriores dejan una hoja de ruta t\'ecnica clara. La autenticaci\'on local con JWT no sustituye a un SSO institucional completo, por lo que una evoluci\'on natural ser\'ia incorporar OAuth2/OIDC, SAML o LDAP como mecanismos de identidad federada. La integraci\'on con OneDrive depende de la configuraci\'on de Azure y de permisos concedidos por el usuario, de modo que un despliegue institucional deber\'ia revisar pol\'iticas de consentimiento, auditor\'ia y retenci\'on de datos. Adem\'as, el sistema valida estructura, extensi\'on y contenido esperado de entregas, pero no incorpora todav\'ia an\'alisis antivirus exhaustivo ni observabilidad avanzada con m\'etricas de uso, tiempos de correcci\'on o alertas operativas.
 
-Estas mejoras no condicionan la validez del TFG,
-sino que delimitan una hoja de ruta t\'ecnica razonable para continuidad del proyecto.
+Estas limitaciones no condicionan la validez del TFG, sino que delimitan una continuidad razonable: reforzar identidad, auditor\'ia, seguridad documental, m\'etricas de producci\'on y requisitos \emph{Should/Could} pendientes sin reescribir el n\'ucleo transaccional.
 
 \FloatBarrier
 \section{Conclusiones}
