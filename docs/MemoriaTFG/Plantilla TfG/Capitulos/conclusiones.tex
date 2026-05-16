@@ -1,4 +1,4 @@
-﻿\chapter{Conclusiones y desarrollos futuros}\label{conclusiones}
+\chapter{Conclusiones y desarrollos futuros}\label{conclusiones}
 
 \FloatBarrier
 \section{S\'intesis final del trabajo}
@@ -8,11 +8,7 @@ entregables acad\'emicos con una orientaci\'on claramente profesional,
 integrando an\'alisis formal de requisitos, dise\~no de arquitectura,
 implementaci\'on por capas, verificaci\'on en profundidad y despliegue continuo.
 
-El resultado no se limita a un prototipo funcional,
-sino a una soluci\'on trazable y mantenible,
-alineada con el problema de negocio detectado en el contexto docente:
-mejorar la gesti\'on de actividades, entregas, evaluaciones y feedback
-frente a herramientas generalistas con menor adecuaci\'on a la operativa diaria.
+El proyecto implementa una soluci\'on especializada en la gesti\'on integral del ciclo de vida de los entregables, integrando las fases de evaluaci\'on y retroalimentaci\'on (feedback) docente. A diferencia de las plataformas generalistas, este sistema ofrece un flujo automatizado de extremo a extremo (end-to-end), minimizando la intervenci\'on manual mediante una arquitectura adaptada espec\'ificamente a la validaci\'on y control de los archivos.
 
 \FloatBarrier
 \section{Grado de cumplimiento de objetivos}
@@ -26,7 +22,14 @@ Respecto a los objetivos espec\'ificos, el balance es positivo. El \textbf{model
 \FloatBarrier
 \section{Aportaciones principales}
 
-Las aportaciones m\'as relevantes del trabajo se articulan en cuatro planos. En el plano \textbf{funcional} se entrega una plataforma centrada en la operativa docente, con flujos diferenciados para administraci\'on, profesorado y alumnado. En el plano \textbf{t\'ecnico} se consolida una arquitectura modular SPA + API, persistencia versionada con Flyway, seguridad JWT y soporte de integraciones cloud configurables. En el plano de \textbf{calidad} se incorpora testing multinivel y mutaci\'on como criterio objetivo de robustez, y en el plano de \textbf{operaci\'on} se establece un canal CI/CD reproducible con validaciones continuas de calidad y seguridad.
+Las aportaciones m\'as relevantes del trabajo se articulan en cuatro planos claramente diferenciados:
+
+\begin{itemize}
+    \item \textbf{Plano funcional:} Se entrega una plataforma centrada espec\'ificamente en la operativa docente, con flujos diferenciados y especializados para los perfiles de administraci\'on, profesorado y alumnado.
+    \item \textbf{Plano t\'ecnico:} Se dise\~na y consolida una arquitectura modular separada en cliente (SPA) y servidor (API REST), con persistencia versionada controlada mediante Flyway, seguridad basada en tokens JWT y soporte para integraciones cloud (como almacenamiento en OneDrive o correo mediante Brevo).
+    \item \textbf{Plano de calidad:} Se incorpora un sistema de verificaci\'on exhaustivo mediante testing multinivel y pruebas de mutaci\'on (con PIT y Stryker) como criterio objetivo para garantizar la robustez del c\'odigo productivo.
+    \item \textbf{Plano de operaci\'on:} Se establece un canal de integraci\'on y despliegue continuo (CI/CD) completamente reproducible, incorporando validaciones autom\'aticas de c\'odigo, calidad y seguridad en cada iteraci\'on.
+\end{itemize}
 
 \FloatBarrier
 \section{Resultados y evidencia}
@@ -64,6 +67,15 @@ Esto refuerza la idea de que,
 en proyectos software de car\'acter acad\'emico-profesional,
 la disciplina metodol\'ogica es un factor diferencial
 tan importante como la selecci\'on tecnol\'ogica.
+
+\FloatBarrier
+\section{An\'alisis de desviaciones en la planificaci\'on temporal}
+
+Durante el desarrollo del proyecto se monitoriz\'o el grado de cumplimiento de los plazos estimados (Sprints y \textit{Product Backlog Items}). Aunque el proyecto logr\'o mantener un avance s\'olido sin comprometer las fechas de entrega finales, se detectaron desviaciones espec\'ificas en la fase de integraci\'on de dependencias externas.
+
+La implementaci\'on del m\'odulo de integraci\'on con \textbf{OneDrive (OAuth2)} requiri\'o m\'as tiempo del inicialmente planificado (aproximadamente un 20\% de sobrecoste temporal en su respectivo Sprint) debido a la configuraci\'on de permisos granulares en el entorno de Azure AD y las restricciones de \textit{CORS} en flujos federados. De forma similar, la \textbf{migraci\'on del proveedor de correo} desde SendGrid a Brevo introdujo una tarea de refactorizaci\'on no prevista.
+
+Estas desviaciones fueron absorbidas gracias a la flexibilidad de la metodolog\'ia \'agil adoptada, reordenando tareas de menor criticidad (funcionalidades secundarias de la UI) para garantizar la robustez del MVP. Este an\'alisis evidencia que las dependencias externas (SaaS, APIs de terceros) representan el mayor factor de riesgo temporal en proyectos de esta naturaleza, validando as\'i la decisi\'on de encapsular estas integraciones en capas de servicio adaptables.
 
 \FloatBarrier
 \section{Limitaciones del trabajo}

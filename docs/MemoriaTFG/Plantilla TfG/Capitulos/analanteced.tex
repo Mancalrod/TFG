@@ -1,4 +1,4 @@
-﻿\chapter{An\'alisis de antecedentes y aportaci\'on realizada}\label{analanteced}
+\chapter{An\'alisis de antecedentes y aportaci\'on realizada}\label{analanteced}
 
 \FloatBarrier
 \section{Introducci\'on}
@@ -43,9 +43,7 @@ sino complementarlo en el punto donde se concentra la fricci\'on operativa.
 
 Junto a las fortalezas, se detectan debilidades que afectan al rendimiento del proceso. La \textbf{DEB-001} se manifiesta en rigidez de gesti\'on de archivos y clasificaci\'on manual reiterada, mientras que la \textbf{DEB-002} limita la evoluci\'on funcional al depender de arquitecturas cerradas. A esto se suma la \textbf{DEB-003}, que reduce la flexibilidad del flujo de entrega para el estudiante, y la \textbf{DEB-004}, que refleja una integraci\'on no nativa con almacenamiento cloud moderno. En conjunto, estas debilidades concentran el coste operativo en fases cr\'iticas de entrega y correcci\'on.
 
-\subsection{An\'alisis de causas ra\'iz}
 
-Las debilidades anteriores no se explican por errores puntuales, sino por causas sist\'emicas. En el plano de proceso predomina la carga manual en fases cr\'iticas de correcci\'on, y en el plano de producto falta especializaci\'on para el ciclo completo de entregables. A nivel t\'ecnico existe acoplamiento entre flujo acad\'emico y herramientas de prop\'osito general, y en calidad se observa una trazabilidad escasa entre entrega, versi\'on, evaluaci\'on y feedback. Esta combinaci\'on explica por qu\'e las mejoras parciales no eliminan la fricci\'on operativa.
 
 \FloatBarrier
 \section{Brechas entre escenario actual y necesidades objetivo}
@@ -97,16 +95,11 @@ patrones funcionales y brechas que condicionan la operativa docente.
 
 \subsection{Tipolog\'ias de competidores analizados}
 
-El an\'alisis se ha estructurado en cuatro familias. Se consideran \textbf{LMS generalistas} que priorizan gesti\'on de cursos, contenidos, evaluaciones y comunicaci\'on, \textbf{herramientas de evaluaci\'on t\'ecnica} orientadas a entregas de programaci\'on o autoevaluaci\'on, \textbf{suites colaborativas y almacenamiento cloud} centradas en compartir archivos y carpetas sin cubrir el flujo completo de entrega, y \textbf{gestores de entrega simples} que ofrecen subida de ficheros con m\'inimo control posterior. Esta segmentaci\'on permite comparar la propuesta con alternativas reales sin reducir el an\'alisis a marcas concretas.
+El an\'alisis se ha estructurado en cuatro familias. Se consideran \textbf{LMS generalistas} (como Moodle, Canvas, Blackboard o Google Classroom) que priorizan gesti\'on de cursos, contenidos, evaluaciones y comunicaci\'on, \textbf{herramientas de evaluaci\'on t\'ecnica} (como GitHub Classroom, Gradescope o CodeGrade) orientadas a entregas de programaci\'on o autoevaluaci\'on, \textbf{suites colaborativas y almacenamiento cloud} (como Microsoft Teams, Google Drive o Dropbox) centradas en compartir archivos y carpetas sin cubrir el flujo completo de entrega, y \textbf{gestores de entrega simples} (formularios web o repositorios p\'ublicos) que ofrecen subida de ficheros con m\'inimo control posterior. Esta segmentaci\'on permite comparar la propuesta con alternativas reales sin reducir el an\'alisis a marcas concretas.
 
 \subsection{LMS generalistas}
 
-Las plataformas LMS ofrecen una cobertura funcional amplia y estable,
-pero su dise\~no generalista tiende a tratar las entregas como un m\'odulo
-m\'as de un ecosistema mayor. Esto provoca que la validaci\'on de ficheros
-sea habitualmente limitada a extensi\'on y tama\~no, y que el control
-de estructura interna de paquetes ZIP recaiga en instrucciones manuales
-al alumnado o en revisi\'on posterior del docente.
+Las plataformas LMS de uso masivo (Moodle, Blackboard, Canvas) ofrecen una cobertura funcional amplia y estable, pero su dise\~no generalista tiende a tratar las entregas como un m\'odulo m\'as de un ecosistema mayor. Esto provoca que la validaci\'on autom\'atica de ficheros sea habitualmente limitada a comprobar la extensi\'on y el tama\~no, y que el control detallado de la estructura interna de paquetes (como los ficheros .zip) recaiga en instrucciones manuales hacia el alumnado o en una ardua revisi\'on a posteriori por parte del docente.
 
 \subsection{Herramientas de evaluaci\'on t\'ecnica}
 
@@ -152,21 +145,14 @@ aumentar trazabilidad y consolidar calidad de producto.
 
 \subsection{Aportaci\'on funcional}
 
-La aportaci\'on funcional responde a las brechas operativas y sectoriales
-identificadas en secciones previas. En concreto, se implementaron capacidades de gesti\'on integral de cursos, grupos, actividades y entregables con visibilidad por rol, as\'i como validaci\'on avanzada de ZIP (estructura, extensiones y nombre esperado). Adem\'as, se incorpor\'o un modo estricto o m\'inimo requerido en entregas ZIP seg\'un criterio docente, control de tipos de entrega (archivo, enlace o solo texto) con reglas espec\'ificas, y versionado con reenv\'io y estado de entrega trazables. Como soporte operativo, se a\~nadi\'o descarga masiva, previsualizaci\'on de contenido para optimizar revisi\'on y un borrador autom\'atico en cliente con revalidaci\'on previa al env\'io.
+El sistema desarrollado aborda directamente la fricci\'on operativa y las deficiencias detectadas en las soluciones de mercado. En concreto, se implementaron capacidades de gesti\'on integral de cursos, grupos, actividades y entregables con visibilidad por rol, as\'i como validaci\'on avanzada de ZIP (estructura, extensiones y nombre esperado). Adem\'as, se incorpor\'o un modo estricto o m\'inimo requerido en entregas ZIP seg\'un criterio docente, control de tipos de entrega (archivo, enlace o solo texto) con reglas espec\'ificas, y versionado con reenv\'io y estado de entrega trazables. Como soporte operativo, se a\~nadi\'o descarga masiva, previsualizaci\'on de contenido para optimizar revisi\'on y un borrador autom\'atico en cliente con revalidaci\'on previa al env\'io.
 
 Estas capacidades se alinean con los procesos objetivo del an\'alisis:
 \textbf{PRON-004} (creaci\'on/publicaci\'on de actividad),
 \textbf{PRON-005} (realizaci\'on de entrega con validaci\'on)
 y \textbf{PRON-006} (evaluaci\'on y feedback).
 
-\subsection{Aportaci\'on arquitect\'onica y tecnol\'ogica}
 
-Desde la perspectiva t\'ecnica, la contribuci\'on principal se concreta en una separaci\'on frontend-backend mediante API REST, una arquitectura por capas en backend que a\'isla responsabilidades, el uso de DTOs para desacoplar contratos de API del modelo de persistencia y una evoluci\'on de esquema controlada por migraciones versionadas. Este conjunto reduce el acoplamiento y facilita mantenimiento evolutivo.
-
-Este dise\~no reduce acoplamiento,
-facilita mantenimiento
-y habilita evoluci\'on incremental sin ruptura del n\'ucleo funcional.
 
 \subsection{Aportaci\'on en calidad y operaci\'on}
 
@@ -231,18 +217,23 @@ Calidad del desarrollo & Validaci\'on heterog\'enea seg\'un tarea & Estrategia d
 \FloatBarrier
 \section{Alineaci\'on con objetivos de negocio}
 
-La aportaci\'on realizada responde de forma directa a los objetivos de negocio definidos en la fase de an\'alisis. Se materializa el \textbf{OBJN-001} al agilizar la gesti\'on docente y reducir tareas manuales de bajo valor, se satisface el \textbf{OBJN-002} al mejorar accesibilidad y usabilidad del proceso de entrega, se refuerza el \textbf{OBJN-003} al centralizar evaluaci\'on y retroalimentaci\'on con trazabilidad, y se cumple el \textbf{OBJN-004} al estructurar informaci\'on que facilita evoluci\'on e integraciones futuras.
+La aportaci\'on realizada materializa los objetivos de negocio definidos en la fase de an\'alisis de la siguiente forma:
+\begin{itemize}
+    \item Se consigue el \textbf{OBJN-001 (agilizar gesti\'on docente)} mediante la capacidad de definir reglas autom\'aticas de validaci\'on de formatos y estructuras internas (ficheros requeridos dentro de un .zip), lo cual reduce sustancialmente el n\'umero de entregas inv\'alidas que un profesor debe revisar y descartar manualmente.
+    \item Se satisface el \textbf{OBJN-002 (mejorar la accesibilidad y usabilidad del estudiante)} implementando un flujo de subida de archivos claro, con prevalidaciones en tiempo real en el lado del cliente (borrador local) y confirmaciones expl\'icitas de fecha y versi\'on de la entrega.
+    \item Se refuerza el \textbf{OBJN-003 (trazabilidad de la evaluaci\'on)} al ofrecer una vista dedicada donde la entrega exacta, los comentarios de correcci\'on (feedback) y la calificaci\'on cuantitativa conviven en un \'unico contexto cerrado, evitando el env\'io de correos masivos para comunicar notas o incidencias.
+    \item Finalmente, el \textbf{OBJN-004 (capacidad de evoluci\'on e integraci\'on)} se asegura mediante una arquitectura que expone todo su cat\'alogo de operaciones a trav\'es de una API documentada, posibilitando enganchar el sistema a m\'odulos externos de autoevaluaci\'on de c\'odigo o herramientas de prevenci\'on de plagio en el futuro.
+\end{itemize}
 
 \FloatBarrier
 \section{Limitaciones residuales y continuidad}
 
-Aun cuando la mejora es significativa, se mantienen l\'ineas de continuidad planificadas: ampliaci\'on de funcionalidades avanzadas fuera del MVP, extensi\'on de integraciones externas seg\'un contexto institucional y refuerzo de observabilidad y m\'etricas operativas de producci\'on. Esta continuidad permite evolucionar sin comprometer la estabilidad alcanzada.
+El alcance acotado de un Trabajo de Fin de Grado introduce ciertas limitaciones residuales respecto a una plataforma en producci\'on comercial. En primer lugar, la integraci\'on de identidades se ha implementado mediante un sistema de autenticaci\'on local con JWT, posponiendo la federaci\'on nativa con los servicios de Single Sign-On (SSO) espec\'ificos de la universidad (como LDAP o SAML) para iteraciones futuras. En segundo lugar, aunque la plataforma valida tipos MIME y contenidos de paquetes ZIP, su an\'alisis no incluye detecci\'on exhaustiva de malware o virus en el lado del servidor antes del almacenamiento. Por \'ultimo, las anal\'iticas docentes provistas se centran en el estado actual de las entregas, sin explorar a\'un la recolecci\'on de m\'etricas temporales agregadas (tiempos promedios de entrega o correcci\'on) que ser\'ian de alto valor en entornos de gesti\'on masiva.
 
-Estas limitaciones no invalidan la aportaci\'on obtenida,
-sino que delimitan una hoja de ruta realista para evoluci\'on posterior.
+Estas limitaciones t\'ecnicas no invalidan el modelo arquitect\'onico propuesto, sino que se integran en la hoja de ruta del producto, pudiendo abordarse incorporando nuevos microservicios transversales (identity provider, esc\'aner antivirus, m\'odulos de \emph{data warehouse}) sin necesidad de reescribir el n\'ucleo transaccional de gesti\'on acad\'emica.
 
 \FloatBarrier
-\section{Conclusiones del cap\'itulo}
+\section{Conclusiones}
 
 El an\'alisis de antecedentes confirma que el principal problema del dominio
 no era la ausencia de plataformas docentes,

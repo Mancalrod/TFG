@@ -1,0 +1,1322 @@
+[
+  {
+    "page": 5,
+    "type": "Highlight",
+    "content": "En paralelo a los comentarios que os hago creo que es necesaria un restructuración.\rPropuesta:\r1. Introducción y metodología. \r=> Actual capítulo 1, 3 y capitulo 4. Los podéis mantener separados (como capítulo 1, capítulo 2 y capítulo 3) o meter los antecentes (el actual capítulo 3) en la introducción y dejar la metodología/planfiicación como capitulo 2. La sección actual 2.2 integrarla en el capítulo 1. El capítulo 1 tiene demasiadas subsecciones en general.\r2. Análisis y requisitos. \r=>La actual sección 2.3. \r3. Diseño y Arquitecrtura . =>La actual seccion 2.4 unida a las secciones actuales de 4.3 en adelante, que son decisiones de diseño y arquitectura.\r4. Implementación y Desarrollo\r=>Unir 2.5 con el actual capitulo 5 completo.\r5. Verificación y Validación (Pruebas)\r=> Actual capítulo 6.\r6. Manual de Usuario\r7. Conclusiones y trabajo futuro\rApendices",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.08190155029297,
+      146.3740234375,
+      182.22300720214844,
+      168.15802001953125
+    ],
+    "text_in_rect": "´Indice general",
+    "vertices": null,
+    "raw_info": {
+      "content": "En paralelo a los comentarios que os hago creo que es necesaria un restructuración.\rPropuesta:\r1. Introducción y metodología. \r=> Actual capítulo 1, 3 y capitulo 4. Los podéis mantener separados (como capítulo 1, capítulo 2 y capítulo 3) o meter los antecentes (el actual capítulo 3) en la introducción y dejar la metodología/planfiicación como capitulo 2. La sección actual 2.2 integrarla en el capítulo 1. El capítulo 1 tiene demasiadas subsecciones en general.\r2. Análisis y requisitos. \r=>La actual sección 2.3. \r3. Diseño y Arquitecrtura . =>La actual seccion 2.4 unida a las secciones actuales de 4.3 en adelante, que son decisiones de diseño y arquitectura.\r4. Implementación y Desarrollo\r=>Unir 2.5 con el actual capitulo 5 completo.\r5. Verificación y Validación (Pruebas)\r=> Actual capítulo 6.\r6. Manual de Usuario\r7. Conclusiones y trabajo futuro\rApendices",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515160146+02'00'",
+      "modDate": "D:20260515161337+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "afc02bd1-5df9-4ea2-8d1b-f1a4284ec9f8"
+    }
+  },
+  {
+    "page": 5,
+    "type": "Text",
+    "content": "En mi propuesta de estructura, el capítulo 2 desaparecería como tal y quedaría distribuido entre varios capítulos (metodología, requisitos, diseño e implementación)",
+    "title": "Antonio",
+    "subject": "Nota adhesiva",
+    "rect": [
+      89.74520111083984,
+      172.65399169921875,
+      113.74520111083984,
+      196.65399169921875
+    ],
+    "text_in_rect": "",
+    "vertices": null,
+    "raw_info": {
+      "content": "En mi propuesta de estructura, el capítulo 2 desaparecería como tal y quedaría distribuido entre varios capítulos (metodología, requisitos, diseño e implementación)",
+      "name": "Comment",
+      "title": "Antonio",
+      "creationDate": "D:20260515161341+02'00'",
+      "modDate": "D:20260515161433+02'00'",
+      "subject": "Nota adhesiva",
+      "id": "2dc7fd3e-59ca-436e-a788-9e4ccc26441c"
+    }
+  },
+  {
+    "page": 15,
+    "type": "Highlight",
+    "content": "",
+    "title": "Antonio",
+    "subject": "Resaltado",
+    "rect": [
+      120.9990005493164,
+      475.5190124511719,
+      135.76300048828125,
+      489.48602294921875
+    ],
+    "text_in_rect": "`unic",
+    "vertices": null,
+    "raw_info": {
+      "content": "",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515134559+02'00'",
+      "modDate": "D:20260515134559+02'00'",
+      "subject": "Resaltado",
+      "id": "cdae84b7-0319-474c-9320-e22c4e87fe7e"
+    }
+  },
+  {
+    "page": 20,
+    "type": "Highlight",
+    "content": "En este momento podemos añadir el enlace al repositorio del proyecto en Github",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.6281967163086,
+      576.3800048828125,
+      510.64801025390625,
+      630.9940185546875
+    ],
+    "text_in_rect": "La gesti´on del c´odigo se realiza en repositorio Git con enfoque de ramas tem´aticas, integraci´on\nmediante pull requests y validaciones autom´aticas previas a fusi´on. Esta pol´ıtica reduce riesgo de\nregresi´on, mejora trazabilidad de cambios y permite relacionar requisitos con commits, pruebas y\ndespliegues.",
+    "vertices": null,
+    "raw_info": {
+      "content": "En este momento podemos añadir el enlace al repositorio del proyecto en Github",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515134819+02'00'",
+      "modDate": "D:20260515134857+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "74ce923d-bbb0-4e32-ac23-abb77511ea33"
+    }
+  },
+  {
+    "page": 20,
+    "type": "Highlight",
+    "content": "Aquí se puede enseñar un snipper del actions.yml. También se puede enseñar la plataforma de Render donde se despliega.",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.6281967163086,
+      680.384033203125,
+      510.64801025390625,
+      721.4490356445312
+    ],
+    "text_in_rect": "kend, frontend y validaci´on conjunta. En cada cambio relevante se ejecutan compilaci´on, pruebas\ny lint, se realiza an´alisis de calidad y seguridad sobre artefactos de c´odigo, se construyen im´agenes\nDocker con publicaci´on automatizada y se despliega en PaaS con configuraci´on por entorno. Estel",
+    "vertices": null,
+    "raw_info": {
+      "content": "Aquí se puede enseñar un snipper del actions.yml. También se puede enseñar la plataforma de Render donde se despliega.",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515134915+02'00'",
+      "modDate": "D:20260515135002+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "121967e0-cd32-4039-8099-1aa6d376c7e7"
+    }
+  },
+  {
+    "page": 20,
+    "type": "Highlight",
+    "content": "En general, creo que vais muy directos a la descripción de las herramientas. Extender el uso de cada herramienta indivuidual. También podeís añadir una referencia a cada herramienta (eg: repositorio de descarga). Falta Proteus",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.6281967163086,
+      472.375,
+      510.6470031738281,
+      526.989990234375
+    ],
+    "text_in_rect": "validaci´on y despliegue, e incluye implementaci´on backend con Java 21, Spring Boot, Spring\nSecurity, JPA/Hibernate, Maven y Flyway, implementaci´on frontend con React, TypeScript, Vite,\nReact Router y Axios, documentaci´on en LATEX con soporte auxiliar en Markdown, y gesti´on\nde proyecto mediante backlog y planificaci´on iterativa versionados en el propio repositorio. Esta",
+    "vertices": null,
+    "raw_info": {
+      "content": "En general, creo que vais muy directos a la descripción de las herramientas. Extender el uso de cada herramienta indivuidual. También podeís añadir una referencia a cada herramienta (eg: repositorio de descarga). Falta Proteus",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515135027+02'00'",
+      "modDate": "D:20260515135141+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "71c927d7-8210-43d5-bd83-b6996012b94e"
+    }
+  },
+  {
+    "page": 21,
+    "type": "Highlight",
+    "content": "Quitar este tipo que calificativos que no se pueden comprobar. ¿Tenemos evidencia de todos los prompts?",
+    "title": "Antonio",
+    "subject": "Resaltado",
+    "rect": [
+      331.5069885253906,
+      93.9949951171875,
+      389.89599609375,
+      109.07403564453125
+    ],
+    "text_in_rect": "y verificable",
+    "vertices": null,
+    "raw_info": {
+      "content": "Quitar este tipo que calificativos que no se pueden comprobar. ¿Tenemos evidencia de todos los prompts?",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515134704+02'00'",
+      "modDate": "D:20260515134801+02'00'",
+      "subject": "Resaltado",
+      "id": "546f2037-9b97-49ac-8769-6e190c6f27db"
+    }
+  },
+  {
+    "page": 21,
+    "type": "Highlight",
+    "content": "Esto no es del todo preciso. La definición del catalogo de requisitos no se hace a partir del ERS y el DAS sino que el propio ERS es el catalogo de requisitos. Si intentamos sintetizar demasiado perdemos \"precisión\". Extender este parrafo.",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.62809753417969,
+      213.218994140625,
+      510.64898681640625,
+      267.8330078125
+    ],
+    "text_in_rect": "La definici´on del cat´alogo de requisitos se ha construido a partir del Documento ERS (Espe-\ncificaci´on de Requisitos del Sistema), el Documento DAS (Documento de An´alisis del Sistema),\nel modelado estructurado y versionado en Proteus, el Product Backlog y Sprint Backlog utiliza-\ndos en la ejecuci´on iterativa, y la evidencia emp´ırica obtenida durante pruebas funcionales y dei",
+    "vertices": null,
+    "raw_info": {
+      "content": "Esto no es del todo preciso. La definición del catalogo de requisitos no se hace a partir del ERS y el DAS sino que el propio ERS es el catalogo de requisitos. Si intentamos sintetizar demasiado perdemos \"precisión\". Extender este parrafo.",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515135213+02'00'",
+      "modDate": "D:20260515135337+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "38ea355f-c7aa-4a51-a9e2-d3a67cd48425"
+    }
+  },
+  {
+    "page": 21,
+    "type": "Highlight",
+    "content": "Si separamos requisitos (2.3) en un capitulo nuevo, introducir el análisis de requisitos como una parte de la ingenieria del softrware",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      116.73500061035156,
+      167.92401123046875,
+      247.57699584960938,
+      187.7540283203125
+    ],
+    "text_in_rect": "An´alisis de requisitos",
+    "vertices": null,
+    "raw_info": {
+      "content": "Si separamos requisitos (2.3) en un capitulo nuevo, introducir el análisis de requisitos como una parte de la ingenieria del softrware",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515135550+02'00'",
+      "modDate": "D:20260515140350+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "5c41b553-5b8c-4b83-ace2-371ae58fe52b"
+    }
+  },
+  {
+    "page": 22,
+    "type": "Highlight",
+    "content": "¿Qué es PBI? Enlazar/referenciar",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      121.3479995727539,
+      526.0009765625,
+      304.6310119628906,
+      541.0800170898438
+    ],
+    "text_in_rect": "e planificaci´on con PBI y sprint asociadoi",
+    "vertices": null,
+    "raw_info": {
+      "content": "¿Qué es PBI? Enlazar/referenciar",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515135413+02'00'",
+      "modDate": "D:20260515135430+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "1e8589c6-4507-4211-a842-dd60389e1d32"
+    }
+  },
+  {
+    "page": 22,
+    "type": "Highlight",
+    "content": "Esta sección podría formar parte de la introducción al analisis de requisitos como capítulo suelto",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.59539794921875,
+      603.33203125,
+      510.68499755859375,
+      752.7911987304688
+    ],
+    "text_in_rect": "La especificaci´on documental de este TFG no se apoya en descripciones ad hoc, sino en dos\nartefactos de an´alisis formal mantenidos en Proteus. El ERS (Especificaci´on de Requisitos del\nSistema) define situaci´on actual, necesidades de negocio, subsistemas y cat´alogo de requisitos\n(generales, de informaci´on, funcionales, no funcionales y reglas de negocio), mientras que el DAS\n(Documento de An´alisis del Sistema) define arquitectura l´ogica, modelo de clases, diagramas\nde estado, diagramas de secuencia, navegabilidad e inventario de mockups de interfaz. Esta base\nasegura continuidad documental entre an´alisis y ejecuci´on.\nLa reutilizaci´on de ambos documentos en esta memoria persigue dos objetivos: primero, pre-\nservar trazabilidad respecto al trabajo original de Ingenier´ıa de Requisitos; segundo, demostrar\nque las decisiones de dise˜no e implementaci´on adoptadas durante el TFG responden a una base de\nespecificaci´on expl´ıcita.",
+    "vertices": null,
+    "raw_info": {
+      "content": "Esta sección podría formar parte de la introducción al analisis de requisitos como capítulo suelto",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515135716+02'00'",
+      "modDate": "D:20260515135742+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "f0380d9f-13ca-4224-8df7-e4bde7d77afc"
+    }
+  },
+  {
+    "page": 23,
+    "type": "Highlight",
+    "content": "Tenemos que referenciar cada Tabla (cambiar Cuadro por Tabla) con una breve descripcioón en la secció que corresponda aunque sea más o menos intiuitivo saber donde corresponde pero es importante que el lector/revisor identifique la relación inmediantmetne",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      122.85800170898438,
+      287.34698486328125,
+      472.4179992675781,
+      301.31402587890625
+    ],
+    "text_in_rect": "Cuadro 2.2: Ejemplo de trazabilidad entre requisitos, backlog e implementaci´on",
+    "vertices": null,
+    "raw_info": {
+      "content": "Tenemos que referenciar cada Tabla (cambiar Cuadro por Tabla) con una breve descripcioón en la secció que corresponda aunque sea más o menos intiuitivo saber donde corresponde pero es importante que el lector/revisor identifique la relación inmediantmetne",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515135754+02'00'",
+      "modDate": "D:20260515135918+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "1d693e14-0e3d-494e-8e69-d883f24c790d"
+    }
+  },
+  {
+    "page": 23,
+    "type": "Highlight",
+    "content": "Cuadno hablemos de hipotesis (como añadir nueva reglas de negocio), mejor poner un ejemplo (por ejemplo: cambios en el tipo de ficheros).",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      303.8500061035156,
+      368.2860107421875,
+      510.6510009765625,
+      382.2530212402344
+    ],
+    "text_in_rect": "pretende introducir reglas de negocio m´as finas.",
+    "vertices": null,
+    "raw_info": {
+      "content": "Cuadno hablemos de hipotesis (como añadir nueva reglas de negocio), mejor poner un ejemplo (por ejemplo: cambios en el tipo de ficheros).",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515135930+02'00'",
+      "modDate": "D:20260515140019+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "9b72aed0-39d9-4257-9f0b-1a46b2d4577f"
+    }
+  },
+  {
+    "page": 23,
+    "type": "Highlight",
+    "content": "Suena un poco genérico. Revisar manualmente",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.62809753417969,
+      381.83502197265625,
+      510.6499938964844,
+      463.5480041503906
+    ],
+    "text_in_rect": "Sobre ese diagn´ostico, las necesidades de negocio priorizadas fueron reducir la carga admi-\nnistrativa en procesos docentes recurrentes, ofrecer al estudiante un flujo de entrega m´as guiado\ny transparente, centralizar evaluaci´on y feedback con reglas de autorizaci´on claras, y mejorar la\nmantenibilidad del sistema y su capacidad de evoluci´on. Estas necesidades conectan directamente\ncon los bloques funcionales del MVP.\nEstas necesidades se conectan con el resto de la memoria en tres planos: arquitectura (separa-il",
+    "vertices": null,
+    "raw_info": {
+      "content": "Suena un poco genérico. Revisar manualmente",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515140044+02'00'",
+      "modDate": "D:20260515140054+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "4850abe0-1a32-445f-9e1b-3395790f1397"
+    }
+  },
+  {
+    "page": 23,
+    "type": "Highlight",
+    "content": "Tabla 2.3",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      125.86900329589844,
+      707.0480346679688,
+      178.20399475097656,
+      721.0150146484375
+    ],
+    "text_in_rect": "Cuadro 2.3:",
+    "vertices": null,
+    "raw_info": {
+      "content": "Tabla 2.3",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515140059+02'00'",
+      "modDate": "D:20260515140103+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "d241e3db-cac8-4f47-9efd-aeeade046679"
+    }
+  },
+  {
+    "page": 24,
+    "type": "Highlight",
+    "content": "Hay que añadir la referencia concreta a la tabla. Ej: \"La Tabla 2.6 recoge ...\" (si lo ponemos \"En la tabla siguiente ...\" la maquetación hace que perdamos la correcta secuanciacion de tablas/secciones y no se entienda.",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.6281967163086,
+      625.3599853515625,
+      510.64898681640625,
+      652.8759765625
+    ],
+    "text_in_rect": "Las tablas siguientes recogen las capacidades operativas que debe ofrecer el sistema al usuario\nfinal, separadas en dos bloques para mantener legible el inventario completo.",
+    "vertices": null,
+    "raw_info": {
+      "content": "Hay que añadir la referencia concreta a la tabla. Ej: \"La Tabla 2.6 recoge ...\" (si lo ponemos \"En la tabla siguiente ...\" la maquetación hace que perdamos la correcta secuanciacion de tablas/secciones y no se entienda.",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515140125+02'00'",
+      "modDate": "D:20260515140242+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "a4e97b53-b6b2-474d-a41e-bc31d65c4876"
+    }
+  },
+  {
+    "page": 27,
+    "type": "Text",
+    "content": "Si la sección 2.3 la ponemos como capítulo independiente (cap. 3) dividir el ERS y el DAS en 2 subsecciones cada una con una subseccion de introduccion de que son el ERS y el DAS",
+    "title": "Antonio",
+    "subject": "Nota adhesiva",
+    "rect": [
+      274.6919860839844,
+      635.3480224609375,
+      298.6919860839844,
+      659.3480224609375
+    ],
+    "text_in_rect": "amas\n2 3",
+    "vertices": null,
+    "raw_info": {
+      "content": "Si la sección 2.3 la ponemos como capítulo independiente (cap. 3) dividir el ERS y el DAS en 2 subsecciones cada una con una subseccion de introduccion de que son el ERS y el DAS",
+      "name": "Comment",
+      "title": "Antonio",
+      "creationDate": "D:20260515140424+02'00'",
+      "modDate": "D:20260515140524+02'00'",
+      "subject": "Nota adhesiva",
+      "id": "5cd684e8-622b-4fc0-9ae3-331a12fe2b20"
+    }
+  },
+  {
+    "page": 31,
+    "type": "Text",
+    "content": "En general, estamos mezclando en esta sección 2.3 el objetivo del ERS y el DAS con los del sistema. Hay que separar los comentarios genéricos sobre el rol del ERS y el DAS en la subsección que menciono y centrarnos en los artefactos del TFG.",
+    "title": "Antonio",
+    "subject": "Nota adhesiva",
+    "rect": [
+      154.91000366210938,
+      570.5479736328125,
+      178.91000366210938,
+      594.5479736328125
+    ],
+    "text_in_rect": "los dia\nncias y",
+    "vertices": null,
+    "raw_info": {
+      "content": "En general, estamos mezclando en esta sección 2.3 el objetivo del ERS y el DAS con los del sistema. Hay que separar los comentarios genéricos sobre el rol del ERS y el DAS en la subsección que menciono y centrarnos en los artefactos del TFG.",
+      "name": "Comment",
+      "title": "Antonio",
+      "creationDate": "D:20260515140544+02'00'",
+      "modDate": "D:20260515140713+02'00'",
+      "subject": "Nota adhesiva",
+      "id": "33b077fb-a75f-4b24-b1f9-44d342028650"
+    }
+  },
+  {
+    "page": 35,
+    "type": "Highlight",
+    "content": "Estas 2 secciones se pueden fusionar. \"Catalogo de casos de uso y matriz de trazabilidad ...\". El primer parrafo es genérico. En el segundo parrafo no podemos decir \"suficientes\" (ya comentado en versión previa)",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.55290222167969,
+      447.51702880859375,
+      510.6520080566406,
+      595.14599609375
+    ],
+    "text_in_rect": "2.3.15.\nCat´alogo operativo de casos de uso y cobertura funcional\nEl modelo de casos de uso del DAS se estructura como un conjunto amplio de operaciones del\nsistema que cubren autenticaci´on, gesti´on acad´emica, entregas, evaluaci´on y supervisi´on docente.\nEsta descomposici´on se reutiliza en la memoria para demostrar que la implementaci´on del MVP\nno es una selecci´on arbitraria de pantallas, sino la materializaci´on de un modelo operativo previo.\nComo representaci´on visual de dicha cobertura, se incluyen cuatro diagramas de casos de\nuso de referencia (Figuras 2.14 a 2.17), suficientes para documentar el enlace entre el cat´alogo\nfuncional y los flujos reales desarrollados.\n2.3.16.\nMatriz ampliada de trazabilidad ERS-DAS-implementaci´on",
+    "vertices": null,
+    "raw_info": {
+      "content": "Estas 2 secciones se pueden fusionar. \"Catalogo de casos de uso y matriz de trazabilidad ...\". El primer parrafo es genérico. En el segundo parrafo no podemos decir \"suficientes\" (ya comentado en versión previa)",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515140858+02'00'",
+      "modDate": "D:20260515141019+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "363520dd-2abe-4787-a2ab-3deecb3ec0ea"
+    }
+  },
+  {
+    "page": 40,
+    "type": "Highlight",
+    "content": "Como comentaba en la versión de ayer, vamos a intentar el Capitulo 2 en 3 seccione/capitulos (Ecossistema de desarrollo, Requisitos, Diseño e Implementación). En la revisión de ayer os dije de meter la sección 2.4 como parte de los  requisitos, pero ahora que la leo, mejor con la implementación (2.5). En el capitulo de \"Diseño e implementación\" hace falta un gráfico de la arquitectura para que no sea solo textual",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.45570373535156,
+      423.0840148925781,
+      217.52099609375,
+      442.91400146484375
+    ],
+    "text_in_rect": "2.5– Implementaci´on",
+    "vertices": null,
+    "raw_info": {
+      "content": "Como comentaba en la versión de ayer, vamos a intentar el Capitulo 2 en 3 seccione/capitulos (Ecossistema de desarrollo, Requisitos, Diseño e Implementación). En la revisión de ayer os dije de meter la sección 2.4 como parte de los  requisitos, pero ahora que la leo, mejor con la implementación (2.5). En el capitulo de \"Diseño e implementación\" hace falta un gráfico de la arquitectura para que no sea solo textual",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515141049+02'00'",
+      "modDate": "D:20260515141426+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "bcf51bda-54ed-4b36-b664-2386be1d454d"
+    }
+  },
+  {
+    "page": 41,
+    "type": "Highlight",
+    "content": "Esta sección es demasiado suscinta. Añadir discusiones como el uso de la API de OneDrive y no de sharepoint.",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      116.73500061035156,
+      395.9850158691406,
+      223.5030059814453,
+      415.81500244140625
+    ],
+    "text_in_rect": "Discusi´on t´ecnica",
+    "vertices": null,
+    "raw_info": {
+      "content": "Esta sección es demasiado suscinta. Añadir discusiones como el uso de la API de OneDrive y no de sharepoint.",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515141509+02'00'",
+      "modDate": "D:20260515141601+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "ebbd5fb0-6e09-45ff-b0a2-ca96e57af79c"
+    }
+  },
+  {
+    "page": 43,
+    "type": "Highlight",
+    "content": "Este parrafo completo es genérico. Quitar.",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.62809753417969,
+      321.009033203125,
+      510.6520080566406,
+      424.78900146484375
+    ],
+    "text_in_rect": "3.3.4.\nAn´alisis de causas ra´ız\nLas debilidades anteriores no se explican por errores puntuales, sino por causas sist´emicas.\nEn el plano de proceso predomina la carga manual en fases cr´ıticas de correcci´on, y en el plano\nde producto falta especializaci´on para el ciclo completo de entregables. A nivel t´ecnico existe\nacoplamiento entre flujo acad´emico y herramientas de prop´osito general, y en calidad se observa\nuna trazabilidad escasa entre entrega, versi´on, evaluaci´on y feedback. Esta combinaci´on explica\npor qu´e las mejoras parciales no eliminan la fricci´on operativa.",
+    "vertices": null,
+    "raw_info": {
+      "content": "Este parrafo completo es genérico. Quitar.",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515141618+02'00'",
+      "modDate": "D:20260515141631+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "18c29a69-2ba9-415e-a9bb-a76aafd3a2a9"
+    }
+  },
+  {
+    "page": 44,
+    "type": "Highlight",
+    "content": "Hay que ser más concretos. Nombrar herramietas concretas",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      116.73500061035156,
+      160.87799072265625,
+      399.10198974609375,
+      180.7080078125
+    ],
+    "text_in_rect": "An´alisis de competidores y brechas sectoriales",
+    "vertices": null,
+    "raw_info": {
+      "content": "Hay que ser más concretos. Nombrar herramietas concretas",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515141703+02'00'",
+      "modDate": "D:20260515141717+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "8949e5d8-ce08-42e0-a560-fa80ced39c74"
+    }
+  },
+  {
+    "page": 45,
+    "type": "Highlight",
+    "content": "Esta frase suena demasiado artificial. Cambiar",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.62809753417969,
+      357.39501953125,
+      510.64300537109375,
+      384.9110107421875
+    ],
+    "text_in_rect": "La aportaci´on funcional responde a las brechas operativas y sectoriales identificadas en sec-\nciones previas. En concreto, se implementaron capacidades de gesti´on integral de cursos, grupos,",
+    "vertices": null,
+    "raw_info": {
+      "content": "Esta frase suena demasiado artificial. Cambiar",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515141740+02'00'",
+      "modDate": "D:20260515141756+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "2685358b-c3aa-4d7b-9092-6d579006e346"
+    }
+  },
+  {
+    "page": 45,
+    "type": "Highlight",
+    "content": "En general esta subsección tiene que ver con las decisiones de diseño, que se discuten en el capitulo anterior. Mover.",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      101.56500244140625,
+      520.6270141601562,
+      348.135009765625,
+      556.6610107421875
+    ],
+    "text_in_rect": ".2.\nAportaci´on arquitect´onica y tecnol´ogica\nDesde la perspectiva t´ecnica, la contribuci´on principal se",
+    "vertices": null,
+    "raw_info": {
+      "content": "En general esta subsección tiene que ver con las decisiones de diseño, que se discuten en el capitulo anterior. Mover.",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515141833+02'00'",
+      "modDate": "D:20260515141901+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "a6627223-3992-4886-8a40-584ae72e3788"
+    }
+  },
+  {
+    "page": 46,
+    "type": "Highlight",
+    "content": "Este parrafo es demasiado abstracto. Concretar sobre el trabajo hecho o eliminar",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.62809753417969,
+      714.9849853515625,
+      510.6499938964844,
+      769.60009765625
+    ],
+    "text_in_rect": "Aun cuando la mejora es significativa, se mantienen l´ıneas de continuidad planificadas: am-\npliaci´on de funcionalidades avanzadas fuera del MVP, extensi´on de integraciones externas seg´un\ncontexto institucional y refuerzo de observabilidad y m´etricas operativas de producci´on. Esta con-\ntinuidad permite evolucionar sin comprometer la estabilidad alcanzada.",
+    "vertices": null,
+    "raw_info": {
+      "content": "Este parrafo es demasiado abstracto. Concretar sobre el trabajo hecho o eliminar",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515141930+02'00'",
+      "modDate": "D:20260515141958+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "1683a606-25e7-432c-b9be-e94752d62860"
+    }
+  },
+  {
+    "page": 46,
+    "type": "Highlight",
+    "content": "En general, si la subseccion (como esta) e s mejor fusionar con secciones anterior. Pero es mejor extenderla para que no sea tan abstracto.",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      123.90799713134766,
+      583.7100219726562,
+      341.5719909667969,
+      603.541015625
+    ],
+    "text_in_rect": "Alineaci´on con objetivos de negocio",
+    "vertices": null,
+    "raw_info": {
+      "content": "En general, si la subseccion (como esta) e s mejor fusionar con secciones anterior. Pero es mejor extenderla para que no sea tan abstracto.",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515142006+02'00'",
+      "modDate": "D:20260515142052+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "8fc7872a-fb04-4961-a410-bc9d0871b4b4"
+    }
+  },
+  {
+    "page": 47,
+    "type": "Highlight",
+    "content": "Siendo estrictos, la descripcion de los antecedentes no es convincente para afirmar ésto si no se concreta más",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.6281967163086,
+      142.34100341796875,
+      510.64898681640625,
+      169.85699462890625
+    ],
+    "text_in_rect": "El an´alisis de antecedentes confirma que el principal problema del dominio no era la ausencia\nde plataformas docentes, sino la falta de especializaci´on en el flujo operativo de entregables.",
+    "vertices": null,
+    "raw_info": {
+      "content": "Siendo estrictos, la descripcion de los antecedentes no es convincente para afirmar ésto si no se concreta más",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515142109+02'00'",
+      "modDate": "D:20260515142141+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "180257c5-eef5-4750-9b65-52fea677e086"
+    }
+  },
+  {
+    "page": 48,
+    "type": "Highlight",
+    "content": "Este capitulo debería ir antes del capitulo de requisitos (actual 2.3). Planificación antes de diseño del software",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.45570373535156,
+      217.551025390625,
+      360.3890075683594,
+      310.64898681640625
+    ],
+    "text_in_rect": "An´alisis temporal y costes de desarrollo\n4.1– An´alisis temporal",
+    "vertices": null,
+    "raw_info": {
+      "content": "Este capitulo debería ir antes del capitulo de requisitos (actual 2.3). Planificación antes de diseño del software",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515142450+02'00'",
+      "modDate": "D:20260515142526+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "988bd51e-9df3-4c9f-b12b-3b33c832b6ca"
+    }
+  },
+  {
+    "page": 56,
+    "type": "Highlight",
+    "content": "Esta justificacion es demasiado suscinta",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      101.56500244140625,
+      73.4000244140625,
+      236.20899963378906,
+      88.47900390625
+    ],
+    "text_in_rect": "Se adopta E1 por trazabilidad y",
+    "vertices": null,
+    "raw_info": {
+      "content": "Esta justificacion es demasiado suscinta",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515142818+02'00'",
+      "modDate": "D:20260515142834+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "3f7aa5a0-215c-4737-a1a6-3614ae65958e"
+    }
+  },
+  {
+    "page": 58,
+    "type": "Highlight",
+    "content": "En general, no es tan esquemático como los capítulos anteriores, pero también vendría bien extender las subsecciones.",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.6281967163086,
+      142.34100341796875,
+      510.64898681640625,
+      196.95501708984375
+    ],
+    "text_in_rect": "La comparaci´on confirma que la soluci´on implementada no responde a una selecci´on arbitraria\nde herramientas, sino a una evaluaci´on razonada frente a alternativas reales.\nEl enfoque adoptado prioriza equilibrio entre robustez, coste y mantenibilidad, lo que lo hace\nespecialmente adecuado para un TFG de perfil profesional con restricciones de tiempo y recursos.",
+    "vertices": null,
+    "raw_info": {
+      "content": "En general, no es tan esquemático como los capítulos anteriores, pero también vendría bien extender las subsecciones.",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515142851+02'00'",
+      "modDate": "D:20260515142926+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "d4c053b3-0d8f-4fec-8307-a7084e4c7fab"
+    }
+  },
+  {
+    "page": 59,
+    "type": "Highlight",
+    "content": "Extender para describir el marco de toma de decisiones que se aplica a todas las decisiones. La descripción de la decisiones es muy suscinta para trazar la ponderación propuesta. Revisar decisión con llos criterios propuestos",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.6281967163086,
+      312.92901611328125,
+      510.6470031738281,
+      381.0920104980469
+    ],
+    "text_in_rect": "En un TFG de ingenier´ıa de software, implementar funcionalidades no es suficiente si no se\nexplica por qu´e se ha elegido cada opci´on t´ecnica, qu´e alternativas se consideraron y qu´e compro-\nmisos se asumieron.\nEste cap´ıtulo ampl´ıa de forma exhaustiva la justificaci´on de decisiones adoptadas durante el\nproyecto, con foco en cuatro ejes: producto, arquitectura, calidad y operaci´on.",
+    "vertices": null,
+    "raw_info": {
+      "content": "Extender para describir el marco de toma de decisiones que se aplica a todas las decisiones. La descripción de la decisiones es muy suscinta para trazar la ponderación propuesta. Revisar decisión con llos criterios propuestos",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515143058+02'00'",
+      "modDate": "D:20260515143237+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "4ec23f74-210b-4b3e-bd60-9c8e819b25ab"
+    }
+  },
+  {
+    "page": 62,
+    "type": "Highlight",
+    "content": "Esto tiene que estar verificado por las pruebas realizadas (pendiente de revisión)",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.6281967163086,
+      316.79803466796875,
+      510.64898681640625,
+      358.28802490234375
+    ],
+    "text_in_rect": "Raz´on de fondo: la cobertura porcentual no garantiza detecci´on efectiva de fallos.\nValor aportado: los mutantes supervivientes ayudan a localizar huecos de aserciones y mejo-\nrar calidad de tests en c´odigo cr´ıtico.",
+    "vertices": null,
+    "raw_info": {
+      "content": "Esto tiene que estar verificado por las pruebas realizadas (pendiente de revisión)",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515143316+02'00'",
+      "modDate": "D:20260515143334+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "3a82003b-8347-4f6b-b9fe-4520b0833a5e"
+    }
+  },
+  {
+    "page": 67,
+    "type": "Highlight",
+    "content": "No se ha hablado de Vitest ni Stryker en el stack tecnologico usado. Añadir a capitulos anteriores",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      210.77000427246094,
+      196.2860107421875,
+      243.5989990234375,
+      210.25299072265625
+    ],
+    "text_in_rect": "Stryker",
+    "vertices": null,
+    "raw_info": {
+      "content": "No se ha hablado de Vitest ni Stryker en el stack tecnologico usado. Añadir a capitulos anteriores",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515143524+02'00'",
+      "modDate": "D:20260515153204+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "90c6fb7e-5108-422e-bad9-e2c20fba24e9"
+    }
+  },
+  {
+    "page": 67,
+    "type": "Text",
+    "content": "En el capitulo sobre herramientas usadas para el desarrollo hay que describirlas aunque sea brevemente",
+    "title": "Antonio",
+    "subject": "Nota adhesiva",
+    "rect": [
+      210.77000427246094,
+      196.2860107421875,
+      234.77000427246094,
+      220.2860107421875
+    ],
+    "text_in_rect": "Stryk",
+    "vertices": null,
+    "raw_info": {
+      "content": "En el capitulo sobre herramientas usadas para el desarrollo hay que describirlas aunque sea brevemente",
+      "name": "Comment",
+      "title": "Antonio",
+      "creationDate": "D:20260515153242+02'00'",
+      "modDate": "D:20260515153242+02'00'",
+      "subject": "Nota adhesiva",
+      "id": "2f8181e4-f5b1-4e1a-a818-c93dc5c3b835"
+    }
+  },
+  {
+    "page": 68,
+    "type": "Text",
+    "content": "",
+    "title": "Antonio",
+    "subject": "Nota adhesiva",
+    "rect": [
+      406.9809875488281,
+      388.2170104980469,
+      430.9809875488281,
+      412.2170104980469
+    ],
+    "text_in_rect": "rocedi",
+    "vertices": null,
+    "raw_info": {
+      "content": "",
+      "name": "Comment",
+      "title": "Antonio",
+      "creationDate": "D:20260515143442+02'00'",
+      "modDate": "D:20260515143442+02'00'",
+      "subject": "Nota adhesiva",
+      "id": "0fee08ac-f429-4d8f-93e0-154447d8ed43"
+    }
+  },
+  {
+    "page": 68,
+    "type": "Highlight",
+    "content": "¿Que es un corte?",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      301.9700012207031,
+      280.74200439453125,
+      379.1449890136719,
+      294.708984375
+    ],
+    "text_in_rect": "En el corte actual",
+    "vertices": null,
+    "raw_info": {
+      "content": "¿Que es un corte?",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515153330+02'00'",
+      "modDate": "D:20260515153338+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "e1ca2b34-b9d8-449e-ba49-132535d01213"
+    }
+  },
+  {
+    "page": 68,
+    "type": "Highlight",
+    "content": "Describir Surefire",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      408.5690002441406,
+      729.4920043945312,
+      446.6449890136719,
+      743.4592895507812
+    ],
+    "text_in_rect": "Surefire,",
+    "vertices": null,
+    "raw_info": {
+      "content": "Describir Surefire",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515153403+02'00'",
+      "modDate": "D:20260515153410+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "57dcec6f-ceb5-419a-b26c-f40adabbf8d5"
+    }
+  },
+  {
+    "page": 69,
+    "type": "Highlight",
+    "content": "¿Qué es JaCoCo? Añádir referencia y descripción",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      226.2449951171875,
+      288.9830322265625,
+      261.6159973144531,
+      302.95001220703125
+    ],
+    "text_in_rect": "JaCoCo",
+    "vertices": null,
+    "raw_info": {
+      "content": "¿Qué es JaCoCo? Añádir referencia y descripción",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515153445+02'00'",
+      "modDate": "D:20260515153501+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "303a2d3e-1159-494f-9d6d-c86dd3bd490f"
+    }
+  },
+  {
+    "page": 69,
+    "type": "Highlight",
+    "content": "¿Qué es PIT? Añadir referencia y descripción",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      267.1000061035156,
+      392.98699951171875,
+      284.2850036621094,
+      406.9540100097656
+    ],
+    "text_in_rect": "PIT",
+    "vertices": null,
+    "raw_info": {
+      "content": "¿Qué es PIT? Añadir referencia y descripción",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515153525+02'00'",
+      "modDate": "D:20260515153537+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "81d310e5-9ddc-459e-95b9-669d4e6a2995"
+    }
+  },
+  {
+    "page": 69,
+    "type": "Highlight",
+    "content": "Eliminar comentarios demasiado vagos. ¿Qué entornos superires?",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      151.11900329589844,
+      759.585205078125,
+      244.64599609375,
+      773.5521240234375
+    ],
+    "text_in_rect": "a entornos superiores",
+    "vertices": null,
+    "raw_info": {
+      "content": "Eliminar comentarios demasiado vagos. ¿Qué entornos superires?",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515153631+02'00'",
+      "modDate": "D:20260515153709+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "4417ea23-d5fc-454c-aef7-c2fa8896ff1a"
+    }
+  },
+  {
+    "page": 82,
+    "type": "Highlight",
+    "content": "",
+    "title": "Antonio",
+    "subject": "Resaltado",
+    "rect": [
+      200.3520050048828,
+      327.75604248046875,
+      233.33700561523438,
+      341.7770080566406
+    ],
+    "text_in_rect": "l `ultimo",
+    "vertices": null,
+    "raw_info": {
+      "content": "",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515153846+02'00'",
+      "modDate": "D:20260515153846+02'00'",
+      "subject": "Resaltado",
+      "id": "a2366c67-f07a-4292-b30f-d2cbbaf8cd20"
+    }
+  },
+  {
+    "page": 90,
+    "type": "Highlight",
+    "content": "Estas 2 secciones se pueden fusionar",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.45559692382812,
+      414.8650207519531,
+      510.6520080566406,
+      632.8400268554688
+    ],
+    "text_in_rect": "La plataforma se centra en el ciclo de actividades, entregables y evaluaci´on. En contextos\ndonde no se requiere un LMS completo, puede funcionar como alternativa ligera, con menor com-\nplejidad operativa y una curva de aprendizaje m´as directa.\nCuando ya existe un entorno como Moodle, el sistema puede actuar como complemento es-\npecializado para la gesti´on de entregas, correcciones y publicaci´on de notas, manteniendo el resto\nde la docencia (contenidos, foros, cuestionarios) en el LMS. La convivencia es viable mediante\nenlaces cruzados y coordinaci´on de calendarios, evitando duplicidades en el trabajo docente.\n7.13– Aspectos novedosos\nEl proyecto introduce capacidades que ampl´ıan la operativa habitual de un LMS. Por un lado,\nel uso de APIs de OneDrive y correo permite autorizar el acceso del usuario a su cuenta (OAuth2) y\ngestionar entregas en su almacenamiento en la nube, mientras que el canal de correo (actualmente\noperado mediante Brevo) soporta procesos como recuperaci´on de contrase˜na y notificaciones de\nevaluaci´on. Por otro, la importaci´on desde OneDrive habilita la incorporaci´on de la estructura de\ncarpetas del usuario para organizar entregables y mantener trazabilidad con su repositorio personal.",
+    "vertices": null,
+    "raw_info": {
+      "content": "Estas 2 secciones se pueden fusionar",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515153951+02'00'",
+      "modDate": "D:20260515154000+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "d80c2058-13b4-4abc-a11f-c6aab989ca9b"
+    }
+  },
+  {
+    "page": 90,
+    "type": "Highlight",
+    "content": "Añadir Tabla con el checklist para cada rol",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.59539794921875,
+      182.56298828125,
+      510.64898681640625,
+      278.25103759765625
+    ],
+    "text_in_rect": "Como apoyo de uso r´apido se incluye un checklist resumido por rol: el administrador se\ncentra en alta de usuarios, asignaci´on de roles y revisi´on de estructura de cursos y grupos; el\nprofesor en configuraci´on de actividad, publicaci´on de entregable, correcci´on y publicaci´on de\nnota; y el estudiante en revisi´on de actividad visible, entrega en plazo y verificaci´on de estado y\nfeedback. Este recordatorio reduce omisiones operativas.\nEl uso sistem´atico de este checklist disminuye errores de operaci´on y mejora la consistencia\ndel proceso acad´emico.",
+    "vertices": null,
+    "raw_info": {
+      "content": "Añadir Tabla con el checklist para cada rol",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515154020+02'00'",
+      "modDate": "D:20260515154035+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "eeefa3ec-0fbe-4860-8ed7-945f4e79292b"
+    }
+  },
+  {
+    "page": 90,
+    "type": "Highlight",
+    "content": "La plataforma de despliegue aparece nombrada aquí por primera vez. Añadir mucho antes la descripción de la herramienta (Capitulo 2)",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.62799835205078,
+      700.93798828125,
+      510.64599609375,
+      769.1011962890625
+    ],
+    "text_in_rect": "config), restricciones de Render en servicios Static Site que exigieron ajustes del blueprint, y res-\ntricciones de correo saliente en PaaS mitigadas con proveedores HTTP (Brevo) para correos tran-\nsaccionales. Tambi´en se abord´o la migraci´on de proveedor de correo transaccional: inicialmente\nse utiliz´o SendGrid, pero al finalizar su plan gratuito se migr´o a Brevo; se evalu´o Resend como\nalternativa, aunque su plan gratuito exige dominio verificado, y el dise˜no del EmailService",
+    "vertices": null,
+    "raw_info": {
+      "content": "La plataforma de despliegue aparece nombrada aquí por primera vez. Añadir mucho antes la descripción de la herramienta (Capitulo 2)",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515154257+02'00'",
+      "modDate": "D:20260515154259+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "fbf4611b-c9ef-4268-a6a9-2f0a8938337b"
+    }
+  },
+  {
+    "page": 91,
+    "type": "Highlight",
+    "content": "El título de esta sección puede ser siemplemente \"Conclusiones\" (aplicar a cada capítulo)",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      123.90799713134766,
+      324.239013671875,
+      280.51300048828125,
+      344.0690002441406
+    ],
+    "text_in_rect": "Conclusiones del cap´ıtulo",
+    "vertices": null,
+    "raw_info": {
+      "content": "El título de esta sección puede ser siemplemente \"Conclusiones\" (aplicar a cada capítulo)",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515154142+02'00'",
+      "modDate": "D:20260515154220+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "05615697-6d31-4874-82d7-b1ff7e5a57c2"
+    }
+  },
+  {
+    "page": 92,
+    "type": "Highlight",
+    "content": "Creo que aquí sí merece la pena tener una lista o subsecciones que estén más desarrolladas con las aportaciones del proyecto",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.59529876708984,
+      639.2239990234375,
+      510.6780090332031,
+      734.9110107421875
+    ],
+    "text_in_rect": "Las aportaciones m´as relevantes del trabajo se articulan en cuatro planos. En el plano fun-\ncional se entrega una plataforma centrada en la operativa docente, con flujos diferenciados para\nadministraci´on, profesorado y alumnado. En el plano t´ecnico se consolida una arquitectura mo-\ndular SPA + API, persistencia versionada con Flyway, seguridad JWT y soporte de integraciones\ncloud configurables. En el plano de calidad se incorpora testing multinivel y mutaci´on como cri-\nterio objetivo de robustez, y en el plano de operaci´on se establece un canal CI/CD reproducible\ncon validaciones continuas de calidad y seguridad.",
+    "vertices": null,
+    "raw_info": {
+      "content": "Creo que aquí sí merece la pena tener una lista o subsecciones que estén más desarrolladas con las aportaciones del proyecto",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515154517+02'00'",
+      "modDate": "D:20260515154544+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "0e0d0a8e-9e9b-4c4c-95d2-fb312b8b3585"
+    }
+  },
+  {
+    "page": 92,
+    "type": "Highlight",
+    "content": "Suena un poco artificial. Ser más directo. Sustituir por \"El proyecto implementa una solución especializada en la gestión integral del ciclo de vida de los entregables, integrando las fases de evaluación y retroalimentación (feedback) docente. A diferencia de las plataformas generalistas, este sistema ofrece un flujo automatizado de extremo a extremo (end-to-end), minimizando la intervención manual mediante una arquitectura adaptada específicamente a la validación y control de los archivos\"",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.6281967163086,
+      367.125,
+      510.64801025390625,
+      421.7400207519531
+    ],
+    "text_in_rect": "El resultado no se limita a un prototipo funcional, sino a una soluci´on trazable y mantenible,\nalineada con el problema de negocio detectado en el contexto docente: mejorar la gesti´on de activi-\ndades, entregas, evaluaciones y feedback frente a herramientas generalistas con menor adecuaci´on\na la operativa diaria.",
+    "vertices": null,
+    "raw_info": {
+      "content": "Suena un poco artificial. Ser más directo. Sustituir por \"El proyecto implementa una solución especializada en la gestión integral del ciclo de vida de los entregables, integrando las fases de evaluación y retroalimentación (feedback) docente. A diferencia de las plataformas generalistas, este sistema ofrece un flujo automatizado de extremo a extremo (end-to-end), minimizando la intervención manual mediante una arquitectura adaptada específicamente a la validación y control de los archivos\"",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515154616+02'00'",
+      "modDate": "D:20260515155023+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "6cc12d0d-2be6-4a83-b039-93b40be7df96"
+    }
+  },
+  {
+    "page": 94,
+    "type": "Highlight",
+    "content": "Creo que aquí merece la pena añadir también un texto sobre las desviaciones en la planificación.",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.6281967163086,
+      93.6650390625,
+      510.64898681640625,
+      175.37799072265625
+    ],
+    "text_in_rect": "Durante la ejecuci´on del proyecto se consolidan varios aprendizajes de inter´es para trabajos\nsimilares. Dise˜nar la trazabilidad desde el inicio (requisito-backlog-c´odigo-prueba) simplifica jus-\ntificaci´on t´ecnica y auditor´ıa; la calidad debe construirse iterativamente y no solo en la fase final de\ncierre; desacoplar configuraci´on por entorno reduce fricci´on en migraciones de infraestructura; e\nintegrar seguridad y permisos en la l´ogica de dominio evita defectos estructurales costosos. Estos\naprendizajes son transferibles a proyectos acad´emicos similares.",
+    "vertices": null,
+    "raw_info": {
+      "content": "Creo que aquí merece la pena añadir también un texto sobre las desviaciones en la planificación.",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515155053+02'00'",
+      "modDate": "D:20260515155123+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "677dd6d7-ed33-4286-a3e2-8ab8b1e391b4"
+    }
+  },
+  {
+    "page": 96,
+    "type": "Highlight",
+    "content": "Hacer cada apéndice como un capítulo separado en vez de todos como un capítulo. Esta sección de introducción no es necesaria (revisar referencias en los capítulos principales).",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.45570373535156,
+      290.81903076171875,
+      510.6520080566406,
+      353.9940185546875
+    ],
+    "text_in_rect": "A.1– Introducci´on\nEste bloque recoge informaci´on complementaria de car´acter operativo que no forma parte del\nhilo principal de dise˜no e implementaci´on, pero facilita reproducci´on, mantenimiento y auditor´ıa\ndel proyecto.",
+    "vertices": null,
+    "raw_info": {
+      "content": "Hacer cada apéndice como un capítulo separado en vez de todos como un capítulo. Esta sección de introducción no es necesaria (revisar referencias en los capítulos principales).",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515155257+02'00'",
+      "modDate": "D:20260515155350+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "cc37d6d5-a0f3-406d-8046-306de57f5abd"
+    }
+  },
+  {
+    "page": 99,
+    "type": "Highlight",
+    "content": "Estas 2 secciones se pueden quitar",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.45570373535156,
+      324.239013671875,
+      510.6520080566406,
+      469.47900390625
+    ],
+    "text_in_rect": "A.7– Anexo F. Referencias t´ecnicas de apoyo\nPara el dise˜no, implementaci´on y validaci´on de la soluci´on se han utilizado como apoyo las\ngu´ıas oficiales de los principales frameworks y herramientas del proyecto, incluyendo Spring Boot,\nReact, Flyway, Vitest, Playwright y OWASP.\nA.8– Cierre de ap´endices\nLos anexos anteriores consolidan la dimensi´on operativa y metodol´ogica del TFG, aportando\nuna base pr´actica para reproducibilidad y continuidad del proyecto m´as all´a del alcance temporal\nde la convocatoria.",
+    "vertices": null,
+    "raw_info": {
+      "content": "Estas 2 secciones se pueden quitar",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515155212+02'00'",
+      "modDate": "D:20260515155225+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "4b1ac807-4e24-434b-841f-ed1c89a4d1bd"
+    }
+  },
+  {
+    "page": 99,
+    "type": "Highlight",
+    "content": "Añadir enlace explícito al repositorio y la ruta específica a documentación disponible adicional",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.6281967163086,
+      242.17401123046875,
+      510.64898681640625,
+      305.3489990234375
+    ],
+    "text_in_rect": "A.6– Anexo E. Documentaci´on complementaria disponible\nComo soporte adicional al contenido principal de la memoria, el repositorio incorpora do-\ncumentos t´ecnicos de operaci´on, seguridad, testing y despliegue que permiten ampliar detalle en\nrevisiones futuras.",
+    "vertices": null,
+    "raw_info": {
+      "content": "Añadir enlace explícito al repositorio y la ruta específica a documentación disponible adicional",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515155408+02'00'",
+      "modDate": "D:20260515155440+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "6072dca4-8190-4a57-b2cb-06f070c22d9c"
+    }
+  },
+  {
+    "page": 99,
+    "type": "Text",
+    "content": "Añadir un nuevo apéndice en plan \"Caso de uso de ejemplo\" donde se describa un usuario de prueba de cada un de los 3 pérfiles que permita probar la funcionalidad para cada uno y las interacciones cada uno de ellos para un uso completo (Creación de asignatura, usairios profesores y estudiantes, creación de actividad entregable, entrega por el estudiante, feedback por el profesor). \rEste caso podría ser el mismo que se muestre en el video.",
+    "title": "Antonio",
+    "subject": "Nota adhesiva",
+    "rect": [
+      108.50900268554688,
+      228.072021484375,
+      132.50900268554688,
+      252.072021484375
+    ],
+    "text_in_rect": "An",
+    "vertices": null,
+    "raw_info": {
+      "content": "Añadir un nuevo apéndice en plan \"Caso de uso de ejemplo\" donde se describa un usuario de prueba de cada un de los 3 pérfiles que permita probar la funcionalidad para cada uno y las interacciones cada uno de ellos para un uso completo (Creación de asignatura, usairios profesores y estudiantes, creación de actividad entregable, entrega por el estudiante, feedback por el profesor). \rEste caso podría ser el mismo que se muestre en el video.",
+      "name": "Comment",
+      "title": "Antonio",
+      "creationDate": "D:20260515155453+02'00'",
+      "modDate": "D:20260515155726+02'00'",
+      "subject": "Nota adhesiva",
+      "id": "2163e3b2-209a-4154-958c-1ebf03880318"
+    }
+  },
+  {
+    "page": 100,
+    "type": "Highlight",
+    "content": "La bibliografía es muy escueta. Es necesario añadir referencias a todas las herramientas y metodlogías que nombráis en la memoria.",
+    "title": "Antonio",
+    "subject": "Comentario en el texto",
+    "rect": [
+      84.63200378417969,
+      220.218017578125,
+      195.32200622558594,
+      234.177001953125
+    ],
+    "text_in_rect": "Contributors, V. (2026).",
+    "vertices": null,
+    "raw_info": {
+      "content": "La bibliografía es muy escueta. Es necesario añadir referencias a todas las herramientas y metodlogías que nombráis en la memoria.",
+      "name": "",
+      "title": "Antonio",
+      "creationDate": "D:20260515155739+02'00'",
+      "modDate": "D:20260515155815+02'00'",
+      "subject": "Comentario en el texto",
+      "id": "5cb86550-a496-4096-86ca-39a00ac0596a"
+    }
+  },
+  {
+    "page": 100,
+    "type": "Text",
+    "content": "En general, tenemos que evitar secciones de 2-3 líneas. Hay que extenderlas o fusionar secciones para no cortar el flujo de lectura.",
+    "title": "Antonio",
+    "subject": "Nota adhesiva",
+    "rect": [
+      119.85399627685547,
+      446.69000244140625,
+      143.85400390625,
+      470.69000244140625
+    ],
+    "text_in_rect": "",
+    "vertices": null,
+    "raw_info": {
+      "content": "En general, tenemos que evitar secciones de 2-3 líneas. Hay que extenderlas o fusionar secciones para no cortar el flujo de lectura.",
+      "name": "Comment",
+      "title": "Antonio",
+      "creationDate": "D:20260515155819+02'00'",
+      "modDate": "D:20260515160134+02'00'",
+      "subject": "Nota adhesiva",
+      "id": "3de7fcf9-5709-4f96-8150-04a4a916a148"
+    }
+  }
+]

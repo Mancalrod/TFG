@@ -186,7 +186,7 @@ si se interrumpe la sesi\'on o falla la conexi\'on.
 
 \subsection{Recomendaciones para entregas sin incidencias}
 
-Para minimizar errores de validaci\'on, se recomienda al estudiante revisar el tipo de entrega requerido antes de preparar el material, verificar nombre y extensi\'on de archivos antes de subir, evitar subir archivos en el \`ultimo minuto para mitigar riesgos de red y confirmar en la vista de detalle que la versi\'on final ha quedado registrada. Estas pr\'acticas reducen incidencias y retrabajo.
+Para minimizar errores de validaci\'on, se recomienda al estudiante revisar el tipo de entrega requerido antes de preparar el material, verificar nombre y extensi\'on de archivos antes de subir, evitar subir archivos en el \'ultimo minuto para mitigar riesgos de red y confirmar en la vista de detalle que la versi\'on final ha quedado registrada. Estas pr\'acticas reducen incidencias y retrabajo.
 
 En entregas de tipo ZIP,
 si existe estructura obligatoria,
@@ -311,10 +311,24 @@ y publicaci\'on accidental de informaci\'on acad\'emica sensible.
 \FloatBarrier
 \section{Checklist operativo por perfil}
 
-Como apoyo de uso r\'apido se incluye un checklist resumido por rol: el \textbf{administrador} se centra en alta de usuarios, asignaci\'on de roles y revisi\'on de estructura de cursos y grupos; el \textbf{profesor} en configuraci\'on de actividad, publicaci\'on de entregable, correcci\'on y publicaci\'on de nota; y el \textbf{estudiante} en revisi\'on de actividad visible, entrega en plazo y verificaci\'on de estado y feedback. Este recordatorio reduce omisiones operativas.
+Como apoyo de uso r\'apido se incluye un checklist resumido por rol (Tabla~\ref{tab:manual-checklist}): el administrador se centra en el alta de usuarios y revisi\'on de la estructura; el profesor en la configuraci\'on de actividades y evaluaci\'on; y el estudiante en la correcta realizaci\'on de la entrega. Este recordatorio reduce omisiones operativas y mejora la consistencia del proceso acad\'emico.
 
-El uso sistem\'atico de este checklist disminuye errores de operaci\'on
-y mejora la consistencia del proceso acad\'emico.
+\begin{table}[!htbp]
+\centering
+\begin{tabular}{|P{3.5cm}|P{8.5cm}|}
+\hline
+\textbf{Perfil} & \textbf{Checklist de operaciones clave} \\
+\hline
+\textbf{Administrador} & \vspace{-3mm}\begin{itemize} \item Alta y modificaci\'on de usuarios. \item Asignaci\'on de roles (profesor/estudiante). \item Revisi\'on de la estructura de cursos y grupos. \end{itemize}\vspace{-3mm} \\
+\hline
+\textbf{Profesor} & \vspace{-3mm}\begin{itemize} \item Configuraci\'on de actividad y fechas l\'imite. \item Publicaci\'on del entregable y reglas de formato. \item Correcci\'on de entregas recibidas. \item Publicaci\'on de calificaciones y feedback. \end{itemize}\vspace{-3mm} \\
+\hline
+\textbf{Estudiante} & \vspace{-3mm}\begin{itemize} \item Revisi\'on de actividades visibles. \item Verificaci\'on de los requisitos de entrega. \item Env\'io de la entrega en plazo estipulado. \item Verificaci\'on del estado, nota y feedback. \end{itemize}\vspace{-3mm} \\
+\hline
+\end{tabular}
+\caption{Checklist operativo por perfil}
+\label{tab:manual-checklist}
+\end{table}
 
 \FloatBarrier
 \section{Buenas pr\'acticas de uso}
@@ -322,29 +336,14 @@ y mejora la consistencia del proceso acad\'emico.
 Para minimizar incidencias operativas se recomienda comprobar siempre fecha l\'imite y tipo de entrega antes de enviar, revisar la vista de detalle tras cada acci\'on cr\'itica, mantener actualizado el perfil de usuario, evitar compartir credenciales y cerrar sesi\'on en equipos compartidos. Estas acciones consolidan un uso seguro y ordenado.
 
 \FloatBarrier
-\section{Alternativa o complemento a la ense\~nanza virtual}
+\section{Alternativa a la ense\~nanza virtual y aspectos novedosos}
 
-La plataforma se centra en el ciclo de actividades, entregables y evaluaci\'on.
-En contextos donde no se requiere un LMS completo,
-puede funcionar como alternativa ligera,
-con menor complejidad operativa y una curva de aprendizaje m\'as directa.
+La plataforma se centra en el ciclo de actividades, entregables y evaluaci\'on. En contextos donde no se requiere un LMS completo, puede funcionar como alternativa ligera, con menor complejidad operativa y una curva de aprendizaje m\'as directa. Cuando ya existe un entorno como Moodle, el sistema puede actuar como complemento especializado para la gesti\'on de entregas, correcciones y publicaci\'on de notas, manteniendo el resto de la docencia (contenidos, foros, cuestionarios) en el LMS matriz. La convivencia es viable mediante enlaces cruzados y coordinaci\'on de calendarios, evitando duplicidades en el trabajo docente.
 
-Cuando ya existe un entorno como Moodle,
-el sistema puede actuar como complemento especializado para la gesti\'on de entregas,
-correcciones y publicaci\'on de notas,
-manteniendo el resto de la docencia (contenidos, foros, cuestionarios) en el LMS.
-La convivencia es viable mediante enlaces cruzados y coordinaci\'on de calendarios,
-evitando duplicidades en el trabajo docente.
-
-\FloatBarrier
-\section{Aspectos novedosos}
-
-El proyecto introduce capacidades que ampl\'ian la operativa habitual de un LMS. Por un lado, el uso de APIs de OneDrive y correo permite autorizar el acceso del usuario a su cuenta (OAuth2) y gestionar entregas en su almacenamiento en la nube, mientras que el canal de correo (actualmente operado mediante Brevo) soporta procesos como recuperaci\'on de contrase\~na y notificaciones de evaluaci\'on. Por otro, la importaci\'on desde OneDrive habilita la incorporaci\'on de la estructura de carpetas del usuario para organizar entregables y mantener trazabilidad con su repositorio personal.
-
-\FloatBarrier
+Como aspecto novedoso, el proyecto introduce capacidades que ampl\'ian la operativa habitual de un LMS convencional. Por un lado, el uso de APIs de OneDrive y correo permite autorizar el acceso del usuario a su cuenta (OAuth2) y gestionar entregas en su almacenamiento en la nube, mientras que el canal de correo (operado mediante Brevo) soporta notificaciones y flujos seguros de recuperaci\'on. Por otro, la importaci\'on directa desde OneDrive habilita la incorporaci\'on de la estructura de carpetas del usuario para organizar entregables, manteniendo trazabilidad total con su repositorio personal de trabajo.
 \section{Desaf\'ios t\'ecnicos encontrados en el proyecto}
 
-Los principales retos t\'ecnicos identificados durante el desarrollo y el despliegue incluyen la incompatibilidad de ESLint 9 con configuraciones cl\'asicas (resuelta con migraci\'on a formato \textit{flat config}), restricciones de Render en servicios Static Site que exigieron ajustes del blueprint, y restricciones de correo saliente en PaaS mitigadas con proveedores HTTP (Brevo) para correos transaccionales. Tambi\'en se abord\'o la migraci\'on de proveedor de correo transaccional: inicialmente se utiliz\'o SendGrid, pero al finalizar su plan gratuito se migr\'o a Brevo; se evalu\'o Resend como alternativa, aunque su plan gratuito exige dominio verificado, y el dise\~no del \texttt{EmailService} con patr\'on de proveedor desacoplado permite intercambiar proveedores sin modificar l\'ogica de negocio. Se suman conflictos y deprecaciones en SonarCloud solventados migrando al plugin de Maven, tiempos excesivos en OWASP Dependency Check sin API Key de NVD mitigados con credenciales dedicadas, errores CORS en despliegue (403) al no incluir el origen del frontend en la configuraci\'on, e inactividad del backend en el tier gratuito mitigada mediante \textit{keep-alive} automatizado.
+Los principales retos t\'ecnicos identificados durante el desarrollo y el despliegue incluyen la incompatibilidad de ESLint 9 con configuraciones cl\'asicas (resuelta con migraci\'on a formato \textit{flat config}), restricciones de Render en servicios Static Site (plataforma de despliegue principal ya descrita en el Cap\'itulo \ref{requisitos}) que exigieron ajustes del blueprint, y restricciones de correo saliente en PaaS mitigadas con proveedores HTTP (Brevo) para correos transaccionales. Tambi\'en se abord\'o la migraci\'on de proveedor de correo transaccional: inicialmente se utiliz\'o SendGrid, pero al finalizar su plan gratuito se migr\'o a Brevo; se evalu\'o Resend como alternativa, aunque su plan gratuito exige dominio verificado, y el dise\~no del \texttt{EmailService} con patr\'on de proveedor desacoplado permite intercambiar proveedores sin modificar l\'ogica de negocio. Se suman conflictos y deprecaciones en SonarCloud solventados migrando al plugin de Maven, tiempos excesivos en OWASP Dependency Check sin API Key de NVD mitigados con credenciales dedicadas, errores CORS en despliegue (403) al no incluir el origen del frontend en la configuraci\'on, e inactividad del backend en el tier gratuito mitigada mediante \textit{keep-alive} automatizado.
 
 \FloatBarrier
 \section{An\'alisis de la evoluci\'on del proyecto}
@@ -352,12 +351,9 @@ Los principales retos t\'ecnicos identificados durante el desarrollo y el despli
 El historial de commits con prefijo \texttt{feat} refleja una evoluci\'on en fases (36 registros). La fase de \textbf{arranque y base} incluye el commit inicial, definici\'on de estructura y primeros flujos de CI; la fase de \textbf{infraestructura} agrupa despliegue continuo, Render y workflows de mantenimiento y seguridad (Dependabot, Sonar, auditor\'ias). La \textbf{funcionalidad nuclear} incorpora JWT, recuperaci\'on de contrase\~na, mejoras de administraci\'on, integraci\'on OneDrive, descargas y panel de evaluaciones; la fase de \textbf{calidad y robustez} ampl\'ia test, mutaci\'on y cobertura eliminando \textit{hotspots}; y la fase de \textbf{documentaci\'on} consolida la memoria del TFG. Esta progresi\'on evidencia una evoluci\'on incremental y trazable.
 
 \FloatBarrier
-\section{Conclusiones del cap\'itulo}
+\section{Conclusiones}
 
-El manual de usuario consolida el uso operativo del sistema y garantiza
-que los tres perfiles principales disponen de un procedimiento claro,
-coherente con las reglas de negocio y alineado con los requisitos definidos.
+El manual de usuario consolida el uso operativo del sistema y garantiza que los tres perfiles principales disponen de un procedimiento claro, coherente con las reglas de negocio y alineado con los requisitos definidos.
 
-Su existencia facilita adopci\'on, reduce errores de uso y mejora la calidad
-del servicio acad\'emico prestado por la plataforma.
+Su existencia facilita adopci\'on, reduce errores de uso y mejora la calidad del servicio acad\'emico prestado por la plataforma.
 

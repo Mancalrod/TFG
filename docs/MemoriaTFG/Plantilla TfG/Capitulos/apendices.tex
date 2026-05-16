@@ -1,14 +1,4 @@
-\chapter{Ap\'endices}\label{apendices}
-
-\FloatBarrier
-\section{Introducci\'on}
-
-Este bloque recoge informaci\'on complementaria de car\'acter operativo
-que no forma parte del hilo principal de dise\~no e implementaci\'on,
-pero facilita reproducci\'on, mantenimiento y auditor\'ia del proyecto.
-
-\FloatBarrier
-\section{Anexo A. Manual de instalaci\'on}
+\chapter{Manual de instalaci\'on}\label{apendice-instalacion}
 
 \subsection{Requisitos previos}
 
@@ -71,7 +61,7 @@ npm run build
 \end{verbatim}
 
 \FloatBarrier
-\section{Anexo B. Configuraci\'on por entornos}
+\chapter{Configuraci\'on por entornos}\label{apendice-configuracion}
 
 \subsection{Variables cr\'iticas de backend}
 
@@ -90,7 +80,7 @@ La variable principal de configuraci\'on de cliente es
 \texttt{VITE\_API\_BASE\_URL}, que define el endpoint de API consumido.
 
 \FloatBarrier
-\section{Anexo C. Operaci\'on y verificaci\'on}
+\chapter{Operaci\'on y verificaci\'on}\label{apendice-operacion}
 
 \subsection{Comprobaciones de salud}
 
@@ -104,7 +94,7 @@ y reducir falsos positivos en monitorizaci\'on.
 Tras cada despliegue se recomienda, como m\'inimo, comprobar endpoints de salud, realizar login con usuario de prueba, ejecutar operaci\'on de lectura y escritura en flujo acad\'emico, verificar subida y descarga de material y probar el correo transaccional (recuperaci\'on de contrase\~na o notificaci\'on) mediante Brevo. Estas comprobaciones validan la operativa esencial en producci\'on.
 
 \FloatBarrier
-\section{Anexo D. Declaraci\'on de uso de IA generativa}
+\chapter{Declaraci\'on de uso de IA generativa}\label{apendice-ia}
 
 En este TFG se ha utilizado IA generativa como herramienta de apoyo
 en tareas acotadas y verificables, con el objetivo de mejorar claridad
@@ -172,23 +162,30 @@ Este anexo se incluye para garantizar transparencia metodol\'ogica
 y trazabilidad del proceso de elaboraci\'on de la memoria.
 
 \FloatBarrier
-\section{Anexo E. Documentaci\'on complementaria disponible}
+\chapter{Documentaci\'on complementaria disponible}\label{apendice-docs}
 
-Como soporte adicional al contenido principal de la memoria,
-el repositorio incorpora documentos t\'ecnicos de operaci\'on,
-seguridad, testing y despliegue que permiten ampliar detalle en revisiones futuras.
+Como soporte adicional al contenido principal de la memoria, el repositorio oficial del proyecto incorpora documentos t\'ecnicos de operaci\'on, seguridad, testing y despliegue que permiten ampliar detalle en revisiones futuras. 
 
-\FloatBarrier
-\section{Anexo F. Referencias t\'ecnicas de apoyo}
+El c\'odigo fuente del proyecto se encuentra alojado en GitHub y est\'a disponible en el siguiente enlace: \url{https://github.com/Mancalrod/TFG}. 
 
-Para el dise\~no, implementaci\'on y validaci\'on de la soluci\'on
-se han utilizado como apoyo las gu\'ias oficiales de los principales
-frameworks y herramientas del proyecto,
-incluyendo Spring Boot, React, Flyway, Vitest, Playwright y OWASP.
+Dentro del repositorio, se puede consultar la documentaci\'on t\'ecnica complementaria en la ruta \texttt{docs/}, donde se encuentran esquemas, configuraciones de despliegue y otros artefactos de dise\~no adicionales no incluidos expl\'icitamente en esta memoria.
 
 \FloatBarrier
-\section{Cierre de ap\'endices}
+\chapter{Caso de uso de ejemplo}\label{apendice-caso-uso}
 
-Los anexos anteriores consolidan la dimensi\'on operativa y metodol\'ogica del TFG,
-aportando una base pr\'actica para reproducibilidad y continuidad del proyecto
-m\'as all\'a del alcance temporal de la convocatoria.
+Para ilustrar de forma unificada la funcionalidad de la plataforma, se describe a continuaci\'on el recorrido completo (flujo de extremo a extremo) de una pr\'actica a trav\'es de los tres perfiles del sistema: Administrador, Profesor y Estudiante. Este recorrido es representativo de la operativa del TFG y coincide con el hilo conductor de la demostraci\'on en v\'ideo del proyecto.
+
+\subsection{1. Administrador: Configuraci\'on inicial}
+El administrador accede a la plataforma y crea un curso denominado ``Ingenier\'ia de Software''. Seguidamente, da de alta a dos usuarios: un \textbf{profesor} y un \textbf{estudiante}, y crea un grupo llamado ``Grupo A''. Finalmente, asocia al profesor como docente del curso y vincula al estudiante al ``Grupo A''. Con esto, la base acad\'emica queda lista.
+
+\subsection{2. Profesor: Creaci\'on de la actividad y el entregable}
+El profesor inicia sesi\'on y visualiza el curso ``Ingenier\'ia de Software'' en su panel. Entra en \'el y crea una nueva \textbf{Actividad} (ej: ``Pr\'actica 1''), asign\'andola al ``Grupo A'' para que s\'olo sus estudiantes la vean. Dentro de la actividad, define un \textbf{Entregable}, configurando la fecha l\'imite y exigiendo un formato espec\'ifico (por ejemplo, un archivo ZIP con un documento PDF obligatorio en su interior).
+
+\subsection{3. Estudiante: Revisi\'on y entrega}
+El estudiante inicia sesi\'on y, en su dashboard, observa que tiene una nueva actividad pendiente en el curso ``Ingenier\'ia de Software''. Accede a los detalles y comprueba los requisitos del entregable (fecha y formato ZIP). El estudiante prepara su archivo en el ordenador local, accede al formulario de entrega, sube su ZIP y pulsa enviar. El sistema valida en tiempo real la extensi\'on y estructura del ZIP y, tras procesarlo correctamente, le confirma que la entrega ha sido registrada.
+
+\subsection{4. Profesor: Correcci\'on y retroalimentaci\'on}
+M\'as tarde, el profesor accede a la secci\'on de \textbf{Evaluaciones} o al detalle del entregable y observa la entrega pendiente del estudiante. Abre la entrega, donde puede previsualizar el contenido o descargarlo. Tras revisarlo, le asigna una calificaci\'on de ``8.5/10'' y redacta un comentario detallado con sugerencias de mejora. Al guardar la evaluaci\'on, el profesor publica las notas.
+
+\subsection{5. Estudiante: Consulta de resultados}
+El estudiante vuelve a iniciar sesi\'on. En su vista de calificaciones (y en el detalle de la propia entrega) puede ver ahora su nota de 8.5 y leer la retroalimentaci\'on proporcionada por el profesor, cerrando as\'i el ciclo completo de la pr\'actica de forma trazable y transparente.

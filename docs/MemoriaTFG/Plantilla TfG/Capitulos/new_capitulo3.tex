@@ -1,87 +1,14 @@
-\chapter{An\'alisis de requisitos, dise\~no e implementaci\'on}\label{requisitos}
+\chapter{An\'alisis y requisitos}\label{cap_requisitos}
 
-\FloatBarrier
-\section{Introducci\'on}
+\section{Fuentes de requisitos}
 
-Este cap\'itulo integra tres perspectivas que en un desarrollo profesional no deben
-tratarse de forma aislada: la especificaci\'on de requisitos, el dise\~no t\'ecnico y la
-implementaci\'on efectiva del sistema.
+La definici\'on del cat\'alogo de requisitos se ha construido a partir del Documento ERS (Especificaci\'on de Requisitos del Sistema), el Documento DAS (Documento de An\'alisis del Sistema), el modelado estructurado y versionado en Proteus, el Product Backlog y Sprint Backlog utilizados en la ejecuci\'on iterativa, y la evidencia emp\'irica obtenida durante pruebas funcionales y de integraci\'on. Esta combinaci\'on evita una especificaci\'on desconectada de la implementaci\'on real.
 
-El objetivo es demostrar trazabilidad de extremo a extremo: desde la necesidad
-identificada en el an\'alisis inicial hasta su materializaci\'on en componentes software,
-persistencia, seguridad, pruebas y despliegue.
+Este planteamiento evita una especificaci\'on est\'atica: los requisitos se formalizan,
+se priorizan, se implementan por incrementos y se vuelven a validar con el producto
+funcionando.
 
-\FloatBarrier
-\section{Ecosistema de desarrollo y operaci\'on}
-
-\subsection{Lenguajes y herramientas utilizadas}
-
-El ecosistema t\'ecnico del proyecto se ha definido para garantizar coherencia entre desarrollo, validaci\'on y despliegue, combinando diversas herramientas especializadas en cada \'area del ciclo de vida del software:
-
-\begin{itemize}
-    \item \textbf{Backend:} Se emplea \textbf{Java 21} como lenguaje principal, apoyado en el framework \textbf{Spring Boot} (\url{https://spring.io/projects/spring-boot}) para acelerar la creaci\'on de la API REST. La seguridad se gestiona con \textbf{Spring Security}, el acceso a base de datos mediante \textbf{JPA/Hibernate}, la construcci\'on con \textbf{Maven} (\url{https://maven.apache.org/}) y el control de versiones de la base de datos a trav\'es de \textbf{Flyway} (\url{https://flywaydb.org/}).
-    \item \textbf{Frontend:} La interfaz de usuario se desarrolla como una Single Page Application utilizando \textbf{React} (\url{https://react.dev/}) y \textbf{TypeScript} (\url{https://www.typescriptlang.org/}) para proveer tipado est\'atico. El empaquetado y entorno de desarrollo r\'apido lo proporciona \textbf{Vite} (\url{https://vitejs.dev/}), mientras que el enrutamiento y las peticiones HTTP se manejan con \textbf{React Router} y \textbf{Axios}. Para el aseguramiento de la calidad se integra \textbf{Vitest} (\url{https://vitest.dev/}) como entorno de pruebas unitarias y \textbf{Stryker} (\url{https://stryker-mutator.io/}) para el an\'alisis de mutaci\'on de c\'odigo.
-    \item \textbf{Documentaci\'on:} La redacci\'on de memorias y documentos formales se realiza en \textbf{\LaTeX{}} (\url{https://www.latex-project.org/}) por su alta calidad tipogr\'afica, apoyado por documentaci\'on auxiliar r\'apida en \textbf{Markdown}.
-    \item \textbf{Ingenier\'ia de requisitos y modelado:} Para la gesti\'on de requisitos y la generaci\'on de modelos formales (ERS y DAS) se ha utilizado \textbf{Proteus} (\url{https://personal.us.es/amador/proteus/}), una herramienta especializada en trazabilidad e ingenier\'ia del software.
-    \item \textbf{Gesti\'on del proyecto:} La planificaci\'on iterativa, el backlog y el control del flujo de trabajo se encuentran alojados y versionados en el propio repositorio del proyecto utilizando herramientas nativas de control de versiones.
-\end{itemize}
-
-Esta combinaci\'on asegura trazabilidad t\'ecnica, robustez metodol\'ogica y consistencia en los diferentes entornos de despliegue.
-
-\subsection{Pol\'itica de gesti\'on del c\'odigo fuente}
-
-La gesti\'on del c\'odigo fuente de todo el sistema se encuentra centralizada y versionada en un repositorio alojado en GitHub, accesible p\'ublicamente en la direcci\'on \url{https://github.com/Mancalrod/TFG}. 
-
-La evoluci\'on del c\'odigo se realiza mediante Git con un enfoque de ramas tem\'aticas, integraci\'on de nuevas funcionalidades a trav\'es de \emph{pull requests} y la ejecuci\'on de validaciones autom\'aticas previas a su fusi\'on en la rama principal. Esta pol\'itica reduce el riesgo de regresi\'on, mejora significativamente la trazabilidad de los cambios y permite establecer una relaci\'on directa entre los requisitos iniciales, los commits individuales, la ejecuci\'on de pruebas y las etapas de despliegue.
-
-\subsection{Estrategia de integraci\'on continua y despliegue}
-
-La estrategia CI/CD se apoya fundamentalmente en \emph{workflows} orquestados mediante GitHub Actions, divididos en etapas separadas para el backend, el frontend y una validaci\'on conjunta del sistema. En cada cambio relevante detectado en el repositorio, se ejecutan de forma autom\'atica la compilaci\'on, las pruebas unitarias y de integraci\'on, as\'i como an\'alisis de calidad y herramientas de \emph{linting}. A modo ilustrativo, se muestra un fragmento representativo del archivo \texttt{actions.yml} que define estas tareas:
-
-\begin{verbatim}
-name: CI Pipeline
-on:
-  push:
-    branches: [ "main", "dev" ]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-    - name: Build with Maven
-      run: mvn clean verify
-\end{verbatim}
-
-Posteriormente, se construyen las im\'agenes Docker pertinentes con publicaci\'on automatizada y se produce el despliegue hacia una plataforma de Plataforma como Servicio (PaaS) configurada por entornos. En este proyecto se ha optado por desplegar en la plataforma Render, la cual proporciona monitorizaci\'on y gesti\'on en tiempo real del estado de los servicios desplegados. En la Figura \ref{fig:render-deploy} se muestra el panel de control del despliegue en Render.
-
-\figura{0.80}{\detokenize{../Pantallas de TFG/Captura render.png}}{Panel de control y despliegue en la plataforma Render}{fig:render-deploy}{}
-
-El objetivo operativo de este conjunto de medidas es que cada versi\'on candidata sea plenamente reproducible, auditable y desplegable con un nivel de esfuerzo m\'inimo, logrando as\'i una l\'inea de entrega continua s\'olida y compatible con el calendario de desarrollo del TFG.
-
-\subsection{Uso de asistentes de Inteligencia Artificial}
-
-El proyecto adopta un uso de herramientas de IA generativa
-limitado al apoyo en tareas de redacci\'on preliminar,
-revisi\'on o aceleraci\'on operativa de c\'odigo base,
-manteniendo en todo momento el criterio de ingenier\'ia y la autor\'ia de dise\~no por parte del autor.
-El alcance y las salvaguardas aplicadas en este \'ambito se detallan
-en el Anexo D de esta memoria.
-
-\FloatBarrier
-\section{An\'alisis de requisitos}
-
-\subsection{Fuentes de requisitos}
-
-La base fundamental para la definici\'on de los requisitos del proyecto es el propio Documento ERS (Especificaci\'on de Requisitos del Sistema), el cual constituye de por s\'i el cat\'alogo formal y exhaustivo de requisitos. Este documento fue redactado, modelado estructuralmente y versionado haciendo uso de la herramienta Proteus, lo que garantiza rigor metodol\'ogico en su definici\'on.
-
-A partir de este cat\'alogo central establecido en el ERS, el flujo de desarrollo se ha complementado con el Documento DAS (Documento de An\'alisis del Sistema) para el modelado conceptual, as\'i como con el uso din\'amico de un Product Backlog y un Sprint Backlog durante la ejecuci\'on iterativa. La interacci\'on continua con estas herramientas, junto con la evidencia emp\'irica obtenida en las pruebas funcionales y de integraci\'on, asegura que los requisitos no se mantengan como meras definiciones abstractas. En lugar de una especificaci\'on est\'atica, los requisitos del ERS se priorizan, se integran en incrementos de valor y se validan con el comportamiento del producto en funcionamiento, evitando en todo momento cualquier desconexi\'on entre la especificaci\'on te\'orica y la implementaci\'on real del sistema.
-
-\subsection{Estructura del cat\'alogo}
+\section{Estructura del cat\'alogo}
 
 El cat\'alogo se organiza en cuatro bloques complementarios: requisitos funcionales de informaci\'on y operaci\'on, reglas de negocio que acotan el comportamiento permitido, requisitos no funcionales de calidad del sistema y restricciones e integraciones t\'ecnicas por entorno. Esta estructura permite cubrir tanto qu\'e debe hacer el sistema como bajo qu\'e condiciones debe hacerlo.
 
@@ -90,14 +17,14 @@ En Proteus se distinguen expl\'icitamente requisitos funcionales (por ejemplo,
 (\texttt{RQNF-001} a \texttt{RQNF-011}), lo que facilita su seguimiento
 durante la implementaci\'on.
 
-\subsection{Requisitos funcionales}
+\section{Requisitos funcionales}
 
 El ERS define un abanico funcional amplio, del que se ha priorizado el n\'ucleo
 necesario para el MVP. A nivel de dominio, la funcionalidad se agrupa en identidad y acceso (autenticaci\'on de usuarios y control por rol), estructura acad\'emica (cursos, grupos, actividades y vinculaciones), gesti\'on de entregables (configuraci\'on de fechas, visibilidad, reenv\'ios y estructura esperada), gesti\'on de entregas (subida, historial, descarga y trazabilidad) y evaluaci\'on y feedback (calificaci\'on, comentarios y publicaci\'on de notas). Esta agrupaci\'on garantiza cobertura del ciclo acad\'emico completo.
 
 Como ejemplos representativos se incluyen \textbf{RQF-001} (creaci\'on de usuarios por administrador), \textbf{RQF-014--RQF-017} (operaciones de entrega y versionado) y \textbf{RQF-018--RQF-025} (evaluaci\'on, visibilidad e integraciones). Estos ejemplos reflejan la amplitud funcional sin agotar el inventario completo.
 
-\subsection{Reglas de negocio}
+\section{Reglas de negocio}
 
 Las reglas de negocio restringen de forma expl\'icita qu\'e acciones son admisibles.
 Una regla clave es \textbf{REGN-001}, que establece que solo el profesor
@@ -107,7 +34,7 @@ Esta norma se implementa en validaciones de servicio y controlador,
 evitando tanto la elevaci\'on de privilegios como la evaluaci\'on fuera de contexto
 (p. ej., docente no vinculado al grupo o actividad).
 
-\subsection{Requisitos no funcionales}
+\section{Requisitos no funcionales}
 
 Los requisitos no funcionales aportan condiciones de calidad del producto.
 La Tabla~\ref{tab:rqnf-resumen} resume los m\'as relevantes para el alcance actual.
@@ -135,7 +62,7 @@ RQNF-009 & Seguridad & Exposici\'on de datos condicionada por autenticaci\'on y 
 \label{tab:rqnf-resumen}
 \end{table}
 
-\subsection{Priorizaci\'on y alcance}
+\section{Priorizaci\'on y alcance}
 
 La priorizaci\'on se realiz\'o con criterio MoSCoW y validaci\'on continua con el backlog.
 El foco del MVP se situ\'o en los procesos con mayor impacto docente: gesti\'on de actividades y entregables, flujo completo de entrega y evaluaci\'on, seguridad por rol, y persistencia con trazabilidad de cambios. Esta selecci\'on maximiza valor operativo en el horizonte temporal disponible.
@@ -144,11 +71,11 @@ Funcionalidades avanzadas (integraciones extendidas, autenticaci\'on federada co
 observabilidad m\'as profunda) se mantienen en backlog de evoluci\'on y no comprometen
 la viabilidad del alcance de TFG.
 
-\subsection{Trazabilidad requisito-backlog-c\'odigo}
+\section{Trazabilidad requisito-backlog-c\'odigo}
 
-La trazabilidad se gestiona en tres niveles estrechamente interconectados: en primer lugar, un \textbf{nivel de an\'alisis} apoyado por el identificador un\'ivoco establecido en el ERS a trav\'es de Proteus; en segundo lugar, un \textbf{nivel de planificaci\'on} guiado por los PBI (\emph{Product Backlog Items}, elementos de trabajo discretos que representan funcionalidades con valor para el usuario dentro de las metodolog\'ias \`agiles) y su sprint asociado; y por \'ultimo, un \textbf{nivel de ejecuci\'on} que liga estos elementos al m\'odulo de software implementado y a la prueba automatizada que lo valida. Esta triple vista permite justificar cualquier decisi\'on de dise\~no con evidencia t\'ecnica medible.
+La trazabilidad se gestiona en tres niveles: \textbf{nivel de an\'alisis} con identificador en ERS/Proteus, \textbf{nivel de planificaci\'on} con PBI y sprint asociado, y \textbf{nivel de ejecuci\'on} con m\'odulo software y prueba que lo valida. Esta triple vista permite justificar decisiones con evidencia t\'ecnica.
 
-La Tabla~\ref{tab:trazabilidad-requisitos} muestra ejemplos representativos de este encadenamiento, ilustrando c\'omo un requisito formal del ERS se convierte en un PBI dentro de un sprint de desarrollo y, finalmente, se materializa en c\'odigo y pruebas espec\'ificas.
+La Tabla~\ref{tab:trazabilidad-requisitos} muestra ejemplos representativos.
 
 \begin{table}[!htbp]
 \centering
@@ -171,7 +98,7 @@ RQNF-009 & Seguridad global / transversal & SecurityConfig, JwtAuthenticationFil
 \label{tab:trazabilidad-requisitos}
 \end{table}
 
-\subsection{Contexto documental de partida (ERS y DAS)}
+\section{Contexto documental de partida (ERS y DAS)}
 
 La especificaci\'on documental de este TFG no se apoya en descripciones ad hoc, sino en dos artefactos de an\'alisis formal mantenidos en Proteus. El \textbf{ERS (Especificaci\'on de Requisitos del Sistema)} define situaci\'on actual, necesidades de negocio, subsistemas y cat\'alogo de requisitos (generales, de informaci\'on, funcionales, no funcionales y reglas de negocio), mientras que el \textbf{DAS (Documento de An\'alisis del Sistema)} define arquitectura l\'ogica, modelo de clases, diagramas de estado, diagramas de secuencia, navegabilidad e inventario de mockups de interfaz. Esta base asegura continuidad documental entre an\'alisis y ejecuci\'on.
 
@@ -180,17 +107,23 @@ primero, preservar trazabilidad respecto al trabajo original de Ingenier\'ia
 de Requisitos; segundo, demostrar que las decisiones de dise\~no e implementaci\'on
 adoptadas durante el TFG responden a una base de especificaci\'on expl\'icita.
 
-\subsection{Situaci\'on actual y necesidades de negocio (ERS)}
+\section{Situaci\'on actual y necesidades de negocio (ERS)}
 
-El ERS parte de un an\'alisis detallado de un escenario acad\'emico real donde los procesos docentes presentaban una alta ineficiencia: los profesores requer\'ian m\'ultiples pasos manuales y plataformas dispersas para la definici\'on de actividades, publicaci\'on de material y, de manera muy acusada, para la recogida, versionado y almacenamiento de las entregas de los alumnos. El rastreo de estas entregas carec\'ia de una trazabilidad uniforme (fechas, reenv\'ios, visibilidad), lo que derivaba en p\'erdidas de informaci\'on y en un soporte t\'ecnico que imposibilitaba la integraci\'on de l\'ogicas de evaluaci\'on m\'as avanzadas.
+El ERS identifica un escenario de partida con fricci\'on operativa notable:
+creaci\'on de actividades y recogida de entregas con alto componente manual,
+dificultad para mantener trazabilidad uniforme y baja capacidad de evoluci\'on
+cuando se pretende introducir reglas de negocio m\'as finas.
 
-Ante este diagn\'ostico espec\'ifico, las necesidades de negocio que fundamentan este TFG se orientan a un cambio de paradigma centralizado. El objetivo es proporcionar un entorno \'unico donde la carga administrativa del profesor se reduzca mediante flujos estandarizados (desde la creaci\'on de un \emph{entregable} hasta la introducci\'on de calificaciones), y donde el alumno perciba transparencia absoluta sobre sus fechas l\'imite, el estado de sus versiones y los comentarios (feedback) recibidos. Adem\'as, era imperativo garantizar que la evaluaci\'on solo pudiera ser efectuada bajo reglas de autorizaci\'on y contexto acad\'emico estrictas (vinculaci\'on estudiante-grupo-profesor). 
+Sobre ese diagn\'ostico, las necesidades de negocio priorizadas fueron reducir la carga administrativa en procesos docentes recurrentes, ofrecer al estudiante un flujo de entrega m\'as guiado y transparente, centralizar evaluaci\'on y feedback con reglas de autorizaci\'on claras, y mejorar la mantenibilidad del sistema y su capacidad de evoluci\'on. Estas necesidades conectan directamente con los bloques funcionales del MVP.
 
-Estas necesidades condicionan el resto de los cap\'itulos en tres planos tangibles: la definici\'on arquitect\'onica (separando estrictamente los servicios de usuarios de la gesti\'on acad\'emica), la implementaci\'on a trav\'es de m\'odulos enfocados a dominios espec\'ificos, y una bater\'ia de pruebas concebida para validar tanto los flujos de experiencia de usuario como el cumplimiento inquebrantable de las reglas de autorizaci\'on impuestas en el negocio.
+Estas necesidades se conectan con el resto de la memoria en tres planos:
+arquitectura (separaci\'on de capas), implementaci\'on (m\'odulos especializados)
+y verificaci\'on (pruebas por flujo cr\'itico y por requisito).
 
-\subsection{Descomposici\'on en subsistemas (ERS)}
+\section{Descomposici\'on en subsistemas (ERS)}
 
-El ERS descompone el sistema en cinco grandes subsistemas l\'ogicos para organizar sus funcionalidades. La Tabla \ref{tab:subsistemas-ers} detalla esta descomposici\'on, la cual ha sido reutilizada como gu\'ia fundamental de dise\~no modular a lo largo del desarrollo del TFG.
+El ERS descompone el sistema en cinco subsistemas. Esta descomposici\'on
+ha sido reutilizada como gu\'ia de dise\~no modular durante el desarrollo.
 
 \begin{table}[!htbp]
 \centering
@@ -215,16 +148,13 @@ SUBS-005 & SPD (Persistencia de Datos) & Persistencia relacional y repositorio d
 \label{tab:subsistemas-ers}
 \end{table}
 
-\subsection{Cat\'alogo exhaustivo de requisitos del ERS}
+\section{Cat\'alogo exhaustivo de requisitos del ERS}
 
 Con objeto de incorporar de forma completa el contenido de ERS, se documenta
 el inventario de requisitos por tipolog\'ia y su interpretaci\'on en el alcance
 real del TFG.
 
-\FloatBarrier
 \subsubsection*{Requisitos generales (RQG)}
-
-La Tabla \ref{tab:rqg-inventario} detalla los requisitos generales del sistema, que establecen el marco de operaci\'on b\'asico para la gesti\'on de usuarios, actividades, entregables y la comunicaci\'on.
 
 \begin{table}[!htbp]
 \centering
@@ -253,10 +183,7 @@ RQG-007 & Seguridad y control de acceso & Restricci\'on de visibilidad/operaci\'
 \label{tab:rqg-inventario}
 \end{table}
 
-\FloatBarrier
 \subsubsection*{Requisitos de informaci\'on (RQI)}
-
-La Tabla \ref{tab:rqi-inventario} describe los requisitos de informaci\'on que definen qu\'e datos esenciales deben persistirse en el sistema (actividades, entregables, usuarios, etc.).
 
 \begin{table}[!htbp]
 \centering
@@ -283,7 +210,9 @@ RQI-005 & Informaci\'on de feedback & Persistencia de calificaciones, comentario
 
 \subsubsection*{Requisitos funcionales (RQF)}
 
-La Tabla \ref{tab:rqf-inventario-1} y la Tabla \ref{tab:rqf-inventario-2} recogen, de manera estructurada y en dos bloques para facilitar su lectura, las capacidades operativas que el sistema debe ofrecer al usuario final, desde la administraci\'on de identidades hasta la integraci\'on cloud.
+Las tablas siguientes recogen las capacidades operativas que debe ofrecer
+el sistema al usuario final, separadas en dos bloques para mantener legible
+el inventario completo.
 
 \begin{table}[!htbp]
 \centering
@@ -361,10 +290,10 @@ RQF-025 & Integraci\'on cloud & Uso de almacenamiento en nube seg\'un configurac
 \label{tab:rqf-inventario-2}
 \end{table}
 
-\FloatBarrier
 \subsubsection*{Reglas de negocio (REGN)}
 
-La Tabla \ref{tab:regn-inventario} agrupa las restricciones ineludibles que condicionan las operaciones del sistema, definiendo estrictamente qui\'en cuenta con los privilegios para ejecutar cada acci\'on, bajo qu\'e contexto acad\'emico particular y respetando qu\'e condiciones temporales o de visibilidad.
+La tabla siguiente agrupa las restricciones que condicionan qui\'en puede
+ejecutar cada operaci\'on, en qu\'e contexto acad\'emico y bajo qu\'e condiciones.
 
 \begin{table}[!htbp]
 \centering
@@ -395,10 +324,10 @@ REGN-008 & Emisi\'on de feedback & Solo el docente autorizado publica feedback e
 \label{tab:regn-inventario}
 \end{table}
 
-\FloatBarrier
 \subsubsection*{Requisitos no funcionales (RQNF)}
 
-La Tabla \ref{tab:rqnf-inventario-completo} resume las condiciones de calidad t\'ecnica y operacionales que debe cumplir el sistema para garantizar una ejecuci\'on fiable, mantenible y segura, m\'as all\'a de la estricta funcionalidad visible por el usuario.
+La tabla siguiente resume las condiciones de calidad que debe cumplir
+el sistema m\'as all\'a de la funcionalidad visible.
 
 \begin{table}[!htbp]
 \centering
@@ -435,7 +364,7 @@ RQNF-011 & Portabilidad web & Compatibilidad expl\'icita con Chrome, Firefox y E
 \label{tab:rqnf-inventario-completo}
 \end{table}
 
-\subsection{Reutilizaci\'on de diagramas y mockups del DAS}
+\section{Reutilizaci\'on de diagramas y mockups del DAS}
 
 El DAS aporta una base visual amplia (diagramas t\'ecnicos, secuencias,
 navegabilidad y mockups) que se reutiliza en esta memoria para explicar
@@ -535,7 +464,7 @@ PaginaEstudiantesProfesores.png & Consulta de estudiantes y trazabilidad docente
 \label{tab:das-mockups}
 \end{table}
 
-\subsection{Lectura t\'ecnica de los diagramas estructurales del DAS}
+\section{Lectura t\'ecnica de los diagramas estructurales del DAS}
 
 La reutilizaci\'on de las Figuras~\ref{fig:das-arquitectura},
 \ref{fig:das-clases}, \ref{fig:das-estado} y \ref{fig:das-navegabilidad}
@@ -578,7 +507,7 @@ Navegabilidad & Flujos de interfaz por rol y contexto & Rutas protegidas, vistas
 \label{tab:das-lectura-estructural}
 \end{table}
 
-\subsection{Flujos operativos del DAS y su encaje en la soluci\'on}
+\section{Flujos operativos del DAS y su encaje en la soluci\'on}
 
 Adem\'as de los diagramas estructurales, el DAS aporta una visi\'on de
 comportamiento detallada mediante secuencias y mockups operativos. Esta capa
@@ -639,7 +568,7 @@ Profesor y estudiante & Consulta y trazabilidad de resultados & Mockups de comen
 \label{tab:das-cobertura-rol}
 \end{table}
 
-\subsection{Cat\'alogo operativo de casos de uso y cobertura funcional}
+\section{Cat\'alogo operativo de casos de uso y cobertura funcional}
 
 El modelo de casos de uso del DAS se estructura como un conjunto amplio de
 operaciones del sistema que cubren autenticaci\'on, gesti\'on acad\'emica,
@@ -686,7 +615,7 @@ Supervisi\'on y trazabilidad & Vistas cruzadas profesor-estudiante y revisi\'on 
 \label{tab:das-familias-casos-uso}
 \end{table}
 
-\subsection{Matriz ampliada de trazabilidad ERS-DAS-implementaci\'on}
+\section{Matriz ampliada de trazabilidad ERS-DAS-implementaci\'on}
 
 Para reforzar la coherencia documental, la Tabla~\ref{tab:trazabilidad-ampliada}
 integra tres niveles de evidencia: requisito formal en ERS, artefacto de
@@ -722,7 +651,7 @@ RQNF-004, RQNF-005, RQNF-009 & Arquitectura de subsistemas + separaci\'on de cap
 \label{tab:trazabilidad-ampliada}
 \end{table}
 
-\subsection{Cobertura documental alcanzada}
+\section{Cobertura documental alcanzada}
 
 Con la incorporaci\'on anterior, este cap\'itulo integra de forma expl\'icita los cinco bloques completos del cat\'alogo ERS (RQG, RQI, RQF, REGN y RQNF), la descomposici\'on en subsistemas usada durante dise\~no e implementaci\'on, los diagramas estructurales y de comportamiento del DAS, el cat\'alogo operativo de casos de uso y familias funcionales del sistema, el conjunto de mockups de interfaz como evidencia de dise\~no funcional y una matriz ampliada de trazabilidad entre especificaci\'on, dise\~no, implementaci\'on y verificaci\'on. Esta integraci\'on evita vac\'ios entre an\'alisis y ejecuci\'on.
 
@@ -731,145 +660,3 @@ trazabilidad documental completa entre especificaci\'on inicial, dise\~no t\'ecn
 y comportamiento implementado.
 
 \FloatBarrier
-\section{Dise\~no del sistema}
-
-\subsection{Arquitectura de alto nivel}
-
-La arquitectura adoptada es cliente-servidor desacoplada, con un \textbf{frontend SPA} en React + TypeScript para presentaci\'on y experiencia de usuario, un \textbf{backend REST} en Spring Boot para l\'ogica de negocio y seguridad, y \textbf{persistencia relacional} con JPA/Hibernate y migraciones Flyway. Esta separaci\'on delimita responsabilidades y facilita evoluci\'on modular.
-
-En backend se aplica dise\~no por capas
-(controller, service, repository y entity),
-que mejora mantenibilidad, testabilidad y capacidad de evoluci\'on.
-
-\subsection{Aportaci\'on arquitect\'onica y tecnol\'ogica}
-
-Desde la perspectiva t\'ecnica, la contribuci\'on principal se concreta en una separaci\'on frontend-backend mediante API REST, una arquitectura por capas en backend que a\'isla responsabilidades, el uso de DTOs para desacoplar contratos de API del modelo de persistencia y una evoluci\'on de esquema controlada por migraciones versionadas. Este dise\~no reduce el acoplamiento transversal, facilita el mantenimiento evolutivo a medio plazo y habilita la incorporaci\'on incremental de nuevas integraciones sin ruptura del n\'ucleo transaccional.
-
-\subsection{Vista de despliegue}
-
-La vista de despliegue se organiza en bloques principales que cubren el \textbf{cliente web} (navegador del usuario final), el \textbf{frontend} como SPA est\'atica servida desde plataforma PaaS (Render), el \textbf{backend} como API REST desplegada en contenedor Docker en Render, los \textbf{datos} en PostgreSQL gestionada accesible solo desde backend, y los \textbf{servicios externos} de almacenamiento cloud, OneDrive y correo transaccional por API HTTP. Esta disposici\'on mantiene una frontera de seguridad clara entre capas.
-
-La separaci\'on de componentes permite escalar y evolucionar cada capa
-sin romper el resto del sistema,
-manteniendo adem\'as una frontera de seguridad clara entre cliente,
-l\'ogica de negocio y persistencia.
-
-\begin{table}[!htbp]
-\centering
-\begin{tabular}{|P{2.9cm}|P{3.1cm}|P{5.6cm}|}
-\hline
-\textbf{Nodo} & \textbf{Tecnolog\'ia} & \textbf{Responsabilidad principal} \\
-\hline
-Cliente & Navegador moderno & Interacci\'on de usuario y consumo de API sobre HTTPS. \\
-\hline
-Frontend & React + Vite en Render & Renderizado de interfaz, estado de sesi\'on y experiencia por rol. \\
-\hline
-Backend & Spring Boot (Java 21) en Render & Exposici\'on de endpoints, reglas de negocio, seguridad y orquestaci\'on de persistencia. \\
-\hline
-Persistencia & Render PostgreSQL & Almacenamiento transaccional y trazabilidad de datos acad\'emicos. \\
-\hline
-Correo transaccional & Brevo API HTTP & Recuperaci\'on de contrase\~na y notificaciones sin depender de puertos SMTP salientes. \\
-\hline
-\end{tabular}
-\caption{Vista de despliegue simplificada del sistema}
-\label{tab:vista-despliegue}
-\end{table}
-
-\subsection{Dise\~no de dominio y datos}
-
-El dominio se modela alrededor de la relaci\'on docente-estudiante-actividad, con \texttt{Usuario} como identidad base, \texttt{Profesor} y \texttt{Estudiante} como especializaciones operativas, \texttt{Curso}, \texttt{Grupo} y \texttt{Actividad} para el contexto acad\'emico, \texttt{Entregable} y \texttt{Entrega} para el ciclo de entrega, y \texttt{Feedback}, \texttt{Material} y entidades de soporte (tokens, notificaciones). Esta estructura facilita trazabilidad y coherencia de reglas de negocio.
-
-La persistencia evoluciona de forma versionada mediante migraciones,
-lo que permite incorporar nuevas capacidades sin perder consistencia hist\'orica.
-
-\subsection{Dise\~no de API}
-
-La API sigue orientaci\'on REST y separa contratos mediante DTOs. Se definen m\'odulos de endpoint coherentes por contexto de negocio, incluyendo \texttt{/api/auth} para login, refresh y recuperaci\'on de contrase\~na, \texttt{/api/actividades} para gesti\'on de actividades y consulta por usuario, \texttt{/api/entregables} para administraci\'on de entregables, y \texttt{/api/entregas} para subida, revisi\'on, evaluaci\'on y descarga de entregas. Esta segmentaci\'on facilita evoluci\'on de contratos por dominio.
-
-El uso de DTOs evita exponer directamente entidades de persistencia,
-reduce acoplamiento y simplifica evoluciones de contrato.
-
-\subsection{Dise\~no de seguridad}
-
-El dise\~no de seguridad incorpora mecanismos complementarios: autenticaci\'on basada en JWT (token de acceso y refresh token), filtros de validaci\'on en la cadena de seguridad, autorizaci\'on por rol y contexto acad\'emico, cifrado de contrase\~nas con BCrypt y limitaci\'on de tasa en operaciones sensibles de autenticaci\'on. Esta combinaci\'on reduce superficie de ataque sin penalizar la experiencia de uso.
-
-Se configura CORS de forma expl\'icita y se diferencia entre rutas p\'ublicas y protegidas,
-minimizando superficie de ataque sin comprometer usabilidad.
-
-\subsection{Dise\~no del frontend}
-
-El frontend se organiza en m\'odulos \texttt{pages}, \texttt{components}, \texttt{context} y \texttt{services} con objetivos de experiencia coherente para profesor y estudiante, protecci\'on de rutas seg\'un sesi\'on y rol, gesti\'on centralizada de autenticaci\'on y manejo uniforme de errores y estados de carga. Esta organizaci\'on evita duplicidades y mejora mantenibilidad.
-
-La capa de red encapsula llamadas HTTP y gesti\'on de tokens,
-incluyendo renovaci\'on autom\'atica de sesi\'on al expirar el token de acceso.
-
-\FloatBarrier
-\section{Implementaci\'on}
-
-\subsection{Implementaci\'on backend}
-
-La implementaci\'on backend se estructura en el paquete principal de la aplicaci\'on, donde destacan \textbf{controladores} como entrada HTTP y validaci\'on de contratos, \textbf{servicios} para l\'ogica de negocio y reglas del dominio, \textbf{repositorios} con acceso a datos mediante Spring Data JPA y un bloque de \textbf{seguridad} con configuraci\'on central y filtros especializados. Esta separaci\'on refuerza la testabilidad y el control de responsabilidades.
-
-Un punto clave es \texttt{EntregaService}, que centraliza validaciones de entrega,
-control de versiones, restricciones temporales y operativa de evaluaci\'on,
-con apoyo de servicios auxiliares para materiales y notificaciones.
-
-\subsection{Implementaci\'on de flujos cr\'iticos}
-
-Los flujos con mayor impacto funcional son la \textbf{autenticaci\'on y sesi\'on} (login, emisi\'on de tokens, refresco y cierre seguro), la \textbf{publicaci\'on de entregables} (creaci\'on por docente y configuraci\'on de fechas y condiciones), la \textbf{entrega de material} (subida de ficheros, verificaciones, versionado y almacenamiento de metadatos) y la \textbf{evaluaci\'on} (correcci\'on por profesor autorizado, feedback y visibilidad de nota). Esta selecci\'on concentra los riesgos funcionales del sistema.
-
-Cada flujo incorpora validaciones de entrada, control de errores y verificaci\'on de permisos,
-asegurando consistencia en escenarios concurrentes y previniendo acciones fuera de alcance.
-
-\subsection{Implementaci\'on frontend}
-
-La implementaci\'on del cliente cubre pantallas y operaciones necesarias para el MVP, incluyendo acceso y gesti\'on de sesi\'on, paneles de actividades y entregables, formularios de entrega y seguimiento, y vista de evaluaciones con retroalimentaci\'on. Esta cobertura garantiza recorrido completo por rol.
-
-Se han introducido medidas pr\'acticas para mejorar usabilidad:
-mensajes de validaci\'on temprana, estados visuales de proceso,
-y comportamiento resiliente ante errores de red.
-
-\subsection{Persistencia, migraciones e integraciones}
-
-Se utiliza PostgreSQL en escenarios de despliegue y un perfil de desarrollo
-local para iteraci\'on r\'apida. Flyway gestiona la evoluci\'on del esquema, incluyendo ampliaciones como atributos para validaci\'on estructural de entregas ZIP, campos para integraci\'on cloud (OneDrive/Cloudinary), tablas y preferencias de notificaci\'on, y tokens de recuperaci\'on de contrase\~na. Esta evoluci\'on versionada protege la consistencia hist\'orica de datos.
-
-Las integraciones externas se dise\~nan por configuraci\'on,
-de modo que el sistema puede operar en local sin dependencia obligatoria
-de servicios de terceros.
-En producci\'on el env\'io de correos se realiza mediante Brevo a trav\'es
-de peticiones HTTPS, evitando depender del protocolo SMTP, que puede estar
-restringido en plataformas PaaS. Este canal se utiliza para recuperaci\'on
-de contrase\~na y notificaciones transaccionales.
-
-\subsection{Verificaci\'on de implementaci\'on}
-
-La verificaci\'on se realiza en capas (unitaria, integraci\'on, E2E y mutaci\'on),
-apoyada por pipelines CI/CD y controles de seguridad en preproducci\'on.
-Este enfoque proporciona evidencia objetiva de robustez y reduce el riesgo de regresiones.
-
-\FloatBarrier
-\section{Discusi\'on t\'ecnica}
-
-\subsection{Decisiones y compromisos}
-
-Las decisiones principales del dise\~no implican compensaciones expl\'icitas. La separaci\'on SPA + API mejora mantenibilidad y escalado, a costa de mayor esfuerzo de orquestaci\'on y pruebas de integraci\'on. El uso de JWT con refresh token simplifica backend stateless, pero exige controles cuidadosos de expiraci\'on y renovaci\'on. La adopci\'on de DTOs y capas reduce acoplamiento con mayor c\'odigo estructural, y las migraciones versionadas aportan trazabilidad de datos requiriendo disciplina de despliegue entre entornos.
-
-\subsection{Limitaciones y trabajo futuro}
-
-Aunque el n\'ucleo funcional est\'a cubierto, se identifican l\'ineas de evoluci\'on como la ampliaci\'on de autenticaci\'on avanzada (p. ej., 2FA completa), una observabilidad m\'as profunda con m\'etricas operativas y el cierre progresivo de requisitos \emph{Should/Could} pendientes. Estas mejoras no condicionan la validez del TFG, pero gu\'ian la continuidad t\'ecnica.
-
-Estas mejoras no condicionan la validez del TFG,
-sino que delimitan una hoja de ruta t\'ecnica razonable para continuidad del proyecto.
-
-\FloatBarrier
-\section{Conclusiones}
-
-El an\'alisis realizado demuestra coherencia entre lo especificado y lo implementado.
-Los requisitos funcionales priorizados se traducen en flujos operativos reales,
-los no funcionales se abordan mediante decisiones t\'ecnicas concretas,
-y el dise\~no modular facilita mantenimiento, verificaci\'on y evoluci\'on.
-
-Por tanto, el resultado no es solo una implementaci\'on funcional,
-sino una soluci\'on con fundamento de ingenier\'ia de software,
-alineada con los objetivos acad\'emicos y profesionales del TFG.

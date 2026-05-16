@@ -12,6 +12,10 @@
 \renewcommand{\floatpagefraction}{0.8}
 \setlength{\headheight}{14.5pt}
 \setlength{\emergencystretch}{2em}
+\addto\captionsspanish{
+  \renewcommand{\tablename}{Tabla}
+  \renewcommand{\listtablename}{\'Indice de tablas}
+}
 \begin{document}
 \tipo{Grado}   % Grado o M\'aster
 \titulopro{Sistema de Gesti\'on de Entregables Acad\'emicos}
@@ -43,5 +47,6 @@
 \backmatter
 %\bibliographystyle{sousa5}
 \bibliographystyle{apacite}
+\nocite{*}
 \bibliography{pfcbib}
 \end{document}
