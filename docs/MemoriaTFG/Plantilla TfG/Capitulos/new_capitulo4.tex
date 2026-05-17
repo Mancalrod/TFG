@@ -12,7 +12,11 @@
 }{}
 \makeatother
 
-\section{Arquitectura de alto nivel}
+\FloatBarrier
+\section{Dise\~no del sistema}
+
+
+\subsection{Arquitectura de alto nivel}
 
 La arquitectura adoptada es cliente-servidor desacoplada, con un \textbf{frontend SPA} en React + TypeScript para presentaci\'on y experiencia de usuario, un \textbf{backend REST} en Spring Boot para l\'ogica de negocio y seguridad, y \textbf{persistencia relacional} con JPA/Hibernate y migraciones Flyway. Esta separaci\'on delimita responsabilidades y facilita evoluci\'on modular.
 
@@ -20,7 +24,11 @@ En backend se aplica dise\~no por capas
 (controller, service, repository y entity),
 que mejora mantenibilidad, testabilidad y capacidad de evoluci\'on.
 
-\section{Vista de despliegue}
+\subsection{Aportaci\'on arquitect\'onica y tecnol\'ogica}
+
+Desde la perspectiva t\'ecnica, la contribuci\'on principal se concreta en una separaci\'on frontend-backend mediante API REST, una arquitectura por capas en backend que a\'isla responsabilidades, el uso de DTOs para desacoplar contratos de API del modelo de persistencia y una evoluci\'on de esquema controlada por migraciones versionadas. Este dise\~no reduce el acoplamiento transversal, facilita el mantenimiento evolutivo a medio plazo y habilita la incorporaci\'on incremental de nuevas integraciones sin ruptura del n\'ucleo transaccional.
+
+\subsection{Vista de despliegue}
 
 La vista de despliegue se organiza en bloques principales que cubren el \textbf{cliente web} (navegador del usuario final), el \textbf{frontend} como SPA est\'atica servida desde plataforma PaaS (Render), el \textbf{backend} como API REST desplegada en contenedor Docker en Render, los \textbf{datos} en PostgreSQL gestionada accesible solo desde backend, y los \textbf{servicios externos} de almacenamiento cloud, OneDrive y correo transaccional por API HTTP. Esta disposici\'on mantiene una frontera de seguridad clara entre capas.
 
@@ -50,28 +58,28 @@ Correo transaccional & Brevo API HTTP & Recuperaci\'on de contrase\~na y notific
 \label{tab:vista-despliegue}
 \end{table}
 
-\section{Dise\~no de dominio y datos}
+\subsection{Dise\~no de dominio y datos}
 
 El dominio se modela alrededor de la relaci\'on docente-estudiante-actividad, con \texttt{Usuario} como identidad base, \texttt{Profesor} y \texttt{Estudiante} como especializaciones operativas, \texttt{Curso}, \texttt{Grupo} y \texttt{Actividad} para el contexto acad\'emico, \texttt{Entregable} y \texttt{Entrega} para el ciclo de entrega, y \texttt{Feedback}, \texttt{Material} y entidades de soporte (tokens, notificaciones). Esta estructura facilita trazabilidad y coherencia de reglas de negocio.
 
 La persistencia evoluciona de forma versionada mediante migraciones,
 lo que permite incorporar nuevas capacidades sin perder consistencia hist\'orica.
 
-\section{Dise\~no de API}
+\subsection{Dise\~no de API}
 
 La API sigue orientaci\'on REST y separa contratos mediante DTOs. Se definen m\'odulos de endpoint coherentes por contexto de negocio, incluyendo \texttt{/api/auth} para login, refresh y recuperaci\'on de contrase\~na, \texttt{/api/actividades} para gesti\'on de actividades y consulta por usuario, \texttt{/api/entregables} para administraci\'on de entregables, y \texttt{/api/entregas} para subida, revisi\'on, evaluaci\'on y descarga de entregas. Esta segmentaci\'on facilita evoluci\'on de contratos por dominio.
 
 El uso de DTOs evita exponer directamente entidades de persistencia,
 reduce acoplamiento y simplifica evoluciones de contrato.
 
-\section{Dise\~no de seguridad}
+\subsection{Dise\~no de seguridad}
 
 El dise\~no de seguridad incorpora mecanismos complementarios: autenticaci\'on basada en JWT (token de acceso y refresh token), filtros de validaci\'on en la cadena de seguridad, autorizaci\'on por rol y contexto acad\'emico, cifrado de contrase\~nas con BCrypt y limitaci\'on de tasa en operaciones sensibles de autenticaci\'on. Esta combinaci\'on reduce superficie de ataque sin penalizar la experiencia de uso.
 
 Se configura CORS de forma expl\'icita y se diferencia entre rutas p\'ublicas y protegidas,
 minimizando superficie de ataque sin comprometer usabilidad.
 
-\section{Dise\~no del frontend}
+\subsection{Dise\~no del frontend}
 
 El frontend se organiza en m\'odulos \texttt{pages}, \texttt{components}, \texttt{context} y \texttt{services} con objetivos de experiencia coherente para profesor y estudiante, protecci\'on de rutas seg\'un sesi\'on y rol, gesti\'on centralizada de autenticaci\'on y manejo uniforme de errores y estados de carga. Esta organizaci\'on evita duplicidades y mejora mantenibilidad.
 
@@ -79,6 +87,20 @@ La capa de red encapsula llamadas HTTP y gesti\'on de tokens,
 incluyendo renovaci\'on autom\'atica de sesi\'on al expirar el token de acceso.
 
 \FloatBarrier
+
+
+% tfg-floatbarrier-auto
+\makeatletter
+\@ifundefined{tfgfloatbarrier}{
+  \def\tfgfloatbarrier{1}
+  \let\tfgorigfigure\figure
+  \let\tfgendorigfigure\endfigure
+  \renewenvironment{figure}{\tfgorigfigure}{\tfgendorigfigure\FloatBarrier}
+  \let\tfgorigtable\table
+  \let\tfgendorigtable\endtable
+  \renewenvironment{table}{\tfgorigtable}{\tfgendorigtable\FloatBarrier}
+}{}
+\makeatother
 
 Esta granularidad no es habitual en soluciones generalistas,
 que suelen tratar todo como subida de fichero sin reglas contextuales.
@@ -169,8 +191,7 @@ lo que confirma bajo acoplamiento a proveedor concreto.
 
 Se compararon \textbf{E1 - Flyway como autoridad de esquema} (elegida) y \textbf{E2 - Hibernate \texttt{ddl-auto=update} en producci\'on}. La decisi\'on prioriza trazabilidad y control expl\'icito del cambio.
 
-Se adopta \textbf{E1} por trazabilidad y control expl\'icito de cambios,
-reduciendo riesgo de divergencias de esquema entre entornos.
+Se adopta \textbf{E1 (Flyway)} por trazabilidad y control expl\'icito de cambios, reduciendo el riesgo de divergencias de esquema entre entornos. En un entorno acad\'emico y de desarrollo r\'apido, el uso de herramientas autom\'aticas como Hibernate puede generar esquemas inconsistentes al cambiar ramas de c\'odigo o desplegar nuevas versiones. Con Flyway, cada alteraci\'on de la base de datos queda versionada (\emph{scripts SQL}), permitiendo reproducir exactamente el mismo estado desde el entorno de desarrollo local hasta el de producci\'on.
 
 \subsection{Almacenamiento de archivos}
 
@@ -302,15 +323,13 @@ con cobertura de pruebas alta y capacidad de evoluci\'on,
 sin sobredimensionar infraestructura ni desviarse del objetivo acad\'emico.
 
 \FloatBarrier
-\section{Conclusiones del cap\'itulo}
+\section{Conclusiones}
 
-La comparaci\'on confirma que la soluci\'on implementada no responde a una selecci\'on
-arbitraria de herramientas,
-sino a una evaluaci\'on razonada frente a alternativas reales.
+El an\'alisis y estudio de alternativas confirma que la soluci\'on implementada no responde a una selecci\'on arbitraria de herramientas, sino a una evaluaci\'on razonada frente a alternativas reales. 
 
-El enfoque adoptado prioriza equilibrio entre robustez, coste y mantenibilidad,
-lo que lo hace especialmente adecuado para un TFG de perfil profesional
-con restricciones de tiempo y recursos.
+En cada \'ambito de decisi\'on, el enfoque adoptado prioriza el equilibrio entre robustez t\'ecnica, viabilidad temporal y bajo coste operativo. La decisi\'on por una arquitectura desacoplada (SPA + API), respaldada por frameworks de amplio uso (Spring Boot y React) y persistencia relacional estricta, provee una plataforma s\'olida y extensible. Al mismo tiempo, el descarte de integraciones m\'as complejas (como SSO o SharePoint) permite concentrar los recursos del MVP en el n\'ucleo de la operativa docente. 
+
+Este conjunto de alternativas y su posterior cribado aseguran la construcci\'on de un TFG de alto perfil profesional, que cumple rigurosamente con sus objetivos limitando conscientemente los riesgos t\'ecnicos y de calendario.
 	
 	 
 

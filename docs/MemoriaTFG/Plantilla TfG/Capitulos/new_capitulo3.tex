@@ -12,15 +12,34 @@
 }{}
 \makeatother
 
-\section{Fuentes de requisitos}
+\FloatBarrier
 
-La definici\'on del cat\'alogo de requisitos se ha construido a partir del Documento ERS (Especificaci\'on de Requisitos del Sistema), el Documento DAS (Documento de An\'alisis del Sistema), el modelado estructurado y versionado en Proteus, el Product Backlog y Sprint Backlog utilizados en la ejecuci\'on iterativa, y la evidencia emp\'irica obtenida durante pruebas funcionales y de integraci\'on. Esta combinaci\'on evita una especificaci\'on desconectada de la implementaci\'on real.
+\section{El proceso de an\'alisis en la Ingenier\'ia del Software}
 
-Este planteamiento evita una especificaci\'on est\'atica: los requisitos se formalizan,
-se priorizan, se implementan por incrementos y se vuelven a validar con el producto
-funcionando.
+El an\'alisis de requisitos es una etapa fundamental dentro del ciclo de vida de la Ingenier\'ia del Software. Su prop\'osito es definir con precisi\'on las necesidades del dominio del problema antes de plantear una soluci\'on tecnol\'ogica. Un an\'alisis exhaustivo previene sobrecostes, minimiza el riesgo de desarrollo de funcionalidades innecesarias y asegura que el sistema entregado se alinee con las expectativas de los usuarios.
 
-\section{Estructura del cat\'alogo}
+En el contexto de este proyecto, la metodolog\'ia de an\'alisis ha partido de un estudio minucioso de la situaci\'on actual en el \'ambito docente, identificando las limitaciones operativas existentes. 
+
+\subsection{Situaci\'on actual y necesidades de negocio}
+El escenario de partida presenta una fricci\'on operativa notable: creaci\'on de actividades y recogida de entregas con alto componente manual, dificultad para mantener trazabilidad uniforme y baja capacidad de evoluci\'on. Las necesidades de negocio priorizadas son reducir la carga administrativa, ofrecer al estudiante un flujo de entrega m\'as guiado, centralizar evaluaci\'on y mejorar la mantenibilidad del sistema. Estas necesidades conectan directamente con los bloques funcionales del MVP.
+
+\FloatBarrier
+\section{Especificaci\'on de Requisitos del Sistema (ERS)}
+
+\subsection{Fundamentaci\'on te\'orica del ERS}
+La Especificaci\'on de Requisitos del Sistema (ERS) es el documento est\'andar que act\'ua como contrato entre las necesidades del negocio y la implementaci\'on t\'ecnica. De forma gen\'erica, su objetivo es catalogar qu\'e debe hacer el sistema (requisitos funcionales) y bajo qu\'e restricciones de calidad y seguridad debe operar (requisitos no funcionales y reglas de negocio). 
+
+Para este Trabajo Fin de Grado en particular, el ERS tiene como objetivo espec\'ifico delimitar de forma inquebrantable qu\'e operaciones est\'an permitidas para los roles de profesor, estudiante y administrador, as\'i como definir los atributos esenciales de los cursos, actividades y entregables.
+
+
+
+\subsection{Fuentes de requisitos}
+
+La base fundamental para la definici\'on de los requisitos del proyecto es el propio Documento ERS (Especificaci\'on de Requisitos del Sistema), el cual constituye de por s\'i el cat\'alogo formal y exhaustivo de requisitos. Este documento fue redactado, modelado estructuralmente y versionado haciendo uso de la herramienta Proteus, lo que garantiza rigor metodol\'ogico en su definici\'on.
+
+A partir de este cat\'alogo central establecido en el ERS, el flujo de desarrollo se ha complementado con el Documento DAS (Documento de An\'alisis del Sistema) para el modelado conceptual, as\'i como con el uso din\'amico de un Product Backlog y un Sprint Backlog durante la ejecuci\'on iterativa. La interacci\'on continua con estas herramientas, junto con la evidencia emp\'irica obtenida en las pruebas funcionales y de integraci\'on, asegura que los requisitos no se mantengan como meras definiciones abstractas. En lugar de una especificaci\'on est\'atica, los requisitos del ERS se priorizan, se integran en incrementos de valor y se validan con el comportamiento del producto en funcionamiento, evitando en todo momento cualquier desconexi\'on entre la especificaci\'on te\'orica y la implementaci\'on real del sistema.
+
+\subsection{Estructura del cat\'alogo}
 
 El cat\'alogo se organiza en cuatro bloques complementarios: requisitos funcionales de informaci\'on y operaci\'on, reglas de negocio que acotan el comportamiento permitido, requisitos no funcionales de calidad del sistema y restricciones e integraciones t\'ecnicas por entorno. Esta estructura permite cubrir tanto qu\'e debe hacer el sistema como bajo qu\'e condiciones debe hacerlo.
 
@@ -29,14 +48,14 @@ En Proteus se distinguen expl\'icitamente requisitos funcionales (por ejemplo,
 (\texttt{RQNF-001} a \texttt{RQNF-011}), lo que facilita su seguimiento
 durante la implementaci\'on.
 
-\section{Requisitos funcionales}
+\subsection{Requisitos funcionales}
 
 El ERS define un abanico funcional amplio, del que se ha priorizado el n\'ucleo
 necesario para el MVP. A nivel de dominio, la funcionalidad se agrupa en identidad y acceso (autenticaci\'on de usuarios y control por rol), estructura acad\'emica (cursos, grupos, actividades y vinculaciones), gesti\'on de entregables (configuraci\'on de fechas, visibilidad, reenv\'ios y estructura esperada), gesti\'on de entregas (subida, historial, descarga y trazabilidad) y evaluaci\'on y feedback (calificaci\'on, comentarios y publicaci\'on de notas). Esta agrupaci\'on garantiza cobertura del ciclo acad\'emico completo.
 
 Como ejemplos representativos se incluyen \textbf{RQF-001} (creaci\'on de usuarios por administrador), \textbf{RQF-014--RQF-017} (operaciones de entrega y versionado) y \textbf{RQF-018--RQF-025} (evaluaci\'on, visibilidad e integraciones). Estos ejemplos reflejan la amplitud funcional sin agotar el inventario completo.
 
-\section{Reglas de negocio}
+\subsection{Reglas de negocio}
 
 Las reglas de negocio restringen de forma expl\'icita qu\'e acciones son admisibles.
 Una regla clave es \textbf{REGN-001}, que establece que solo el profesor
@@ -46,7 +65,7 @@ Esta norma se implementa en validaciones de servicio y controlador,
 evitando tanto la elevaci\'on de privilegios como la evaluaci\'on fuera de contexto
 (p. ej., docente no vinculado al grupo o actividad).
 
-\section{Requisitos no funcionales}
+\subsection{Requisitos no funcionales}
 
 Los requisitos no funcionales aportan condiciones de calidad del producto.
 La Tabla~\ref{tab:rqnf-resumen} resume los m\'as relevantes para el alcance actual.
@@ -74,7 +93,7 @@ RQNF-009 & Seguridad & Exposici\'on de datos condicionada por autenticaci\'on y 
 \label{tab:rqnf-resumen}
 \end{table}
 
-\section{Priorizaci\'on y alcance}
+\subsection{Priorizaci\'on y alcance}
 
 La priorizaci\'on se realiz\'o con criterio MoSCoW y validaci\'on continua con el backlog.
 El foco del MVP se situ\'o en los procesos con mayor impacto docente: gesti\'on de actividades y entregables, flujo completo de entrega y evaluaci\'on, seguridad por rol, y persistencia con trazabilidad de cambios. Esta selecci\'on maximiza valor operativo en el horizonte temporal disponible.
@@ -83,11 +102,11 @@ Funcionalidades avanzadas (integraciones extendidas, autenticaci\'on federada co
 observabilidad m\'as profunda) se mantienen en backlog de evoluci\'on y no comprometen
 la viabilidad del alcance de TFG.
 
-\section{Trazabilidad requisito-backlog-c\'odigo}
+\subsection{Trazabilidad requisito-backlog-c\'odigo}
 
-La trazabilidad se gestiona en tres niveles: \textbf{nivel de an\'alisis} con identificador en ERS/Proteus, \textbf{nivel de planificaci\'on} con PBI y sprint asociado, y \textbf{nivel de ejecuci\'on} con m\'odulo software y prueba que lo valida. Esta triple vista permite justificar decisiones con evidencia t\'ecnica.
+La trazabilidad se gestiona en tres niveles estrechamente interconectados: en primer lugar, un \textbf{nivel de an\'alisis} apoyado por el identificador un\'ivoco establecido en el ERS a trav\'es de Proteus; en segundo lugar, un \textbf{nivel de planificaci\'on} guiado por los PBI (\emph{Product Backlog Items}, elementos de trabajo discretos que representan funcionalidades con valor para el usuario dentro de las metodolog\'ias \`agiles) y su sprint asociado; y por \'ultimo, un \textbf{nivel de ejecuci\'on} que liga estos elementos al m\'odulo de software implementado y a la prueba automatizada que lo valida. Esta triple vista permite justificar cualquier decisi\'on de dise\~no con evidencia t\'ecnica medible.
 
-La Tabla~\ref{tab:trazabilidad-requisitos} muestra ejemplos representativos.
+La Tabla~\ref{tab:trazabilidad-requisitos} muestra ejemplos representativos de este encadenamiento, ilustrando c\'omo un requisito formal del ERS se convierte en un PBI dentro de un sprint de desarrollo y, finalmente, se materializa en c\'odigo y pruebas espec\'ificas.
 
 \begin{table}[!htbp]
 \centering
@@ -110,7 +129,7 @@ RQNF-009 & Seguridad global / transversal & SecurityConfig, JwtAuthenticationFil
 \label{tab:trazabilidad-requisitos}
 \end{table}
 
-\section{Contexto documental de partida (ERS y DAS)}
+\subsection{Contexto documental de partida (ERS y DAS)}
 
 La especificaci\'on documental de este TFG no se apoya en descripciones ad hoc, sino en dos artefactos de an\'alisis formal mantenidos en Proteus. El \textbf{ERS (Especificaci\'on de Requisitos del Sistema)} define situaci\'on actual, necesidades de negocio, subsistemas y cat\'alogo de requisitos (generales, de informaci\'on, funcionales, no funcionales y reglas de negocio), mientras que el \textbf{DAS (Documento de An\'alisis del Sistema)} define arquitectura l\'ogica, modelo de clases, diagramas de estado, diagramas de secuencia, navegabilidad e inventario de mockups de interfaz. Esta base asegura continuidad documental entre an\'alisis y ejecuci\'on.
 
@@ -119,23 +138,17 @@ primero, preservar trazabilidad respecto al trabajo original de Ingenier\'ia
 de Requisitos; segundo, demostrar que las decisiones de dise\~no e implementaci\'on
 adoptadas durante el TFG responden a una base de especificaci\'on expl\'icita.
 
-\section{Situaci\'on actual y necesidades de negocio (ERS)}
 
-El ERS identifica un escenario de partida con fricci\'on operativa notable:
-creaci\'on de actividades y recogida de entregas con alto componente manual,
-dificultad para mantener trazabilidad uniforme y baja capacidad de evoluci\'on
-cuando se pretende introducir reglas de negocio m\'as finas.
 
-Sobre ese diagn\'ostico, las necesidades de negocio priorizadas fueron reducir la carga administrativa en procesos docentes recurrentes, ofrecer al estudiante un flujo de entrega m\'as guiado y transparente, centralizar evaluaci\'on y feedback con reglas de autorizaci\'on claras, y mejorar la mantenibilidad del sistema y su capacidad de evoluci\'on. Estas necesidades conectan directamente con los bloques funcionales del MVP.
+El ERS parte de un an\'alisis detallado de un escenario acad\'emico real donde los procesos docentes presentaban una alta ineficiencia: los profesores requer\'ian m\'ultiples pasos manuales y plataformas dispersas para la definici\'on de actividades, publicaci\'on de material y, de manera muy acusada, para la recogida, versionado y almacenamiento de las entregas de los alumnos. El rastreo de estas entregas carec\'ia de una trazabilidad uniforme (fechas, reenv\'ios, visibilidad), lo que derivaba en p\'erdidas de informaci\'on y en un soporte t\'ecnico que imposibilitaba la integraci\'on de l\'ogicas de evaluaci\'on m\'as avanzadas.
 
-Estas necesidades se conectan con el resto de la memoria en tres planos:
-arquitectura (separaci\'on de capas), implementaci\'on (m\'odulos especializados)
-y verificaci\'on (pruebas por flujo cr\'itico y por requisito).
+Ante este diagn\'ostico espec\'ifico, las necesidades de negocio que fundamentan este TFG se orientan a un cambio de paradigma centralizado. El objetivo es proporcionar un entorno \'unico donde la carga administrativa del profesor se reduzca mediante flujos estandarizados (desde la creaci\'on de un \emph{entregable} hasta la introducci\'on de calificaciones), y donde el alumno perciba transparencia absoluta sobre sus fechas l\'imite, el estado de sus versiones y los comentarios (feedback) recibidos. Adem\'as, era imperativo garantizar que la evaluaci\'on solo pudiera ser efectuada bajo reglas de autorizaci\'on y contexto acad\'emico estrictas (vinculaci\'on estudiante-grupo-profesor). 
 
-\section{Descomposici\'on en subsistemas (ERS)}
+Estas necesidades condicionan el resto de los cap\'itulos en tres planos tangibles: la definici\'on arquitect\'onica (separando estrictamente los servicios de usuarios de la gesti\'on acad\'emica), la implementaci\'on a trav\'es de m\'odulos enfocados a dominios espec\'ificos, y una bater\'ia de pruebas concebida para validar tanto los flujos de experiencia de usuario como el cumplimiento inquebrantable de las reglas de autorizaci\'on impuestas en el negocio.
 
-El ERS descompone el sistema en cinco subsistemas. Esta descomposici\'on
-ha sido reutilizada como gu\'ia de dise\~no modular durante el desarrollo.
+\subsection{Descomposici\'on en subsistemas (ERS)}
+
+El ERS descompone el sistema en cinco grandes subsistemas l\'ogicos para organizar sus funcionalidades. La Tabla \ref{tab:subsistemas-ers} detalla esta descomposici\'on, la cual ha sido reutilizada como gu\'ia fundamental de dise\~no modular a lo largo del desarrollo del TFG.
 
 \begin{table}[!htbp]
 \centering
@@ -160,13 +173,16 @@ SUBS-005 & SPD (Persistencia de Datos) & Persistencia relacional y repositorio d
 \label{tab:subsistemas-ers}
 \end{table}
 
-\section{Cat\'alogo exhaustivo de requisitos del ERS}
+\subsection{Cat\'alogo exhaustivo de requisitos del ERS}
 
 Con objeto de incorporar de forma completa el contenido de ERS, se documenta
 el inventario de requisitos por tipolog\'ia y su interpretaci\'on en el alcance
 real del TFG.
 
+\FloatBarrier
 \subsubsection*{Requisitos generales (RQG)}
+
+La Tabla \ref{tab:rqg-inventario} detalla los requisitos generales del sistema, que establecen el marco de operaci\'on b\'asico para la gesti\'on de usuarios, actividades, entregables y la comunicaci\'on.
 
 \begin{table}[!htbp]
 \centering
@@ -195,7 +211,10 @@ RQG-007 & Seguridad y control de acceso & Restricci\'on de visibilidad/operaci\'
 \label{tab:rqg-inventario}
 \end{table}
 
+\FloatBarrier
 \subsubsection*{Requisitos de informaci\'on (RQI)}
+
+La Tabla \ref{tab:rqi-inventario} describe los requisitos de informaci\'on que definen qu\'e datos esenciales deben persistirse en el sistema (actividades, entregables, usuarios, etc.).
 
 \begin{table}[!htbp]
 \centering
@@ -222,9 +241,7 @@ RQI-005 & Informaci\'on de feedback & Persistencia de calificaciones, comentario
 
 \subsubsection*{Requisitos funcionales (RQF)}
 
-Las tablas siguientes recogen las capacidades operativas que debe ofrecer
-el sistema al usuario final, separadas en dos bloques para mantener legible
-el inventario completo.
+La Tabla \ref{tab:rqf-inventario-1} y la Tabla \ref{tab:rqf-inventario-2} recogen, de manera estructurada y en dos bloques para facilitar su lectura, las capacidades operativas que el sistema debe ofrecer al usuario final, desde la administraci\'on de identidades hasta la integraci\'on cloud.
 
 \begin{table}[!htbp]
 \centering
@@ -302,10 +319,10 @@ RQF-025 & Integraci\'on cloud & Uso de almacenamiento en nube seg\'un configurac
 \label{tab:rqf-inventario-2}
 \end{table}
 
+\FloatBarrier
 \subsubsection*{Reglas de negocio (REGN)}
 
-La tabla siguiente agrupa las restricciones que condicionan qui\'en puede
-ejecutar cada operaci\'on, en qu\'e contexto acad\'emico y bajo qu\'e condiciones.
+La Tabla \ref{tab:regn-inventario} agrupa las restricciones ineludibles que condicionan las operaciones del sistema, definiendo estrictamente qui\'en cuenta con los privilegios para ejecutar cada acci\'on, bajo qu\'e contexto acad\'emico particular y respetando qu\'e condiciones temporales o de visibilidad.
 
 \begin{table}[!htbp]
 \centering
@@ -336,10 +353,10 @@ REGN-008 & Emisi\'on de feedback & Solo el docente autorizado publica feedback e
 \label{tab:regn-inventario}
 \end{table}
 
+\FloatBarrier
 \subsubsection*{Requisitos no funcionales (RQNF)}
 
-La tabla siguiente resume las condiciones de calidad que debe cumplir
-el sistema m\'as all\'a de la funcionalidad visible.
+La Tabla \ref{tab:rqnf-inventario-completo} resume las condiciones de calidad t\'ecnica y operacionales que debe cumplir el sistema para garantizar una ejecuci\'on fiable, mantenible y segura, m\'as all\'a de la estricta funcionalidad visible por el usuario.
 
 \begin{table}[!htbp]
 \centering
@@ -376,7 +393,16 @@ RQNF-011 & Portabilidad web & Compatibilidad expl\'icita con Chrome, Firefox y E
 \label{tab:rqnf-inventario-completo}
 \end{table}
 
-\section{Reutilizaci\'on de diagramas y mockups del DAS}
+
+\FloatBarrier
+\section{Documento de Arquitectura de Software (DAS)}
+
+\subsection{Fundamentaci\'on te\'orica del DAS}
+El Documento de Arquitectura de Software o Documento de An\'alisis del Sistema (DAS) constituye el puente entre la especificaci\'on te\'orica y la construcci\'on real. Gen\'ericamente, su finalidad es modelar los componentes l\'ogicos, la navegabilidad, la interacci\'on entre clases y los estados de las entidades principales.
+
+En el marco de este proyecto, el objetivo espec\'ifico del DAS es establecer el mapa visual que justifique la arquitectura cliente-servidor adoptada, las secuencias transaccionales para la entrega y evaluaci\'on, y los mockups de interfaz que gu\'ian la experiencia de usuario final.
+
+\subsection{Reutilizaci\'on de diagramas y mockups del DAS}
 
 El DAS aporta una base visual amplia (diagramas t\'ecnicos, secuencias,
 navegabilidad y mockups) que se reutiliza en esta memoria para explicar
@@ -476,7 +502,7 @@ PaginaEstudiantesProfesores.png & Consulta de estudiantes y trazabilidad docente
 \label{tab:das-mockups}
 \end{table}
 
-\section{Lectura t\'ecnica de los diagramas estructurales del DAS}
+\subsection{Lectura t\'ecnica de los diagramas estructurales del DAS}
 
 La reutilizaci\'on de las Figuras~\ref{fig:das-arquitectura},
 \ref{fig:das-clases}, \ref{fig:das-estado} y \ref{fig:das-navegabilidad}
@@ -519,7 +545,7 @@ Navegabilidad & Flujos de interfaz por rol y contexto & Rutas protegidas, vistas
 \label{tab:das-lectura-estructural}
 \end{table}
 
-\section{Flujos operativos del DAS y su encaje en la soluci\'on}
+\subsection{Flujos operativos del DAS y su encaje en la soluci\'on}
 
 Adem\'as de los diagramas estructurales, el DAS aporta una visi\'on de
 comportamiento detallada mediante secuencias y mockups operativos. Esta capa
@@ -580,19 +606,19 @@ Profesor y estudiante & Consulta y trazabilidad de resultados & Mockups de comen
 \label{tab:das-cobertura-rol}
 \end{table}
 
-\section{Cat\'alogo operativo de casos de uso y cobertura funcional}
+\subsection{Cat\'alogo de casos de uso y matriz de trazabilidad ERS-DAS-implementaci\'on}
 
-El modelo de casos de uso del DAS se estructura como un conjunto amplio de
-operaciones del sistema que cubren autenticaci\'on, gesti\'on acad\'emica,
-entregas, evaluaci\'on y supervisi\'on docente. Esta descomposici\'on se
-reutiliza en la memoria para demostrar que la implementaci\'on del MVP no es
-una selecci\'on arbitraria de pantallas, sino la materializaci\'on de un
-modelo operativo previo.
+El DAS define un cat\'alogo amplio de casos de uso; en esta memoria se han
+seleccionado cuatro diagramas representativos (Figuras~\ref{fig:das-cu-1} a
+\ref{fig:das-cu-4}) que cubren acceso, gesti\'on acad\'emica, entregas y
+evaluaci\'on. Esta selecci\'on se corresponde con los flujos implementados en el
+MVP y sirve como base visual para enlazar el modelo operativo con la evidencia
+de implementaci\'on y pruebas.
 
 Como representaci\'on visual de dicha cobertura, se incluyen cuatro diagramas
 de casos de uso de referencia (Figuras~\ref{fig:das-cu-1} a
-\ref{fig:das-cu-4}), suficientes para documentar el enlace entre el
-cat\'alogo funcional y los flujos reales desarrollados.
+\ref{fig:das-cu-4}), para documentar el enlace entre el cat\'alogo funcional y
+los flujos reales desarrollados.
 
 \figura{0.82}{\detokenize{../assets/CU-1.drawio.png}}{Caso de uso representativo CU-1 (DAS)}{fig:das-cu-1}{}
 
@@ -601,6 +627,12 @@ cat\'alogo funcional y los flujos reales desarrollados.
 \figura{0.82}{\detokenize{../assets/CU-3.drawio.png}}{Caso de uso representativo CU-3 (DAS)}{fig:das-cu-3}{}
 
 \figura{0.82}{\detokenize{../assets/CU-4.drawio.png}}{Caso de uso representativo CU-4 (DAS)}{fig:das-cu-4}{}
+
+\FloatBarrier
+
+Para resumir la cobertura por familias operativas dentro del MVP, la
+Tabla~\ref{tab:das-familias-casos-uso} agrupa el alcance funcional, el actor
+dominante y el grado de cobertura logrado.
 
 \begin{table}[!htbp]
 \centering
@@ -627,7 +659,7 @@ Supervisi\'on y trazabilidad & Vistas cruzadas profesor-estudiante y revisi\'on 
 \label{tab:das-familias-casos-uso}
 \end{table}
 
-\section{Matriz ampliada de trazabilidad ERS-DAS-implementaci\'on}
+\FloatBarrier
 
 Para reforzar la coherencia documental, la Tabla~\ref{tab:trazabilidad-ampliada}
 integra tres niveles de evidencia: requisito formal en ERS, artefacto de
@@ -663,7 +695,9 @@ RQNF-004, RQNF-005, RQNF-009 & Arquitectura de subsistemas + separaci\'on de cap
 \label{tab:trazabilidad-ampliada}
 \end{table}
 
-\section{Cobertura documental alcanzada}
+\FloatBarrier
+
+\subsection{Cobertura documental alcanzada}
 
 Con la incorporaci\'on anterior, este cap\'itulo integra de forma expl\'icita los cinco bloques completos del cat\'alogo ERS (RQG, RQI, RQF, REGN y RQNF), la descomposici\'on en subsistemas usada durante dise\~no e implementaci\'on, los diagramas estructurales y de comportamiento del DAS, el cat\'alogo operativo de casos de uso y familias funcionales del sistema, el conjunto de mockups de interfaz como evidencia de dise\~no funcional y una matriz ampliada de trazabilidad entre especificaci\'on, dise\~no, implementaci\'on y verificaci\'on. Esta integraci\'on evita vac\'ios entre an\'alisis y ejecuci\'on.
 

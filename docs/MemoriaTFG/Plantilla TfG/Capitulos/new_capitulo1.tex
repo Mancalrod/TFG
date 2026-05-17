@@ -14,282 +14,27 @@
 
 \FloatBarrier
 \section{Contexto y problema a resolver}
-\subsection{Contexto y motivaci\'on}
 
-El presente Trabajo Fin de Grado se desarrolla en el \`ambito de la gesti\'on acad\'emica universitaria,
-centrado en el ciclo de vida completo de las actividades evaluables:
-definici\'on de actividades, publicaci\'on de entregables, realizaci\'on de entregas,
-evaluaci\'on y retroalimentaci\'on.
+El presente Trabajo Fin de Grado se desarrolla en el \'ambito de la gesti\'on acad\'emica universitaria, centrado en el ciclo de vida completo de las actividades evaluables: definici\'on de actividades, publicaci\'on de entregables, realizaci\'on de entregas, evaluaci\'on y retroalimentaci\'on.
 
-La motivaci\'on principal se fundamenta en una realidad operativa detectada en el an\'alisis previo:
-en muchos contextos docentes, el flujo de entrega y correcci\'on combina una plataforma institucional
-de prop\'osito general con tareas manuales de clasificaci\'on, validaci\'on y descarga de archivos.
-Esa combinaci\'on introduce ineficiencias en tres dimensiones cr\'iticas. En primer lugar, el esfuerzo docente se incrementa porque se consume tiempo en operaciones administrativas de bajo valor, lo que reduce el foco en la correcci\'on y la orientaci\'on pedag\'ogica. En segundo lugar, la experiencia del estudiante se resiente, ya que la entrega resulta poco guiada y la validaci\'on suele ser tard\'ia, lo que introduce incertidumbre en el proceso. Por \'ultimo, la trazabilidad de la evaluaci\'on queda debilitada, dado que la relaci\'on entrega-versi\'on-feedback no siempre se consolida en un flujo \`unico.
+La motivaci\'on principal se fundamenta en una realidad operativa detectada en contextos docentes: el flujo de entrega y correcci\'on suele combinar plataformas institucionales de prop\'osito general con tareas manuales de clasificaci\'on y validaci\'on de archivos. Esta combinaci\'on introduce ineficiencias críticas: aumenta el esfuerzo administrativo del profesorado, reduce la precisi\'on en la gu\'ia al estudiante y debilita la trazabilidad entre las entregas, sus versiones y el \emph{feedback} recibido.
 
-Por tanto, el proyecto no persigue replicar una plataforma LMS generalista,
-sino resolver de forma especializada el problema operativo de la gesti\'on de entregables,
-apoy\'andose en los artefactos de requisitos y an\'alisis del sistema (ERS y DAS),
-y en la planificaci\'on ejecutiva definida en backlog y plan de sprints.
+Desde la perspectiva de la ingenier\'ia del software, el problema a resolver consiste en dise\~nar un sistema especializado que, con recursos acotados, maximice la cobertura funcional del ciclo de entregables, garantizando robustez, seguridad por rol y facilidad de evoluci\'on, sin depender de tareas manuales externas a la plataforma.
 
 \FloatBarrier
-\subsection{Problema de ingenier\'ia a resolver}
+\section{An\'alisis de antecedentes y situaci\'on inicial}
 
-Desde una perspectiva de ingenier\'ia del software,
-el problema se formula como la necesidad de dise\~nar un sistema que,
-con recursos acotados de tiempo y equipo,
-maximice simult\'aneamente la cobertura funcional del ciclo de entregables, la robustez t\'ecnica y la seguridad por rol, y la capacidad de evoluci\'on sin deuda estructural excesiva. Este equilibrio exige priorizar decisiones que sostengan el flujo completo y eviten comprometer la mantenibilidad en el medio plazo.
+En el entorno acad\'emico actual, intervienen tres actores fundamentales: el \textbf{profesor}, que gestiona la recogida y correcci\'on; el \textbf{estudiante}, que realiza las entregas; y el \textbf{administrador}, que mantiene la infraestructura. Aunque los sistemas de gesti\'on del aprendizaje (LMS) generalistas ofrecen ventajas como la autenticaci\'on centralizada y el acceso estandarizado, carecen de especializaci\'on en el flujo de entregables.
 
-Este problema impone una restricci\'on de dise\~no clave:
-no basta con construir funcionalidades aisladas,
-sino que es necesario garantizar coherencia extremo a extremo
-entre requisitos, arquitectura, implementaci\'on, pruebas y despliegue.
+Las plataformas LMS tradicionales tienden a tratar las entregas como simples cargas de archivos, sin validaciones profundas sobre la estructura del contenido (p. ej., archivos requeridos dentro de un paquete ZIP). Las herramientas especializadas en correcci\'on t\'ecnica son potentes para c\'odigo pero r\'igidas para entregas heterog\'eneas. Asimismo, el uso de suites colaborativas en la nube fragmenta la trazabilidad y desvincula la evaluaci\'on de la entrega real. Esta dependencia de herramientas no adaptadas traslada gran parte del esfuerzo de validaci\'on y organizaci\'on al puesto local del docente, incrementando la carga administrativa y el riesgo de inconsistencias.
 
-\FloatBarrier
-\section{Objetivos del proyecto}
-\subsection{Objetivo general}
-
-Dise\~nar, implementar y validar un sistema web para la gesti\'on integral de entregables acad\'emicos,
-que permita a profesores y estudiantes operar de forma centralizada, segura y trazable,
-reduciendo tareas manuales y mejorando la eficiencia del proceso de evaluaci\'on continua.
-
-\FloatBarrier
-\subsection{Metodolog\'ia para definir los objetivos}
-
-La definici\'on de objetivos no se ha realizado de forma declarativa aislada,
-sino mediante un proceso iterativo de convergencia entre objetivos de negocio (OBJN) definidos en el an\'alisis inicial, requisitos funcionales y no funcionales del ERS, decisiones arquitect\'onicas del DAS, prioridades MoSCoW del Product Backlog y la capacidad temporal real (660 horas en 6 iteraciones). Esta convergencia asegura que cada objetivo no solo responda a una necesidad, sino que sea viable dentro del calendario y del alcance del TFG.
-
-Este enfoque permite que cada objetivo sea evaluable,
-relacionable con entregables t\'ecnicos concretos
-y verificable mediante evidencia objetiva de implementaci\'on y pruebas.
-
-\FloatBarrier
-\subsection{Objetivos espec\'ificos}
-
-Para alcanzar el objetivo general se establecen los siguientes objetivos espec\'ificos,
-ordenados por su contribuci\'on al MVP:
-
-\begin{enumerate}
-	\item \textbf{Centralizar la estructura acad\'emica del sistema.}
-	Modelar cursos, grupos, actividades, entregables y entregas de forma coherente
-	con la organizaci\'on docente real.
-
-	\item \textbf{Proporcionar flexibilidad en la configuraci\'on de actividades y entregables.}
-	Permitir al profesorado definir condiciones de entrega (fechas, visibilidad,
-	reenv\'io, tipo de material y par\'ametros de evaluaci\'on).
-
-	\item \textbf{Optimizar el proceso de entrega para el alumnado.}
-	Implementar flujos de subida y consulta de historial de versiones,
-	con validaciones y mensajes de estado claros.
-
-	\item \textbf{Mejorar la evaluaci\'on y la retroalimentaci\'on.}
-	Facilitar la revisi\'on de entregas por parte del profesorado,
-	incorporando calificaci\'on y feedback en el mismo flujo de trabajo.
-
-	\item \textbf{Garantizar seguridad y control de acceso por roles y contexto.}
-	Aplicar autenticaci\'on y autorizaci\'on de forma consistente,
-	diferenciando permisos de administrador, profesor y estudiante.
-
-	\item \textbf{Dise\~nar una arquitectura modular e interoperable.}
-	Mantener separaci\'on clara entre frontend y backend mediante API REST,
-	facilitando integraciones y evoluci\'on por componentes.
-
-	\item \textbf{Asegurar calidad t\'ecnica mediante validaci\'on automatizada.}
-	Verificar el comportamiento funcional y la robustez del sistema
-	con pruebas unitarias, de integraci\'on, E2E y de mutaci\'on.
-
-	\item \textbf{Establecer un despliegue reproducible y mantenible.}
-	Integrar pr\'acticas de CI/CD y contenedorizaci\'on para sostener
-	entregas frecuentes, trazables y auditables.
-\end{enumerate}
-
-\FloatBarrier
-\subsection{Priorizaci\'on de objetivos (criterio MoSCoW)}
-
-Para alinear expectativas y alcance,
-los objetivos se priorizan con criterio MoSCoW,
-consistente con el backlog del proyecto.
-
-\begin{table}[!htbp]
-\centering
-\begin{tabular}{|P{2.2cm}|P{4.8cm}|P{5.4cm}|}
-\hline
-\textbf{Prioridad} & \textbf{Objetivos asociados} & \textbf{Justificaci\'on} \\
-\hline
-Must Have & O1, O2, O3, O4, O5 & Sin estos objetivos no existe flujo acad\'emico completo de entrega y evaluaci\'on. \\
-\hline
-Should Have & O6, O7 & Aumentan mantenibilidad y calidad, y reducen riesgo de regresi\'on. \\
-\hline
-Could Have & Extensiones anal\'iticas y observabilidad avanzada & Aportan valor, pero no condicionan la validez del MVP. \\
-\hline
-Won't Have (MVP) & inicio de sesi\'on federado (OAuth2/OIDC), 2FA integral, notificaciones avanzadas & Se reservan para evoluci\'on por coste de implementaci\'on y validaci\'on. \\
-\hline
-\end{tabular}
-\caption{Priorizaci\'on de objetivos conforme a estrategia MoSCoW}
-\label{tab:priorizacion-objetivos}
-\end{table}
-
-\FloatBarrier
-\section{Alcance funcional}
-\subsection{Alcance funcional del trabajo}
-
-El alcance funcional cubierto en este TFG incluye la gesti\'on de usuarios y el control de acceso por rol, la gesti\'on de cursos, grupos y actividades acad\'emicas, y la administraci\'on de entregables con configuraci\'on de plazos y visibilidad. Adem\'as, se cubren la realizaci\'on de entregas con historial de versiones y descarga, la evaluaci\'on con retroalimentaci\'on docente y la automatizaci\'on de validaci\'on y despliegue en entorno CI/CD para asegurar trazabilidad t\'ecnica.
-
-\FloatBarrier
-\subsection{Delimitaci\'on expl\'icita del alcance}
-
-Para mantener viabilidad temporal y calidad de salida,
-se delimita de forma expl\'icita lo que queda fuera del MVP,
-aunque exista su consideraci\'on en el an\'alisis inicial. En concreto, se excluyen el inicio de sesi\'on federado (OAuth2/OIDC institucional), el doble factor de autenticaci\'on integral (2FA), las notificaciones avanzadas desacopladas y las funcionalidades avanzadas de anal\'itica y monitorizaci\'on, por su coste de implementaci\'on y validaci\'on en el horizonte temporal disponible.
-
-	Estas exclusiones se refieren al inicio de sesi\'on federado; la autorizaci\'on OAuth2 necesaria para conectar OneDrive s\'i est\'a implementada.
-
-Esta delimitaci\'on no representa una carencia metodol\'ogica,
-sino una decisi\'on de ingenier\'ia para proteger el objetivo principal:
-entregar un sistema funcional, verificable y defendible en plazo.
-
-\FloatBarrier
-\section{Cumplimiento y trazabilidad}
-\subsection{Criterios de cumplimiento y evidencia de logro}
-
-El cumplimiento de objetivos se eval\'ua mediante evidencia verificable,
-evitando formulaciones subjetivas.
-
-\begin{table}[!htbp]
-\centering
-\begin{tabular}{|P{2cm}|P{3.4cm}|P{3.3cm}|P{3.7cm}|}
-\hline
-\textbf{Obj.} & \textbf{Indicador principal} & \textbf{Meta de cumplimiento} & \textbf{Evidencia} \\
-\hline
-O1--O4 & Cobertura del flujo funcional extremo a extremo & Flujo completo operativo por rol & Endpoints y pantallas de curso/actividad/entrega/evaluaci\'on \\
-\hline
-O5 & Restricciones de acceso aplicadas & Operaciones protegidas por rol/contexto & Configuraci\'on de seguridad, filtros y tests de autorizaci\'on \\
-\hline
-O6 & Separaci\'on modular de componentes & Bajo acoplamiento entre capas & Arquitectura frontend-backend + DTOs + servicios \\
-\hline
-O7 & Calidad t\'ecnica cuantificable & Suites en verde y m\'etricas altas & Cobertura, E2E y mutaci\'on reportadas \\
-\hline
-O8 & Reproducibilidad de entrega & Pipeline estable para build/test/deploy & Workflows CI/CD y despliegue trazable \\
-\hline
-\end{tabular}
-\caption{Criterios de evaluaci\'on del cumplimiento de objetivos}
-\label{tab:criterios-cumplimiento-objetivos}
-\end{table}
-
-\FloatBarrier
-\subsection{Trazabilidad objetivos-requisitos-entregables}
-
-La trazabilidad constituye un criterio central de rigor acad\'emico.
-Cada objetivo se conecta con requisitos del ERS
-y con entregables t\'ecnicos ejecutados durante los sprints.
-
-\begin{table}[!htbp]
-\centering
-\begin{tabular}{|P{1.9cm}|P{3.2cm}|P{3.6cm}|P{3.7cm}|}
-\hline
-\textbf{Objetivo} & \textbf{Requisitos relacionados} & \textbf{Backlog/Sprint} & \textbf{Entregable t\'ecnico} \\
-\hline
-O1 & RQF-005 a RQF-017 & EP-04, EP-05 (S1) & M\'odulos de cursos, grupos y actividades \\
-\hline
-O2--O3 & RQF-018 a RQF-026 & EP-06, EP-07 (S1-S2) & M\'odulos de entregables y entregas \\
-\hline
-O4 & RQF-027 a RQF-029 & EP-09 (S1-S3) & M\'odulo de evaluaci\'on y feedback \\
-\hline
-O5 & RQNF-009, REGN-001 & EP-12 (S1) & JWT, control de roles y validaci\'on contextual \\
-\hline
-O7 & RQNF-001, RQNF-004 & EP-13 (S1-S4) & Testing en capas + mutaci\'on \\
-\hline
-O8 & RQNF-008, RQNF-004 & EP-14 (S1) & CI/CD y despliegue automatizado \\
-\hline
-\end{tabular}
-\caption{Trazabilidad entre objetivos, requisitos y resultados t\'ecnicos}
-\label{tab:trazabilidad-objetivos}
-\end{table}
-
-\FloatBarrier
-\subsection{Riesgos estrat\'egicos asociados a los objetivos}
-
-Al definir objetivos de forma ambiciosa, es necesario explicitar riesgos y medidas de mitigaci\'on. Existe un riesgo de sobrealcance funcional si se incorporan m\'as funcionalidades de las asumibles en 660 horas, por lo que la mitigaci\'on se apoya en priorizaci\'on MoSCoW y control por hitos. Tambi\'en hay riesgo de deuda de calidad si se pospone el testing a la fase final, lo que se corrige con una estrategia de pruebas integrada en cada sprint. Por \`ultimo, el riesgo de incoherencia documental entre memoria y estado real del producto se reduce mediante redacci\'on iterativa y trazabilidad objetiva.
-
-\FloatBarrier
-\subsection{Conclusiones iniciales}
-
-La definici\'on de objetivos presentada no se limita a una enumeraci\'on formal,
-sino que establece un marco de ejecuci\'on y validaci\'on completo.
-
-En consecuencia, este cap\'itulo fija la base de todo el desarrollo posterior:
-qu\'e se pretende conseguir, por qu\'e se prioriza de ese modo,
-qu\'e evidencia demostrar\'a su cumplimiento
-y cu\'ales son los l\'imites deliberados del alcance en el contexto del TFG.
-	
-
-\section{Ecosistema de desarrollo y operaci\'on}
-
-\subsection{Lenguajes y herramientas utilizadas}
-
-El ecosistema t\'ecnico del proyecto se ha definido para garantizar coherencia entre desarrollo, validaci\'on y despliegue, e incluye implementaci\'on backend con Java 21, Spring Boot, Spring Security, JPA/Hibernate, Maven y Flyway, implementaci\'on frontend con React, TypeScript, Vite, React Router y Axios, documentaci\'on en \LaTeX{} con soporte auxiliar en Markdown, y gesti\'on de proyecto mediante backlog y planificaci\'on iterativa versionados en el propio repositorio. Esta combinaci\'on asegura trazabilidad t\'ecnica y consistencia de entorno.
-
-\subsection{Pol\'itica de gesti\'on del c\'odigo fuente}
-
-La gesti\'on del c\'odigo se realiza en repositorio Git con enfoque de ramas tem\'aticas,
-integraci\'on mediante \emph{pull requests} y validaciones autom\'aticas previas a fusi\'on.
-Esta pol\'itica reduce riesgo de regresi\'on,
-mejora trazabilidad de cambios y permite relacionar requisitos con commits,
-pruebas y despliegues.
-
-\subsection{Estrategia de integraci\'on continua y despliegue}
-
-La estrategia CI/CD se apoya en workflows de GitHub Actions con etapas separadas para backend, frontend y validaci\'on conjunta. En cada cambio relevante se ejecutan compilaci\'on, pruebas y lint, se realiza an\'alisis de calidad y seguridad sobre artefactos de c\'odigo, se construyen im\'agenes Docker con publicaci\'on automatizada y se despliega en PaaS con configuraci\'on por entorno. Este flujo reduce variabilidad y mantiene una entrega continua compatible con el calendario del TFG.
-
-El objetivo operativo es que cada versi\'on candidata sea reproducible,
-auditable y desplegable con esfuerzo m\'inimo,
-manteniendo una l\'inea de entrega continua compatible con el calendario del TFG.
-
-\subsection{Uso de asistentes de Inteligencia Artificial}
-
-El proyecto adopta un uso \textbf{limitado, transparente y verificable}
-de herramientas de IA generativa,
-siempre como apoyo a tareas de redacci\'on preliminar,
-revisi\'on o aceleraci\'on operativa,
-nunca como sustituto del criterio de ingenier\'ia del autor.
-El alcance y las salvaguardas aplicadas se detallan en el
-Anexo D de esta memoria.
-
-\FloatBarrier
-
-?\section{An\'alisis de antecedentes y aportaci\'on realizada}\label{analanteced}
-
-\FloatBarrier
-\subsection{Introducci\'on}
-
-Este cap\'itulo analiza la situaci\'on de partida del dominio de gesti\'on de entregables acad\'emicos
-y describe con detalle la aportaci\'on concreta del proyecto sobre dicho contexto.
-El an\'alisis se sustenta en los artefactos de requisitos y dise\~no (ERS y DAS),
-y se contrasta con el estado real de implementaci\'on reflejado en el backlog,
-el plan de sprints y la estrategia de pruebas.
-
-El objetivo de esta secci\'on no es solo comparar un ``antes'' y un ``despu\'es'',
-sino explicar por qu\'e el problema exist\'ia,
-qu\'e brechas de ingenier\'ia lo sosten\'ian,
-y c\'omo la soluci\'on propuesta aporta una mejora estructural defendible.
-
-\FloatBarrier
-\subsection{Metodolog\'ia de an\'alisis de antecedentes}
-
-Se adopta un enfoque en tres pasos: la caracterizaci\'on del escenario \emph{actual} (actores, procesos, fortalezas y debilidades), la identificaci\'on de brechas operativas y tecnol\'ogicas, y la definici\'on del escenario \emph{objetivo} con mapeo expl\'icito de aportaciones. Este orden evita saltos l\'ogicos y permite justificar cada mejora a partir de una necesidad concreta.
-
-Este m\'etodo evita descripciones gen\'ericas y permite mantener trazabilidad
-entre problema detectado, decisi\'on de dise\~no e impacto obtenido.
-
-\FloatBarrier
-\subsection{Situaci\'on actual (escenario \emph{actual})}
-
-\subsubsection{Actores y procesos principales}
+\subsection{Actores y procesos principales}
 
 En la situaci\'on de partida intervienen tres actores de negocio: el \textbf{profesor}, que crea actividades y gestiona la recogida y correcci\'on de entregas; el \textbf{estudiante}, que realiza la entrega de ficheros en la plataforma docente; y el \textbf{administrador de plataforma}, responsable de mantener servicios base e infraestructura institucional. Esta distribuci\'on delimita responsabilidades y explica por qu\'e ciertos problemas se concentran en el flujo docente.
 
 Los procesos de referencia en ese escenario son \textbf{PRON-001} (creaci\'on y publicaci\'on de tareas), \textbf{PRON-002} (entrega de pr\'acticas por el alumnado) y \textbf{PRON-003} (descarga masiva y organizaci\'on manual de entregas por el profesorado). La presencia de un proceso dedicado a organizaci\'on manual evidencia el principal foco de fricci\'on operativa.
 
-\subsubsection{Fortalezas del entorno de partida}
+\subsection{Fortalezas del entorno de partida}
 
 El an\'alisis del contexto inicial evidencia fortalezas relevantes. En particular, \textbf{FOR-001} aporta centralizaci\'on de usuarios mediante identidad institucional, \textbf{FOR-002} garantiza disponibilidad generalizada y acceso web estandarizado, y \textbf{FOR-003} ofrece un marco de uso conocido por estudiantes y docentes. Estas ventajas justifican una estrategia de complementariedad en lugar de sustituci\'on total.
 
@@ -297,15 +42,10 @@ Estas fortalezas justifican que la propuesta no persiga sustituir por completo
 el ecosistema acad\'emico existente,
 sino complementarlo en el punto donde se concentra la fricci\'on operativa.
 
-\subsubsection{Debilidades estructurales detectadas}
+\subsection{Debilidades estructurales detectadas}
 
 Junto a las fortalezas, se detectan debilidades que afectan al rendimiento del proceso. La \textbf{DEB-001} se manifiesta en rigidez de gesti\'on de archivos y clasificaci\'on manual reiterada, mientras que la \textbf{DEB-002} limita la evoluci\'on funcional al depender de arquitecturas cerradas. A esto se suma la \textbf{DEB-003}, que reduce la flexibilidad del flujo de entrega para el estudiante, y la \textbf{DEB-004}, que refleja una integraci\'on no nativa con almacenamiento cloud moderno. En conjunto, estas debilidades concentran el coste operativo en fases cr\'iticas de entrega y correcci\'on.
 
-\subsubsection{An\'alisis de causas ra\'iz}
-
-Las debilidades anteriores no se explican por errores puntuales, sino por causas sist\'emicas. En el plano de proceso predomina la carga manual en fases cr\'iticas de correcci\'on, y en el plano de producto falta especializaci\'on para el ciclo completo de entregables. A nivel t\'ecnico existe acoplamiento entre flujo acad\'emico y herramientas de prop\'osito general, y en calidad se observa una trazabilidad escasa entre entrega, versi\'on, evaluaci\'on y feedback. Esta combinaci\'on explica por qu\'e las mejoras parciales no eliminan la fricci\'on operativa.
-
-\FloatBarrier
 \subsection{Brechas entre escenario actual y necesidades objetivo}
 
 Para justificar la intervenci\'on,
@@ -333,7 +73,6 @@ Calidad y despliegue & Validaci\'on heterog\'enea por tarea & Verificaci\'on aut
 \label{tab:brechas-antecedentes}
 \end{table}
 
-\FloatBarrier
 \subsection{Entorno tecnol\'ogico de partida}
 
 El contexto previo se caracteriza por una plataforma institucional LMS con autenticaci\'on centralizada, acceso multiplataforma desde navegador y dependencia de herramientas locales para el tratamiento de paquetes de entrega. Esta dependencia traslada parte del esfuerzo al puesto de trabajo del docente y amplifica diferencias de criterio en la gesti\'on de materiales.
@@ -344,7 +83,6 @@ con impacto en tiempo de correcci\'on,
 estandarizaci\'on de criterios
 y riesgo de inconsistencias en trazabilidad.
 
-\FloatBarrier
 \subsection{An\'alisis de competidores y brechas sectoriales}
 
 Para dimensionar la aportaci\'on real del proyecto en el sector,
@@ -355,16 +93,11 @@ patrones funcionales y brechas que condicionan la operativa docente.
 
 \subsubsection{Tipolog\'ias de competidores analizados}
 
-El an\'alisis se ha estructurado en cuatro familias. Se consideran \textbf{LMS generalistas} que priorizan gesti\'on de cursos, contenidos, evaluaciones y comunicaci\'on, \textbf{herramientas de evaluaci\'on t\'ecnica} orientadas a entregas de programaci\'on o autoevaluaci\'on, \textbf{suites colaborativas y almacenamiento cloud} centradas en compartir archivos y carpetas sin cubrir el flujo completo de entrega, y \textbf{gestores de entrega simples} que ofrecen subida de ficheros con m\'inimo control posterior. Esta segmentaci\'on permite comparar la propuesta con alternativas reales sin reducir el an\'alisis a marcas concretas.
+El an\'alisis se ha estructurado en cuatro familias. Se consideran \textbf{LMS generalistas} (como Moodle, Canvas, Blackboard o Google Classroom) que priorizan gesti\'on de cursos, contenidos, evaluaciones y comunicaci\'on, \textbf{herramientas de evaluaci\'on t\'ecnica} (como GitHub Classroom, Gradescope o CodeGrade) orientadas a entregas de programaci\'on o autoevaluaci\'on, \textbf{suites colaborativas y almacenamiento cloud} (como Microsoft Teams, Google Drive o Dropbox) centradas en compartir archivos y carpetas sin cubrir el flujo completo de entrega, y \textbf{gestores de entrega simples} (formularios web o repositorios p\'ublicos) que ofrecen subida de ficheros con m\'inimo control posterior. Esta segmentaci\'on permite comparar la propuesta con alternativas reales sin reducir el an\'alisis a marcas concretas.
 
 \subsubsection{LMS generalistas}
 
-Las plataformas LMS ofrecen una cobertura funcional amplia y estable,
-pero su dise\~no generalista tiende a tratar las entregas como un m\'odulo
-m\'as de un ecosistema mayor. Esto provoca que la validaci\'on de ficheros
-sea habitualmente limitada a extensi\'on y tama\~no, y que el control
-de estructura interna de paquetes ZIP recaiga en instrucciones manuales
-al alumnado o en revisi\'on posterior del docente.
+Las plataformas LMS de uso masivo (Moodle, Blackboard, Canvas) ofrecen una cobertura funcional amplia y estable, pero su dise\~no generalista tiende a tratar las entregas como un m\'odulo m\'as de un ecosistema mayor. Esto provoca que la validaci\'on autom\'atica de ficheros sea habitualmente limitada a comprobar la extensi\'on y el tama\~no, y que el control detallado de la estructura interna de paquetes (como los ficheros .zip) recaiga en instrucciones manuales hacia el alumnado o en una ardua revisi\'on a posteriori por parte del docente.
 
 \subsubsection{Herramientas de evaluaci\'on t\'ecnica}
 
@@ -401,7 +134,6 @@ validaciones del sistema. La aportaci\'on se orient\'o a reducir carga
 manual, mejorar la trazabilidad y ofrecer verificaciones t\'ecnicas
 que no suelen estar disponibles en soluciones generalistas.
 
-\FloatBarrier
 \subsection{Aportaci\'on realizada (escenario \emph{objetivo})}
 
 La propuesta implementada aporta una mejora estructural,
@@ -410,21 +142,12 @@ aumentar trazabilidad y consolidar calidad de producto.
 
 \subsubsection{Aportaci\'on funcional}
 
-La aportaci\'on funcional responde a las brechas operativas y sectoriales
-identificadas en secciones previas. En concreto, se implementaron capacidades de gesti\'on integral de cursos, grupos, actividades y entregables con visibilidad por rol, as\'i como validaci\'on avanzada de ZIP (estructura, extensiones y nombre esperado). Adem\'as, se incorpor\'o un modo estricto o m\'inimo requerido en entregas ZIP seg\'un criterio docente, control de tipos de entrega (archivo, enlace o solo texto) con reglas espec\'ificas, y versionado con reenv\'io y estado de entrega trazables. Como soporte operativo, se a\~nadi\'o descarga masiva, previsualizaci\'on de contenido para optimizar revisi\'on y un borrador autom\'atico en cliente con revalidaci\'on previa al env\'io.
+El sistema desarrollado aborda directamente la fricci\'on operativa y las deficiencias detectadas en las soluciones de mercado. En concreto, se implementaron capacidades de gesti\'on integral de cursos, grupos, actividades y entregables con visibilidad por rol, as\'i como validaci\'on avanzada de ZIP (estructura, extensiones y nombre esperado). Adem\'as, se incorpor\'o un modo estricto o m\'inimo requerido en entregas ZIP seg\'un criterio docente, control de tipos de entrega (archivo, enlace o solo texto) con reglas espec\'ificas, y versionado con reenv\'io y estado de entrega trazables. Como soporte operativo, se a\~nadi\'o descarga masiva, previsualizaci\'on de contenido para optimizar revisi\'on y un borrador autom\'atico en cliente con revalidaci\'on previa al env\'io.
 
 Estas capacidades se alinean con los procesos objetivo del an\'alisis:
 \textbf{PRON-004} (creaci\'on/publicaci\'on de actividad),
 \textbf{PRON-005} (realizaci\'on de entrega con validaci\'on)
 y \textbf{PRON-006} (evaluaci\'on y feedback).
-
-\subsubsection{Aportaci\'on arquitect\'onica y tecnol\'ogica}
-
-Desde la perspectiva t\'ecnica, la contribuci\'on principal se concreta en una separaci\'on frontend-backend mediante API REST, una arquitectura por capas en backend que a\'isla responsabilidades, el uso de DTOs para desacoplar contratos de API del modelo de persistencia y una evoluci\'on de esquema controlada por migraciones versionadas. Este conjunto reduce el acoplamiento y facilita mantenimiento evolutivo.
-
-Este dise\~no reduce acoplamiento,
-facilita mantenimiento
-y habilita evoluci\'on incremental sin ruptura del n\'ucleo funcional.
 
 \subsubsection{Aportaci\'on en calidad y operaci\'on}
 
@@ -433,7 +156,6 @@ Adem\'as de funcionalidad, el proyecto incorpora capacidades de calidad y operac
 La aportaci\'on, por tanto, no se limita a ``que funcione'',
 sino a que el sistema sea verificable, mantenible y operable.
 
-\FloatBarrier
 \subsection{Matriz de mapeo debilidades-aportaciones}
 
 La matriz siguiente sintetiza la relaci\'on entre debilidades detectadas
@@ -458,7 +180,6 @@ DEB-004 & Dependencia de almacenamiento local/heterog\'eneo & Integraciones conf
 \label{tab:mapeo-debilidades-aportacion}
 \end{table}
 
-\FloatBarrier
 \subsection{Comparativa sint\'etica}
 
 Esta comparativa resume el salto entre escenario de partida y la
@@ -486,12 +207,16 @@ Calidad del desarrollo & Validaci\'on heterog\'enea seg\'un tarea & Estrategia d
 \label{tab:comparativa-antecedentes}
 \end{table}
 
-\FloatBarrier
 \subsection{Alineaci\'on con objetivos de negocio}
 
-La aportaci\'on realizada responde de forma directa a los objetivos de negocio definidos en la fase de an\'alisis. Se materializa el \textbf{OBJN-001} al agilizar la gesti\'on docente y reducir tareas manuales de bajo valor, se satisface el \textbf{OBJN-002} al mejorar accesibilidad y usabilidad del proceso de entrega, se refuerza el \textbf{OBJN-003} al centralizar evaluaci\'on y retroalimentaci\'on con trazabilidad, y se cumple el \textbf{OBJN-004} al estructurar informaci\'on que facilita evoluci\'on e integraciones futuras.
+La aportaci\'on realizada materializa los objetivos de negocio definidos en la fase de an\'alisis de la siguiente forma:
+\begin{itemize}
+  \item Se consigue el \textbf{OBJN-001 (agilizar gesti\'on docente)} mediante la capacidad de definir reglas autom\'aticas de validaci\'on de formatos y estructuras internas (ficheros requeridos dentro de un .zip), lo cual reduce sustancialmente el n\'umero de entregas inv\'alidas que un profesor debe revisar y descartar manualmente.
+  \item Se satisface el \textbf{OBJN-002 (mejorar la accesibilidad y usabilidad del estudiante)} implementando un flujo de subida de archivos claro, con prevalidaciones en tiempo real en el lado del cliente (borrador local) y confirmaciones expl\'icitas de fecha y versi\'on de la entrega.
+  \item Se refuerza el \textbf{OBJN-003 (trazabilidad de la evaluaci\'on)} al ofrecer una vista dedicada donde la entrega exacta, los comentarios de correcci\'on (feedback) y la calificaci\'on cuantitativa conviven en un \emph{\'unico} contexto cerrado, evitando el env\'io de correos masivos para comunicar notas o incidencias.
+  \item Finalmente, el \textbf{OBJN-004 (capacidad de evoluci\'on e integraci\'on)} se asegura mediante una arquitectura que expone todo su cat\'alogo de operaciones a trav\'es de una API documentada, posibilitando enganchar el sistema a m\'odulos externos de autoevaluaci\'on de c\'odigo o herramientas de prevenci\'on de plagio en el futuro.
+\end{itemize}
 
-\FloatBarrier
 \subsection{Limitaciones residuales y continuidad}
 
 Aun cuando la mejora es significativa, se mantienen l\'ineas de continuidad planificadas: ampliaci\'on de funcionalidades avanzadas fuera del MVP, extensi\'on de integraciones externas seg\'un contexto institucional y refuerzo de observabilidad y m\'etricas operativas de producci\'on. Esta continuidad permite evolucionar sin comprometer la estabilidad alcanzada.
@@ -499,7 +224,6 @@ Aun cuando la mejora es significativa, se mantienen l\'ineas de continuidad plan
 Estas limitaciones no invalidan la aportaci\'on obtenida,
 sino que delimitan una hoja de ruta realista para evoluci\'on posterior.
 
-\FloatBarrier
 \subsection{Conclusiones del cap\'itulo}
 
 El an\'alisis de antecedentes confirma que el principal problema del dominio
@@ -510,3 +234,171 @@ La aportaci\'on de este TFG se sit\'ua precisamente en ese hueco:
 transformar un proceso manual y costoso en un proceso digital trazable,
 modular y orientado a evaluaci\'on continua,
 con una base t\'ecnica preparada para evolucionar con menor riesgo de deuda estructural.
+
+\FloatBarrier
+\section{Aportaci\'on del proyecto y justificaci\'on}
+
+Para solventar las brechas detectadas, este proyecto aporta un sistema estructurado y espec\'ifico que transforma un proceso manual y disperso en un flujo digital unificado.
+
+La principal aportaci\'on funcional es la gesti\'on integral de actividades y entregables con validaciones avanzadas autom\'aticas (control de formatos, previsualizaci\'on, y chequeo estricto de estructura), adem\'as de un sistema de versionado y trazabilidad completa de cada entrega. Esto permite integrar la evaluaci\'on y la retroalimentaci\'on en el mismo ciclo, reduciendo dr\'asticamente la sobrecarga manual de clasificaci\'on.
+
+A nivel arquitect\'onico, la soluci\'on adopta un dise\~no desacoplado mediante una API REST, separando la capa de experiencia de usuario de la l\'ogica de negocio y persistencia, lo que facilita el mantenimiento evolutivo. Adem\'as, se aplican pol\'iticas de calidad y operaci\'on modernas (testing en capas, CI/CD) que garantizan que el producto sea verificable y estable en un entorno de despliegue continuo.
+
+\FloatBarrier
+\section{Objetivos del proyecto}
+
+El \textbf{objetivo general} del trabajo es dise\~nar, implementar y validar un sistema web para la gesti\'on integral de entregables acad\'emicos, que permita a profesores y estudiantes operar de forma centralizada, segura y trazable, reduciendo tareas manuales y mejorando la eficiencia del proceso de evaluaci\'on continua.
+
+Para alcanzar este fin, se han definido los siguientes \textbf{objetivos espec\'ificos}, priorizados mediante un enfoque MoSCoW:
+
+\begin{enumerate}
+    \item \textbf{Centralizar la estructura acad\'emica}: Modelar cursos, grupos, actividades, entregables y entregas.
+    \item \textbf{Proporcionar flexibilidad de configuraci\'on}: Permitir al profesorado definir plazos, visibilidad y reglas de validaci\'on automatizada.
+    \item \textbf{Optimizar el proceso de entrega}: Ofrecer al alumnado un flujo guiado, con versionado, borradores y confirmaci\'on de estados.
+    \item \textbf{Mejorar la evaluaci\'on y retroalimentaci\'on}: Integrar la correcci\'on, la calificaci\'on y los comentarios docentes directamente sobre la entrega.
+    \item \textbf{Garantizar seguridad y control de acceso}: Aplicar autenticaci\'on y autorizaci\'on consistente por roles (administrador, profesor y estudiante) y contexto.
+    \item \textbf{Dise\~nar una arquitectura modular}: Mantener separaci\'on clara entre frontend y backend para facilitar futuras integraciones.
+    \item \textbf{Asegurar la calidad t\'ecnica}: Verificar el sistema mediante un conjunto automatizado de pruebas en m\'ultiples niveles.
+\end{enumerate}
+
+Los cinco primeros objetivos constituyen los requisitos indispensables (\emph{Must Have}) para disponer de un MVP plenamente operativo. Los \'ultimos aseguran la calidad y sostenibilidad t\'ecnica del producto a medio plazo.
+
+\subsection{Metodolog\'ia para definir los objetivos}
+
+La definici\'on de objetivos no se ha realizado de forma declarativa aislada,
+sino mediante un proceso iterativo de convergencia entre objetivos de negocio (OBJN) definidos en el an\'alisis inicial, requisitos funcionales y no funcionales del ERS, decisiones arquitect\'onicas del DAS, prioridades MoSCoW del Product Backlog y la capacidad temporal real (660 horas en 6 iteraciones). Esta convergencia asegura que cada objetivo no solo responda a una necesidad, sino que sea viable dentro del calendario y del alcance del TFG.
+
+Este enfoque permite que cada objetivo sea evaluable,
+relacionable con entregables t\'ecnicos concretos
+y verificable mediante evidencia objetiva de implementaci\'on y pruebas.
+
+\subsection{Priorizaci\'on de objetivos (criterio MoSCoW)}
+
+Para alinear expectativas y alcance,
+los objetivos se priorizan con criterio MoSCoW,
+consistente con el backlog del proyecto.
+
+\begin{table}[!htbp]
+\centering
+\begin{tabular}{|P{2.2cm}|P{4.8cm}|P{5.4cm}|}
+\hline
+\textbf{Prioridad} & \textbf{Objetivos asociados} & \textbf{Justificaci\'on} \\
+\hline
+Must Have & O1, O2, O3, O4, O5 & Sin estos objetivos no existe flujo acad\'emico completo de entrega y evaluaci\'on. \\
+\hline
+Should Have & O6, O7 & Aumentan mantenibilidad y calidad, y reducen riesgo de regresi\'on. \\
+\hline
+Could Have & Extensiones anal\'iticas y observabilidad avanzada & Aportan valor, pero no condicionan la validez del MVP. \\
+\hline
+Won't Have (MVP) & inicio de sesi\'on federado (OAuth2/OIDC), 2FA integral, notificaciones avanzadas & Se reservan para evoluci\'on por coste de implementaci\'on y validaci\'on. \\
+\hline
+\end{tabular}
+\caption{Priorizaci\'on de objetivos conforme a estrategia MoSCoW}
+\label{tab:priorizacion-objetivos}
+\end{table}
+
+\subsection{Alcance funcional del trabajo}
+
+El alcance funcional cubierto en este TFG incluye la gesti\'on de usuarios y el control de acceso por rol, la gesti\'on de cursos, grupos y actividades acad\'emicas, y la administraci\'on de entregables con configuraci\'on de plazos y visibilidad. Adem\'as, se cubren la realizaci\'on de entregas con historial de versiones y descarga, la evaluaci\'on con retroalimentaci\'on docente y la automatizaci\'on de validaci\'on y despliegue en entorno CI/CD para asegurar trazabilidad t\'ecnica.
+
+\subsection{Delimitaci\'on expl\'icita del alcance}
+
+Para mantener viabilidad temporal y calidad de salida,
+se delimita de forma expl\'icita lo que queda fuera del MVP,
+aunque exista su consideraci\'on en el an\'alisis inicial. En concreto, se excluyen el inicio de sesi\'on federado (OAuth2/OIDC institucional), el doble factor de autenticaci\'on integral (2FA), las notificaciones avanzadas desacopladas y las funcionalidades avanzadas de anal\'itica y monitorizaci\'on, por su coste de implementaci\'on y validaci\'on en el horizonte temporal disponible.
+
+Estas exclusiones se refieren al inicio de sesi\'on federado; la autorizaci\'on OAuth2 necesaria para conectar OneDrive s\'i est\'a implementada.
+
+Esta delimitaci\'on no representa una carencia metodol\'ogica,
+sino una decisi\'on de ingenier\'ia para proteger el objetivo principal:
+entregar un sistema funcional, verificable y defendible en plazo.
+
+\subsection{Criterios de cumplimiento y evidencia de logro}
+
+El cumplimiento de objetivos se eval\'ua mediante evidencia verificable,
+evitando formulaciones subjetivas.
+
+\begin{table}[!htbp]
+\centering
+\begin{tabular}{|P{2cm}|P{3.4cm}|P{3.3cm}|P{3.7cm}|}
+\hline
+\textbf{Obj.} & \textbf{Indicador principal} & \textbf{Meta de cumplimiento} & \textbf{Evidencia} \\
+\hline
+O1--O4 & Cobertura del flujo funcional extremo a extremo & Flujo completo operativo por rol & Endpoints y pantallas de curso/actividad/entrega/evaluaci\'on \\
+\hline
+O5 & Restricciones de acceso aplicadas & Operaciones protegidas por rol/contexto & Configuraci\'on de seguridad, filtros y tests de autorizaci\'on \\
+\hline
+O6 & Separaci\'on modular de componentes & Bajo acoplamiento entre capas & Arquitectura frontend-backend + DTOs + servicios \\
+\hline
+O7 & Calidad t\'ecnica cuantificable & Suites en verde y m\'etricas altas & Cobertura, E2E y mutaci\'on reportadas \\
+\hline
+O8 & Reproducibilidad de entrega & Pipeline estable para build/test/deploy & Workflows CI/CD y despliegue trazable \\
+\hline
+\end{tabular}
+\caption{Criterios de evaluaci\'on del cumplimiento de objetivos}
+\label{tab:criterios-cumplimiento-objetivos}
+\end{table}
+
+\subsection{Trazabilidad objetivos-requisitos-entregables}
+
+La trazabilidad constituye un criterio central de rigor acad\'emico.
+Cada objetivo se conecta con requisitos del ERS
+y con entregables t\'ecnicos ejecutados durante los sprints.
+
+\begin{table}[!htbp]
+\centering
+\begin{tabular}{|P{1.9cm}|P{3.2cm}|P{3.6cm}|P{3.7cm}|}
+\hline
+\textbf{Objetivo} & \textbf{Requisitos relacionados} & \textbf{Backlog/Sprint} & \textbf{Entregable t\'ecnico} \\
+\hline
+O1 & RQF-005 a RQF-017 & EP-04, EP-05 (S1) & M\'odulos de cursos, grupos y actividades \\
+\hline
+O2--O3 & RQF-018 a RQF-026 & EP-06, EP-07 (S1-S2) & M\'odulos de entregables y entregas \\
+\hline
+O4 & RQF-027 a RQF-029 & EP-09 (S1-S3) & M\'odulo de evaluaci\'on y feedback \\
+\hline
+O5 & RQNF-009, REGN-001 & EP-12 (S1) & JWT, control de roles y validaci\'on contextual \\
+\hline
+O7 & RQNF-001, RQNF-004 & EP-13 (S1-S4) & Testing en capas + mutaci\'on \\
+\hline
+O8 & RQNF-008, RQNF-004 & EP-14 (S1) & CI/CD y despliegue automatizado \\
+\hline
+\end{tabular}
+\caption{Trazabilidad entre objetivos, requisitos y resultados t\'ecnicos}
+\label{tab:trazabilidad-objetivos}
+\end{table}
+
+\subsection{Riesgos estrat\'egicos asociados a los objetivos}
+
+Al definir objetivos de forma ambiciosa, es necesario explicitar riesgos y medidas de mitigaci\'on. Existe un riesgo de sobrealcance funcional si se incorporan m\'as funcionalidades de las asumibles en 660 horas, por lo que la mitigaci\'on se apoya en priorizaci\'on MoSCoW y control por hitos. Tambi\'en hay riesgo de deuda de calidad si se pospone el testing a la fase final, lo que se corrige con una estrategia de pruebas integrada en cada sprint. Por \`ultimo, el riesgo de incoherencia documental entre memoria y estado real del producto se reduce mediante redacci\'on iterativa y trazabilidad objetiva.
+
+\subsection{Conclusiones iniciales}
+
+La definici\'on de objetivos presentada no se limita a una enumeraci\'on formal,
+sino que establece un marco de ejecuci\'on y validaci\'on completo.
+
+En consecuencia, este cap\'itulo fija la base de todo el desarrollo posterior:
+qu\'e se pretende conseguir, por qu\'e se prioriza de ese modo,
+qu\'e evidencia demostrar\'a su cumplimiento
+y cu\'ales son los l\'imites deliberados del alcance en el contexto del TFG.
+
+\FloatBarrier
+\section{Alcance funcional y riesgos estrat\'egicos}
+
+El alcance de este TFG cubre el flujo de trabajo \emph{core} de la evaluaci\'on continua: desde la administraci\'on de la estructura acad\'emica, hasta la realizaci\'on de entregas, la correcci\'on y la descarga de evidencias.
+
+Para mantener la viabilidad temporal del proyecto y asegurar la calidad, se excluyen deliberadamente algunas caracter\'isticas avanzadas contempladas en el an\'alisis te\'orico, como la implementaci\'on de inicio de sesi\'on federado institucional (OAuth2/OIDC pleno), un doble factor de autenticaci\'on integral (2FA) nativo y las notificaciones desacopladas en tiempo real.
+
+La ejecuci\'on de este alcance se gestion\'o asumiendo riesgos clave, como la complejidad de integraci\'on y el l\'imite de tiempo de desarrollo, que se mitigaron mediante iteraciones \'agiles, validaci\'on continua y una estrecha alineaci\'on entre los requisitos formales (ERS) y la implementaci\'on.
+
+\FloatBarrier
+\section{Ecosistema de desarrollo y operaci\'on}
+
+Para asegurar la coherencia entre el dise\~no, la validaci\'on y el despliegue del sistema, se ha seleccionado un conjunto de tecnolog\'ias y herramientas alineado con est\'andares actuales de la industria:
+
+\begin{itemize}
+    \item \textbf{Backend:} Se emplea \textbf{Java 21} como lenguaje principal con el framework \textbf{Spring Boot}. La seguridad se gestiona con \textbf{Spring Security}, el acceso a base de datos mediante \textbf{JPA/Hibernate}, el control de versiones del esquema de base de datos a trav\'es de \textbf{Flyway} y la construcci\'on con \textbf{Maven}, manteniendo el backend organizado por capas para facilitar validaci\'on y trazabilidad.
+    \item \textbf{Frontend:} Interfaz desarrollada como \emph{Single Page Application} (SPA) con \textbf{React} y \textbf{TypeScript}. Se usa \textbf{Vite} como empaquetador y entorno de desarrollo. Para el enrutamiento se utiliza \textbf{React Router} y para las peticiones HTTP, \textbf{Axios}. La validaci\'on de componentes se realiza con \textbf{Vitest} y pruebas de mutaci\'on mediante \textbf{Stryker}, reforzando el control de calidad sobre componentes, contextos y servicios de cliente.
+    \item \textbf{Integraci\'on Continua y Despliegue (CI/CD):} El c\'odigo fuente se versiona en GitHub, empleando \emph{workflows} de GitHub Actions para ejecuci\'on automatizada de compilaci\'on, \emph{linting} y pruebas. Las versiones candidatas se despliegan autom\'aticamente en la plataforma como servicio (PaaS) \textbf{Render}, utilizando contenedores Docker para el backend y sitios est\'aticos para el frontend, junto a una base de datos gestionada PostgreSQL. Este flujo facilita una entrega reproducible, auditable y alineada con los sprints del proyecto.
+    \item \textbf{Documentaci\'on y Modelado:} La especificaci\'on de requisitos y an\'alisis se realiz\'o con la herramienta \textbf{Proteus}. Esta memoria y la documentaci\'on t\'ecnica han sido elaboradas en \textbf{\LaTeX{}}. Adicionalmente, el proyecto hace un uso transparente y guiado de asistentes de Inteligencia Artificial para agilizar tareas de redacci\'on y refinamiento de c\'odigo base, manteniendo en todo momento el criterio y autor\'ia del equipo de ingenier\'ia.
+\end{itemize}

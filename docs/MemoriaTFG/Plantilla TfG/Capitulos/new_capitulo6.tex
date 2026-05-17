@@ -1,4 +1,4 @@
-\chapter{Verificaci\'on y Validaci\'on (Pruebas)}\label{pruebas}
+\chapter{Pruebas}\label{pruebas}
 % tfg-floatbarrier-auto
 \makeatletter
 \@ifundefined{tfgfloatbarrier}{
@@ -64,7 +64,7 @@ Para documentar de forma expl\'icita el alcance de verificaci\'on,
 se ha consolidado el recuento de pruebas por capa a partir de los reportes
 generados por Vitest, Playwright y Surefire.
 
-El n\'umero total de pruebas autom\'aticas ejecutadas en el \textit{corte} actual es:
+El n\'umero total de pruebas autom\'aticas ejecutadas en la versi\'on actual (MVP final) es:
 
 \[
 N_{\text{total}} = N_{\text{frontend unitarias}} + N_{\text{frontend E2E}} + N_{\text{backend}} = 138 + 3 + 850 = 991
@@ -124,7 +124,7 @@ el navegador se levanta contra el frontend real y se simulan endpoints API
 en los escenarios definidos. Esto reduce inestabilidad ambiental y facilita
 reproducibilidad en CI.
 
-Se validan, entre otros, los escenarios de autenticaci\'on correcta, autenticaci\'on fallida y flujo de evaluaciones con filtros y descarga mockeada. En el corte actual se ejecutan 3 escenarios y los 3 finalizan en verde; durante la ejecuci\'on pueden aparecer avisos de proxy de Vite para endpoints no mockeados de notificaciones, sin impacto en el resultado de la suite.
+Se validan, entre otros, los escenarios de autenticaci\'on correcta, autenticaci\'on fallida y flujo de evaluaciones con filtros y descarga mockeada. En la versi\'on actual (MVP final) se ejecutan 3 escenarios y los 3 finalizan en verde; durante la ejecuci\'on pueden aparecer avisos de proxy de Vite para endpoints no mockeados de notificaciones, sin impacto en el resultado de la suite.
 
 \subsection{Mutaci\'on en frontend}
 
@@ -135,7 +135,7 @@ sino que detectan alteraciones sem\'anticas en el comportamiento.
 
 La cobertura mediante mutaci\'on en frontend se ha realizado con un procedimiento que selecciona el alcance en \path{src/services/**/*.ts} y \path{src/utils/**/*.ts}, excluye expl\'icitamente tests y archivos de infraestructura (\path{*.test.*}, \path{*.spec.*}, \path{api.ts}, \path{index.ts}), ejecuta \texttt{npm run test:mutation} generando mutantes y relanzando Vitest por lotes, y analiza mutantes \textit{survived}/\textit{timeout} para reforzar casos de prueba d\'ebiles. Este enfoque prioriza secciones con mayor impacto funcional.
 
-En el corte actual, \texttt{npm run test:mutation} instrumenta 10 ficheros de servicios y utilidades con 435 mutantes. El resultado global es un \textit{mutation score} del 92.10\%, con 267 mutantes eliminados, 23 supervivientes y 1 \textit{timeout}. Como criterio de aceptaci\'on de esta fase, Stryker aplica umbrales \texttt{high=75}, \texttt{low=60} y \texttt{break=50}, siendo este \'ultimo el que determina fallo de pipeline.
+En la versi\'on actual (MVP final), \texttt{npm run test:mutation} instrumenta 10 ficheros de servicios y utilidades con 435 mutantes. El resultado global es un \textit{mutation score} del 92.10\%, con 267 mutantes eliminados, 23 supervivientes y 1 \textit{timeout}. Como criterio de aceptaci\'on de esta fase, Stryker aplica umbrales \texttt{high=75}, \texttt{low=60} y \texttt{break=50}, siendo este \'ultimo el que determina fallo de pipeline.
 
 \FloatBarrier
 \section{Pruebas en backend}
@@ -151,9 +151,7 @@ restricciones y evoluci\'on de estado.
 
 \subsection{M\'odulos testeados en backend}
 
-El backend se ha cuantificado a partir de nodos \texttt{testcase}
-en reportes Surefire, lo que permite reflejar correctamente pruebas
-parametrizadas y escenarios anidados.
+El backend se ha cuantificado a partir de nodos \texttt{testcase} en reportes generados por Maven Surefire (el plugin oficial de construcci\'on y ejecuci\'on de pruebas de Java que orquesta la fase de test en el ciclo de vida del proyecto). Esto permite reflejar correctamente pruebas parametrizadas y escenarios anidados.
 
 \begin{table}[!htbp]
 \centering
@@ -188,15 +186,12 @@ Aplicaci\'on base (\texttt{root}) & 1 \\
 
 \subsection{Cobertura backend}
 
-La cobertura se genera con JaCoCo durante la fase de test,
-produciendo informe HTML en
-\texttt{backend/target/site/jacoco/index.html}.
-En el corte actual, el reporte agregado indica 89.55\% de instrucciones, 70.31\% de ramas, 90.75\% de l\'ineas y 91.60\% de m\'etodos cubiertos. Este reporte se utiliza como soporte de revisi\'on t\'ecnica para detectar m\'odulos subprobados y orientar ampliaciones de suite.
+La cobertura se genera con JaCoCo (Java Code Coverage Library, un marco de trabajo de an\'alisis de c\'odigo abierto para medir c\'omo el c\'odigo fuente es ejercitado por los tests autom\'aticos) durante la fase de test, produciendo informe HTML en
+\texttt{backend/target/site/jacoco/index.html}. En la versi\'on actual (MVP final), el reporte agregado indica 89.55\% de instrucciones, 70.31\% de ramas, 90.75\% de l\'ineas y 91.60\% de m\'etodos cubiertos. Este reporte se utiliza como soporte de revisi\'on t\'ecnica para detectar m\'odulos subprobados y orientar ampliaciones de suite.
 
 \subsection{Mutaci\'on en backend}
 
-El perfil Maven \texttt{mutation} ejecuta PIT sobre clases objetivo
-de servicios y controladores seleccionados.
+El perfil Maven \texttt{mutation} ejecuta PIT (PIT Mutation Testing, un sistema de pruebas de mutaci\'on para la m\'aquina virtual de Java que altera artificialmente el bytecode de los programas para medir qu\'e porcentaje de esos defectos es capaz de detectar la suite de pruebas) sobre clases objetivo de servicios y controladores seleccionados.
 La configuraci\'on define umbrales de mutaci\'on y cobertura,
 y genera reportes estructurados para su an\'alisis.
 
@@ -210,7 +205,7 @@ cr\'itico.
 
 El flujo seguido para cobertura de mutaci\'on en backend consiste en ejecutar el perfil con \texttt{mvn -Pmutation ... mutationCoverage}, generar mutantes con operadores de retorno, aritm\'etica e incrementos, relacionar mutante y test para identificar qu\'e prueba mata cada defecto sint\'etico, y revisar mutantes supervivientes para crear pruebas adicionales o ajustar aserciones. Este proceso mejora la eficacia real de la suite.
 
-En el corte actual, PIT genera 144 mutantes, de los que 134 son eliminados por la suite. El resultado es un \textit{mutation score} del 93\%, una cobertura de l\'inea del 95\% sobre clases mutadas y una fuerza de test del 96\%. El perfil exige adem\'as un m\'inimo de mutaci\'on del 70\% y de cobertura del 75\%, reforzando que la cobertura no sea solo de l\'ineas, sino de detecci\'on efectiva de fallos.
+En la versi\'on actual (MVP final), PIT genera 144 mutantes, de los que 134 son eliminados por la suite. El resultado es un \textit{mutation score} del 93\%, una cobertura de l\'inea del 95\% sobre clases mutadas y una fuerza de test del 96\%. El perfil exige adem\'as un m\'inimo de mutaci\'on del 70\% y de cobertura del 75\%, reforzando que la cobertura no sea solo de l\'ineas, sino de detecci\'on efectiva de fallos.
 
 \FloatBarrier
 \section{Automatizaci\'on en CI/CD}
@@ -220,8 +215,7 @@ lo que garantiza ejecuci\'on repetible por cada cambio relevante.
 
 Workflows principales: \texttt{frontend-ci.yml} para lint, unitarias con cobertura, E2E y build de frontend; \texttt{full-stack-ci.yml} para verificaci\'on backend (\texttt{mvn verify}) y frontend completo; y \texttt{mutation-ci.yml} para mutaci\'on backend (PIT) y frontend (Stryker) con subida de artefactos. Esta organizaci\'on separa capas de validaci\'on sin perder coherencia global.
 
-Esta automatizaci\'on reduce el riesgo de integraci\'on tard\'ia,
-y permite detectar regresiones antes de despliegues a entornos superiores.
+Esta automatizaci\'on reduce el riesgo de integraci\'on tard\'ia, y permite detectar regresiones antes de integrar c\'odigo en la rama principal y desplegarlo en producci\'on.
 
 \FloatBarrier
 \section{Resultados verificados}
@@ -273,7 +267,7 @@ No obstante, las limitaciones actuales no comprometen la validez de la verificac
 para el alcance definido del proyecto.
 
 \FloatBarrier
-\section{Conclusiones del cap\'itulo}
+\section{Conclusiones}
 
 La estrategia de pruebas aplicada combina cobertura, profundidad y automatizaci\'on,
 aportando evidencia objetiva de calidad funcional y t\'ecnica.
