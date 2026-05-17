@@ -1,0 +1,259 @@
+--- PAGE 0 --- 
+Agradecimientos
+Queremos expresar nuestro agradecimiento al tutor del Trabajo Fin de Grado, por la orien-
+taci´on t´ecnica y metodol ´ogica aportada durante el desarrollo del proyecto, y por su seguimiento
+continuo en las distintas fases de an´alisis, implementaci´on y validaci´on.
+Asimismo, agradecemos a la Escuela T ´ecnica Superior de Ingenier ´ıa Inform´atica de la Uni-
+versidad de Sevilla el marco formativo y los recursos que han hecho posible la realizaci´on de este
+trabajo.
+Finalmente, reconocemos el apoyo de nuestras familias y compa ˜neros, cuya ayuda ha sido
+clave para completar este proyecto con el nivel de exigencia requerido.
+II
+--- PAGE 1 --- 
+´Indice general
+´Indice general III
+´Indice de tablas X
+´Indice de figuras XII
+1 Introducci ´on y antecedentes 1
+1.1 Contexto y problema a resolver . . . . . . . . . . . . . . . . . . . . . . . . . . . . 1
+1.1.1 An ´alisis de antecedentes y situaci´on inicial . . . . . . . . . . . . . . . . . . . 1
+1.1.2 Aportaci ´on realizada (escenarioobjetivo) . . . . . . . . . . . . . . . . . . . . 4
+1.1.3 Matriz de mapeo debilidades-aportaciones . . . . . . . . . . . . . . . . . . . . 4
+1.1.4 Comparativa sint ´etica . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+1.1.5 Alineaci ´on con objetivos de negocio . . . . . . . . . . . . . . . . . . . . . . . 5
+1.1.6 Limitaciones residuales y continuidad . . . . . . . . . . . . . . . . . . . . . . 6
+1.1.7 Conclusiones del cap ´ıtulo . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+1.2 Objetivos del proyecto . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+1.2.1 Metodolog ´ıa para definir los objetivos . . . . . . . . . . . . . . . . . . . . . . 7
+1.2.2 Priorizaci ´on de objetivos (criterio MoSCoW) . . . . . . . . . . . . . . . . . . 7
+1.2.3 Alcance funcional del trabajo . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+1.2.4 Delimitaci ´on expl´ıcita del alcance . . . . . . . . . . . . . . . . . . . . . . . . 8
+1.2.5 Criterios de cumplimiento y evidencia de logro . . . . . . . . . . . . . . . . . 8
+1.2.6 Trazabilidad objetivos-requisitos-entregables . . . . . . . . . . . . . . . . . . 9
+1.2.7 Riesgos estrat ´egicos asociados a los objetivos . . . . . . . . . . . . . . . . . . 9
+1.2.8 Conclusiones iniciales . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+1.3 Ecosistema de desarrollo y operaci ´on . . . . . . . . . . . . . . . . . . . . . . . . . 10
+2 An ´alisis temporal y costes de desarrollo 11
+2.1 An ´alisis temporal . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+2.1.1 Metodolog ´ıa aplicada y roles del proyecto . . . . . . . . . . . . . . . . . . . . 11
+2.1.2 Herramientas de gesti ´on y seguimiento . . . . . . . . . . . . . . . . . . . . . 11
+2.1.3 Marco de planificaci ´on . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+2.1.4 Hip ´otesis de capacidad y calendario base . . . . . . . . . . . . . . . . . . . . 12
+2.1.5 Planificaci ´on macro por sprints . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+2.1.6 Planificaci ´on micro y distribuci´on del esfuerzo . . . . . . . . . . . . . . . . . 12
+2.1.7 Hitos de control del proyecto . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+2.1.8 Seguimiento del avance y m ´etricas de control . . . . . . . . . . . . . . . . . . 13
+2.1.9 Control de desviaciones con valor ganado simplificado . . . . . . . . . . . . . 13
+2.1.10 Desviaciones y replanificaci ´on . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+2.1.11 Lecciones aprendidas de planificaci ´on . . . . . . . . . . . . . . . . . . . . . . 14
+2.1.12 Riesgos temporales y mitigaci ´on . . . . . . . . . . . . . . . . . . . . . . . . . 14
+III
+--- PAGE 2 --- 
+´INDICE GENERALIV
+2.1.13 Conclusi ´on temporal . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+2.2 Costes de desarrollo . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+2.2.1 Criterio de estimaci ´on econ´omica . . . . . . . . . . . . . . . . . . . . . . . . 14
+2.2.2 Coste de personal . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+2.2.3 Coste de personal por iteraci ´on . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+2.2.4 Coste asociado a aseguramiento de calidad . . . . . . . . . . . . . . . . . . . 15
+2.2.5 Costes de infraestructura y operaci ´on . . . . . . . . . . . . . . . . . . . . . . 16
+2.2.6 Coste total del proyecto . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+2.2.7 An ´alisis de sensibilidad econ´omica . . . . . . . . . . . . . . . . . . . . . . . 16
+2.2.8 Interpretaci ´on econ´omica y sostenibilidad . . . . . . . . . . . . . . . . . . . . 17
+2.2.9 Conclusi ´on del an´alisis de costes . . . . . . . . . . . . . . . . . . . . . . . . . 17
+3 An ´alisis y requisitos 18
+3.1 El proceso de an ´alisis en la Ingenier´ıa del Software . . . . . . . . . . . . . . . . . . 18
+3.1.1 Situaci ´on actual y necesidades de negocio . . . . . . . . . . . . . . . . . . . . 18
+3.2 Especificaci ´on de Requisitos del Sistema (ERS) . . . . . . . . . . . . . . . . . . . . 18
+3.2.1 Fundamentaci ´on te´orica del ERS . . . . . . . . . . . . . . . . . . . . . . . . . 18
+3.2.2 Fuentes de requisitos . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+3.2.3 Estructura del cat ´alogo . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+3.2.4 Requisitos funcionales . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+3.2.5 Reglas de negocio . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+3.2.6 Requisitos no funcionales . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+3.2.7 Priorizaci ´on y alcance . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+3.2.8 Trazabilidad requisito-backlog-c ´odigo . . . . . . . . . . . . . . . . . . . . . . 20
+3.2.9 Contexto documental de partida (ERS y DAS) . . . . . . . . . . . . . . . . . . 21
+3.2.10 Descomposici ´on en subsistemas (ERS) . . . . . . . . . . . . . . . . . . . . . 22
+3.2.11 Cat ´alogo exhaustivo de requisitos del ERS . . . . . . . . . . . . . . . . . . . . 22
+3.3 Documento de Arquitectura de Software (DAS) . . . . . . . . . . . . . . . . . . . . 25
+3.3.1 Fundamentaci ´on te´orica del DAS . . . . . . . . . . . . . . . . . . . . . . . . 25
+3.3.2 Reutilizaci ´on de diagramas y mockups del DAS . . . . . . . . . . . . . . . . . 25
+3.3.3 Lectura t ´ecnica de los diagramas estructurales del DAS . . . . . . . . . . . . . 31
+3.3.4 Flujos operativos del DAS y su encaje en la soluci ´on . . . . . . . . . . . . . . 32
+3.3.5 Cat ´alogo de casos de uso y matriz de trazabilidad ERS-DAS-implementaci´on . 36
+3.3.6 Cobertura documental alcanzada . . . . . . . . . . . . . . . . . . . . . . . . . 40
+4 Dise ˜no y Arquitectura 41
+4.1 Dise ˜no del sistema . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 41
+4.1.1 Arquitectura de alto nivel . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 41
+4.1.2 Aportaci ´on arquitect´onica y tecnol´ogica . . . . . . . . . . . . . . . . . . . . . 41
+4.1.3 Vista de despliegue . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 41
+4.1.4 Dise ˜no de dominio y datos . . . . . . . . . . . . . . . . . . . . . . . . . . . . 42
+4.1.5 Dise ˜no de API . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 42
+4.1.6 Dise ˜no de seguridad . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 42
+4.1.7 Dise ˜no del frontend . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 42
+4.2 Alternativas de arquitectura y stack . . . . . . . . . . . . . . . . . . . . . . . . . . 43
+4.2.1 Arquitectura de aplicaci ´on . . . . . . . . . . . . . . . . . . . . . . . . . . . . 43
+4.2.2 Backend framework . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 43
+4.2.3 Frontend framework . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 43
+4.3 Alternativas de persistencia y almacenamiento . . . . . . . . . . . . . . . . . . . . 44
+4.3.1 Base de datos relacional . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 44
+4.3.2 Estrategia de esquema . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 44
+4.3.3 Almacenamiento de archivos . . . . . . . . . . . . . . . . . . . . . . . . . . . 44
+--- PAGE 3 --- 
+´INDICE GENERALV
+4.4 Alternativas de seguridad y sesi ´on . . . . . . . . . . . . . . . . . . . . . . . . . . . 44
+4.4.1 Modelo de autenticaci ´on . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 44
+4.4.2 Extensiones de seguridad . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 45
+4.5 Alternativas investigadas y descartadas . . . . . . . . . . . . . . . . . . . . . . . . 45
+4.5.1 SharePoint para OneDrive corporativo . . . . . . . . . . . . . . . . . . . . . . 45
+4.5.2 Registro de usuarios con OAuth . . . . . . . . . . . . . . . . . . . . . . . . . 45
+4.6 Alternativas de despliegue y operaci ´on . . . . . . . . . . . . . . . . . . . . . . . . . 45
+4.6.1 Estrategia de despliegue . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 45
+4.6.2 CI/CD y calidad . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 45
+4.7 Comparativa multicriterio . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 46
+4.8 Decisiones adoptadas y justificaci ´on final . . . . . . . . . . . . . . . . . . . . . . . 46
+4.9 Conclusiones . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 46
+5 Implementaci ´on y Desarrollo 47
+5.1 Implementaci ´on . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 47
+5.1.1 Implementaci ´on backend . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 47
+5.1.2 Implementaci ´on de flujos cr´ıticos . . . . . . . . . . . . . . . . . . . . . . . . 47
+5.1.3 Implementaci ´on frontend . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 47
+5.1.4 Persistencia, migraciones e integraciones . . . . . . . . . . . . . . . . . . . . 47
+5.1.5 Verificaci ´on de implementaci´on . . . . . . . . . . . . . . . . . . . . . . . . . 48
+5.2 Discusi ´on t´ecnica . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 48
+5.2.1 Decisiones y compromisos . . . . . . . . . . . . . . . . . . . . . . . . . . . . 48
+5.2.2 Limitaciones y trabajo futuro . . . . . . . . . . . . . . . . . . . . . . . . . . . 49
+5.3 Conclusiones . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 50
+6 Justificaci ´on detallada de decisiones 51
+6.1 Introducci ´on . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 51
+6.2 Marco de toma de decisiones . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 51
+6.2.1 Criterios utilizados . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 51
+6.2.2 Ponderaci ´on de criterios . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 51
+6.3 Decisiones de alcance funcional . . . . . . . . . . . . . . . . . . . . . . . . . . . . 52
+6.3.1 Decisi ´on D1: definir un MVP centrado en flujo acad´emico nuclear . . . . . . . 52
+6.3.2 Decisi ´on D2: dise˜nar experiencia por rol desde el inicio . . . . . . . . . . . . . 52
+6.4 Decisiones de arquitectura . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 52
+6.4.1 Decisi ´on D3: arquitectura SPA + API desacoplada . . . . . . . . . . . . . . . 52
+6.4.2 Decisi ´on D4: arquitectura backend por capas . . . . . . . . . . . . . . . . . . 52
+6.4.3 Decisi ´on D5: uso de DTOs y mapper dedicado . . . . . . . . . . . . . . . . . 53
+6.5 Decisiones de stack tecnol ´ogico . . . . . . . . . . . . . . . . . . . . . . . . . . . . 53
+6.5.1 Decisi ´on D6: backend en Spring Boot + Java 21 . . . . . . . . . . . . . . . . . 53
+6.5.2 Decisi ´on D7: frontend en React + TypeScript + Vite . . . . . . . . . . . . . . 53
+6.6 Decisiones de seguridad . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 53
+6.6.1 Decisi ´on D8: autenticaci´on JWT con refresh token . . . . . . . . . . . . . . . 53
+6.6.2 Decisi ´on D9: autorizaci´on por rol + contexto acad´emico . . . . . . . . . . . . 53
+6.7 Decisiones de datos e integraciones . . . . . . . . . . . . . . . . . . . . . . . . . . 54
+6.7.1 Decisi ´on D10: PostgreSQL como base de datos principal . . . . . . . . . . . . 54
+6.7.2 Decisi ´on D11: Flyway como autoridad de esquema . . . . . . . . . . . . . . . 54
+6.7.3 Decisi ´on D12: estrategia h´ıbrida de almacenamiento de archivos . . . . . . . . 54
+6.8 Decisiones de calidad y verificaci ´on . . . . . . . . . . . . . . . . . . . . . . . . . . 54
+6.8.1 Decisi ´on D13: testing en capas . . . . . . . . . . . . . . . . . . . . . . . . . . 54
+6.8.2 Decisi ´on D14: incluir mutaci´on (PIT/Stryker) . . . . . . . . . . . . . . . . . . 54
+6.9 Decisiones de operaci ´on y despliegue . . . . . . . . . . . . . . . . . . . . . . . . . 54
+6.9.1 Decisi ´on D15: GitHub Actions como columna vertebral CI/CD . . . . . . . . . 54
+--- PAGE 4 --- 
+´INDICE GENERALVI
+6.9.2 Decisi ´on D16: despliegue en PaaS gestionado . . . . . . . . . . . . . . . . . . 54
+6.10 Matriz consolidada de decisiones . . . . . . . . . . . . . . . . . . . . . . . . . . . 55
+6.11 An ´alisis coste-beneficio por bloques de decisiones . . . . . . . . . . . . . . . . . . 55
+6.11.1 Bloque de arquitectura . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 55
+6.11.2 Bloque de stack tecnol ´ogico . . . . . . . . . . . . . . . . . . . . . . . . . . . 56
+6.11.3 Bloque de seguridad . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 56
+6.11.4 Bloque de calidad y pruebas . . . . . . . . . . . . . . . . . . . . . . . . . . . 56
+6.11.5 Bloque de despliegue y operaci ´on . . . . . . . . . . . . . . . . . . . . . . . . 56
+6.12 Riesgos asociados a decisiones y medidas de contingencia . . . . . . . . . . . . . . 56
+6.13 Trazabilidad de decisiones con requisitos y evidencia . . . . . . . . . . . . . . . . . 57
+6.14 Decisiones descartadas y por qu ´e no se adoptaron en esta fase . . . . . . . . . . . . 57
+6.14.1 Autenticaci ´on federada completa en MVP . . . . . . . . . . . . . . . . . . . . 57
+6.14.2 2FA integral desde primera versi ´on . . . . . . . . . . . . . . . . . . . . . . . 58
+6.14.3 Orquestaci ´on avanzada de infraestructura . . . . . . . . . . . . . . . . . . . . 58
+6.15 Conclusiones . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 58
+7 Justificaci ´on detallada de decisiones 59
+7.1 Introducci ´on . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 59
+7.2 Marco de toma de decisiones . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 59
+7.2.1 Criterios utilizados . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 59
+7.2.2 Ponderaci ´on de criterios . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 59
+7.3 Decisiones de alcance funcional . . . . . . . . . . . . . . . . . . . . . . . . . . . . 60
+7.3.1 Decisi ´on D1: definir un MVP centrado en flujo acad´emico nuclear . . . . . . . 60
+7.3.2 Decisi ´on D2: dise˜nar experiencia por rol desde el inicio . . . . . . . . . . . . . 60
+7.4 Decisiones de arquitectura . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 60
+7.4.1 Decisi ´on D3: arquitectura SPA + API desacoplada . . . . . . . . . . . . . . . 60
+7.4.2 Decisi ´on D4: arquitectura backend por capas . . . . . . . . . . . . . . . . . . 60
+7.4.3 Decisi ´on D5: uso de DTOs y mapper dedicado . . . . . . . . . . . . . . . . . 61
+7.5 Decisiones de stack tecnol ´ogico . . . . . . . . . . . . . . . . . . . . . . . . . . . . 61
+7.5.1 Decisi ´on D6: backend en Spring Boot + Java 21 . . . . . . . . . . . . . . . . . 61
+7.5.2 Decisi ´on D7: frontend en React + TypeScript + Vite . . . . . . . . . . . . . . 61
+7.6 Decisiones de seguridad . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 61
+7.6.1 Decisi ´on D8: autenticaci´on JWT con refresh token . . . . . . . . . . . . . . . 61
+7.6.2 Decisi ´on D9: autorizaci´on por rol + contexto acad´emico . . . . . . . . . . . . 61
+7.7 Decisiones de datos e integraciones . . . . . . . . . . . . . . . . . . . . . . . . . . 62
+7.7.1 Decisi ´on D10: PostgreSQL como base de datos principal . . . . . . . . . . . . 62
+7.7.2 Decisi ´on D11: Flyway como autoridad de esquema . . . . . . . . . . . . . . . 62
+7.7.3 Decisi ´on D12: estrategia h´ıbrida de almacenamiento de archivos . . . . . . . . 62
+7.8 Decisiones de calidad y verificaci ´on . . . . . . . . . . . . . . . . . . . . . . . . . . 62
+7.8.1 Decisi ´on D13: testing en capas . . . . . . . . . . . . . . . . . . . . . . . . . . 62
+7.8.2 Decisi ´on D14: incluir mutaci´on (PIT/Stryker) . . . . . . . . . . . . . . . . . . 62
+7.9 Decisiones de operaci ´on y despliegue . . . . . . . . . . . . . . . . . . . . . . . . . 62
+7.9.1 Decisi ´on D15: GitHub Actions como columna vertebral CI/CD . . . . . . . . . 62
+7.9.2 Decisi ´on D16: despliegue en PaaS gestionado . . . . . . . . . . . . . . . . . . 62
+7.10 Matriz consolidada de decisiones . . . . . . . . . . . . . . . . . . . . . . . . . . . 63
+7.11 An ´alisis coste-beneficio por bloques de decisiones . . . . . . . . . . . . . . . . . . 63
+7.11.1 Bloque de arquitectura . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 63
+7.11.2 Bloque de stack tecnol ´ogico . . . . . . . . . . . . . . . . . . . . . . . . . . . 64
+7.11.3 Bloque de seguridad . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 64
+7.11.4 Bloque de calidad y pruebas . . . . . . . . . . . . . . . . . . . . . . . . . . . 64
+7.11.5 Bloque de despliegue y operaci ´on . . . . . . . . . . . . . . . . . . . . . . . . 64
+7.12 Riesgos asociados a decisiones y medidas de contingencia . . . . . . . . . . . . . . 64
+--- PAGE 5 --- 
+´INDICE GENERALVII
+7.13 Trazabilidad de decisiones con requisitos y evidencia . . . . . . . . . . . . . . . . . 65
+7.14 Decisiones descartadas y por qu ´e no se adoptaron en esta fase . . . . . . . . . . . . 65
+7.14.1 Autenticaci ´on federada completa en MVP . . . . . . . . . . . . . . . . . . . . 65
+7.14.2 2FA integral desde primera versi ´on . . . . . . . . . . . . . . . . . . . . . . . 66
+7.14.3 Orquestaci ´on avanzada de infraestructura . . . . . . . . . . . . . . . . . . . . 66
+7.15 Conclusiones . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 66
+8 Pruebas 67
+8.1 Introducci ´on . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 67
+8.2 Objetivos de verificaci ´on . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 67
+8.3 Estrategia de pruebas en capas . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 67
+8.4 Inventario cuantitativo de pruebas realizadas . . . . . . . . . . . . . . . . . . . . . 68
+8.5 Pruebas en frontend . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 68
+8.5.1 Pruebas unitarias y cobertura . . . . . . . . . . . . . . . . . . . . . . . . . . . 68
+8.5.2 M ´odulos testeados en frontend . . . . . . . . . . . . . . . . . . . . . . . . . . 68
+8.5.3 Pruebas E2E . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 69
+8.5.4 Mutaci ´on en frontend . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 69
+8.6 Pruebas en backend . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 69
+8.6.1 Pruebas unitarias e integraci ´on . . . . . . . . . . . . . . . . . . . . . . . . . . 69
+8.6.2 M ´odulos testeados en backend . . . . . . . . . . . . . . . . . . . . . . . . . . 70
+8.6.3 Cobertura backend . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 70
+8.6.4 Mutaci ´on en backend . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 70
+8.7 Automatizaci ´on en CI/CD . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 71
+8.8 Resultados verificados . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 71
+8.9 Criterios de aceptaci ´on . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 71
+8.10 Limitaciones y riesgos . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 71
+8.11 Conclusiones . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 72
+9 Manual de usuario 73
+9.1 Introducci ´on . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 73
+9.2 Acceso al sistema . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 73
+9.2.1 Requisitos previos de uso . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 73
+9.2.2 Pantallas de acceso . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 73
+9.2.3 Ciclo de sesi ´on . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 73
+9.2.4 Recuperaci ´on de contrase˜na . . . . . . . . . . . . . . . . . . . . . . . . . . . 74
+9.3 Perfiles y permisos . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 74
+9.4 Vistas comunes a todos los perfiles . . . . . . . . . . . . . . . . . . . . . . . . . . . 74
+9.5 Gu ´ıa de uso para profesorado . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 75
+9.5.1 Vistas principales . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 75
+9.5.2 Crear y configurar una actividad . . . . . . . . . . . . . . . . . . . . . . . . . 75
+9.5.3 Crear y editar entregables . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 78
+9.5.4 Revisar entregas y evaluar . . . . . . . . . . . . . . . . . . . . . . . . . . . . 81
+9.5.5 Flujo docente recomendado de extremo a extremo . . . . . . . . . . . . . . . . 83
+9.6 Gu ´ıa de uso para estudiantes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 84
+9.6.1 Vistas principales . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 84
+9.6.2 Consultar actividades y entregables . . . . . . . . . . . . . . . . . . . . . . . 84
+9.6.3 Realizar una entrega . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 85
+9.6.4 Recomendaciones para entregas sin incidencias . . . . . . . . . . . . . . . . . 86
+9.6.5 Consultar historial y feedback . . . . . . . . . . . . . . . . . . . . . . . . . . 86
+9.7 Gu ´ıa de uso para administraci´on . . . . . . . . . . . . . . . . . . . . . . . . . . . . 87
+9.7.1 Administraci ´on de usuarios . . . . . . . . . . . . . . . . . . . . . . . . . . . . 87
+9.7.2 Administraci ´on de cursos . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 88

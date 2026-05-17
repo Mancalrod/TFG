@@ -1,73 +1,13 @@
 \cdpchapter{Resumen}
 
 \textbf{Contexto y problema:}
-en la operativa acad\'emica habitual, la gesti\'on de entregables suele fragmentarse
-entre herramientas generales, con fricciones en trazabilidad,
-seguimiento de versiones y evaluaci\'on docente.
-Este TFG aborda el problema de disponer de un flujo integral,
-desde la definici\'on del entregable hasta la publicaci\'on de feedback y notas,
-adaptado a perfiles de administraci\'on, profesorado y alumnado.
+En la operativa acad\'emica habitual, los flujos de trabajo de entregas acad\'emicas suelen estar fragmentados entre herramientas de prop\'osito general, lo que genera fricciones en trazabilidad, control de versiones de entregas y consistencia de calificaciones. Esta memoria aborda la necesidad de disponer de un flujo integral de extremo a extremo, desde la definici\'on del entregable hasta la publicaci\'on de retroalimentaci\'on y calificaciones, adaptado a administradores, docentes y estudiantes.
 
 \textbf{Relevancia:}
-la necesidad es especialmente significativa por su impacto directo en
-tiempo de correcci\'on, coherencia de criterios de evaluaci\'on,
-calidad de experiencia del estudiante y sostenibilidad del sistema
-cuando aumenta la carga docente o el n\'umero de grupos.
+La necesidad es especialmente significativa por su impacto directo en la carga de trabajo docente, la experiencia del estudiante y la mantenibilidad a largo plazo a medida que aumenta el n\'umero de cursos y grupos acad\'emicos. Adem\'as, aborda la mitigaci\'on del error humano mediante la implementaci\'on de un motor de validaci\'on sem\'antica y estructural de entregables. Se busca garantizar la integridad y conformidad de los entregables mediante la definici\'on din\'amica de esquemas de validaci\'on.
 
 \textbf{Soluci\'on propuesta y m\'etodo:}
-se dise\~na e implementa una plataforma web con arquitectura
-cliente-servidor desacoplada,
-frontend en React + TypeScript y backend en Spring Boot sobre Java 21,
-persistencia relacional y migraciones versionadas con Flyway.
-La seguridad combina autenticaci\'on JWT con renovaci\'on de sesi\'on,
-autorizaci\'on por rol y validaciones por contexto acad\'emico.
-El desarrollo se ejecuta por iteraciones,
-con trazabilidad entre requisitos, backlog, implementaci\'on y pruebas.
+Se dise\~na e implementa una plataforma web con arquitectura cliente-servidor desacoplada, con frontend en React + TypeScript y backend en Spring Boot sobre Java 21, persistencia relacional y migraciones versionadas con Flyway. La seguridad combina autenticaci\'on JWT con renovaci\'on de sesi\'on, autorizaci\'on por rol y validaciones por contexto acad\'emico. El desarrollo sigue incrementos iterativos con trazabilidad expl\'icita entre requisitos, backlog, implementaci\'on y pruebas.
 
 \textbf{Resultados y por qu\'e la soluci\'on es adecuada:}
-el sistema cubre el ciclo funcional completo
-(cursos, actividades, entregables, entregas, evaluaci\'on y feedback),
-con una estrategia de calidad en capas
-(pruebas unitarias, integraci\'on, E2E y mutaci\'on),
-automatizaci\'on CI/CD y despliegue cloud reproducible.
-El resultado es una base funcional, mantenible y escalable,
-con menor riesgo de regresiones y mayor trazabilidad t\'ecnica,
-alineada con los objetivos definidos para el TFG.
-
-\cdpchapter{Resumen complementario}
-
-\textbf{Contexto y problema:}
-los flujos de trabajo de entregas acad\'emicas suelen estar fragmentados entre
-herramientas de prop\'osito general,
-lo que genera fricciones en trazabilidad,
-control de versiones de entregas y consistencia de calificaciones.
-Esta memoria aborda la necesidad de un flujo integral de extremo a extremo,
-desde la definici\'on del entregable hasta la publicaci\'on de retroalimentaci\'on
-y calificaciones,
-adaptado a administradores, docentes y estudiantes.
-
-\textbf{Relevancia:}
-el problema tiene impacto directo en la carga de trabajo docente,
-la experiencia del estudiante
-y la mantenibilidad a largo plazo a medida que aumenta el n\'umero de cursos y grupos.
-
-\textbf{Soluci\'on propuesta y m\'etodo:}
-el proyecto dise\~na e implementa una plataforma web desacoplada,
-con frontend en React + TypeScript y backend en Spring Boot sobre Java 21,
-persistencia relacional y migraciones de esquema versionadas con Flyway.
-La seguridad se basa en autenticaci\'on JWT con renovaci\'on de sesi\'on,
-autorizaci\'on por rol
-y validaci\'on de acceso contextualizada.
-El desarrollo sigue incrementos iterativos con trazabilidad expl\'icita
-entre requisitos, backlog, implementaci\'on y pruebas.
-
-\textbf{Resultados y adecuaci\'on:}
-la plataforma resultante cubre el ciclo funcional completo
-(cursos, actividades, entregables, entregas, calificaci\'on y retroalimentaci\'on),
-y aplica una estrategia de calidad en capas
-(pruebas unitarias, de integraci\'on, de extremo a extremo y de mutaci\'on),
-adem\'as de automatizaci\'on CI/CD y despliegue en cloud.
-El resultado es una soluci\'on funcional, mantenible y evolutiva,
-con menor riesgo de regresiones y mayor trazabilidad t\'ecnica.
-
-
+La plataforma resultante cubre el ciclo funcional completo (cursos, actividades, entregables, entregas, calificaci\'on y retroalimentaci\'on), aplicando una estrategia de calidad en capas (pruebas unitarias, de integraci\'on, de extremo a extremo y de mutaci\'on), adem\'as de automatizaci\'on CI/CD y despliegue en cloud reproducible. El resultado es una soluci\'on funcional, mantenible y evolutiva, con menor riesgo de regresiones y mayor trazabilidad t\'ecnica.
