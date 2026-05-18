@@ -12,15 +12,15 @@
 }{}
 \makeatother
 
-\subsection{Requisitos previos}
+\section{Requisitos previos}
 
 Para ejecutar la soluci\'on en entorno local se requiere JDK 21 y Maven 3.9+ para backend, Node.js 18+ y npm 9+ para frontend, y PostgreSQL 14+ disponible en local o contenedor. Estos requisitos aseguran compatibilidad con el stack desplegado.
 
-\subsection{Preparaci\'on del entorno}
+\section{Preparaci\'on del entorno}
 
 La preparaci\'on del entorno consiste en clonar el repositorio y situarse en la ra\'iz del proyecto, y en verificar credenciales y variables seg\'un el Anexo B. Este orden evita configuraciones incompletas antes de arrancar servicios.
 
-\subsection{Base de datos}
+\section{Base de datos}
 
 Para entorno local se recomienda PostgreSQL con la base \texttt{tfgdb}
 y el usuario \texttt{tfg}. El repositorio incluye un script de apoyo
@@ -28,7 +28,7 @@ y el usuario \texttt{tfg}. El repositorio incluye un script de apoyo
 el backend. En caso de preferir contenedor, puede utilizarse
 \texttt{docker-compose} (ver subsecci\'on correspondiente).
 
-\subsection{Arranque del backend}
+\section{Arranque del backend}
 
 Pasos de ejecuci\'on recomendados:
 
@@ -43,7 +43,7 @@ puede activarse el perfil \texttt{local} mediante
 \texttt{SPRING\_PROFILES\_ACTIVE=local}. Para pruebas r\'apidas
 sin base externa, est\'a disponible el perfil \texttt{h2}.
 
-\subsection{Arranque del frontend}
+\section{Arranque del frontend}
 
 \begin{verbatim}
 cd frontend
@@ -54,13 +54,13 @@ npm run dev
 Por defecto el frontend consumir\'a la API local. Si es necesario,
 ajustar \texttt{VITE\_API\_BASE\_URL} seg\'un el entorno.
 
-\subsection{Ejecuci\'on con contenedores}
+\section{Ejecuci\'on con contenedores}
 
 Como alternativa reproducible, la soluci\'on puede ejecutarse con
 \texttt{docker-compose}, levantando base de datos y backend con healthchecks.
 Esta opci\'on reduce diferencias entre m\'aquinas de desarrollo.
 
-\subsection{Build de producci\'on}
+\section{Build de producci\'on}
 
 Para generar artefactos de despliegue:
 
@@ -75,7 +75,7 @@ npm run build
 \FloatBarrier
 \chapter{Configuraci\'on por entornos}\label{apendice-configuracion}
 
-\subsection{Variables cr\'iticas de backend}
+\section{Variables cr\'iticas de backend}
 
 Las variables m\'inimas para funcionamiento seguro en entornos no locales son \texttt{DATABASE\_URL}, \texttt{DATABASE\_USER}, \texttt{DATABASE\_PASSWORD}, \texttt{JWT\_SECRET}, \texttt{SPRING\_PROFILES\_ACTIVE} y \texttt{APP\_FRONTEND\_BASE\_URL}. Esta configuraci\'on garantiza conectividad, seguridad y coherencia de entorno.
 
@@ -86,7 +86,7 @@ deben definirse \texttt{BREVO\_API\_KEY} y \texttt{BREVO\_FROM\_EMAIL}
 con un remitente verificado en Brevo. Esta elecci\'on evita depender de
 conexiones SMTP salientes, que pueden estar restringidas por el PaaS.
 
-\subsection{Variables cr\'iticas de frontend}
+\section{Variables cr\'iticas de frontend}
 
 La variable principal de configuraci\'on de cliente es
 \texttt{VITE\_API\_BASE\_URL}, que define el endpoint de API consumido.
@@ -94,14 +94,14 @@ La variable principal de configuraci\'on de cliente es
 \FloatBarrier
 \chapter{Operaci\'on y verificaci\'on}\label{apendice-operacion}
 
-\subsection{Comprobaciones de salud}
+\section{Comprobaciones de salud}
 
 El sistema expone endpoints de salud para diferenciaci\'on operativa: \'el de \textit{liveness} valida disponibilidad del proceso y el de \textit{readiness} valida disponibilidad real de dependencias como la base de datos. Esta separaci\'on permite detectar fallos de conectividad de forma temprana.
 
 Esta separaci\'on permite detectar de forma temprana incidencias de conectividad
 y reducir falsos positivos en monitorizaci\'on.
 
-\subsection{Validaci\'on post-despliegue}
+\section{Validaci\'on post-despliegue}
 
 Tras cada despliegue se recomienda, como m\'inimo, comprobar endpoints de salud, realizar login con usuario de prueba, ejecutar operaci\'on de lectura y escritura en flujo acad\'emico, verificar subida y descarga de material y probar el correo transaccional (recuperaci\'on de contrase\~na o notificaci\'on) mediante Brevo. Estas comprobaciones validan la operativa esencial en producci\'on.
 
@@ -114,17 +114,17 @@ documental, revisar estructura y acelerar actividades de bajo riesgo.
 La IA no ha sustituido el criterio t\'ecnico ni ha generado decisiones
 de dise\~no o implementaci\'on sin validaci\'on humana.
 
-\subsection{Alcance y criterios de uso}
+\section{Alcance y criterios de uso}
 
 El uso de IA se limit\'o a apoyo de redacci\'on y reformulaci\'on de texto t\'ecnico, revisi\'on de estructura y coherencia de secciones, generaci\'on de listados de verificaci\'on y casos borde, microcopy y textos de ayuda para interfaz, y aclaraciones puntuales de sintaxis o formatos (por ejemplo, JSON o \LaTeX{}). Estas tareas se consideraron de bajo riesgo y siempre se validaron manualmente.
 
 Se excluyeron expl\'icitamente usos como decisiones arquitect\'onicas finales sin justificaci\'on propia, c\'odigo productivo incorporado sin revisi\'on manual, resultados emp\'iricos o m\'etricas no verificadas y contenido no contrastado con el repositorio y la evidencia de pruebas. Esta restricci\'on garantiza responsabilidad t\'ecnica.
 
-\subsection{Proceso de control y verificaci\'on}
+\section{Proceso de control y verificaci\'on}
 
 Cada propuesta generada por IA se trat\'o como borrador. El proceso seguido consisti\'o en formular la consulta indicando el contexto del proyecto, evaluar si la respuesta era coherente con requisitos y c\'odigo, ajustar manualmente terminolog\'ia y rigor acad\'emico, contrastar con artefactos del repositorio (memoria, c\'odigo, tests) e integrar la versi\'on final ya revisada. Este flujo evita incorporaciones autom\'aticas sin validaci\'on.
 
-\subsection{Ejemplos concretos de consultas y respuestas}
+\section{Ejemplos concretos de consultas y respuestas}
 
 Los siguientes ejemplos resumen consultas reales y la respuesta resumida
 que se utiliz\'o como punto de partida. En todos los casos se realiz\'o
@@ -187,17 +187,17 @@ Dentro del repositorio, se puede consultar la documentaci\'on t\'ecnica compleme
 
 Para ilustrar de forma unificada la funcionalidad de la plataforma, se describe a continuaci\'on el recorrido completo (flujo de extremo a extremo) de una pr\'actica a trav\'es de los tres perfiles del sistema: Administrador, Profesor y Estudiante. Este recorrido es representativo de la operativa del TFG y coincide con el hilo conductor de la demostraci\'on en v\'ideo del proyecto.
 
-\subsection{1. Administrador: Configuraci\'on inicial}
+\section{1. Administrador: Configuraci\'on inicial}
 El administrador accede a la plataforma y crea un curso denominado ``Ingenier\'ia de Software''. Seguidamente, da de alta a dos usuarios: un \textbf{profesor} y un \textbf{estudiante}, y crea un grupo llamado ``Grupo A''. Finalmente, asocia al profesor como docente del curso y vincula al estudiante al ``Grupo A''. Con esto, la base acad\'emica queda lista.
 
-\subsection{2. Profesor: Creaci\'on de la actividad y el entregable}
+\section{2. Profesor: Creaci\'on de la actividad y el entregable}
 El profesor inicia sesi\'on y visualiza el curso ``Ingenier\'ia de Software'' en su panel. Entra en \'el y crea una nueva \textbf{Actividad} (ej: ``Pr\'actica 1''), asign\'andola al ``Grupo A'' para que s\'olo sus estudiantes la vean. Dentro de la actividad, define un \textbf{Entregable}, configurando la fecha l\'imite y exigiendo un formato espec\'ifico (por ejemplo, un archivo ZIP con un documento PDF obligatorio en su interior).
 
-\subsection{3. Estudiante: Revisi\'on y entrega}
+\section{3. Estudiante: Revisi\'on y entrega}
 El estudiante inicia sesi\'on y, en su dashboard, observa que tiene una nueva actividad pendiente en el curso ``Ingenier\'ia de Software''. Accede a los detalles y comprueba los requisitos del entregable (fecha y formato ZIP). El estudiante prepara su archivo en el ordenador local, accede al formulario de entrega, sube su ZIP y pulsa enviar. El sistema valida en tiempo real la extensi\'on y estructura del ZIP y, tras procesarlo correctamente, le confirma que la entrega ha sido registrada.
 
-\subsection{4. Profesor: Correcci\'on y retroalimentaci\'on}
+\section{4. Profesor: Correcci\'on y retroalimentaci\'on}
 M\'as tarde, el profesor accede a la secci\'on de \textbf{Evaluaciones} o al detalle del entregable y observa la entrega pendiente del estudiante. Abre la entrega, donde puede previsualizar el contenido o descargarlo. Tras revisarlo, le asigna una calificaci\'on de ``8.5/10'' y redacta un comentario detallado con sugerencias de mejora. Al guardar la evaluaci\'on, el profesor publica las notas.
 
-\subsection{5. Estudiante: Consulta de resultados}
+\section{5. Estudiante: Consulta de resultados}
 El estudiante vuelve a iniciar sesi\'on. En su vista de calificaciones (y en el detalle de la propia entrega) puede ver ahora su nota de 8.5 y leer la retroalimentaci\'on proporcionada por el profesor, cerrando as\'i el ciclo completo de la pr\'actica de forma trazable y transparente.

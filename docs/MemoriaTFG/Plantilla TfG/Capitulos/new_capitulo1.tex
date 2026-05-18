@@ -32,13 +32,13 @@ Las plataformas LMS tradicionales tienden a tratar las entregas como simples car
 
 \subsection{Actores y procesos principales}
 
-En la situaci\'on de partida intervienen tres actores de negocio: el \textbf{profesor}, que crea actividades y gestiona la recogida y correcci\'on de entregas; el \textbf{estudiante}, que realiza la entrega de ficheros en la plataforma docente; y el \textbf{administrador de plataforma}, responsable de mantener servicios base e infraestructura institucional. Esta distribuci\'on delimita responsabilidades y explica por qu\'e ciertos problemas se concentran en el flujo docente.
+En la situaci\'on de partida intervienen tres actores de negocio: el \textbf{profesor}, que crea actividades y gestiona la recogida y correcci\'on de entregas; el \textbf{estudiante}, que realiza la entrega de ficheros en la plataforma docente; y el \textbf{administrador de plataforma}, responsable de mantener servicios base e infraestructura institucional. Esta distribuci\'on delimita responsabilidades y explica por qu\'e ciertos problemas se concentran en la realizaci\'on y evaluaci\'on de entregables.
 
-Los procesos de referencia en ese escenario son \textbf{PRON-001} (creaci\'on y publicaci\'on de tareas), \textbf{PRON-002} (entrega de pr\'acticas por el alumnado) y \textbf{PRON-003} (descarga masiva y organizaci\'on manual de entregas por el profesorado). La presencia de un proceso dedicado a organizaci\'on manual evidencia el principal foco de fricci\'on operativa.
+Los procesos de referencia en ese escenario son la creaci\'on y publicaci\'on de tareas, la entrega de pr\'acticas por el alumnado y la descarga masiva y organizaci\'on manual de entregas por el profesorado. La presencia de un proceso dedicado a organizaci\'on manual evidencia la dificultad de gestionar el flujo de entregables de manera eficiente.
 
 \subsection{Fortalezas del entorno de partida}
 
-El an\'alisis del contexto inicial evidencia fortalezas relevantes. En particular, \textbf{FOR-001} aporta centralizaci\'on de usuarios mediante identidad institucional, \textbf{FOR-002} garantiza disponibilidad generalizada y acceso web estandarizado, y \textbf{FOR-003} ofrece un marco de uso conocido por estudiantes y docentes. Estas ventajas justifican una estrategia de complementariedad en lugar de sustituci\'on total.
+El an\'alisis del contexto inicial evidencia fortalezas relevantes. En particular, se aporta centralizaci\'on de usuarios mediante identidad institucional, se garantiza disponibilidad generalizada y acceso web estandarizado, y se ofrece un marco de uso conocido por estudiantes y docentes. Estas ventajas justifican una estrategia de complementariedad en lugar de sustituci\'on total.
 
 Estas fortalezas justifican que la propuesta no persiga sustituir por completo
 el ecosistema acad\'emico existente,
@@ -224,16 +224,7 @@ Aun cuando la mejora es significativa, se mantienen l\'ineas de continuidad plan
 Estas limitaciones no invalidan la aportaci\'on obtenida,
 sino que delimitan una hoja de ruta realista para evoluci\'on posterior.
 
-\subsection{Conclusiones del cap\'itulo}
 
-El an\'alisis de antecedentes confirma que el principal problema del dominio
-no era la ausencia de plataformas docentes,
-sino la falta de especializaci\'on en el flujo operativo de entregables.
-
-La aportaci\'on de este TFG se sit\'ua precisamente en ese hueco:
-transformar un proceso manual y costoso en un proceso digital trazable,
-modular y orientado a evaluaci\'on continua,
-con una base t\'ecnica preparada para evolucionar con menor riesgo de deuda estructural.
 
 \FloatBarrier
 \section{Aportaci\'on del proyecto y justificaci\'on}
@@ -265,7 +256,7 @@ Para alcanzar este fin, se han definido los siguientes objetivos espec\'ificos. 
 
 \textbf{Objetivo 7 — Asegurar la calidad t\'ecnica.} Garantizar la verificaci\'on continua mediante pruebas autom\'aticas (unitarias, integraci\'on, E2E) y mutaci\'on, junto a pipelines CI/CD que validen cada candidato. Este objetivo asegura que las decisiones de dise\~no se traduzcan en resultados medibles de calidad; la evidencia se compone de informes de cobertura, ejecuci\'on de pruebas en CI y resultados de mutaci\'on.
 
-Los cinco primeros objetivos constituyen los requisitos indispensables (\emph{Must Have}) para disponer de un MVP plenamente operativo. Los \emph{Should/Could} y elementos de calidad se orientan a garantizar mantenibilidad y reproducibilidad t\'ecnica en el medio plazo.
+Los cinco primeros objetivos constituyen los requisitos indispensables (\emph{Must Have}) para disponer de un MVP plenamente operativo. Los dos \'ultimos se orientan a garantizar mantenibilidad y reproducibilidad t\'ecnica en el medio plazo.
 
 
 \subsection{Metodolog\'ia para definir los objetivos}
@@ -302,7 +293,7 @@ Won't Have (MVP) & inicio de sesi\'on federado (OAuth2/OIDC), 2FA integral, noti
 \label{tab:priorizacion-objetivos}
 \end{table}
 
-\noindent\textbf{Referencias conceptuales:} Criterio MoSCoW (Must/Should/Could/Won't) y su aplicaci\'on al backlog del proyecto. Consulte fuentes metodol\'ogicas sobre priorizaci\'on de requisitos para un anclaje te\'orico m\'as amplio.
+\noindent\textbf{Referencias conceptuales:} Criterio MoSCoW (Must/Should/Could/Won't) \cite{moscow_method} y su aplicaci\'on al backlog del proyecto.
 
 \subsection{Alcance funcional del trabajo}
 
@@ -388,9 +379,7 @@ O8 & RQNF-008, RQNF-004 & EP-14 (S1) & CI/CD y despliegue automatizado \\
 
 Al definir objetivos de forma ambiciosa, es necesario explicitar riesgos y medidas de mitigaci\'on. Existe un riesgo de sobrealcance funcional si se incorporan m\'as funcionalidades de las asumibles en 660 horas, por lo que la mitigaci\'on se apoya en priorizaci\'on MoSCoW y control por hitos. Tambi\'en hay riesgo de deuda de calidad si se pospone el testing a la fase final, lo que se corrige con una estrategia de pruebas integrada en cada sprint. Por \`ultimo, el riesgo de incoherencia documental entre memoria y estado real del producto se reduce mediante redacci\'on iterativa y trazabilidad objetiva.
 
-\subsection{Conclusiones iniciales}
 
-La estructura de objetivos y alcances definida en este cap\'itulo establece el marco metodol\'ogico del proyecto. Al alinear los objetivos estrat\'egicos con criterios de cumplimiento verificables y matrices de trazabilidad, se asegura una ejecuci\'on t\'ecnica dirigida por requisitos. Este cap\'itulo establece un compromiso entre los objetivos t\'ecnicos y la viabilidad operativa, delimitando un alcance que garantiza la entrega de un sistema robusto y escalable. Esta base permite abordar las fases de dise\~no y desarrollo con una hoja de ruta clara, orientada a la mitigaci\'on del error y la excelencia en el proceso de ingenier\'ia del software.
 
 \FloatBarrier
 \section{Alcance funcional y riesgos estrat\'egicos}
