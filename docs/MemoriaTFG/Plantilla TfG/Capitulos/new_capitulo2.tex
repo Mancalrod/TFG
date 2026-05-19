@@ -152,7 +152,7 @@ pero mejor\'o la probabilidad de cumplimiento de hitos y redujo el riesgo de cie
 
 \subsection{Lecciones aprendidas de planificaci\'on}
 
-Del seguimiento temporal se extraen tres lecciones principales. Iniciar testing temprano reduce retrabajo porque distribuir pruebas por sprint evita acumulaci\'on de defectos al final. Documentar en paralelo reduce riesgo de cierre, ya que incorporar memoria desde S3 disminuye el cuello de botella de la fase final. Planificar un \emph{buffer} expl\'icito mejora estabilidad al absorber incidencias sin romper hitos cr\'iticos.
+Del seguimiento temporal se extraen tres lecciones principales. Iniciar testing temprano reduce el trabajo repetido porque distribuir pruebas por sprint evita acumulaci\'on de defectos al final. Documentar en paralelo reduce riesgo de cierre, ya que incorporar memoria desde S3 disminuye el cuello de botella de la fase final. Planificar un \emph{buffer} expl\'icito mejora estabilidad al absorber incidencias sin romper hitos cr\'iticos.
 
 \subsection{Riesgos temporales y mitigaci\'on}
 
@@ -280,7 +280,7 @@ Esto representa un peso relativo de:
 \]
 
 del esfuerzo total del proyecto, porcentaje coherente con un producto
-que prioriza estabilidad antes de defensa.
+que prioriza la estabilidad y calidad del software.
 
 \begin{table}[!htbp]
 \centering
@@ -302,9 +302,9 @@ planes gratuitos o cr\'editos de estudiante para servicios de integraci\'on,
 despliegue y repositorio. Por tanto, el coste operativo \textbf{real observado}
 ha sido pr\'oximo a 0 EUR en la etapa de desarrollo.
 
-No obstante, para ofrecer una visi\'on profesional,
+No obstante, para ofrecer una visi\'on realista,
 se incluye una estimaci\'on orientativa de operaci\'on m\'inima en un entorno no gratuito
-durante 4 meses de proyecto:
+durante 4 meses de proyecto (basada en las tarifas del proveedor PaaS Render):
 
 \begin{table}[!htbp]
 \centering
@@ -327,52 +327,32 @@ Dominio y gesti\'on b\'asica & 0 EUR & 4 EUR \\
 \label{tab:coste-operativo}
 \end{table}
 
-\subsection{Coste total del proyecto}
+\subsection{Coste total del proyecto y escenarios de sensibilidad}
 
-El coste total se modela como:
-
+El coste total se modela como la suma del coste de personal y el coste operativo:
 \[
 C_{total} = C_{personal} + C_{operacion}
 \]
 
-\begin{table}[!htbp]
-\centering
-\begin{tabular}{|P{5.2cm}|P{3.4cm}|P{3.4cm}|}
-\hline
-\textbf{Escenario} & \textbf{Sin operaci\'on de pago} & \textbf{Con operaci\'on orientativa} \\
-\hline
-Escenario A (15 EUR/h) & 9\,900 EUR & 10\,032 EUR \\
-\hline
-Escenario B (25 EUR/h) & 16\,500 EUR & 16\,632 EUR \\
-\hline
-\end{tabular}
-\caption{Coste total estimado del proyecto}
-\label{tab:coste-total}
-\end{table}
-
-\subsection{An\'alisis de sensibilidad econ\'omica}
-
-Aunque el modelo base usa dos tarifas de referencia,
-se incluye un an\'alisis de sensibilidad para escenarios de mercado m\'as exigentes,
-manteniendo las 660 horas como constante de alcance.
+Para ofrecer una visi\'on realista de la viabilidad del proyecto en distintos contextos, se plantea un an\'alisis de sensibilidad con tres escenarios de tarifas, manteniendo las 660 horas como constante de alcance. Se compara el coste asumiendo que no hay costes de operaci\'on (como ha ocurrido durante el desarrollo) frente a un escenario con operaci\'on orientativa de pago.
 
 \begin{table}[!htbp]
 \centering
-\begin{tabular}{|P{4.3cm}|P{2.8cm}|P{4.3cm}|}
+\begin{tabular}{|P{3.5cm}|P{2.2cm}|P{3.5cm}|P{3.5cm}|}
 \hline
-\textbf{Escenario de tarifa} & \textbf{Tarifa} & \textbf{Coste total estimado (sin operaci\'on)} \\
+\textbf{Escenario (Tarifa)} & \textbf{Coste personal} & \textbf{Total (Sin costes de operaci\'on)} & \textbf{Total (Con operaci\'on orientativa)} \\
 \hline
-Acad\'emico & 15 EUR/h & 9\,900 EUR \\
+Acad\'emico (15 EUR/h) & 9\,900 EUR & 9\,900 EUR & 10\,032 EUR \\
 \hline
-Junior mercado & 25 EUR/h & 16\,500 EUR \\
+Junior mercado (25 EUR/h) & 16\,500 EUR & 16\,500 EUR & 16\,632 EUR \\
 \hline
-Perfil intermedio & 35 EUR/h & 23\,100 EUR \\
+Perfil intermedio (35 EUR/h) & 23\,100 EUR & 23\,100 EUR & 23\,232 EUR \\
 \hline
-Perfil senior & 45 EUR/h & 29\,700 EUR \\
+Perfil senior (45 EUR/h) & 29\,700 EUR & 29\,700 EUR & 29\,832 EUR \\
 \hline
 \end{tabular}
-\caption{Sensibilidad del coste total ante variaci\'on de tarifa horaria}
-\label{tab:sensibilidad-costes}
+\caption{Coste total estimado del proyecto seg\'un escenario de tarifa}
+\label{tab:coste-total-sensibilidad}
 \end{table}
 
 Este an\'alisis confirma que,
