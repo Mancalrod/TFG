@@ -77,7 +77,7 @@ npm run build
 
 \section{Variables cr\'iticas de backend}
 
-Las variables m\'inimas para funcionamiento seguro en entornos no locales son \texttt{DATABASE\_URL}, \texttt{DATABASE\_USER}, \texttt{DATABASE\_PASSWORD}, \texttt{JWT\_SECRET}, \texttt{SPRING\_PROFILES\_ACTIVE} y \texttt{APP\_FRONTEND\_BASE\_URL}. Esta configuraci\'on garantiza conectividad, seguridad y coherencia de entorno.
+Las variables m\'inimas para el funcionamiento seguro en entornos no locales incluyen los par\'ametros de conexi\'on a la base de datos (\texttt{DATABASE\_URL}, \texttt{DATABASE\_USER}, \texttt{DATABASE\_PASSWORD}), la clave privada para la firma criptogr\'afica de tokens de sesi\'on (\texttt{JWT\_SECRET}), el perfil de entorno activo para la inyecci\'on de dependencias (\texttt{SPRING\_PROFILES\_ACTIVE}), y la URL base del cliente web para configurar correctamente las reglas CORS (\texttt{APP\_FRONTEND\_BASE\_URL}). Esta configuraci\'on garantiza conectividad, seguridad y coherencia de entorno.
 
 En producci\'on se habilitan adem\'as variables para servicios externos
 como almacenamiento cloud y correo transaccional. En el despliegue sobre
