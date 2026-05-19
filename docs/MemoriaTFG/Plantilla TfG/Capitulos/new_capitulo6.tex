@@ -46,11 +46,11 @@ Unitarias frontend & Vitest + Testing Library & Validaci\'on de componentes, con
 \hline
 Unitarias e integraci\'on backend & JUnit + Spring Test + MockMvc & Verificar servicios, controladores, seguridad y persistencia. \\
 \hline
-E2E frontend & Playwright & Simular escenarios reales de uso en navegador con flujos completos. \\
+E2E frontend & Playwright \cite{playwrightdocs} & Simular escenarios reales de uso en navegador con flujos completos. \\
 \hline
 Mutaci\'on frontend & Stryker & Medir fortaleza de tests frente a mutantes en servicios y utilidades. \\
 \hline
-Mutaci\'on backend & PIT & Medir capacidad de detecci\'on de fallos en servicios/controladores objetivo. \\
+Mutaci\'on backend & PIT \cite{pitest} & Medir capacidad de detecci\'on de fallos en servicios/controladores objetivo. \\
 \hline
 \end{tabular}
 \caption{Matriz de niveles y herramientas de prueba}
@@ -186,7 +186,7 @@ Aplicaci\'on base (\texttt{root}) & 1 \\
 
 \subsection{Cobertura backend}
 
-La cobertura se genera con JaCoCo (Java Code Coverage Library, un marco de trabajo de an\'alisis de c\'odigo abierto para medir c\'omo el c\'odigo fuente es ejercitado por los tests autom\'aticos) durante la fase de test, produciendo informe HTML en
+La cobertura se genera con JaCoCo \cite{jacoco} (Java Code Coverage Library, un marco de trabajo de an\'alisis de c\'odigo abierto para medir c\'omo el c\'odigo fuente es ejercitado por los tests autom\'aticos) durante la fase de test, produciendo informe HTML en
 \texttt{backend/target/site/jacoco/index.html}. En la versi\'on actual (MVP final), el reporte agregado indica 89.55\% de instrucciones, 70.31\% de ramas, 90.75\% de l\'ineas y 91.60\% de m\'etodos cubiertos. Este reporte se utiliza como soporte de revisi\'on t\'ecnica para detectar m\'odulos subprobados y orientar ampliaciones de suite.
 
 \subsection{Mutaci\'on en backend}

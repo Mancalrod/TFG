@@ -187,17 +187,78 @@ Dentro del repositorio, se puede consultar la documentaci\'on t\'ecnica compleme
 
 Para ilustrar de forma unificada la funcionalidad de la plataforma, se describe a continuaci\'on el recorrido completo (flujo de extremo a extremo) de una pr\'actica a trav\'es de los tres perfiles del sistema: Administrador, Profesor y Estudiante. Este recorrido es representativo de la operativa del TFG y coincide con el hilo conductor de la demostraci\'on en v\'ideo del proyecto.
 
-\section{1. Administrador: Configuraci\'on inicial}
-El administrador accede a la plataforma y crea un curso denominado ``Ingenier\'ia de Software''. Seguidamente, da de alta a dos usuarios: un \textbf{profesor} y un \textbf{estudiante}, y crea un grupo llamado ``Grupo A''. Finalmente, asocia al profesor como docente del curso y vincula al estudiante al ``Grupo A''. Con esto, la base acad\'emica queda lista.
+\section{Administrador: Configuraci\'on inicial}
 
-\section{2. Profesor: Creaci\'on de la actividad y el entregable}
-El profesor inicia sesi\'on y visualiza el curso ``Ingenier\'ia de Software'' en su panel. Entra en \'el y crea una nueva \textbf{Actividad} (ej: ``Pr\'actica 1''), asign\'andola al ``Grupo A'' para que s\'olo sus estudiantes la vean. Dentro de la actividad, define un \textbf{Entregable}, configurando la fecha l\'imite y exigiendo un formato espec\'ifico (por ejemplo, un archivo ZIP con un documento PDF obligatorio en su interior).
+El administrador accede a la plataforma desde el enlace oficial \url{https://tfg-85os.onrender.com/admin} para realizar la configuraci\'on inicial del censo acad\'emico.
 
-\section{3. Estudiante: Revisi\'on y entrega}
-El estudiante inicia sesi\'on y, en su dashboard, observa que tiene una nueva actividad pendiente en el curso ``Ingenier\'ia de Software''. Accede a los detalles y comprueba los requisitos del entregable (fecha y formato ZIP). El estudiante prepara su archivo en el ordenador local, accede al formulario de entrega, sube su ZIP y pulsa enviar. El sistema valida en tiempo real la extensi\'on y estructura del ZIP y, tras procesarlo correctamente, le confirma que la entrega ha sido registrada.
+En primer lugar, crea el curso ``Ingenier\'ia de Software'' y le asigna un profesor responsable para su impartici\'on (Figura~\ref{fig:apendice-crear-curso}).
 
-\section{4. Profesor: Correcci\'on y retroalimentaci\'on}
-M\'as tarde, el profesor accede a la secci\'on de \textbf{Evaluaciones} o al detalle del entregable y observa la entrega pendiente del estudiante. Abre la entrega, donde puede previsualizar el contenido o descargarlo. Tras revisarlo, le asigna una calificaci\'on de ``8.5/10'' y redacta un comentario detallado con sugerencias de mejora. Al guardar la evaluaci\'on, el profesor publica las notas.
+\figura{0.90}{\detokenize{../Pantallas de TFG/Crear curso apendice F.PNG}}{Creaci\'on del curso ``Ingenier\'ia de Software'' y asignaci\'on del profesorado.}{fig:apendice-crear-curso}{}
 
-\section{5. Estudiante: Consulta de resultados}
-El estudiante vuelve a iniciar sesi\'on. En su vista de calificaciones (y en el detalle de la propia entrega) puede ver ahora su nota de 8.5 y leer la retroalimentaci\'on proporcionada por el profesor, cerrando as\'i el ciclo completo de la pr\'actica de forma trazable y transparente.
+A continuaci\'on, procede a crear un grupo denominado ``Grupo A'', al cual le asocia la asignatura ``Ingenier\'ia de Software'' previamente establecida (Figura~\ref{fig:apendice-crear-grupo}).
+
+\figura{0.90}{\detokenize{../Pantallas de TFG/Crear grupo y asignar curso apendice F.PNG}}{Creaci\'on de ``Grupo A'' y vinculaci\'on del curso de Ingenier\'ia.}{fig:apendice-crear-grupo}{}
+
+Por \'ultimo, realiza la asignaci\'on de los estudiantes matriculados en dicho grupo (Figura~\ref{fig:apendice-anadir-estudiantes}). A estos alumnos los puede incorporar de manera interactiva seleccion\'andolos de la lista o bien cargando un archivo de texto plano (\texttt{.txt}) que contenga la lista de correos electr\'onicos correspondientes. Es un requisito indispensable del sistema que los estudiantes hayan sido previamente registrados como usuarios generales de la plataforma antes de poder ser elegidos o asignados a un grupo.
+
+\figura{0.90}{\detokenize{../Pantallas de TFG/Añadir estudiante apendice F.PNG}}{Asignaci\'on e importaci\'on de estudiantes al ``Grupo A''.}{fig:apendice-anadir-estudiantes}{}
+
+\section{Profesor: Creaci\'on de actividad y entregables}
+
+El profesor inicia sesi\'on en el portal acad\'emico mediante la URL \url{https://tfg-85os.onrender.com/dashboard} y visualiza la asignatura ``Ingenier\'ia de Software'' asignada en su panel (Figura~\ref{fig:apendice-pantalla-inicial-profesor}).
+
+\figura{0.90}{\detokenize{../Pantallas de TFG/pantalla inicial apendice f.PNG}}{Vista del panel principal docente con las asignaturas asignadas.}{fig:apendice-pantalla-inicial-profesor}{}
+
+Tras entrar en la asignatura a trav\'es del enlace \url{https://tfg-85os.onrender.com/cursos/1}, crea una nueva \textbf{Actividad} (por ejemplo, ``Pr\'actica 1''), y la vincula estrictamente al ``Grupo A'' para garantizar que s\'olo los estudiantes matriculados en ese grupo tengan visibilidad y acceso a ella (Figura~\ref{fig:apendice-crear-actividad}).
+
+\figura{0.90}{\detokenize{../Pantallas de TFG/Crear actividad apendice F.PNG}}{Formulario de creaci\'on de actividad y asignaci\'on de grupo.}{fig:apendice-crear-actividad}{}
+
+Una vez dentro de los detalles de la actividad mediante el enlace \url{https://tfg-85os.onrender.com/actividades/1/entregables/nuevo}, define un \textbf{Entregable} concreto. En este formulario configura tanto la fecha l\'imite de entrega como las restricciones de formato esperadas, exigiendo de forma obligatoria que el env\'io sea un archivo comprimido en formato ZIP que contenga en su interior un documento PDF con la resoluci\'on (Figura~\ref{fig:apendice-crear-entregable-1} y Figura~\ref{fig:apendice-crear-entregable-2}).
+
+\figura{0.90}{\detokenize{../Pantallas de TFG/Dentro de una actividad - Crear entregables (Parte 1) (Profesor).png}}{Configuraci\'on del entregable y fecha l\'imite (1/2).}{fig:apendice-crear-entregable-1}{}
+
+\figura{0.90}{\detokenize{../Pantallas de TFG/Dentro de una actividad - Crear entregables (Parte 2) (Profesor).png}}{Configuraci\'on de restricciones de archivo obligatorias del entregable (2/2).}{fig:apendice-crear-entregable-2}{}
+
+\section{Estudiante: Realizaci\'on de la entrega}
+
+El estudiante inicia sesi\'on en la plataforma desde el enlace \url{https://tfg-85os.onrender.com/dashboard}. En su panel de control observa de inmediato que tiene una tarea pendiente dentro de la asignatura ``Ingenier\'ia de Software'' (Figura~\ref{fig:apendice-dashboard-alumno}).
+
+\figura{0.90}{\detokenize{../Pantallas de TFG/Pantalla inicial alumno apendice F.PNG}}{Dashboard del estudiante con alertas de entregas pendientes.}{fig:apendice-dashboard-alumno}{}
+
+Al acceder a los detalles del entregable mediante la URL \url{https://tfg-85os.onrender.com/entregables/13}, comprueba rigurosamente los requisitos impuestos por el docente: la fecha l\'imite y la estructura del ZIP requerida (Figura~\ref{fig:apendice-detalles-entregable-alumno}).
+
+\figura{0.90}{\detokenize{../Pantallas de TFG/Activiad alumno apendice f.PNG}}{Detalles del entregable y estructura de validaci\'on del archivo ZIP.}{fig:apendice-detalles-entregable-alumno}{}
+
+Tras preparar su archivo comprimido en su equipo local, el estudiante accede al formulario de env\'io a trav\'es de la ruta \url{https://tfg-85os.onrender.com/entregables/13/entregar}. Sube su archivo ZIP y pulsa enviar. El sistema realiza una validaci\'on sint\'actica y estructural en tiempo real (comprobando la extensi\'on y la presencia del PDF dentro del ZIP) y, tras superarla con \'exito, registra la entrega de forma segura en la base de datos y le muestra una confirmaci\'on visual (Figura~\ref{fig:apendice-realizar-entrega}).
+
+\figura{0.90}{\detokenize{../Pantallas de TFG/Realizar entrega apendice f.PNG}}{Formulario de subida de archivos y validaci\'on en tiempo real.}{fig:apendice-realizar-entrega}{}
+
+\section{Profesor: Correcci\'on y retroalimentaci\'on}
+
+Transcurrido el plazo, el docente accede a la secci\'on global de evaluaciones desde el enlace \url{https://tfg-85os.onrender.com/evaluaciones} o ingresa directamente al detalle de la actividad para comprobar las entregas pendientes de correcci\'on (Figura~\ref{fig:apendice-evaluaciones-profesor}).
+
+\figura{0.90}{\detokenize{../Pantallas de TFG/Correcion Entregable apendice f.PNG}}{Bandeja de entregas pendientes de calificaci\'on para el profesorado.}{fig:apendice-evaluaciones-profesor}{}
+
+A continuaci\'on, ingresa a la entrega del estudiante desde la URL \url{https://tfg-85os.onrender.com/entregas/14}. En esta pantalla puede visualizar de forma integrada los metadatos de la entrega y el historial de versiones del archivo (Figura~\ref{fig:apendice-ver-entrega-profesor}), as\'i como previsualizar de forma interactiva el c\'odigo o contenido del archivo ZIP directamente en el navegador sin necesidad de descargarlo en local (Figura~\ref{fig:apendice-previsualizar-zip}).
+
+\figura{0.90}{\detokenize{../Pantallas de TFG/visualizar entrega alumno apendice f.PNG}}{Vista detallada del material entregado e historial de env\'ios.}{fig:apendice-ver-entrega-profesor}{}
+
+\figura{0.90}{\detokenize{../Pantallas de TFG/Previsalizar zip apendice f.PNG}}{Previsualizador integrado de la estructura interna del archivo ZIP.}{fig:apendice-previsualizar-zip}{}
+
+Una vez analizado el trabajo, el profesor le asigna una calificaci\'on de ``8.5/10'' y redacta una evaluaci\'on detallada con observaciones de mejora en el cuadro de feedback (Figura~\ref{fig:apendice-calificar-trabajo}).
+
+\figura{0.90}{\detokenize{../Pantallas de TFG/Calificar trabajo apendice f.PNG}}{Formulario de emisi\'on de notas y retroalimentaci\'on formativa.}{fig:apendice-calificar-trabajo}{}
+
+Tras guardar y publicar la nota en el sistema mediante el enlace \url{https://tfg-85os.onrender.com/entregables/13}, las calificaciones pasan a estar visibles para los estudiantes de la asignatura (Figura~\ref{fig:apendice-mostrar-notas}).
+
+\figura{0.90}{\detokenize{../Pantallas de TFG/Mostrar notas apendice f.PNG}}{Publicaci\'on de notas y cierre de evaluaci\'on del entregable.}{fig:apendice-mostrar-notas}{}
+
+\section{Estudiante: Consulta de resultados}
+
+El estudiante inicia sesi\'on de nuevo en la plataforma y, en su dashboard accesible desde \url{https://tfg-85os.onrender.com/dashboard}, recibe la notificaci\'on de que su nota ha sido publicada y est\'a disponible para su consulta (Figura~\ref{fig:apendice-nota-publicada}).
+
+\figura{0.90}{\detokenize{../Pantallas de TFG/nota publicada apendice f.PNG}}{Dashboard del alumno con indicaci\'on de actividad calificada.}{fig:apendice-nota-publicada}{}
+
+Al entrar al detalle de su entrega mediante el enlace \url{https://tfg-85os.onrender.com/entregas/14}, el estudiante visualiza con total transparencia y trazabilidad su calificaci\'on de ``8.5'' y el comentario explicativo aportado por el docente, concluyendo con \'exito el ciclo de evaluaci\'on (Figura~\ref{fig:apendice-visualizar-nota-alumno}).
+
+\figura{0.90}{\detokenize{../Pantallas de TFG/Visualizar nota estudiante apendice f.PNG}}{Vista del estudiante con nota y comentarios de feedback del profesor.}{fig:apendice-visualizar-nota-alumno}{}

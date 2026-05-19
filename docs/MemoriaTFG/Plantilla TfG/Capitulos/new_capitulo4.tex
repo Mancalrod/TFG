@@ -1,4 +1,4 @@
-\chapter{Dise\~no y Arquitectura}\label{cap_diseno}
+\chapter{Dise\~no, Arquitectura y Decisiones de Ingenier\'ia}\label{cap_diseno}
 % tfg-floatbarrier-auto
 \makeatletter
 \@ifundefined{tfgfloatbarrier}{
@@ -13,29 +13,248 @@
 \makeatother
 
 \FloatBarrier
-\section{Dise\~no del sistema}
+\section{Introducci\'on y Marco de Decisi\'on}
 
+En la ingenier\'ia de software, el dise\~no de un sistema no debe responder a una selecci\'on arbitraria de tecnolog\'ias o herramientas, sino a una justificaci\'on expl\'icita de por qu\'e se ha elegido cada opci\'on t\'ecnica, qu\'e alternativas reales se consideraron y qu\'e compromisos o \emph{trade-offs} se asumieron durante el proyecto.
 
-\subsection{Arquitectura de alto nivel}
+Este cap\'itulo consolida las bases arquitect\'onicas del sistema y las decisiones de ingenier\'ia adoptadas, analizando su adecuaci\'on funcional y viabilidad temporal, estructurado en torno a cuatro ejes: producto, arquitectura, calidad y operaci\'on.
 
-La arquitectura adoptada es cliente-servidor desacoplada, con un \textbf{frontend SPA} en React + TypeScript para presentaci\'on y experiencia de usuario, un \textbf{backend REST} en Spring Boot para l\'ogica de negocio y seguridad, y \textbf{persistencia relacional} con JPA/Hibernate y migraciones Flyway. Esta separaci\'on delimita responsabilidades y facilita evoluci\'on modular.
+\subsection{Criterios de toma de decisiones}
 
-En backend se aplica dise\~no por capas
-(controller, service, repository y entity),
-que mejora mantenibilidad, testabilidad y capacidad de evoluci\'on.
+La selecci\'on de alternativas se realiz\'o usando un enfoque multicriterio, priorizando la alineaci\'on con los requisitos funcionales y no funcionales del pliego de condiciones (ERS), la viabilidad temporal dentro de las 660 horas planificadas del proyecto, la mantenibilidad y capacidad de evoluci\'on posterior, el coste operativo compatible con un entorno acad\'emico y la seguridad con trazabilidad del ciclo completo. Esta pauta evita decisiones aisladas y garantiza coherencia transversal en la soluci\'on.
 
-\subsection{Aportaci\'on arquitect\'onica y tecnol\'ogica}
+\subsection{Ponderaci\'on de criterios}
 
-Desde la perspectiva t\'ecnica, la contribuci\'on principal se concreta en una separaci\'on frontend-backend mediante API REST, una arquitectura por capas en backend que a\'isla responsabilidades, el uso de DTOs para desacoplar contratos de API del modelo de persistencia y una evoluci\'on de esquema controlada por migraciones versionadas. Este dise\~no reduce el acoplamiento transversal, facilita el mantenimiento evolutivo a medio plazo y habilita la incorporaci\'on incremental de nuevas integraciones sin ruptura del n\'ucleo transaccional.
+Para evitar decisiones ad-hoc o basadas en preferencias personales, se aplic\'o una ponderaci\'on orientativa de criterios que act\'ua como filtro primario en todos los bloques de dise\~no (arquitectura, stack tecnol\'ogico, seguridad y despliegue). Esta ponderaci\'on (Tabla~\ref{tab:pesos-criterios}) exige que cada decisi\'on justifique prioritariamente su adecuaci\'on a los requisitos, y de manera secundaria, la mantenibilidad y el riesgo temporal. S\'olo cuando dos alternativas empatan en estos \'ambitos, se dirime en funci\'on del coste operativo o la robustez t\'ecnica.
 
-\subsection{Vista de despliegue}
+\begin{table}[!htbp]
+\centering
+\begin{tabular}{|P{6.4cm}|P{2.5cm}|}
+\hline
+\textbf{Criterio} & \textbf{Peso (\%)} \\
+\hline
+Adecuaci\'on funcional y cobertura de requisitos & 30 \\
+\hline
+Mantenibilidad y evoluci\'on & 20 \\
+\hline
+Tiempo de implementaci\'on y riesgo de entrega & 20 \\
+\hline
+Coste operativo y sostenibilidad & 15 \\
+\hline
+Seguridad y robustez t\'ecnica & 15 \\
+\hline
+\textbf{Total} & \textbf{100} \\
+\hline
+\end{tabular}
+\caption{Ponderaci\'on orientativa para selecci\'on de decisiones}
+\label{tab:pesos-criterios}
+\end{table}
 
-La vista de despliegue se organiza en bloques principales que cubren el \textbf{cliente web} (navegador del usuario final), el \textbf{frontend} como SPA est\'atica servida desde plataforma PaaS (Render), el \textbf{backend} como API REST desplegada en contenedor Docker en Render, los \textbf{datos} en PostgreSQL gestionada accesible solo desde backend, y los \textbf{servicios externos} de almacenamiento cloud, OneDrive y correo transaccional por API HTTP. Esta disposici\'on mantiene una frontera de seguridad clara entre capas.
+\FloatBarrier
 
-La separaci\'on de componentes permite escalar y evolucionar cada capa
-sin romper el resto del sistema,
-manteniendo adem\'as una frontera de seguridad clara entre cliente,
-l\'ogica de negocio y persistencia.
+\subsection{Decisiones de alcance funcional}
+
+\subsubsection*{Decisi\'on D1: Definir un MVP centrado en el flujo acad\'emico nuclear}
+\begin{itemize}
+    \item \textbf{Alternativas consideradas:} Incorporar desde el inicio todas las funcionalidades del backlog (incluyendo notificaciones push en tiempo real, chat interno, anal\'iticas avanzadas de correcci\'on) o limitar el alcance a un Producto M\'inimo Viable (MVP) con el ciclo completo de entrega y evaluaci\'on estructurada. La comparativa se centr\'o en riesgo de entrega y capacidad de validaci\'on pr\'actica.
+    \item \textbf{Decisi\'on adoptada:} Segunda alternativa.
+    \item \textbf{Raz\'on principal:} Maximizar el valor entregado en el plazo del proyecto, evitando la dispersi\'on en funcionalidades accesorias que pod\'ian comprometer la estabilidad del n\'ucleo transaccional del sistema.
+    \item \textbf{Impacto positivo:} Mayor probabilidad de cierre funcional completo, mejor cobertura de pruebas automatizadas sobre los procesos cr\'iticos y documentaci\'on m\'as s\'olida de extremo a extremo, reforzando la validez acad\'emica del resultado.
+    \item \textbf{Compromiso asumido:} Las funcionalidades secundarias o \emph{Should/Could} (como el inicio de sesi\'on federado o el 2FA integral) pasan a la hoja de ruta de evoluci\'on futura, sin bloquear la validez del resultado principal.
+\end{itemize}
+
+\subsubsection*{Decisi\'on D2: Dise\~nar la experiencia de usuario segmentada por rol}
+\begin{itemize}
+    \item \textbf{Decisi\'on adoptada:} Separar de forma expl\'icita desde la capa de presentaci\'on y servicios las experiencias de administrador, profesorado y estudiantes.
+    \item \textbf{Razones:} Esta separaci\'on reduce la ambig\"uedad de permisos en la interfaz y en los endpoints de la API, simplifica las pruebas de autorizaci\'on de casos negativos, y mejora la usabilidad general al mostrar a cada usuario de forma transparente las operaciones y datos pertinentes a su rol acad\'emico, previniendo errores de contexto en operaciones sensibles.
+\end{itemize}
+
+\FloatBarrier
+\section{An\'alisis de Alternativas y Arquitectura}
+
+En esta secci\'on se detallan las opciones analizadas en cada eje de dise\~no, confrontando las alternativas arquitect\'onicas y de stack con las correspondientes decisiones de ingenier\'ia adoptadas.
+
+\subsection{Arquitectura de la aplicaci\'on y backend}
+
+Se valoraron dos enfoques principales para la arquitectura general:
+\begin{itemize}
+    \item \textbf{A1 - Arquitectura SPA + API desacoplada (opci\'on elegida):} Permite separar la capa de presentaci\'on en el cliente de la l\'ogica de negocio y persistencia en el servidor.
+    \item \textbf{A2 - Aplicaci\'on monol\'itica server-side renderizada (descartada):} Reduce la complejidad inicial de la infraestructura, pero limita la flexibilidad de la interfaz y complica la evoluci\'on de experiencias de usuario ricas y adaptadas por rol.
+\end{itemize}
+
+\subsubsection*{Decisi\'on D3: Adopci\'on de SPA + API desacoplada}
+\begin{itemize}
+    \item \textbf{Decisi\'on adoptada:} Arquitectura desacoplada (A1).
+    \item \textbf{Razones de peso:} Clara separaci\'on de responsabilidades, menor acoplamiento, capacidad de desplegar y evolucionar de forma independiente la capa visual y el backend, y mejor ajuste a un dominio con flujos de interacci\'on ricos y din\'amicos (bandeja de evaluaciones, filtros, historial).
+    \item \textbf{Trade-off:} Incremento inicial en el esfuerzo de integraci\'on (gesti\'on de CORS, contratos HTTP) y necesidad de pruebas de integraci\'on y E2E adicionales. Se consider\'o asumible por la robustez estructural y la mantenibilidad a medio plazo que aporta.
+\end{itemize}
+
+\subsubsection*{Decisi\'on D4: Estructuraci\'on del backend en capas}
+\begin{itemize}
+    \item \textbf{Decisi\'on adoptada:} Patr\'on \texttt{controller-service-repository-entity} con DTOs de frontera.
+    \item \textbf{Razones:} Control claro de responsabilidades y testabilidad por m\'odulo. Al aislar la l\'ogica de persistencia (entities) de la l\'ogica de negocio (services) y los puntos de entrada (controllers), se evita la exposici\'on del modelo interno de datos y se facilita el mantenimiento evolutivo.
+\end{itemize}
+
+\subsubsection*{Decisi\'on D5: Uso de DTOs y mapeo desacoplado}
+\begin{itemize}
+    \item \textbf{Decisi\'on adoptada:} Evitar que las entidades JPA crucen la frontera de los controladores REST mediante la introducci\'on de DTOs (Data Transfer Objects) y mappers dedicados.
+    \item \textbf{Razones:} Evita el acoplamiento directo entre el esquema f\'isico de base de datos y el contrato HTTP de la API, reduce dr\'asticamente el riesgo de sobreexposici\'on de atributos sensibles (como hashes de contrase\~nas o metadatos de persistencia) y permite optimizar las respuestas seg\'un el caso de uso del cliente frontend.
+    \item \textbf{Trade-off:} Mayor volumen de c\'odigo estructural, plenamente compensado por la estabilidad contractual y la seguridad obtenidas.
+\end{itemize}
+
+\FloatBarrier
+\subsection{Stack tecnol\'ogico principal}
+
+\subsubsection*{Backend framework}
+Se compararon principalmente tres plataformas l\'ideres en la industria backend:
+\begin{itemize}
+    \item \textbf{B1 - Spring Boot (Java 21) (opci\'on elegida):} Ecosistema corporativo e industrial muy s\'olido.
+    \item \textbf{B2 - Node.js \cite{nodejs} (Express/Nest):} Excelente rendimiento e I/O, pero requiere m\'as decisiones de ensamblaje en piezas de seguridad y transaccionalidad.
+    \item \textbf{B3 - Django (Python):} R\'apido desarrollo de paneles b\'asicos, pero con menor afinidad al tipado estricto y la arquitectura modular requerida en este proyecto.
+\end{itemize}
+
+\subsubsection*{Decisi\'on D6: Elecci\'on de Spring Boot + Java 21}
+\begin{itemize}
+    \item \textbf{Decisi\'on adoptada:} Framework backend Spring Boot \cite{springbootdocs}.
+    \item \textbf{Justificaci\'on:} Ecosistema maduro y nativo para la gesti\'on de seguridad de forma centralizada (Spring Security), mapeo objeto-relacional robusto (JPA/Hibernate) y herramientas est\'andar de pruebas. La selecci\'on de Java 21 permite utilizar caracter\'isticas modernas del lenguaje. Esta elecci\'on redujo cr\'iticamente la incertidumbre en aspectos cr\'iticos como el control de transacciones y el control de acceso por contexto.
+\end{itemize}
+
+\subsubsection*{Frontend framework}
+Se analizaron los tres frameworks l\'ideres para el desarrollo del cliente:
+\begin{itemize}
+    \item \textbf{F1 - React + TypeScript + Vite (opci\'on elegida):} Alternativa flexible, tipada y de gran rendimiento.
+    \item \textbf{F2 - Angular:} Estructura fuertemente opinionada, pero con una curva de aprendizaje y peso inicial superiores para el alcance temporal del TFG.
+    \item \textbf{F3 - Vue:} Gran DX (Developer Experience), pero la experiencia previa del equipo y la integraci\'on con librer\'ias de testing y CI inclinaron la balanza hacia React.
+\end{itemize}
+
+\subsubsection*{Decisi\'on D7: Elecci\'on de React + TypeScript + Vite}
+\begin{itemize}
+    \item \textbf{Decisi\'on adoptada:} React \cite{reactdocs} con TypeScript \cite{typescript} y Vite \cite{vite}.
+    \item \textbf{Justificaci\'on:} Excelente equilibrio entre productividad, control tipado en tiempo de compilaci\'on y agilidad de iteraci\'on mediante el empaquetador Vite. TypeScript aporta rigurosidad en los contratos de datos consumidos de la API.
+    \item \textbf{Trade-off:} Al no ser React un framework opinionado como Angular, requiere mayor disciplina en la definici\'on de la arquitectura del frontend, lo cual se mitig\'o organizando el c\'odigo de forma estricta en carpetas especializadas de \texttt{pages}, \texttt{components}, \texttt{context} y \texttt{services}.
+\end{itemize}
+
+\FloatBarrier
+\subsection{Persistencia y estrategia de datos}
+
+\subsubsection*{Base de datos relacional}
+Se compararon las siguientes opciones:
+\begin{itemize}
+    \item \textbf{D1 - PostgreSQL gestionado (opci\'on elegida):} Estabilidad transaccional estricta y adaptaci\'on nativa a despliegues cloud.
+    \item \textbf{D2 - MySQL gestionado:} Opci\'on viable, pero con menor rendimiento en tipos de datos avanzados y consultas estructuradas en comparación con PostgreSQL.
+    \item \textbf{D3 - H2 embebida:} Reservada exclusivamente para agilizar el entorno local de desarrollo y la suite de pruebas automatizadas.
+\end{itemize}
+
+\subsubsection*{Decisi\'on D10: PostgreSQL como motor de base de datos principal}
+\begin{itemize}
+    \item \textbf{Decisi\'on adoptada:} PostgreSQL \cite{postgresql} en producci\'on.
+    \item \textbf{Justificaci\'on:} El modelo de dominio presenta relaciones fuertes y restricciones de integridad acad\'emica estrictas (usuario-entregables-evaluaciones). PostgreSQL garantiza transaccionalidad total (ACID), soporte robusto para indexaci\'on y gran compatibilidad con JPA/Hibernate.
+\end{itemize}
+
+\subsubsection*{Estrategia de evoluci\'on del esquema}
+\begin{itemize}
+    \item \textbf{E1 - Flyway como autoridad de esquema (opci\'on elegida):} Migraciones versionadas mediante scripts controlados.
+    \item \textbf{E2 - Hibernate \texttt{ddl-auto=update} en producci\'on (descartada):} Riesgo cr\'itico de mutaciones de esquema no controladas en producci\'on que puedan romper la consistencia hist\'orica de los datos acad\'emicos.
+\end{itemize}
+
+\subsubsection*{Decisi\'on D11: Flyway para migraciones y ddl-auto estricto}
+\begin{itemize}
+    \item \textbf{Decisi\'on adoptada:} Flyway \cite{flywaydocs} para control de versiones y ejecuci\'on con configuraci\'on de validaci\'on estricta (\texttt{ddl-auto=validate}) en producci\'on.
+    \item \textbf{Justificaci\'on:} Garantiza un control expl\'icito y auditable de los cambios de la base de datos a trav\'es de scripts SQL incrementales, reduciendo a cero el riesgo de divergencias entre el entorno de desarrollo local y el de preproducci\'on.
+\end{itemize}
+
+\subsubsection*{Almacenamiento de archivos y entregas}
+Se compararon tres opciones complementarias:
+\begin{itemize}
+    \item \textbf{S1 - Almacenamiento en el sistema de archivos del servidor (descartado en producci\'on):} Simple en local, pero inviable en PaaS con filesystem ef\'imero donde los contenedores se destruyen y recrean.
+    \item \textbf{S2 - Cloudinary (elegida para producci\'on persistente):} Almacenamiento seguro, persistente y con entrega r\'apida.
+    \item \textbf{S3 - OneDrive / Microsoft Graph (integraci\'on opcional):} Gesti\'on institucional de archivos, pero supeditada a autorizaci\'on de la cuenta personal del docente.
+\end{itemize}
+
+\subsubsection*{Decisi\'on D12: Estrategia h\'ibrida de almacenamiento de archivos}
+\begin{itemize}
+    \item \textbf{Decisi\'on adoptada:} Persistencia local en entorno de desarrollo e integraci\'on con Cloudinary en producci\'on, complementada con la API de OneDrive como integraci\'on opcional para la gesti\'on de carpetas del docente.
+    \item \textbf{Justificaci\'on:} Protege las entregas del alumnado contra p\'erdidas de datos por inactividad o reinicio de los contenedores ef\'imeros en la PaaS. Al mismo tiempo, permite al profesorado un flujo de trabajo familiar organizando entregas directamente en su OneDrive mediante OAuth2 sin imponer dependencias obligatorias al n\'ucleo transaccional del backend.
+\end{itemize}
+
+\FloatBarrier
+\subsection{Seguridad y gesti\'on de sesiones}
+
+\subsubsection*{Modelo de autenticaci\'on}
+\begin{itemize}
+    \item \textbf{A1 - JWT (access + refresh token) (opci\'on elegida):} Arquitectura stateless, descentralizada y compatible con SPA.
+    \item \textbf{A2 - Sesi\'on server-side tradicional (descartada):} Requiere almacenamiento local de estados en servidor, lo que limita la portabilidad y escalabilidad stateless de la API.
+\end{itemize}
+
+\subsubsection*{Decisi\'on D8: Autenticaci\'on basada en JWT con Refresh Token}
+\begin{itemize}
+    \item \textbf{Decisi\'on adoptada:} Autenticaci\'on basada en JSON Web Tokens con refresh tokens y expiraci\'on diferenciada.
+    \item \textbf{Justificaci\'on:} Ajuste natural al modelo SPA + API, permitiendo un backend stateless. El refresh token garantiza una renovaci\'on autom\'atica y transparente de la sesi\'on en el frontend, mejorando la experiencia del usuario sin comprometer la seguridad de las peticiones.
+    \item \textbf{Riesgos y mitigaci\'on:} El principal riesgo es la revocaci\'on de tokens de forma inmediata en caso de compromiso. Se mitig\'o implementando una pol\'itica estricta de tiempos de expiraci\'on cortos para el access token y un filtro de renovaci\'on seguro en el backend.
+\end{itemize}
+
+\subsubsection*{Decisi\'on D9: Autorizaci\'on por rol y contexto acad\'emico}
+\begin{itemize}
+    \item \textbf{Decisi\'on adoptada:} Validar de forma combinada el rol global del usuario (administrador, profesor, estudiante) con su pertenencia expl\'icita al contexto acad\'emico específico del recurso (curso, grupo o actividad).
+    \item \textbf{Justificaci\'on:} En un dominio acad\'emico, un rol global es insuficiente. Un usuario con rol de estudiante no debe poder acceder a entregas de otros estudiantes, y un profesor s\'olo debe poder evaluar a alumnos de sus propios cursos y grupos asignados. Esto se resolvi\'o integrando comprobaciones a nivel de base de datos y reglas l\'ogicas en los servicios de negocio antes de exponer cualquier operaci\'on sensible.
+\end{itemize}
+
+\FloatBarrier
+\subsection{Calidad de c\'odigo y verificaci\'on}
+
+\subsubsection*{CI/CD y suite de pruebas}
+Se compararon dos enfoques:
+\begin{itemize}
+    \item \textbf{C1 - Pruebas autom\'aticas y CI integrada en GitHub Actions (opci\'on elegida):} Pipeline autom\'atico de construcci\'on, linting, testing de mutaci\'on y auditor\'ia de seguridad.
+    \item \textbf{C2 - Pipeline de CI en servidor externo (descartada):} Aumenta significativamente el sobrecoste de infraestructura y mantenimiento operativo para un equipo de desarrollo acotado.
+\end{itemize}
+
+\subsubsection*{Decisi\'on D13: Testing en capas integrado en CI/CD}
+\begin{itemize}
+    \item \textbf{Decisi\'on adoptada:} Testing en capas (unitarias, integraci\'on y E2E) orquestado de forma autom\'atica en GitHub Actions \cite{githubactions}.
+    \item \textbf{Justificaci\'on:} Garantiza que ning\'un commit rompa funcionalidades existentes (regresiones), asegurando la calidad del MVP. Las pruebas unitarias validan la l\'ogica del dominio de forma r\'apida, mientras que las pruebas de integraci\'on con MockMvc y las pruebas E2E con Playwright \cite{playwrightdocs} verifican la consistencia de los endpoints y los flujos de usuario completos.
+\end{itemize}
+
+\subsubsection*{Decisi\'on D14: Incorporaci\'on de pruebas de mutaci\'on}
+\begin{itemize}
+    \item \textbf{Decisi\'on adoptada:} Integrar PIT \cite{pitest} en backend y Stryker \cite{stryker} en frontend.
+    \item \textbf{Justificaci\'on:} La cobertura de c\'odigo tradicional mide qu\'e l\'ineas son ejercitadas por los tests, pero no garantiza la solidez de las aserciones. Las pruebas de mutaci\'on inyectan fallos deliberados (mutantes) en el c\'odigo de producci\'on para asegurar que los tests fallan y, por tanto, detectan errores reales. Esto ha permitido identificar huecos en la suite y elevar dr\'asticamente la fortaleza de las pruebas.
+\end{itemize}
+
+\FloatBarrier
+\subsection{Despliegue y operaci\'on t\'ecnica}
+
+\subsubsection*{Estrategia de despliegue}
+Se evaluaron tres alternativas operativas:
+\begin{itemize}
+    \item \textbf{P1 - Despliegue automatizado en PaaS gestionado (opci\'on elegida):} Render para backend, base de datos y frontend est\'atico.
+    \item \textbf{P2 - Servidor VPS autogestionado con pipeline manual (descartada):} Elevado coste de administraci\'on del sistema y menor estabilidad ante reinicios.
+    \item \textbf{P3 - Orquestaci\'on completa en Kubernetes (descartada):} Complejidad desproporcionada que no aporta retorno directo sobre los objetivos del MVP del TFG.
+\end{itemize}
+
+\subsubsection*{Decisi\'on D15: CI/CD basada en GitHub Actions}
+\begin{itemize}
+    \item \textbf{Decisi\'on adoptada:} GitHub Actions como columna vertebral del flujo diario.
+    \item \textbf{Justificaci\'on:} Integraci\'on nativa con el repositorio de c\'odigo, lo que permite auditar cada cambio, ejecutar suites de seguridad (OWASP Dependency Check, SonarCloud \cite{sonarcloud}) y activar el despliegue contin\'uo s\'olo cuando todos los checks est\'an en verde, minimizando errores en producci\'on.
+\end{itemize}
+
+\subsubsection*{Decisi\'on D16: Despliegue continuo en PaaS gestionado y Brevo}
+\begin{itemize}
+    \item \textbf{Decisi\'on adoptada:} Despliegue en Render \cite{render} utilizando contenedores Docker \cite{docker} para el backend, sitio est\'atico para el frontend y PostgreSQL gestionada. Para el correo transaccional, se adopta Brevo \cite{brevo} operado mediante API HTTPS.
+    \item \textbf{Justificaci\'on:} Permite que el sistema est\'e disponible en producci\'on de forma robusta con bajo coste y nula sobrecarga de administraci\'on de red. La integraci\'on de Brevo mediante API HTTPS resuelve el bloqueo de puertos SMTP t\'ipico en plataformas PaaS en sus planes gratuitos, garantizando el env\'io fiable de correos de recuperaci\'on y notificaciones.
+    \item \textbf{Dise\~no adaptativo del correo:} El backend implementa un patr\'on desacoplado en \texttt{EmailService} que permite la interoperabilidad de proveedores (Brevo, Resend, SendGrid) mediante variables de entorno, demostrando flexibilidad y resiliencia ante cortes o cambios de planes comerciales en los proveedores externos.
+\end{itemize}
+
+\FloatBarrier
+\section{Dise\~no del Sistema (La soluci\'on elegida)}
+
+Una vez justificadas y asentadas las decisiones de ingenier\'ia, en esta secci\'on se detalla el dise\~no t\'ecnico final de la soluci\'on. El sistema destaca por una alta granularidad l\'ogica y un acoplamiento d\'ebil entre sus componentes principales, garantizando que el ciclo acad\'emico de entregas y evaluaciones transcurra con total trazabilidad.
+
+\subsection{Arquitectura modular de alto nivel}
+
+El sistema sigue una arquitectura por capas desacoplada. La interacci\'on del usuario final se canaliza mediante la interfaz del cliente frontend (React SPA), la cual consume servicios de la API REST expuestos por el backend (Spring Boot), que a su vez se apoya en una base de datos relacional (PostgreSQL) para persistencia e integridad referencial acad\'emica. Las entregas f\'isicas se gestionan de forma segura en la nube (Cloudinary) y, opcionalmente, se integran con la unidad OneDrive del profesorado mediante Microsoft Graph.
+
+La Figura~\ref{fig:das-arquitectura} (presentada en el Cap\'itulo~\ref{cap_requisitos}) detalla la topolog\'ia del sistema, y la Tabla~\ref{tab:vista-despliegue} (Secci\'on~\ref{cap_diseno}) consolida los nodos del entorno operativo.
 
 \begin{table}[!htbp]
 \centering
@@ -58,303 +277,225 @@ Correo transaccional & Brevo API HTTP & Recuperaci\'on de contrase\~na y notific
 \label{tab:vista-despliegue}
 \end{table}
 
-\subsection{Dise\~no de dominio y datos}
-
-El dominio se modela alrededor de la relaci\'on docente-estudiante-actividad, con \texttt{Usuario} como identidad base, \texttt{Profesor} y \texttt{Estudiante} como especializaciones operativas, \texttt{Curso}, \texttt{Grupo} y \texttt{Actividad} para el contexto acad\'emico, \texttt{Entregable} y \texttt{Entrega} para el ciclo de entrega, y \texttt{Feedback}, \texttt{Material} y entidades de soporte (tokens, notificaciones). Esta estructura facilita trazabilidad y coherencia de reglas de negocio.
-
-La persistencia evoluciona de forma versionada mediante migraciones,
-lo que permite incorporar nuevas capacidades sin perder consistencia hist\'orica.
-
-\subsection{Dise\~no de API}
-
-La API sigue orientaci\'on REST y separa contratos mediante DTOs. Se definen m\'odulos de endpoint coherentes por contexto de negocio, incluyendo \texttt{/api/auth} para login, refresh y recuperaci\'on de contrase\~na, \texttt{/api/actividades} para gesti\'on de actividades y consulta por usuario, \texttt{/api/entregables} para administraci\'on de entregables, y \texttt{/api/entregas} para subida, revisi\'on, evaluaci\'on y descarga de entregas. Esta segmentaci\'on facilita evoluci\'on de contratos por dominio.
-
-El uso de DTOs evita exponer directamente entidades de persistencia,
-reduce acoplamiento y simplifica evoluciones de contrato.
-
-\subsection{Dise\~no de seguridad}
-
-El dise\~no de seguridad incorpora mecanismos complementarios: autenticaci\'on basada en JWT (token de acceso y refresh token), filtros de validaci\'on en la cadena de seguridad, autorizaci\'on por rol y contexto acad\'emico, cifrado de contrase\~nas con BCrypt y limitaci\'on de tasa en operaciones sensibles de autenticaci\'on. Esta combinaci\'on reduce superficie de ataque sin penalizar la experiencia de uso.
-
-Se configura CORS de forma expl\'icita y se diferencia entre rutas p\'ublicas y protegidas,
-minimizando superficie de ataque sin comprometer usabilidad.
-
-\subsection{Dise\~no del frontend}
-
-El frontend se organiza en m\'odulos \texttt{pages}, \texttt{components}, \texttt{context} y \texttt{services} con objetivos de experiencia coherente para profesor y estudiante, protecci\'on de rutas seg\'un sesi\'on y rol, gesti\'on centralizada de autenticaci\'on y manejo uniforme de errores y estados de carga. Esta organizaci\'on evita duplicidades y mejora mantenibilidad.
-
-La capa de red encapsula llamadas HTTP y gesti\'on de tokens,
-incluyendo renovaci\'on autom\'atica de sesi\'on al expirar el token de acceso.
-
 \FloatBarrier
 
+\subsection{Dise\~no de dominio y datos acad\'emicos}
 
-% tfg-floatbarrier-auto
-\makeatletter
-\@ifundefined{tfgfloatbarrier}{
-  \def\tfgfloatbarrier{1}
-  \let\tfgorigfigure\figure
-  \let\tfgendorigfigure\endfigure
-  \renewenvironment{figure}{\tfgorigfigure}{\tfgendorigfigure\FloatBarrier}
-  \let\tfgorigtable\table
-  \let\tfgendorigtable\endtable
-  \renewenvironment{table}{\tfgorigtable}{\tfgendorigtable\FloatBarrier}
-}{}
-\makeatother
+El dise\~no del modelo de datos est\'a estrictamente orientado a la estructura organizativa de una instituci\'on docente. La entidad central de identidad es \texttt{Usuario}, la cual se especializa l\'ogicamente mediante roles (\textbf{administrador}, \textbf{profesor} y \textbf{estudiante}). El contexto docente se delimita mediante las entidades \texttt{Curso} (asignatura), \texttt{Grupo} (agrupaci\'on de estudiantes matriculados en un curso) y \texttt{Actividad} (tarea docente asignada a un curso con un rango de fechas de vigencia).
 
-Esta granularidad no es habitual en soluciones generalistas,
-que suelen tratar todo como subida de fichero sin reglas contextuales.
+Para gestionar el ciclo de entrega se introducen las siguientes entidades:
+\begin{itemize}
+    \item \texttt{Entregable:} Define los requisitos obligatorios de una tarea dentro de una actividad, incluyendo la fecha l\'imite de env\'io, el tipo de archivo esperado (PDF, DOCX, ZIP, etc.), el tama\~no m\'aximo permitido y la estructura obligatoria de carpetas en caso de entregas ZIP.
+    \item \texttt{Entrega:} Registra cada env\'io realizado por un estudiante, controlando su estado (borrador, entregado, fuera de plazo), la versi\'on incremental del env\'io y la referencia al archivo subido.
+    \item \texttt{Feedback / Evaluaci\'on:} Contiene la calificaci\'on otorgada por el profesorado responsable del curso, la retroalimentaci\'on textual y la visibilidad de la nota para el alumnado.
+\end{itemize}
 
-\subsubsection*{Versionado y reenv\'io con trazabilidad}
+Esta organizaci\'on conceptual garantiza la trazabilidad completa desde la creaci\'on de la actividad por el profesor hasta la recepci\'on de feedback por el estudiante.
 
-Cada entrega queda registrada con versi\'on y fecha, manteniendo un
-historial completo y una versi\'on activa por entregable.
-Cuando el reenv\'io est\'a permitido, el sistema conserva la trazabilidad
-sin sobrescribir el historial previo, facilitando auditor\'ia docente.
+\subsection{Dise\~no de la API REST}
+
+La API REST del sistema est\'a dise\~nada siguiendo est\'andares sem\'anticos estrictos y utiliza DTOs para desacoplar los contratos externos de la estructura f\'isica de datos. Los endpoints se agrupan por m\'odulos funcionales:
+\begin{itemize}
+    \item \texttt{/api/auth:} Gesti\'on de credenciales, emisi\'on de tokens de acceso JWT y refresh tokens, cierre de sesi\'on seguro y flujos de recuperaci\'on de contrase\~nas mediante token de un solo uso.
+    \item \texttt{/api/cursos:} Endpoints para la creaci\'on de asignaturas, asignaci\'on de profesores y matriculaci\'on de estudiantes.
+    \item \texttt{/api/actividades:} Gesti\'on de tareas docentes, permitiendo al profesorado definir fechas de inicio, fechas l\'imites y visibilidad general.
+    \item \texttt{/api/entregables:} Administraci\'on de los requisitos t\'ecnicos y validaciones estructurales de los entregables asociados a una actividad.
+    \item \texttt{/api/entregas:} Endpoints de subida de archivos, guardado de borradores temporales, correcci\'on docente, descargas masivas en formato ZIP e integraci\'on con OneDrive.
+\end{itemize}
+
+Todas las peticiones protegidas requieren la cabecera \texttt{Authorization: Bearer <token>} y son filtradas en backend para validar tanto la autenticidad como la autorizaci\'on de contexto del usuario.
+
+\subsection{Dise\~no de seguridad integral}
+
+La seguridad operativa se estructura en m\'ultiples filtros interceptores integrados en Spring Security. El ciclo se inicia con la autenticaci\'on de credenciales cifradas con \textbf{BCrypt} y la emisi\'on de un par de tokens JWT. Para las peticiones a recursos protegidos, el filtro \texttt{JwtAuthenticationFilter} intercepta la cabecera, extrae el \emph{subject} y los roles, y establece el contexto de seguridad.
+
+Adicionalmente, se aplican reglas de seguridad de contexto en la capa de servicios: antes de permitir que un profesor eval\'ue una entrega, o que un estudiante suba un archivo, el sistema comprueba activamente que el curso y el grupo del recurso pertenecen a la matr\'icula f\'isica del usuario. Las peticiones an\'omalas son rechazadas inmediatamente en el backend con respuestas \texttt{403 Forbidden}, previniendo ataques de escalada de privilegios o inyecci\'on de IDs arbitrarios.
+
+\subsection{Dise\~no y organizaci\'on del frontend}
+
+El cliente frontend se estructura bajo principios de desacoplamiento y componentizaci\'on limpia. Destacan los siguientes m\'odulos:
+\begin{itemize}
+    \item \textbf{Capa de presentaci\'on (\texttt{pages} y \texttt{components}):} Vistas adaptadas por rol operando bajo un dise\~no responsivo y premium. Las pantallas se comunican con los servicios mediante estados locales controlados.
+    \item \textbf{Capa de contexto y estado (\texttt{context}):} Mantiene el estado global de sesi\'on, la persistencia temporal de los borradores locales en navegador, y la gesti\'on de configuraciones comunes de la aplicaci\'on.
+    \item \textbf{Capa de servicios (\texttt{services}):} Centraliza las peticiones a la API REST mediante clientes Axios preconfigurados, los cuales interceptan las respuestas \texttt{401 Unauthorized} para renovar de forma transparente el token de acceso utilizando el refresh token almacenado de forma segura, evitando interrupciones en la operaci\'on del usuario.
+\end{itemize}
+
+\subsection{Flujos cr\'iticos dise\~nados y aportaciones funcionales}
+
+El sistema introduce mecanismos de robustez espec\'ificos que aumentan significativamente su valor frente a alternativas gen\'ericas de almacenamiento:
+
+\subsubsection*{Validaci\'on estructural estricta de archivos ZIP}
+Cuando un entregable est\'a configurado para recibir un archivo comprimido ZIP con estructura obligatoria (por ejemplo, proyectos de software con carpetas espec\'ificas \texttt{/src} y \texttt{/test}), el backend y el frontend cooperan para abrir el archivo, parsear su contenido, y validar que cumple exactamente con el esquema docente configurado antes de permitir la subida f\'isica del archivo. Esta validaci\'on estructural previene entregas vac\'ias o incompletas en el momento del env\'io.
+
+\subsubsection*{Versionado incremental de entregas}
+Cada env\'io de un estudiante queda registrado en base de datos con un identificador de versi\'on incremental y una marca de tiempo. Si la actividad permite el reenv\'io y el estudiante sube una nueva versi\'on, la anterior pasa a estado hist\'orico inactivo pero no se destruye, garantizando que el profesorado conserva la trazabilidad completa del progreso acad\'emico y el historial de cambios del alumno.
 
 \subsubsection*{Operativa docente optimizada}
+Para reducir dr\'asticamente la sobrecarga manual del profesorado, el dise\~no de entregas incorpora descargas masivas agregadas: el docente puede descargar un \'unico archivo ZIP con todas las entregas de un curso, estructurado autom\'aticamente por carpetas con el nombre y grupo del alumnado, o consultar el contenido de las entregas ZIP directamente en navegador antes de su descarga f\'isica.
 
-Se incorporan descargas masivas por entregable o actividad,
-previsualizaci\'on de archivos en l\'inea y listado de contenido
-de ZIP, reduciendo tareas manuales de comprobaci\'on y clasificaci\'on.
-
-\subsubsection*{Robustez en el flujo de estudiante}
-
-El flujo de entrega incorpora borradores autom\'aticos en cliente,
-revalidaci\'on antes de enviar y mensajes de error contextualizados.
-Esto minimiza p\'erdida de trabajo en conexiones inestables
-y mejora la experiencia del alumnado.
+\subsubsection*{Resiliencia en el flujo de estudiante}
+El formulario de entrega en el cliente frontend realiza guardados locales autom\'aticos de borradores en el almacenamiento local del navegador (\emph{Local Storage}). Si el estudiante experimenta una interrupci\'on de la red o cierra accidentalmente la ventana, al regresar encontrar\'a sus archivos y comentarios cargados y listos para enviar, reduciendo dr\'asticamente el riesgo de p\'erdida de trabajo.
 
 \FloatBarrier
-\section{Alternativas de arquitectura y stack}
+\section{An\'alisis Consolidado}
 
-\subsection{Arquitectura de aplicaci\'on}
+Para dotar al dise\~no de un rigor metodol\'ogico completo, se consolida la evaluaci\'on de las decisiones tomadas a trav\'es de matrices de selecci\'on, an\'alisis de costes y beneficios, contingencias de riesgos y trazabilidad con los requisitos.
 
-Se valoraron dos enfoques principales: \textbf{A1 - SPA + API desacoplada} (opci\'on elegida) y \textbf{A2 - Aplicaci\'on monol\'itica server-side renderizada}. Esta comparativa permite sopesar flexibilidad de evoluci\'on frente a simplicidad inicial.
+\subsection{Matriz consolidada de decisiones}
 
-\textbf{A1} permite separar claramente la capa de experiencia de usuario
-de la l\'ogica de negocio y persistencia, facilitando pruebas independientes,
-despliegues diferenciados y evoluci\'on incremental.
-
-\textbf{A2} reduce complejidad inicial de infraestructura,
-pero limita flexibilidad de frontend y complica evoluci\'on de UX avanzada
-en escenarios con roles y paneles diferenciados.
-
-\subsection{Backend framework}
-
-Se compararon principalmente \textbf{B1 - Spring Boot (Java)} (elegida), \textbf{B2 - Node.js (Express/Nest)} y \textbf{B3 - Django (Python)}. El an\'alisis consider\'o compatibilidad con seguridad, persistencia y tiempos de entrega.
-
-La elecci\'on de \textbf{Spring Boot} se justifica por su ecosistema maduro para seguridad, JPA, validaci\'on y testing, por la integraci\'on natural con migraciones Flyway y por el buen soporte a arquitectura por capas y control transaccional. Estos factores reducen incertidumbre t\'ecnica en el alcance temporal disponible.
-
-Node.js y Django son opciones v\'alidas,
-pero para este proyecto requer\'ian m\'as decisiones de ensamblaje
-en piezas de seguridad/persistencia para alcanzar un nivel equivalente
-en el tiempo disponible.
-
-\subsection{Frontend framework}
-
-Alternativas consideradas: \textbf{F1 - React + TypeScript + Vite} (elegida), \textbf{F2 - Angular} y \textbf{F3 - Vue}. La selecci\'on se orient\'o a equilibrio entre velocidad de desarrollo y control de complejidad.
-
-React con TypeScript y Vite ofrece buen equilibrio entre velocidad de desarrollo,
-ecosistema y control de complejidad para una SPA de tama\~no medio.
-Angular aporta una estructura m\'as opinionada,
-pero con curva de entrada superior para el alcance temporal del TFG.
-Vue mantiene una DX excelente, aunque en este caso la experiencia previa del equipo
-y la alineaci\'on con librer\'ias de testing/CI favorecieron React.
-
-\FloatBarrier
-\section{Alternativas de persistencia y almacenamiento}
-
-\subsection{Base de datos relacional}
-
-Opciones comparadas: \textbf{D1 - PostgreSQL gestionado} (elegida en producci\'on), \textbf{D2 - MySQL gestionado} y \textbf{D3 - H2 embebida} (solo desarrollo/pruebas locales). La selecci\'on equilibra estabilidad productiva con agilidad local.
-
-PostgreSQL se mantuvo como opci\'on principal por estabilidad, compatibilidad
-con el stack y buen comportamiento en entornos PaaS.
-H2 se reserva para contextos de desarrollo y pruebas, no para producci\'on.
-
-Dentro de las alternativas de base de datos desplegadas,
-inicialmente se decidi\'o utilizar \textbf{Neon} como proveedor PostgreSQL
-por sus mejores caracter\'isticas percibidas para el arranque del proyecto:
-aprovisionamiento r\'apido, enfoque serverless y facilidad de conexi\'on
-desde un backend desplegado en PaaS.
-No obstante, durante la validaci\'on operativa se detectaron limitaciones
-en su plan gratuito que condicionaban la continuidad del despliegue acad\'emico.
-Por ello se migr\'o a \textbf{Render PostgreSQL},
-manteniendo PostgreSQL como decisi\'on t\'ecnica de base y cambiando solo
-el proveedor gestionado.
-La migraci\'on se realiz\'o sin cambios de c\'odigo de dominio,
-apoy\'andose en variables de entorno y configuraci\'on portable del datasource,
-lo que confirma bajo acoplamiento a proveedor concreto.
-
-\subsection{Estrategia de esquema}
-
-Se compararon \textbf{E1 - Flyway como autoridad de esquema} (elegida) y \textbf{E2 - Hibernate \texttt{ddl-auto=update} en producci\'on}. La decisi\'on prioriza trazabilidad y control expl\'icito del cambio.
-
-Se adopta \textbf{E1 (Flyway)} por trazabilidad y control expl\'icito de cambios, reduciendo el riesgo de divergencias de esquema entre entornos. En un entorno acad\'emico y de desarrollo r\'apido, el uso de herramientas autom\'aticas como Hibernate puede generar esquemas inconsistentes al cambiar ramas de c\'odigo o desplegar nuevas versiones. Con Flyway, cada alteraci\'on de la base de datos queda versionada (\emph{scripts SQL}), permitiendo reproducir exactamente el mismo estado desde el entorno de desarrollo local hasta el de producci\'on.
-
-\subsection{Almacenamiento de archivos}
-
-Alternativas evaluadas: \textbf{S1 - Almacenamiento local en servidor}, \textbf{S2 - Cloudinary} (elegida para producci\'on persistente) y \textbf{S3 - OneDrive/Microsoft Graph} (integraci\'on opcional por contexto acad\'emico). La opci\'on final combina persistencia en producci\'on con flexibilidad institucional.
-
-La opci\'on local es simple y adecuada en desarrollo,
-pero en plataformas con sistema de archivos ef\'imero (como despliegues free)
-puede provocar p\'erdida de datos tras reinicio.
-Por ello se adopta \textbf{Cloudinary} en producci\'on.
-
-La integraci\'on \textbf{OneDrive} aporta valor en casos docentes
-que requieren sincronizaci\'on con ecosistemas Microsoft,
-pero se mantiene como capacidad configurable y no obligatoria del n\'ucleo.
-
-\FloatBarrier
-\section{Alternativas de seguridad y sesi\'on}
-
-\subsection{Modelo de autenticaci\'on}
-
-Se compararon dos enfoques principales: \textbf{A1 - JWT (access + refresh)} (elegido) y \textbf{A2 - Sesi\'on server-side tradicional}. La elecci\'on favorece coherencia con arquitectura SPA y escalado stateless.
-
-En una SPA desacoplada, JWT con refresh ofrece una experiencia m\'as natural
-para cliente API-first y facilita escalado stateless del backend.
-La sesi\'on server-side reduce cierta complejidad de token,
-pero exige estrategia adicional de estado distribuido en despliegues horizontales.
-
-\subsection{Extensiones de seguridad}
-
-Se han considerado funcionalidades avanzadas (inicio de sesi\'on federado con OAuth2/OIDC y 2FA)
-como l\'inea de evoluci\'on.
-La decisi\'on de no imponerlas en el MVP responde al criterio
-de maximizar cobertura funcional core sin comprometer plazos.
-
-\FloatBarrier
-\section{Alternativas investigadas y descartadas}
-
-\subsection{SharePoint para OneDrive corporativo}
-
-Se valor\'o el uso de SharePoint como intermediario para acceder a cuentas
-corporativas de OneDrive. La opci\'on facilitaba el encaje institucional,
-pero implicaba perder capacidades clave que s\'i ofrece la integraci\'on directa,
-como la selecci\'on de carpeta de destino o la gesti\'on flexible de rutas
-durante la subida de entregas. Dado que estas funciones son parte del valor
-diferencial de la plataforma, se descart\'o esta v\'ia.
-
-\subsection{Registro de usuarios con OAuth}
-
-Se estudi\'o habilitar registro de usuarios mediante OAuth/OIDC
-para que el alumnado pudiera crear cuentas de forma aut\'onoma.
-Finalmente se prioriz\'o el flujo habitual en entornos acad\'emicos,
-donde el administrador crea usuarios y los asigna a cursos y grupos.
-Esto evita altas desalineadas con la matr\'icula real y simplifica el control
-de permisos y pertenencia a grupos.
-
-\FloatBarrier
-\section{Alternativas de despliegue y operaci\'on}
-
-\subsection{Estrategia de despliegue}
-
-Opciones principales: \textbf{P1 - PaaS con automatizaci\'on GitHub Actions + Render} (elegida), \textbf{P2 - VPS autogestionado con pipeline manual o Jenkins} y \textbf{P3 - Orquestaci\'on completa en Kubernetes}. La selecci\'on busca minimizar carga operativa y mantener viabilidad acad\'emica.
-
-\textbf{P1} reduce carga operativa,
-permite despliegue r\'apido y mantiene un coste ajustado para contexto acad\'emico.
-La opci\'on elegida se concreta en Render como PaaS gestionado para el servicio
-backend, el frontend est\'atico y PostgreSQL gestionado, manteniendo la
-configuraci\'on por variables de entorno.
-\textbf{P2} y \textbf{P3} ofrecen m\'as control,
-pero su complejidad no aporta retorno proporcional dentro del alcance del TFG.
-
-Dentro de esta estrategia, el correo transaccional se resuelve con Brevo
-mediante API HTTP. Inicialmente se emple\'o SendGrid como proveedor
-de correo, pero tras la finalizaci\'on de su plan gratuito se migr\'o
-a Brevo. Se evalu\'o tambi\'en Resend, pero su plan gratuito requiere
-un dominio verificado para enviar a destinatarios arbitrarios.
-Esta alternativa se prefiere frente a SMTP en producci\'on
-porque los PaaS pueden bloquear o restringir puertos propios del protocolo
-de correo, mientras que las peticiones HTTPS salientes son compatibles con
-el modelo operativo del despliegue.
-
-\subsection{CI/CD y calidad}
-
-Se compararon \textbf{C1 - CI/CD integrada en GitHub Actions} (elegida) y \textbf{C2 - CI externa (GitLab CI/Jenkins) con mayor administraci\'on}. La decisi\'on prioriza trazabilidad y menor sobrecarga operativa.
-
-La alternativa elegida integra lint, tests, build, an\'alisis de seguridad,
-mutaci\'on y publicaci\'on de artefactos en un flujo unificado y reproducible.
-
-\FloatBarrier
-\section{Comparativa multicriterio}
-
-La Tabla~\ref{tab:comparativa-global} sintetiza la comparaci\'on global
-entre enfoques de soluci\'on.
+La Tabla~\ref{tab:resumen-decisiones} resume las decisiones clave adoptadas en el TFG, confrontadas con la alternativa descartada y exponiendo el argumento dominante de ingenier\'ia que gui\'o la selecci\'on.
 
 \begin{table}[!htbp]
 \centering
-\small
-\begin{tabular}{|P{3.9cm}|c|c|c|}
+\begin{tabular}{|P{1.6cm}|P{3.8cm}|P{3.2cm}|P{4.4cm}|}
 \hline
-\textbf{Criterio} & \textbf{Soluci\'on elegida} & \textbf{Alternativa intermedia} & \textbf{Alternativa avanzada} \\
+\textbf{ID} & \textbf{Decisi\'on} & \textbf{Alternativa descartada} & \textbf{Raz\'on dominante} \\
 \hline
-Tiempo de entrega MVP & 5 & 3 & 2 \\
+D1 & Alcance MVP priorizado & Backlog completo desde inicio & Reducir riesgo de no entrega funcional \\
 \hline
-Mantenibilidad & 4 & 3 & 4 \\
+D3 & SPA + API desacoplada & Monolito SSR & Mantenibilidad y evoluci\'on de UX \\
 \hline
-Coste operativo & 5 & 3 & 2 \\
+D6 & Spring Boot + Java & Node.js/Django & Menor incertidumbre en seguridad/persistencia \\
 \hline
-Escalabilidad potencial & 4 & 3 & 5 \\
+D7 & React + TS + Vite & Angular/Vue & Equilibrio productividad-control tipado \\
 \hline
-Complejidad de operaci\'on & 4 & 3 & 1 \\
+D8 & JWT + refresh & Sesi\'on server-side & Ajuste natural a cliente API-first \\
 \hline
-Adecuaci\'on al TFG & 5 & 3 & 2 \\
+D11 & Flyway + validate & ddl-auto update & Trazabilidad y control de esquema \\
+\hline
+D12 & Cloud en producci\'on & Solo almacenamiento local & Evitar p\'erdida en entornos ef\'imeros \\
+\hline
+D13 & Testing en capas + mutaci\'on & Solo unitarias/cobertura & Robustez real frente a regresiones \\
+\hline
+D16 & PaaS gestionado & VPS/Kubernetes & Tiempo y coste operativos contenidos \\
 \hline
 \end{tabular}
-\caption{Comparativa global (escala 1-5, mayor es mejor)}
-\label{tab:comparativa-global}
+\caption{Resumen de decisiones clave y justificaci\'on dominante}
+\label{tab:resumen-decisiones}
 \end{table}
 
-Interpretaci\'on:
-la alternativa seleccionada no maximiza todos los ejes te\'oricos,
-pero s\'i ofrece el mejor equilibrio entre valor entregado,
-riesgo t\'ecnico y viabilidad temporal del proyecto.
+\FloatBarrier
+\subsection{An\'alisis coste-beneficio por bloques}
+
+Se analiza cada bloque en t\'erminos de esfuerzo de implantaci\'on inicial (coste) y retorno en el desarrollo del TFG (beneficio):
+
+\subsubsection*{Bloque de arquitectura (SPA + API)}
+\begin{itemize}
+    \item \textbf{Coste inicial:} Esfuerzo adicional para definir y mantener contratos HTTP estables, orquestar CORS, renovar tokens y configurar pipelines duales de despliegue.
+    \item \textbf{Beneficio:} Separaci\'on total de responsabilidades, testabilidad aislada y facilidad para aislar fallos en desarrollo. Habilita una evoluci\'on de la interfaz sin tocar la l\'ogica del negocio backend.
+    \item \textbf{Retorno:} Alto. La inversi\'on se recupera al reducir la deuda t\'ecnica estructural y facilitar las pruebas E2E.
+\end{itemize}
+
+\subsubsection*{Bloque de stack tecnol\'ogico (Java/Spring Boot + React/Vite)}
+\begin{itemize}
+    \item \textbf{Coste inicial:} Tiempo dedicado a la configuraci\'on de los entornos locales de desarrollo, convenciones de proyecto comunes y aprendizaje de herramientas avanzadas.
+    \item \textbf{Beneficio:} Ecosistema industrial estable, librer\'ias oficiales abundantes para seguridad, validaci\'on e integraci\'on, y velocidad excelente de compilaci\'on y compilaci\'on est\'atica en frontend mediante Vite.
+    \item \textbf{Retorno:} Alto. Redujo la incertidumbre t\'ecnica de base en m\'odulos transaccionales y de persistencia compleja.
+\end{itemize}
+
+\subsubsection*{Bloque de seguridad (JWT + refresh + autorizaci\'on de contexto)}
+\begin{itemize}
+    \item \textbf{Coste inicial:} Dise\~no de filtros interceptores en backend, pol\'iticas de expiraci\'on de tokens y gesti\'on de almacenamiento de borradores en cliente.
+    \item \textbf{Beneficio:} Autenticaci\'on y autorizaci\'on stateless robustas, protecci\'on eficaz contra accesos cruzados ileg\'itimos y control granular de datos por contexto acad\'emico real.
+    \item \textbf{Retorno:} Muy alto. En una plataforma orientada a la gesti\'on de calificaciones y entregas acad\'emicas, garantizar la seguridad es un requisito no negociable.
+\end{itemize}
+
+\subsubsection*{Bloque de calidad (testing en capas + mutaci\'on)}
+\begin{itemize}
+    \item \textbf{Coste inicial:} Esfuerzo continuo de redacci\'on de pruebas, configuraci\'on de mocks, control de bases de datos de pruebas (H2) y tiempos de ejecuci\'on elevados en pipeline al inyectar mutaciones de PIT y Stryker.
+    \item \textbf{Beneficio:} Detecci\'on temprana de errores, suites de pruebas de alta confianza con aserciones s\'olidas y prevenci\'on real de regresiones al refactorizar c\'odigo base.
+    \item \textbf{Retorno:} Muy alto. Permite un ritmo de despliegue continuo de releases con una tasa de fallos en producci\'on nula.
+\end{itemize}
+
+\subsubsection*{Bloque de despliegue y operaci\'on (GitHub Actions + PaaS)}
+\begin{itemize}
+    \item \textbf{Coste inicial:} Configuraci\'on de variables seguras en repositorio, blueprint de base de datos gestionada y control de puertos por API HTTPS de Brevo.
+    \item \textbf{Beneficio:} Automatizaci\'on absoluta del ciclo, eliminando despliegues manuales propensos a errores y conteniendo los costes del entorno dentro de los l\'imites acad\'emicos gratuitos.
+    \item \textbf{Retorno:} Alto. La estabilidad operativa del proyecto aumenta enormemente y permite iterar de forma reproducible.
+\end{itemize}
 
 \FloatBarrier
-\section{Decisiones adoptadas y justificaci\'on final}
+\subsection{Riesgos derivados de las decisiones y mitigaci\'on}
 
-Las decisiones finales que mejor explican el resultado del proyecto son la arquitectura SPA + API desacoplada para separar responsabilidades, un backend Spring Boot con persistencia relacional y migraciones Flyway, un frontend React + TypeScript para productividad con control tipado, almacenamiento cloud persistente en producci\'on y local en desarrollo, y despliegue en PaaS con CI/CD automatizada y verificaciones de calidad. Esta combinaci\'on asegura equilibrio entre viabilidad temporal y robustez t\'ecnica.
+Toda decisi\'on conlleva riesgos operacionales. La Tabla~\ref{tab:riesgos-decisiones} detalla las contingencias identificadas y la mitigaci\'on aplicada.
 
-Esta combinaci\'on ha permitido llegar a un sistema funcional,
-con cobertura de pruebas alta y capacidad de evoluci\'on,
-sin sobredimensionar infraestructura ni desviarse del objetivo acad\'emico.
+\begin{table}[!htbp]
+\centering
+\begin{tabular}{|P{3.4cm}|P{4.3cm}|P{4.5cm}|}
+\hline
+\textbf{Eje de decisi\'on} & \textbf{Riesgo principal} & \textbf{Mitigaci\'on aplicada} \\
+\hline
+Arquitectura desacoplada & Errores de contrato entre cliente y API & DTOs expl\'icitos, pruebas de integraci\'on y E2E \\
+\hline
+JWT + refresh & Gesti\'on incorrecta de expiraciones/revocaci\'on & Pol\'iticas de expiraci\'on, filtros dedicados y validaci\'on de contexto \\
+\hline
+Flyway como autoridad & Fallos de migraci\'on en despliegue & Versionado incremental, validaci\'on previa y backups de datos \\
+\hline
+Cloud en producci\'on & Dependencia de servicio externo & Configuraci\'on por entorno y estrategia fallback local \\
+\hline
+CI/CD automatizada & Falsos positivos por inestabilidad de tests & Separaci\'on por etapas, reintentos controlados y revisi\'on de flaky tests \\
+\hline
+\end{tabular}
+\caption{Riesgos derivados de decisiones y medidas de contingencia}
+\label{tab:riesgos-decisiones}
+\end{table}
 
 \FloatBarrier
-\section{Conclusiones}
+\subsection{Trazabilidad con requisitos y evidencias}
 
-El an\'alisis y estudio de alternativas confirma que la soluci\'on implementada no responde a una selecci\'on arbitraria de herramientas, sino a una evaluaci\'on razonada frente a alternativas reales. 
+Para comprobar la solidez de la ingenier\'ia del proyecto, se establece la trazabilidad directa entre las decisiones de dise\~no adoptadas, los requisitos del pliego de condiciones (ERS) y las evidencias emp\'iricas observadas durante la ejecuci\'on (Tabla~\ref{tab:trazabilidad-decisiones}).
 
-En cada \'ambito de decisi\'on, el enfoque adoptado prioriza el equilibrio entre robustez t\'ecnica, viabilidad temporal y bajo coste operativo. La decisi\'on por una arquitectura desacoplada (SPA + API), respaldada por frameworks de amplio uso (Spring Boot y React) y persistencia relacional estricta, provee una plataforma s\'olida y extensible. Al mismo tiempo, el descarte de integraciones m\'as complejas (como SSO o SharePoint) permite concentrar los recursos del MVP en el n\'ucleo de la operativa docente. 
+\begin{table}[!htbp]
+\centering
+\begin{tabular}{|P{1.6cm}|P{2.8cm}|P{2.9cm}|P{4.7cm}|}
+\hline
+\textbf{ID} & \textbf{Requisito(s) relacionado(s)} & \textbf{Evidencia principal} & \textbf{Conclusi\'on de valor} \\
+\hline
+D3 & RQNF-004, RQNF-008 & Separaci\'on frontend/backend en repositorio y pipelines & Mejora mantenibilidad y portabilidad \\
+\hline
+D8 & RQNF-009, REGN-001 & Filtros JWT y validaciones de autorizaci\'on en servicios & Refuerza control de acceso por rol/contexto \\
+\hline
+D11 & RQNF-001, RQNF-004 & Hist\'orico de migraciones versionadas & Reduce riesgo de deriva de esquema \\
+\hline
+D13 & RQNF-001, RQNF-006 & Suites unitarias/integraci\'on/E2E en verde y mutaci\'on alta & Mayor fiabilidad y menor regresi\'on \\
+\hline
+D16 & RQNF-008, RQNF-004 & Workflows CI/CD y despliegue automatizado en PaaS & Operaci\'on reproducible con bajo coste \\
+\hline
+\end{tabular}
+\caption{Trazabilidad entre decisiones, requisitos y evidencia}
+\label{tab:trazabilidad-decisiones}
+\end{table}
 
-Este conjunto de alternativas y su posterior cribado aseguran la construcci\'on de un TFG de alto perfil profesional, que cumple rigurosamente con sus objetivos limitando conscientemente los riesgos t\'ecnicos y de calendario.
-	
-	 
+\FloatBarrier
+\section{Alternativas Descartadas}
 
+En el transcurso del desarrollo se investigaron diversas v\'ias y funcionalidades avanzadas que, tras una evaluaci\'on de coste-beneficio frente al alcance temporal del proyecto, fueron conscientemente descartadas para esta fase:
 
+\subsection{Integraci\'on con SharePoint corporativo}
+Se analiz\'o el uso de SharePoint como plataforma de destino de las entregas del alumnado. Aunque aportaba robustez corporativa, su integraci\'on requiere configuraciones complejas de Azure Tenant, permisos de organizaci\'on restrictivos y administraci\'on de sitios compartidos. Esta complejidad habr\'ia consumido un tiempo excesivo, impidiendo el desarrollo de funcionalidades prioritarias de evaluaci\'on. En su lugar, se prioriz\'o la API directa de OneDrive a nivel de usuario, que ofrece la flexibilidad necesaria para que el profesorado organice sus entregables en su propio espacio sin restricciones organizativas externas.
 
+\subsection{Autenticaci\'on federada completa (SSO)}
+El uso de proveedores federados institucionales (tipo OAuth2/OIDC corporativos) se consider\'o relevante para simplificar el acceso. No obstante, se descart\'o del MVP porque el flujo de registro e inicio de sesi\'on local basado en JWT cubr\'ia plenamente los requisitos del sistema y permit\'ia avanzar de forma aut\'onoma en la definici\'on de los roles y el control de acceso en la API sin depender de un directorio corporativo externo.
 
+\subsection{Registro de usuarios con OAuth}
+Se estudi\'o habilitar el registro de usuarios de forma aut\'onoma en el cliente. Se descart\'o r\'apidamente para priorizar el flujo est\'andar en el que un administrador escolar realiza el alta y asignaci\'on formal a asignaturas y grupos. Esto reduce la generaci\'on de cuentas no autorizadas y garantiza la consistencia del censo f\'isico del alumnado matriculado en la plataforma.
 
+\subsection{Autenticaci\'on de doble factor (2FA)}
+Se valor\'o la implementaci\'on de un segundo factor de autenticaci\'on (SMS o TOTP) para proteger los accesos. Aunque es una buena pr\'actica de seguridad, su desarrollo habr\'ia implicado integrar APIs de terceros y a\~nadir pantallas de configuraci\'on, lo que representaba un riesgo para los plazos. Se consider\'o m\'as adecuado delegar esta capacidad a la hoja de ruta de evoluci\'on futura, protegiendo el MVP con pol\'iticas estrictas de contrase\~nas (BCrypt) y tokens JWT.
 
+\subsection{Orquestaci\'on avanzada de infraestructura con Kubernetes}
+Para la operaci\'on en producci\'on se consider\'o el uso de herramientas de orquestaci\'on y balanceo horizontal (Kubernetes). Su complejidad operativa y de infraestructura representaba un sobrecoste de tiempo y econ\'omico inasumible para un equipo de desarrollo unitario, aportando un nulo valor funcional al MVP en esta fase acad\'emica. Por ello, se descart\'o a favor de una soluci\'on PaaS gestionada (Render) que permite el despliegue de contenedores Docker de forma estable, segura y autogestionada.
 
+\FloatBarrier
+\section{Conclusiones del Dise\~no}
 
+La unificaci\'on del dise\~no de la arquitectura y la justificaci\'on detallada de decisiones en esta fase de ingenier\'ia demuestra la solidez del sistema de gesti\'on de entregables acad\'emicos. La arquitectura desacoplada (SPA + API REST) respaldada por frameworks maduros y est\'andar en el mercado (Spring Boot y React) ha demostrado ser una elecci\'on id\'onea:
+\begin{itemize}
+    \item Garantiza una delimitaci\'on rigurosa de responsabilidades entre la visualizaci\'on y las reglas de negocio.
+    \item Provee una base extensible que permite acoger nuevas integraciones de almacenamiento (OneDrive) y correo (Brevo) sin alterar el comportamiento nuclear del dominio.
+    \item Permite mantener una cobertura de pruebas alta y suites de verificaci\'on s\'olidas, mitigando el riesgo de fallos en producci\'on.
+\end{itemize}
 
+El cribado sistem\'atico de alternativas descartadas evidencia que el proyecto se ha desarrollado bajo una gesti\'on rigurosa del alcance y los plazos, seleccionando siempre aquellas opciones que maximizan la robustez t\'ecnica con el menor coste y riesgo operacional. El resultado es una plataforma de software defendible ante tribunal, que cumple rigurosamente con sus objetivos limitando conscientemente los riesgos t\'ecnicos y de calendario.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+\FloatBarrier

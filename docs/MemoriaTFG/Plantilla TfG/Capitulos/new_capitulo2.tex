@@ -297,20 +297,17 @@ Esfuerzo QA acumulado (S1-S4) & 74 & 1\,110 EUR & 1\,850 EUR \\
 
 \subsection{Costes de infraestructura y operaci\'on}
 
-Durante el desarrollo acad\'emico se han utilizado, de forma predominante,
-planes gratuitos o cr\'editos de estudiante para servicios de integraci\'on,
-despliegue y repositorio. Por tanto, el coste operativo \textbf{real observado}
-ha sido pr\'oximo a 0 EUR en la etapa de desarrollo.
+Para el coste de operaci\'on del sistema se consideran dos perfiles de plataforma diferenciados, de manera an\'aloga a los escenarios de personal: el \textbf{Perfil de Plataforma A} (Acad\'emico/Desarrollo) y el \textbf{Perfil de Plataforma B} (Pago/Producci\'on).
 
-No obstante, para ofrecer una visi\'on realista,
-se incluye una estimaci\'on orientativa de operaci\'on m\'inima en un entorno no gratuito
-durante 4 meses de proyecto (basada en las tarifas del proveedor PaaS Render):
+En el \textbf{Perfil A (Desarrollo)}, que representa el escenario real observado durante la ejecuci\'on del TFG, se utilizan de manera predominante planes gratuitos o cr\'editos de estudiante para servicios de integraci\'on, despliegue, base de datos y repositorio, lo que resulta en un coste operativo de 0 EUR. 
+
+Por otro lado, el \textbf{Perfil B (Producci\'on)} representa un entorno real de producci\'on comercial no gratuito durante 4 meses de proyecto, basado en tarifas mínimas del proveedor PaaS Render para garantizar alta disponibilidad y persistencia sin restricciones de inactividad. La Tabla~\ref{tab:coste-operativo} muestra la comparativa detallada entre ambos perfiles.
 
 \begin{table}[!htbp]
 \centering
 \begin{tabular}{|P{5.2cm}|P{3.2cm}|P{3.2cm}|}
 \hline
-\textbf{Concepto} & \textbf{Coste real (proyecto)} & \textbf{Coste orientativo (4 meses)} \\
+\textbf{Concepto} & \textbf{Coste A (Perfil Acad\'emico)} & \textbf{Coste B (Perfil Producci\'on)} \\
 \hline
 Hosting backend & 0 EUR & 28 EUR \\
 \hline
@@ -323,35 +320,31 @@ Dominio y gesti\'on b\'asica & 0 EUR & 4 EUR \\
 \textbf{Total operaci\'on} & \textbf{0 EUR} & \textbf{132 EUR} \\
 \hline
 \end{tabular}
-\caption{Comparativa entre coste real y coste operativo orientativo}
+\caption{Comparativa de costes de infraestructura según perfil de plataforma}
 \label{tab:coste-operativo}
 \end{table}
 
 \subsection{Coste total del proyecto y escenarios de sensibilidad}
 
-El coste total se modela como la suma del coste de personal y el coste operativo:
+El coste total del proyecto se modela como la suma de los costes de personal y los costes operativos de infraestructura:
 \[
 C_{total} = C_{personal} + C_{operacion}
 \]
 
-Para ofrecer una visi\'on realista de la viabilidad del proyecto en distintos contextos, se plantea un an\'alisis de sensibilidad con tres escenarios de tarifas, manteniendo las 660 horas como constante de alcance. Se compara el coste asumiendo que no hay costes de operaci\'on (como ha ocurrido durante el desarrollo) frente a un escenario con operaci\'on orientativa de pago.
+Para ofrecer una visi\'on clara y consistente con el resto del cap\'itulo, se realiza un an\'alisis de sensibilidad cruzando los dos escenarios de tarifas de personal (Escenario A y Escenario B) con los dos perfiles de plataforma analizados (Plataforma A y Plataforma B), manteniendo las 660 horas de esfuerzo como constante.
 
 \begin{table}[!htbp]
 \centering
-\begin{tabular}{|P{3.5cm}|P{2.2cm}|P{3.5cm}|P{3.5cm}|}
+\begin{tabular}{|P{4.2cm}|P{2.5cm}|P{3.2cm}|P{3.2cm}|}
 \hline
-\textbf{Escenario (Tarifa)} & \textbf{Coste personal} & \textbf{Total (Sin costes de operaci\'on)} & \textbf{Total (Con operaci\'on orientativa)} \\
+\textbf{Escenario (Tarifa)} & \textbf{Coste personal} & \textbf{Total con Plataforma A (0 EUR)} & \textbf{Total con Plataforma B (132 EUR)} \\
 \hline
-Acad\'emico (15 EUR/h) & 9\,900 EUR & 9\,900 EUR & 10\,032 EUR \\
+Escenario A (Acad\'emico --- 15 EUR/h) & 9\,900 EUR & 9\,900 EUR & 10\,032 EUR \\
 \hline
-Junior mercado (25 EUR/h) & 16\,500 EUR & 16\,500 EUR & 16\,632 EUR \\
-\hline
-Perfil intermedio (35 EUR/h) & 23\,100 EUR & 23\,100 EUR & 23\,232 EUR \\
-\hline
-Perfil senior (45 EUR/h) & 29\,700 EUR & 29\,700 EUR & 29\,832 EUR \\
+Escenario B (Junior --- 25 EUR/h) & 16\,500 EUR & 16\,500 EUR & 16\,632 EUR \\
 \hline
 \end{tabular}
-\caption{Coste total estimado del proyecto seg\'un escenario de tarifa}
+\caption{Coste total estimado cruzando tarifas de personal y perfiles de plataforma}
 \label{tab:coste-total-sensibilidad}
 \end{table}
 

@@ -21,7 +21,7 @@ La motivaci\'on principal se fundamenta en un problema habitual detectado durant
 
 Desde la perspectiva de la ingenier\'ia del software, el problema a resolver consiste en dise\~nar un sistema especializado que, con recursos acotados, maximice la cobertura funcional del ciclo de entregables, garantizando seguridad por rol, una interfaz de usuario enriquecida que reduzca los errores involuntarios y capacidad de evoluci\'on, sin depender de tareas manuales externas a la plataforma.
 
-Para el dise\~no del proyecto nos apoyamos en metodolog\'ias de la Ingenier\'ia del Software: (i) la elicitaci\'on de requisitos y el an\'alisis y dise\~no recogidos en los artefactos ERS y DAS; y (ii) la planificaci\'on y seguimiento mediante backlog y plan de sprints (SCRUM). Estos artefactos garantizan trazabilidad entre requisitos, implementaci\'on y pruebas.
+Para el dise\~no del proyecto nos apoyamos en metodolog\'ias de la Ingenier\'ia del Software: (i) la elicitaci\'on de requisitos y el an\'alisis y dise\~no recogidos en los artefactos ERS y DAS; y (ii) la planificaci\'on y seguimiento mediante backlog y plan de sprints (SCRUM) \cite{scrumguide}. Estos artefactos garantizan trazabilidad entre requisitos, implementaci\'on y pruebas.
 
 \FloatBarrier
 \section{An\'alisis de antecedentes y situaci\'on inicial}
@@ -262,7 +262,7 @@ Los cinco primeros objetivos constituyen los requisitos indispensables (\emph{Mu
 \subsection{Metodolog\'ia para definir los objetivos}
 
 La definici\'on de objetivos no se ha realizado de forma declarativa aislada,
-sino mediante un proceso iterativo de convergencia entre objetivos de negocio (OBJN) definidos en el an\'alisis inicial, requisitos funcionales y no funcionales del ERS, decisiones arquitect\'onicas del DAS, prioridades MoSCoW del Product Backlog y la capacidad temporal real (660 horas en 6 iteraciones). Esta convergencia asegura que cada objetivo no solo responda a una necesidad, sino que sea viable dentro del calendario y del alcance del TFG.
+sino mediante un proceso iterativo de convergencia entre objetivos de negocio (OBJN) definidos en el an\'alisis inicial, requisitos funcionales y no funcionales del ERS, decisiones arquitect\'onicas del DAS, prioridades MoSCoW \cite{moscow_method} del Product Backlog y la capacidad temporal real (660 horas en 6 iteraciones). Esta convergencia asegura que cada objetivo no solo responda a una necesidad, sino que sea viable dentro del calendario y del alcance del TFG.
 
 Este enfoque permite que cada objetivo sea evaluable,
 relacionable con entregables t\'ecnicos concretos
@@ -286,7 +286,7 @@ Should Have & O6, O7 & Aumentan mantenibilidad y calidad, y reducen riesgo de re
 \hline
 Could Have & Extensiones anal\'iticas y observabilidad avanzada & Aportan valor, pero no condicionan la validez del MVP. \\
 \hline
-Won't Have (MVP) & inicio de sesi\'on federado (OAuth2/OIDC), 2FA integral, notificaciones avanzadas & Se reservan para evoluci\'on por coste de implementaci\'on y validaci\'on. \\
+Won't Have (MVP) & inicio de sesi\'on federado (OAuth2/OIDC) \cite{oauth2}, 2FA integral, notificaciones avanzadas & Se reservan para evoluci\'on por coste de implementaci\'on y validaci\'on. \\
 \hline
 \end{tabular}
 \caption{Priorizaci\'on de objetivos conforme a estrategia MoSCoW}
@@ -396,8 +396,8 @@ La ejecuci\'on de este alcance se gestion\'o asumiendo riesgos clave, como la co
 Para asegurar la coherencia entre el dise\~no, la validaci\'on y el despliegue del sistema, se ha seleccionado un conjunto de tecnolog\'ias y herramientas alineado con est\'andares actuales de la industria:
 
 \begin{itemize}
-    \item \textbf{Backend:} Se emplea \textbf{Java 21} como lenguaje principal con el framework \textbf{Spring Boot}. La seguridad se gestiona con \textbf{Spring Security}, el acceso a base de datos mediante \textbf{JPA/Hibernate}, el control de versiones del esquema de base de datos a trav\'es de \textbf{Flyway} y la construcci\'on con \textbf{Maven}, manteniendo el backend organizado por capas para facilitar validaci\'on y trazabilidad.
-    \item \textbf{Frontend:} Interfaz desarrollada como \emph{Single Page Application} (SPA) con \textbf{React} y \textbf{TypeScript}. Se usa \textbf{Vite} como empaquetador y entorno de desarrollo. Para el enrutamiento se utiliza \textbf{React Router} y para las peticiones HTTP, \textbf{Axios}. La validaci\'on de componentes se realiza con \textbf{Vitest} y pruebas de mutaci\'on mediante \textbf{Stryker}, reforzando el control de calidad sobre componentes, contextos y servicios de cliente.
-    \item \textbf{Integraci\'on Continua y Despliegue (CI/CD):} El c\'odigo fuente se versiona en GitHub, empleando \emph{workflows} de GitHub Actions para ejecuci\'on automatizada de compilaci\'on, \emph{linting} y pruebas. Las versiones candidatas se despliegan autom\'aticamente en la plataforma como servicio (PaaS) \textbf{Render}, utilizando contenedores Docker para el backend y sitios est\'aticos para el frontend, junto a una base de datos gestionada PostgreSQL. Este flujo facilita una entrega reproducible, auditable y alineada con los sprints del proyecto.
-    \item \textbf{Documentaci\'on y Modelado:} La especificaci\'on de requisitos y anal\'isis se realiz\'o con la herramienta \textbf{Proteus}. Esta memoria y la documentaci\'on t\'ecnica han sido elaboradas en \textbf{\LaTeX{}}. Adicionalmente, el proyecto hace un uso transparente y guiado de asistentes de Inteligencia Artificial para agilizar tareas de redacci\'on y refinamiento de c\'odigo base, manteniendo en todo momento el criterio y autor\'ia del equipo de ingenier\'ia.
+    \item \textbf{Backend:} Se emplea \textbf{Java 21} como lenguaje principal con el framework \textbf{Spring Boot} \cite{springbootdocs}. La seguridad se gestiona con \textbf{Spring Security}, el acceso a base de datos mediante \textbf{JPA/Hibernate}, el control de versiones del esquema de base de datos a trav\'es de \textbf{Flyway} \cite{flywaydocs} y la construcci\'on con \textbf{Maven} \cite{maven}, manteniendo el backend organizado por capas para facilitar validaci\'on y trazabilidad.
+    \item \textbf{Frontend:} Interfaz desarrollada como \emph{Single Page Application} (SPA) con \textbf{React} \cite{reactdocs} y \textbf{TypeScript} \cite{typescript}. Se usa \textbf{Vite} \cite{vite} como empaquetador y entorno de desarrollo. Para el enrutamiento se utiliza \textbf{React Router} y para las peticiones HTTP, \textbf{Axios}. La validaci\'on de componentes se realiza con \textbf{Vitest} \cite{vitestdocs} y pruebas de mutaci\'on mediante \textbf{Stryker} \cite{stryker}, reforzando el control de calidad sobre componentes, contextos y servicios de cliente.
+    \item \textbf{Integraci\'on Continua y Despliegue (CI/CD):} El c\'odigo fuente se versiona en GitHub, empleando \emph{workflows} de GitHub Actions \cite{githubactions} para ejecuci\'on automatizada de compilaci\'on, \emph{linting} y pruebas. Las versiones candidatas se despliegan autom\'aticamente en la plataforma como servicio (PaaS) \textbf{Render} \cite{render}, utilizando contenedores Docker \cite{docker} para el backend y sitios est\'aticos para el frontend, junto a una base de datos gestionada PostgreSQL \cite{postgresql}. Este flujo facilita una entrega reproducible, auditable y alineada con los sprints del proyecto.
+    \item \textbf{Documentaci\'on y Modelado:} La especificaci\'on de requisitos y anal\'isis se realiz\'o con la herramienta \textbf{Proteus} \cite{proteus}. Esta memoria y la documentaci\'on t\'ecnica han sido elaboradas en \textbf{\LaTeX{}}. Adicionalmente, el proyecto hace un uso transparente y guiado de asistentes de Inteligencia Artificial para agilizar tareas de redacci\'on y refinamiento de c\'odigo base, manteniendo en todo momento el criterio y autor\'ia del equipo de ingenier\'ia.
 \end{itemize}

@@ -74,24 +74,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  gap: 6px;
+  padding: 6px 14px;
   border-radius: 8px;
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
+  border: 1px solid var(--border-secondary);
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
 }
 
 .fpm-btn-download:hover {
-  background-color: var(--bg-tertiary);
+  background-color: var(--bg-secondary);
+  border-color: var(--accent-blue);
   color: var(--accent-blue);
 }
 
 .fpm-btn-close:hover {
-  background-color: var(--bg-tertiary);
-  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.fpm-btn-emoji {
+  font-size: 0.9rem;
 }
 
 .fpm-content {
