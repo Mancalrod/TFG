@@ -17,12 +17,11 @@ const HomePage: React.FC = () => {
           <span className="badge">Universidad de Sevilla</span>
           
           <h1 className="hero-title">
-            Sistema de Gestión de <br />
-            <span className="text-highlight">Entregables</span>
+            Academic<span className="text-highlight">Flow</span>
           </h1>
           
           <p className="hero-subtitle">
-            Plataforma para la gestión integral de entregables académicos.<br />
+            Gestión inteligente y fluida de entregables académicos.<br />
             Trabajo de Fin de Grado.
           </p>
 

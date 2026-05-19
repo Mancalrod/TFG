@@ -231,7 +231,7 @@ const Navbar: React.FC = () => {
     <nav className="navbar">
       {/* Lado izquierdo: Logo / Marca */}
       <div className="navbar-brand">
-        <Link to="/">Sistema de Gestión de Entregables</Link>
+        <Link to="/">AcademicFlow</Link>
       </div>
       
       {/* Centro: Enlaces de navegación */}

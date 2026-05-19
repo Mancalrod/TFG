@@ -15,11 +15,11 @@
 \FloatBarrier
 \section{Contexto y problema a resolver}
 
-El presente Trabajo Fin de Grado se desarrolla en el \textit{\'ambito} de la gesti\'on acad\'emica universitaria, centrado en el ciclo de vida completo de las actividades evaluables: definici\'on de actividades, publicaci\'on de entregables, realizaci\'on de entregas, evaluaci\'on y retroalimentaci\'on.
+El presente Trabajo Fin de Grado se desarrolla en el \'ambito de la gesti\'on acad\'emica universitaria, centrado en el ciclo de vida completo de las actividades evaluables: definici\'on de actividades, publicaci\'on de entregables, realizaci\'on de entregas, evaluaci\'on y retroalimentaci\'on.
 
 La motivaci\'on principal se fundamenta en un problema habitual detectado durante el flujo de entrega: el uso de la plataforma institucional requiere tareas manuales de clasificaci\'on y validaci\'on de archivos. Esta situaci\'on introduce ineficiencias cr\'iticas: aumenta el esfuerzo administrativo del profesorado, reduce la precisi\'on en la gu\'ia al estudiante y debilita la trazabilidad entre las entregas, sus versiones y el \emph{feedback} asociado.
 
-Desde la perspectiva de la ingenier\'ia del software, el problema a resolver consiste en dise\~nar un sistema especializado que, con recursos acotados, maximice la cobertura funcional del ciclo de entregables, garantizando seguridad por rol, una interfaz de usuario enriquecida que reduzca los errores involuntarios y capacidad de evoluci\'on, sin depender de tareas manuales externas a la plataforma.
+Desde la perspectiva de la ingenier\'ia del software, el problema a resolver consiste en dise\~nar AcademicFlow, un sistema especializado que, con recursos acotados, maximice la cobertura funcional del ciclo de entregables, garantizando seguridad por rol, una interfaz de usuario enriquecida que reduzca los errores involuntarios y capacidad de evoluci\'on, sin depender de tareas manuales externas a la plataforma.
 
 Para el dise\~no del proyecto nos apoyamos en metodolog\'ias de la Ingenier\'ia del Software: (i) la elicitaci\'on de requisitos y el an\'alisis y dise\~no recogidos en los artefactos ERS y DAS; y (ii) la planificaci\'on y seguimiento mediante backlog y plan de sprints (SCRUM) \cite{scrumguide}. Estos artefactos garantizan trazabilidad entre requisitos, implementaci\'on y pruebas.
 
@@ -46,7 +46,7 @@ sino complementarlo en el punto donde se concentra la fricci\'on operativa.
 
 \subsection{Debilidades estructurales detectadas}
 
-Junto a las fortalezas, se detectan debilidades que afectan al rendimiento del proceso. La \textbf{DEB-001} se manifiesta en rigidez de gesti\'on de archivos y clasificaci\'on manual reiterada, mientras que la \textbf{DEB-002} limita la evoluci\'on funcional al depender de arquitecturas cerradas. A esto se suma la \textbf{DEB-003}, que reduce la flexibilidad del flujo de entrega para el estudiante, y la \textbf{DEB-004}, que refleja una integraci\'on no nativa con almacenamiento cloud moderno. En conjunto, estas debilidades concentran el coste operativo en fases cr\'iticas de entrega y correcci\'on.
+Junto a las fortalezas, se detectan debilidades que afectan al rendimiento del proceso. Destacan: la rigidez en la gesti\'on de archivos y la clasificaci\'on manual reiterada (DEB-001); la dependencia de arquitecturas cerradas que limita la capacidad de evoluci\'on funcional (DEB-002); la falta de flexibilidad del flujo de entrega para el estudiante (DEB-003); y la integraci\'on no nativa con soluciones de almacenamiento en la nube (DEB-004). En conjunto, estas debilidades concentran el coste operativo en fases cr\'iticas de entrega y correcci\'on.
 
 \subsection{Brechas entre escenario actual y necesidades objetivo}
 
@@ -132,7 +132,7 @@ De la revisi\'on anterior se desprenden brechas recurrentes. Falta validaci\'on 
 \subsubsection{Implicaciones para el dise\~no del TFG}
 
 Estas brechas guiaron la definici\'on del alcance funcional y de las
-validaciones del sistema. La aportaci\'on se orient\'o a reducir carga
+validaciones en AcademicFlow. La aportaci\'on se orient\'o a reducir carga
 manual, mejorar la trazabilidad y ofrecer verificaciones t\'ecnicas
 que no suelen estar disponibles en soluciones generalistas.
 
@@ -144,19 +144,16 @@ aumentar trazabilidad y consolidar calidad de producto.
 
 \subsubsection{Aportaci\'on funcional}
 
-El sistema desarrollado aborda directamente la fricci\'on operativa y las deficiencias detectadas en las soluciones de mercado. En concreto, se implementaron capacidades de gesti\'on integral de cursos, grupos, actividades y entregables con visibilidad por rol, as\'i como validaci\'on avanzada de ZIP (estructura, extensiones y nombre esperado). Adem\'as, se incorpor\'o un modo estricto o m\'inimo requerido en entregas ZIP seg\'un criterio docente, control de tipos de entrega (archivo, enlace o solo texto) con reglas espec\'ificas, y versionado con reenv\'io y estado de entrega trazables. Como soporte operativo, se a\~nadi\'o descarga masiva, previsualizaci\'on de contenido para optimizar revisi\'on y un borrador autom\'atico en cliente con revalidaci\'on previa al env\'io.
+AcademicFlow aborda directamente la fricci\'on operativa y las deficiencias detectadas en las soluciones de mercado. En concreto, se implementaron capacidades de gesti\'on integral de cursos, grupos, actividades y entregables con visibilidad por rol, as\'i como validaci\'on avanzada de ZIP (estructura, extensiones y nombre esperado). Adem\'as, se incorpor\'o un modo estricto o m\'inimo requerido en entregas ZIP seg\'un criterio docente, control de tipos de entrega (archivo, enlace o solo texto) con reglas espec\'ificas, y versionado con reenv\'io y estado de entrega trazables. Como soporte operativo, se a\~nadi\'o descarga masiva, previsualizaci\'on de contenido para optimizar revisi\'on y un borrador autom\'atico en cliente con revalidaci\'on previa al env\'io.
 
-Estas capacidades se alinean con los procesos objetivo del an\'alisis:
-\textbf{PRON-004} (creaci\'on/publicaci\'on de actividad),
-\textbf{PRON-005} (realizaci\'on de entrega con validaci\'on)
-y \textbf{PRON-006} (evaluaci\'on y feedback).
+Estas capacidades se alinean con los procesos objetivo del an\'alisis: PRON-004 (creaci\'on/publicaci\'on de actividad), PRON-005 (realizaci\'on de entrega con validaci\'on) y PRON-006 (evaluaci\'on y feedback).
 
 \subsubsection{Aportaci\'on en calidad y operaci\'on}
 
 Adem\'as de funcionalidad, el proyecto incorpora capacidades de calidad y operaci\'on mediante una estrategia de testing en capas (unitarias, integraci\'on, E2E y mutaci\'on), pipelines CI/CD para validaci\'on continua y despliegue reproducible en entorno PaaS con configuraci\'on por entorno. Estas decisiones garantizan que el producto sea verificable y operable en condiciones reales.
 
 La aportaci\'on, por tanto, no se limita a ``que funcione'',
-sino a que el sistema sea verificable, mantenible y operable.
+sino a que AcademicFlow sea verificable, mantenible y operable.
 
 \subsection{Matriz de mapeo debilidades-aportaciones}
 
@@ -214,7 +211,7 @@ La aportaci\'on realizada materializa los objetivos de negocio definidos en la f
   \item Se consigue el \textbf{OBJN-001 (agilizar gesti\'on docente)} mediante la capacidad de definir reglas autom\'aticas de validaci\'on de formatos y estructuras internas (ficheros requeridos dentro de un .zip), lo cual reduce sustancialmente el n\'umero de entregas inv\'alidas que un profesor debe revisar y descartar manualmente.
   \item Se satisface el \textbf{OBJN-002 (mejorar la accesibilidad y usabilidad del estudiante)} implementando un flujo de subida de archivos claro, con prevalidaciones en tiempo real en el lado del cliente (borrador local) y confirmaciones expl\'icitas de fecha y versi\'on de la entrega.
   \item Se refuerza el \textbf{OBJN-003 (trazabilidad de la evaluaci\'on)} al ofrecer una vista dedicada donde la entrega exacta, los comentarios de correcci\'on (feedback) y la calificaci\'on cuantitativa conviven en un \emph{\'unico} contexto cerrado, evitando el env\'io de correos masivos para comunicar notas o incidencias.
-  \item Finalmente, el \textbf{OBJN-004 (capacidad de evoluci\'on e integraci\'on)} se asegura mediante una arquitectura que expone todo su cat\'alogo de operaciones a trav\'es de una API documentada, posibilitando enganchar el sistema a m\'odulos externos de autoevaluaci\'on de c\'odigo o herramientas de prevenci\'on de plagio en el futuro.
+  \item Finalmente, el \textbf{OBJN-004 (capacidad de evoluci\'on e integraci\'on)} se asegura mediante una arquitectura que expone todo su cat\'alogo de operaciones a trav\'es de una API documentada, posibilitando enganchar AcademicFlow a m\'odulos externos de autoevaluaci\'on de c\'odigo o herramientas de prevenci\'on de plagio en el futuro.
 \end{itemize}
 
 \subsection{Limitaciones residuales y continuidad}
@@ -229,7 +226,7 @@ sino que delimitan una hoja de ruta realista para evoluci\'on posterior.
 \FloatBarrier
 \section{Aportaci\'on del proyecto y justificaci\'on}
 
-Para solventar las brechas detectadas, este proyecto aporta un sistema estructurado y espec\'ifico que transforma un proceso manual y disperso en un flujo digital unificado.
+Para solventar las brechas detectadas, este proyecto aporta AcademicFlow, un sistema estructurado y espec\'ifico que transforma un proceso manual y disperso en un flujo digital unificado.
 
 La principal aportaci\'on funcional es la gesti\'on integral de actividades y entregables con validaciones avanzadas autom\'aticas (control de formatos, previsualizaci\'on, y chequeo estricto de estructura), adem\'as de un sistema de versionado y trazabilidad completa de cada entrega. Esto permite integrar la evaluaci\'on y la retroalimentaci\'on en el mismo ciclo, reduciendo dr\'asticamente la sobrecarga manual de clasificaci\'on.
 
@@ -240,7 +237,7 @@ A nivel arquitect\'onico, la soluci\'on adopta un dise\~no desacoplado mediante 
 
 El \textbf{objetivo general} del trabajo es dise\~nar, implementar y validar un sistema web para la gesti\'on integral de entregables acad\'emicos, que permita a profesores y estudiantes operar de forma centralizada, segura y trazable, reduciendo tareas manuales y mejorando la eficiencia del proceso de evaluaci\'on continua.
 
-Para alcanzar este fin, se han definido los siguientes objetivos espec\'ificos. En lugar de un listado telegr\'afico, a continuaci\'on se describen de manera extensiva y verificable, indicando su prop\'osito y la evidencia esperada.
+Para alcanzar este fin, se han definido los siguientes objetivos espec\'ificos, que se describen a continuaci\'on de manera extensiva y verificable, indicando su prop\'osito y la evidencia esperada.
 
 \textbf{Objetivo 1 — Centralizar la estructura acad\'emica.} Modelar de forma integral la jerarqu\'a acad\'emica (cursos, asignaturas, grupos, actividades y entregables) para que toda informaci\'on relevante est\'e vinculada por contexto. La centralizaci\'on reduce ambig\'uedades operativas, facilita consultas por contexto y permite la trazabilidad entre actividad, entrega y evaluaci\'on. La evidencia de cumplimiento se mide por la existencia de los m\'odulos de administraci\'on y vistas por rol que permitan navegar y operar sobre esa estructura.
 
@@ -297,7 +294,7 @@ Won't Have (MVP) & inicio de sesi\'on federado (OAuth2/OIDC) \cite{oauth2}, 2FA 
 
 \subsection{Alcance funcional del trabajo}
 
-El sistema desarrollado se articula en torno a tres pilares operativos que definen su alcance funcional. En primer lugar, se implementa un m\'odulo de gesti\'on de identidad, que permite la administraci\'on de usuarios mediante un control de acceso basado en roles (RBAC), garantizando la seguridad de la jerarqu\'ia acad\'emica (cursos, grupos y actividades). En segundo lugar, el n\'ucleo del sistema se centra en la orquestaci\'on de entregables: configuraci\'on din\'amica de plazos y visibilidad por parte del docente, ciclo de vida completo para la entrega del estudiante (subida, control de versiones y feedback evaluativo). Finalmente, el alcance se extiende hacia la automatizaci\'on de la infraestructura, integrando procesos de validaci\'on y despliegue continuo (CI/CD) que aseguran la integridad t\'ecnica de cada entrega en entornos de producci\'on.
+AcademicFlow se articula en torno a tres pilares operativos que definen su alcance funcional. En primer lugar, se implementa un m\'odulo de gesti\'on de identidad, que permite la administraci\'on de usuarios mediante un control de acceso basado en roles (RBAC), garantizando la seguridad de la jerarqu\'ia acad\'emica (cursos, grupos y actividades). En segundo lugar, el n\'ucleo del sistema se centra en la orquestaci\'on de entregables: configuraci\'on din\'amica de plazos y visibilidad por parte del docente, ciclo de vida completo para la entrega del estudiante (subida, control de versiones y feedback evaluativo). Finalmente, el alcance se extiende hacia la automatizaci\'on de la infraestructura, integrando procesos de validaci\'on y despliegue continuo (CI/CD) que aseguran la integridad t\'ecnica de cada entrega en entornos de producci\'on.
 
 \medskip
 
@@ -393,7 +390,7 @@ La ejecuci\'on de este alcance se gestion\'o asumiendo riesgos clave, como la co
 \FloatBarrier
 \section{Ecosistema de desarrollo y operaci\'on}
 
-Para asegurar la coherencia entre el dise\~no, la validaci\'on y el despliegue del sistema, se ha seleccionado un conjunto de tecnolog\'ias y herramientas alineado con est\'andares actuales de la industria:
+Para asegurar la coherencia entre el dise\~no, la validaci\'on y el despliegue en AcademicFlow, se ha seleccionado un conjunto de tecnolog\'ias y herramientas alineado con est\'andares actuales de la industria:
 
 \begin{itemize}
     \item \textbf{Backend:} Se emplea \textbf{Java 21} como lenguaje principal con el framework \textbf{Spring Boot} \cite{springbootdocs}. La seguridad se gestiona con \textbf{Spring Security}, el acceso a base de datos mediante \textbf{JPA/Hibernate}, el control de versiones del esquema de base de datos a trav\'es de \textbf{Flyway} \cite{flywaydocs} y la construcci\'on con \textbf{Maven} \cite{maven}, manteniendo el backend organizado por capas para facilitar validaci\'on y trazabilidad.

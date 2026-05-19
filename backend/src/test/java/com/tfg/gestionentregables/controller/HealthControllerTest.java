@@ -27,7 +27,7 @@ class HealthControllerTest {
         mockMvc.perform(get("/api/health"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("UP"))
-                .andExpect(jsonPath("$.application").value("Sistema de Gestión de Entregables"));
+                .andExpect(jsonPath("$.application").value("AcademicFlow"));
     }
 
     @Test

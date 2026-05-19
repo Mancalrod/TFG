@@ -36,7 +36,7 @@ public class HealthController {
         return ResponseEntity.ok(Map.of(
             "status", "UP",
             "type", "LIVENESS",
-            "application", "Sistema de Gestión de Entregables",
+            "application", "AcademicFlow",
             "version", "1.0.0-SNAPSHOT"
         ));
     }
@@ -50,7 +50,7 @@ public class HealthController {
             "status", dbUp ? "UP" : "DOWN",
             "type", "READINESS",
             "database", dbUp ? "UP" : "DOWN",
-            "application", "Sistema de Gestión de Entregables",
+            "application", "AcademicFlow",
             "version", "1.0.0-SNAPSHOT"
         ));
     }
@@ -72,7 +72,7 @@ public class HealthController {
     @GetMapping("/public/info")
     public ResponseEntity<Map<String, String>> publicInfo() {
         return ResponseEntity.ok(Map.of(
-            "message", "API del Sistema de Gestión de Entregables - TFG",
+            "message", "API de AcademicFlow - TFG",
             "documentation", "/swagger-ui.html"
         ));
     }
