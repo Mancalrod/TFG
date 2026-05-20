@@ -89,6 +89,7 @@ TFG/
 - Maven 3.9+
 - Node.js 18+
 - npm 9+
+- PostgreSQL. Consulta el [manual de instalación](docs/MANUAL_INSTALACION.md) para ver la configuración y conexión.
 
 ### Backend
 
@@ -150,6 +151,7 @@ npm run build
 
 - [ERS - Especificacion de Requisitos de Software](docs/ERS%20TFG.pdf)
 - [DAS - Documento de Arquitectura del Sistema](docs/DAS%20TFG.pdf)
+- [Manual de instalacion](docs/MANUAL_INSTALACION.md)
 - [Product Backlog](docs/PRODUCT_BACKLOG.md)
 - [Plan de Sprints](docs/PLAN_SPRINTS.md)
 - [Sprint Backlog](docs/SPRINT_BACKLOG.md)

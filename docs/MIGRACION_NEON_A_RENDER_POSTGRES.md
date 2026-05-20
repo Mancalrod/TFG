@@ -10,6 +10,25 @@ Sustituir Neon cuando se agota la cuota gratuita y mantener el backend en Render
 - Acceso a Render Dashboard con permisos para crear bases de datos y editar variables de entorno.
 - Backup de la base de datos actual (si necesitas conservar datos).
 
+## Copia entre despliegues
+
+Si lo que necesitas es pasar el contenido de una base PostgreSQL de un despliegue a otro y no puedes tener ambas activas a la vez, usa el script en dos pasos:
+
+1. Exporta los datos de la primera base a un fichero.
+2. Cuando la segunda base esté disponible, importa ese fichero.
+
+```powershell
+.\backend\copy-postgres-data.ps1 -Mode export `
+	-SourceUrl "jdbc:postgresql://<origen>:5432/<bd_origen>?sslmode=require" `
+	-SourceUser "<usuario_origen>" `
+	-DumpFile "C:\temp\origen.dump"
+
+.\backend\copy-postgres-data.ps1 -Mode import `
+	-TargetUrl "jdbc:postgresql://<destino>:5432/<bd_destino>?sslmode=require" `
+	-TargetUser "<usuario_destino>" `
+	-DumpFile "C:\temp\origen.dump"
+```
+
 ## Paso 1: Crear Render Postgres
 
 1. En Render, crear un nuevo recurso PostgreSQL.
