@@ -18,7 +18,7 @@
 	<properties>
 		<java.version>21</java.version>
 		<pitest.version>1.17.2</pitest.version>
-		<pitest.junit5.plugin.version>1.2.1</pitest.junit5.plugin.version>
+		<pitest.junit5.plugin.version>1.2.3</pitest.junit5.plugin.version>
 		<junit.platform.version>6.0.3</junit.platform.version>
 	</properties>
 	
